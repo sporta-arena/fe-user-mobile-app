@@ -5,6 +5,10 @@ import 'search_page.dart';       // Import Halaman Pencarian
 import 'promo_detail_page.dart'; // Import Halaman Detail Promo
 import 'all_categories_page.dart'; // Import Halaman Semua Kategori
 import 'category_venues_page.dart'; // Import Halaman Venue per Kategori
+import 'loyalty_page.dart'; // Import Halaman Loyalty
+import 'venue_detail_page.dart'; // Import Halaman Detail Venue
+import 'my_booking_page.dart'; // Import Halaman My Booking
+import 'profile_page.dart'; // Import Halaman Profile
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -19,8 +23,8 @@ class _HomePageState extends State<HomePage> {
   // Daftar Halaman (Dashboard, Booking, Profile)
   static final List<Widget> _pages = <Widget>[
     const DashboardContent(), // Halaman Utama
-    const Center(child: Text("Halaman Riwayat Booking (Coming Soon)")),
-    const Center(child: Text("Halaman Profil User (Coming Soon)")),
+    const MyBookingPage(), // Halaman My Booking
+    const ProfilePage(), // Halaman Profile
   ];
 
   void _onItemTapped(int index) {
@@ -86,11 +90,86 @@ class _DashboardContentState extends State<DashboardContent> {
   // Variabel Lokasi
   String _currentAddress = "Mencari Lokasi..."; 
   bool _isLoadingLocation = false;
+  Position? _currentPosition; // Tambah variabel untuk menyimpan posisi GPS
+
+  // Data venue dengan koordinat GPS (dummy data Jakarta area)
+  final List<Map<String, dynamic>> _allVenues = [
+    {
+      'name': 'Gor Bulutangkis Sejahtera',
+      'location': 'Tebet, Jakarta Selatan',
+      'price': 'Rp 60.000',
+      'rating': '4.8',
+      'imageColor': Colors.blueAccent,
+      'category': 'Badminton',
+      'latitude': -6.2297, // Tebet area
+      'longitude': 106.8467,
+      'facilities': ['Parkir', 'AC', 'Shower', 'Kantin'],
+    },
+    {
+      'name': 'Futsal Champions Arena',
+      'location': 'Kemang, Jakarta Selatan',
+      'price': 'Rp 150.000',
+      'rating': '4.9',
+      'imageColor': Colors.green,
+      'category': 'Futsal',
+      'latitude': -6.2615, // Kemang area
+      'longitude': 106.8106,
+      'facilities': ['Parkir', 'Kantin', 'AC', 'Shower'],
+    },
+    {
+      'name': 'Basketball Hall A',
+      'location': 'Senayan, Jakarta Pusat',
+      'price': 'Rp 200.000',
+      'rating': '4.7',
+      'imageColor': Colors.orange,
+      'category': 'Basketball',
+      'latitude': -6.2088, // Senayan area
+      'longitude': 106.8456,
+      'facilities': ['Parkir', 'AC', 'Locker'],
+    },
+    {
+      'name': 'Sporta Swimming Pool',
+      'location': 'Pancoran, Jakarta Selatan',
+      'price': 'Rp 80.000',
+      'rating': '4.6',
+      'imageColor': Colors.cyan,
+      'category': 'Swimming',
+      'latitude': -6.2441, // Pancoran area
+      'longitude': 106.8495,
+      'facilities': ['Parkir', 'Shower', 'Locker'],
+    },
+    {
+      'name': 'Victory Gym Center',
+      'location': 'Kuningan, Jakarta Selatan',
+      'price': 'Rp 100.000',
+      'rating': '4.5',
+      'imageColor': Colors.red,
+      'category': 'Gym',
+      'latitude': -6.2382, // Kuningan area
+      'longitude': 106.8306,
+      'facilities': ['Parkir', 'AC', 'Shower'],
+    },
+    {
+      'name': 'Tennis Court Premium',
+      'location': 'Menteng, Jakarta Pusat',
+      'price': 'Rp 120.000',
+      'rating': '4.4',
+      'imageColor': Colors.purple,
+      'category': 'Tennis',
+      'latitude': -6.1944, // Menteng area
+      'longitude': 106.8294,
+      'facilities': ['Parkir', 'Kantin'],
+    },
+  ];
+
+  // List venue terdekat (akan diupdate berdasarkan lokasi)
+  List<Map<String, dynamic>> _nearbyVenues = [];
 
   @override
   void initState() {
     super.initState();
     _getCurrentLocation(); // Otomatis cari lokasi saat dibuka
+    _setDefaultVenues(); // Set venue default dulu
   }
 
   // --- LOGIKA MENCARI LOKASI ---
@@ -124,9 +203,13 @@ class _DashboardContentState extends State<DashboardContent> {
       
       if (mounted) {
         setState(() {
+          _currentPosition = position;
           _currentAddress = "${place.subLocality}, ${place.locality}"; 
           _isLoadingLocation = false;
         });
+        
+        // Update nearby venues berdasarkan lokasi
+        _updateNearbyVenues();
       }
 
     } catch (e) {
@@ -135,9 +218,55 @@ class _DashboardContentState extends State<DashboardContent> {
           _currentAddress = "Gagal memuat lokasi";
           _isLoadingLocation = false;
         });
+        
+        // Jika gagal dapat lokasi, tampilkan venue default
+        _setDefaultVenues();
       }
       debugPrint("Error Lokasi: $e");
     }
+  }
+
+  // --- HITUNG JARAK DAN UPDATE NEARBY VENUES ---
+  void _updateNearbyVenues() {
+    if (_currentPosition == null) return;
+
+    List<Map<String, dynamic>> venuesWithDistance = [];
+    
+    for (var venue in _allVenues) {
+      double distance = Geolocator.distanceBetween(
+        _currentPosition!.latitude,
+        _currentPosition!.longitude,
+        venue['latitude'],
+        venue['longitude'],
+      );
+      
+      // Convert meter ke kilometer
+      double distanceKm = distance / 1000;
+      
+      venue['distance'] = distanceKm;
+      venue['distanceText'] = distanceKm < 1 
+          ? '${(distance).round()} m'
+          : '${distanceKm.toStringAsFixed(1)} km';
+      
+      venuesWithDistance.add(venue);
+    }
+    
+    // Sort berdasarkan jarak terdekat
+    venuesWithDistance.sort((a, b) => a['distance'].compareTo(b['distance']));
+    
+    setState(() {
+      _nearbyVenues = venuesWithDistance.take(3).toList(); // Ambil 3 terdekat
+    });
+  }
+
+  // --- SET DEFAULT VENUES JIKA GPS GAGAL ---
+  void _setDefaultVenues() {
+    setState(() {
+      _nearbyVenues = _allVenues.take(3).map((venue) {
+        venue['distanceText'] = '-- km';
+        return venue;
+      }).toList();
+    });
   }
 
   @override
@@ -242,6 +371,11 @@ class _DashboardContentState extends State<DashboardContent> {
 
             const SizedBox(height: 24),
 
+            // --- LOYALTY CARD ---
+            const LoyaltyCard(),
+
+            const SizedBox(height: 24),
+
             // --- 4. BANNER PROMO (NAVIGASI KE DETAIL PROMO) ---
             SizedBox(
               height: 140,
@@ -292,31 +426,76 @@ class _DashboardContentState extends State<DashboardContent> {
 
             const SizedBox(height: 24),
 
-            // --- 6. REKOMENDASI VENUE ---
-            const Text("Rekomendasi Arena", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            // --- 6. NEARBY ARENA ---
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text("Nearby Arena", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                GestureDetector(
+                  onTap: () {
+                    // Navigasi ke halaman semua venue terdekat
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Membuka semua venue terdekat...'),
+                        backgroundColor: Color(0xFF0047FF),
+                      ),
+                    );
+                  },
+                  child: const Text(
+                    "Lihat Semua", 
+                    style: TextStyle(color: Color(0xFF0047FF), fontSize: 12, fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 16),
 
-            const VenueCard(
-              name: "Gor Bulutangkis Sejahtera",
-              location: "Tebet, Jakarta Selatan",
-              price: "Rp 60.000",
-              rating: "4.8",
-              imageColor: Colors.blueAccent,
-            ),
-            const VenueCard(
-              name: "Futsal Champions Arena",
-              location: "Kemang, Jakarta Selatan",
-              price: "Rp 150.000",
-              rating: "4.9",
-              imageColor: Colors.green,
-            ),
-            const VenueCard(
-              name: "Basketball Hall A",
-              location: "Senayan, Jakarta Pusat",
-              price: "Rp 200.000",
-              rating: "4.7",
-              imageColor: Colors.orange,
-            ),
+            // Loading atau list venue terdekat
+            _isLoadingLocation 
+              ? const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(40.0),
+                    child: Column(
+                      children: [
+                        CircularProgressIndicator(color: Color(0xFF0047FF)),
+                        SizedBox(height: 16),
+                        Text('Mencari venue terdekat...', style: TextStyle(color: Colors.grey)),
+                      ],
+                    ),
+                  ),
+                )
+              : _nearbyVenues.isEmpty
+                ? Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Column(
+                      children: [
+                        Icon(Icons.location_off, size: 40, color: Colors.grey),
+                        SizedBox(height: 8),
+                        Text(
+                          'Tidak dapat menemukan venue terdekat',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                  )
+                : Column(
+                    children: _nearbyVenues.map((venue) => 
+                      NearbyVenueCard(
+                        name: venue['name'],
+                        location: venue['location'],
+                        price: venue['price'],
+                        rating: venue['rating'],
+                        imageColor: venue['imageColor'],
+                        distance: venue['distanceText'] ?? '-- km',
+                        category: venue['category'],
+                        facilities: List<String>.from(venue['facilities']),
+                      )
+                    ).toList(),
+                  ),
           ],
         ),
       ),
@@ -478,7 +657,10 @@ class VenueCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Buka Detail: $name")));
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const VenueDetailPage()),
+        );
       },
       child: Container(
         margin: const EdgeInsets.only(bottom: 20),
@@ -568,6 +750,346 @@ class VenueCard extends StatelessWidget {
                 ],
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ==========================================
+// NEARBY VENUE CARD (DENGAN JARAK)
+// ==========================================
+
+class NearbyVenueCard extends StatelessWidget {
+  final String name;
+  final String location;
+  final String price;
+  final String rating;
+  final Color imageColor;
+  final String distance;
+  final String category;
+  final List<String> facilities;
+
+  const NearbyVenueCard({
+    super.key,
+    required this.name,
+    required this.location,
+    required this.price,
+    required this.rating,
+    required this.imageColor,
+    required this.distance,
+    required this.category,
+    required this.facilities,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const VenueDetailPage()),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              height: 140,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: imageColor.withOpacity(0.8),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              ),
+              child: Stack(
+                children: [
+                  const Center(child: Icon(Icons.sports, color: Colors.white54, size: 40)),
+                  
+                  // Distance badge
+                  Positioned(
+                    top: 12,
+                    left: 12,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF0047FF),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.near_me, color: Colors.white, size: 12),
+                          const SizedBox(width: 4),
+                          Text(
+                            distance,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  
+                  // Rating badge
+                  Positioned(
+                    top: 12,
+                    right: 12,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.star, color: Colors.orange, size: 12),
+                          const SizedBox(width: 4),
+                          Text(
+                            rating,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 10,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  
+                  // Category badge
+                  Positioned(
+                    bottom: 12,
+                    left: 12,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.9),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        category,
+                        style: TextStyle(
+                          color: imageColor,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Icon(Icons.location_on_outlined, size: 14, color: Colors.grey[600]),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          location,
+                          style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                        ),
+                      ),
+                    ],
+                  ),
+                  
+                  const SizedBox(height: 8),
+                  
+                  // Facilities
+                  Wrap(
+                    spacing: 6,
+                    children: facilities.take(3).map((facility) {
+                      return Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF0047FF).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          facility,
+                          style: const TextStyle(
+                            color: Color(0xFF0047FF),
+                            fontSize: 9,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  
+                  const SizedBox(height: 12),
+                  const Divider(height: 1),
+                  const SizedBox(height: 12),
+                  
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      RichText(
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: price,
+                              style: const TextStyle(
+                                color: Color(0xFF0047FF),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                            TextSpan(
+                              text: " / jam",
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF0047FF),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Text(
+                          "Book",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+// ==========================================
+// LOYALTY CARD WIDGET
+// ==========================================
+
+class LoyaltyCard extends StatelessWidget {
+  const LoyaltyCard({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const LoyaltyPage()),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.grey.shade200), // Border halus
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            // Icon Mahkota/Bintang
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: const BoxDecoration(
+                color: Color(0xFFFFF9C4), // Kuning muda banget
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.stars_rounded, color: Colors.orange, size: 24),
+            ),
+            
+            const SizedBox(width: 12),
+            
+            // Info Poin
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Sporta Points", 
+                    style: TextStyle(
+                      fontSize: 10, 
+                      color: Colors.grey, 
+                      fontWeight: FontWeight.bold
+                    )
+                  ),
+                  Text(
+                    "150 Poin", 
+                    style: TextStyle(
+                      fontSize: 16, 
+                      fontWeight: FontWeight.w900, 
+                      color: Colors.black87
+                    )
+                  ),
+                ],
+              ),
+            ),
+            
+            // Badge Level Member
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: const Color(0xFF0047FF).withOpacity(0.1), // Biru transparan
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Text(
+                "Silver", 
+                style: TextStyle(
+                  color: Color(0xFF0047FF), 
+                  fontWeight: FontWeight.bold, 
+                  fontSize: 12
+                )
+              ),
+            ),
+            
+            const SizedBox(width: 8),
+            const Icon(Icons.arrow_forward_ios, size: 12, color: Colors.grey),
           ],
         ),
       ),

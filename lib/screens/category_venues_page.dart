@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
 import '../constants/colors.dart';
+import 'venue_detail_page.dart';
 
 class CategoryVenuesPage extends StatefulWidget {
   final String categoryName;
@@ -20,8 +23,13 @@ class CategoryVenuesPage extends StatefulWidget {
 class _CategoryVenuesPageState extends State<CategoryVenuesPage> {
   String selectedFilter = 'Semua';
   String selectedSort = 'Terdekat';
+  String searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
+  List<Map<String, dynamic>> filteredVenues = [];
+  Position? _currentPosition;
+  bool _isLoadingLocation = false;
 
-  // Data dummy venues berdasarkan kategori
+  // Data dummy venues berdasarkan kategori dengan koordinat GPS
   List<Map<String, dynamic>> get venues {
     switch (widget.categoryName.toLowerCase()) {
       case 'futsal':
@@ -29,8 +37,10 @@ class _CategoryVenuesPageState extends State<CategoryVenuesPage> {
           {
             'name': 'Futsal Arena Champions',
             'location': 'Kemang, Jakarta Selatan',
-            'distance': '1.2 km',
-            'price': 'Rp 150.000',
+            'latitude': -6.2615,
+            'longitude': 106.8106,
+            'price': 150000,
+            'priceText': 'Rp 150.000',
             'rating': '4.9',
             'reviews': 245,
             'facilities': ['Parkir', 'Kantin', 'AC', 'Shower'],
@@ -39,8 +49,10 @@ class _CategoryVenuesPageState extends State<CategoryVenuesPage> {
           {
             'name': 'Sporta Futsal Center',
             'location': 'Tebet, Jakarta Selatan',
-            'distance': '2.1 km',
-            'price': 'Rp 120.000',
+            'latitude': -6.2297,
+            'longitude': 106.8467,
+            'price': 120000,
+            'priceText': 'Rp 120.000',
             'rating': '4.7',
             'reviews': 189,
             'facilities': ['Parkir', 'Kantin', 'Shower'],
@@ -49,12 +61,38 @@ class _CategoryVenuesPageState extends State<CategoryVenuesPage> {
           {
             'name': 'Victory Futsal Court',
             'location': 'Pancoran, Jakarta Selatan',
-            'distance': '3.5 km',
-            'price': 'Rp 100.000',
+            'latitude': -6.2441,
+            'longitude': 106.8495,
+            'price': 100000,
+            'priceText': 'Rp 100.000',
             'rating': '4.5',
             'reviews': 156,
             'facilities': ['Parkir', 'Kantin'],
             'available': false,
+          },
+          {
+            'name': 'Elite Futsal Arena',
+            'location': 'Senayan, Jakarta Pusat',
+            'latitude': -6.2088,
+            'longitude': 106.8456,
+            'price': 200000,
+            'priceText': 'Rp 200.000',
+            'rating': '4.8',
+            'reviews': 320,
+            'facilities': ['Parkir', 'AC', 'Shower', 'Kantin', 'Locker'],
+            'available': true,
+          },
+          {
+            'name': 'Budget Futsal Hall',
+            'location': 'Cawang, Jakarta Timur',
+            'latitude': -6.2424,
+            'longitude': 106.8784,
+            'price': 80000,
+            'priceText': 'Rp 80.000',
+            'rating': '4.2',
+            'reviews': 98,
+            'facilities': ['Parkir'],
+            'available': true,
           },
         ];
       case 'badminton':
@@ -62,8 +100,10 @@ class _CategoryVenuesPageState extends State<CategoryVenuesPage> {
           {
             'name': 'GOR Bulutangkis Sejahtera',
             'location': 'Tebet, Jakarta Selatan',
-            'distance': '0.8 km',
-            'price': 'Rp 60.000',
+            'latitude': -6.2297,
+            'longitude': 106.8467,
+            'price': 60000,
+            'priceText': 'Rp 60.000',
             'rating': '4.8',
             'reviews': 312,
             'facilities': ['Parkir', 'AC', 'Shower', 'Kantin'],
@@ -72,11 +112,37 @@ class _CategoryVenuesPageState extends State<CategoryVenuesPage> {
           {
             'name': 'Badminton Hall Premium',
             'location': 'Kemang, Jakarta Selatan',
-            'distance': '1.5 km',
-            'price': 'Rp 80.000',
+            'latitude': -6.2615,
+            'longitude': 106.8106,
+            'price': 80000,
+            'priceText': 'Rp 80.000',
             'rating': '4.6',
             'reviews': 198,
             'facilities': ['Parkir', 'AC', 'Shower'],
+            'available': true,
+          },
+          {
+            'name': 'Shuttle Arena Pro',
+            'location': 'Kuningan, Jakarta Selatan',
+            'latitude': -6.2382,
+            'longitude': 106.8306,
+            'price': 100000,
+            'priceText': 'Rp 100.000',
+            'rating': '4.9',
+            'reviews': 267,
+            'facilities': ['Parkir', 'AC', 'Shower', 'Kantin', 'Locker'],
+            'available': false,
+          },
+          {
+            'name': 'Community Badminton',
+            'location': 'Menteng, Jakarta Pusat',
+            'latitude': -6.1944,
+            'longitude': 106.8294,
+            'price': 45000,
+            'priceText': 'Rp 45.000',
+            'rating': '4.3',
+            'reviews': 145,
+            'facilities': ['Parkir', 'Shower'],
             'available': true,
           },
         ];
@@ -85,15 +151,178 @@ class _CategoryVenuesPageState extends State<CategoryVenuesPage> {
           {
             'name': '${widget.categoryName} Arena Pro',
             'location': 'Jakarta Selatan',
-            'distance': '1.0 km',
-            'price': 'Rp 100.000',
+            'latitude': -6.2297,
+            'longitude': 106.8467,
+            'price': 100000,
+            'priceText': 'Rp 100.000',
             'rating': '4.7',
             'reviews': 150,
             'facilities': ['Parkir', 'Shower'],
             'available': true,
           },
+          {
+            'name': '${widget.categoryName} Center Elite',
+            'location': 'Jakarta Pusat',
+            'latitude': -6.1944,
+            'longitude': 106.8294,
+            'price': 150000,
+            'priceText': 'Rp 150.000',
+            'rating': '4.8',
+            'reviews': 200,
+            'facilities': ['Parkir', 'AC', 'Shower'],
+            'available': true,
+          },
         ];
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _getCurrentLocation();
+    _setDefaultVenues();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  // --- GPS LOCATION METHODS ---
+  Future<void> _getCurrentLocation() async {
+    setState(() => _isLoadingLocation = true);
+
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) throw 'GPS mati. Harap nyalakan GPS.';
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) throw 'Izin lokasi ditolak';
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        throw 'Izin lokasi ditolak permanen. Buka pengaturan HP.';
+      }
+
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      if (mounted) {
+        setState(() {
+          _currentPosition = position;
+          _isLoadingLocation = false;
+        });
+        
+        // Update venues dengan jarak real
+        _updateVenuesWithDistance();
+      }
+
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoadingLocation = false;
+        });
+        
+        // Jika gagal dapat lokasi, set default distance
+        _setDefaultVenues();
+      }
+      debugPrint("Error Lokasi: $e");
+    }
+  }
+
+  // --- UPDATE VENUES DENGAN JARAK REAL ---
+  void _updateVenuesWithDistance() {
+    if (_currentPosition == null) return;
+
+    List<Map<String, dynamic>> venuesWithDistance = [];
+    
+    for (var venue in venues) {
+      double distance = Geolocator.distanceBetween(
+        _currentPosition!.latitude,
+        _currentPosition!.longitude,
+        venue['latitude'],
+        venue['longitude'],
+      );
+      
+      // Convert meter ke kilometer
+      double distanceKm = distance / 1000;
+      
+      venue['distance'] = distanceKm;
+      venue['distanceText'] = distanceKm < 1 
+          ? '${(distance).round()} m'
+          : '${distanceKm.toStringAsFixed(1)} km';
+      
+      venuesWithDistance.add(venue);
+    }
+    
+    // Apply filters and sort dengan data yang sudah ada jarak
+    _applyFiltersAndSort();
+  }
+
+  // --- SET DEFAULT VENUES JIKA GPS GAGAL ---
+  void _setDefaultVenues() {
+    for (var venue in venues) {
+      venue['distanceText'] = '-- km';
+      venue['distance'] = 999.0; // Set jarak tinggi untuk default
+    }
+    _applyFiltersAndSort();
+  }
+
+  // Apply search, filter, and sort
+  void _applyFiltersAndSort() {
+    List<Map<String, dynamic>> result = List.from(venues);
+
+    // Apply search filter
+    if (searchQuery.isNotEmpty) {
+      result = result.where((venue) {
+        return venue['name'].toLowerCase().contains(searchQuery.toLowerCase()) ||
+               venue['location'].toLowerCase().contains(searchQuery.toLowerCase());
+      }).toList();
+    }
+
+    // Apply availability filter
+    if (selectedFilter == 'Tersedia') {
+      result = result.where((venue) => venue['available'] == true).toList();
+    } else if (selectedFilter == 'Rating Tinggi') {
+      result = result.where((venue) => double.parse(venue['rating']) >= 4.5).toList();
+    } else if (selectedFilter == 'Harga Murah') {
+      result = result.where((venue) => venue['price'] <= 100000).toList();
+    }
+
+    // Apply sorting
+    switch (selectedSort) {
+      case 'Terdekat':
+        result.sort((a, b) {
+          double distanceA = a['distance'] ?? 999.0;
+          double distanceB = b['distance'] ?? 999.0;
+          return distanceA.compareTo(distanceB);
+        });
+        break;
+      case 'Rating Tertinggi':
+        result.sort((a, b) => double.parse(b['rating']).compareTo(double.parse(a['rating'])));
+        break;
+      case 'Harga Terendah':
+        result.sort((a, b) => a['price'].compareTo(b['price']));
+        break;
+      case 'Harga Tertinggi':
+        result.sort((a, b) => b['price'].compareTo(a['price']));
+        break;
+    }
+
+    setState(() {
+      filteredVenues = result;
+    });
+  }
+
+  void _onSearchChanged(String query) {
+    setState(() {
+      searchQuery = query;
+    });
+    _applyFiltersAndSort();
   }
 
   @override
@@ -115,7 +344,15 @@ class _CategoryVenuesPageState extends State<CategoryVenuesPage> {
           IconButton(
             icon: const Icon(Icons.search),
             onPressed: () {
-              // Implementasi search
+              showSearch(
+                context: context,
+                delegate: VenueSearchDelegate(
+                  venues: venues,
+                  categoryName: widget.categoryName,
+                  categoryIcon: widget.categoryIcon,
+                  categoryColor: widget.categoryColor,
+                ),
+              );
             },
           ),
         ],
@@ -155,7 +392,7 @@ class _CategoryVenuesPageState extends State<CategoryVenuesPage> {
                         ),
                       ),
                       Text(
-                        '${venues.length} venue tersedia',
+                        '${filteredVenues.length} venue tersedia',
                         style: TextStyle(
                           fontSize: 14,
                           color: Colors.grey[600],
@@ -191,14 +428,44 @@ class _CategoryVenuesPageState extends State<CategoryVenuesPage> {
 
           // List venues
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(20),
-              itemCount: venues.length,
-              itemBuilder: (context, index) {
-                final venue = venues[index];
-                return _buildVenueCard(venue);
-              },
-            ),
+            child: filteredVenues.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.search_off,
+                          size: 64,
+                          color: Colors.grey[400],
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Tidak ada venue ditemukan',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey[600],
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Coba ubah filter atau kata kunci pencarian',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[500],
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.all(20),
+                    itemCount: filteredVenues.length,
+                    itemBuilder: (context, index) {
+                      final venue = filteredVenues[index];
+                      return _buildVenueCard(venue);
+                    },
+                  ),
           ),
         ],
       ),
@@ -336,7 +603,7 @@ class _CategoryVenuesPageState extends State<CategoryVenuesPage> {
                       ),
                     ),
                     Text(
-                      venue['distance'],
+                      venue['distanceText'] ?? '-- km',
                       style: TextStyle(
                         color: AppColors.primaryBlue,
                         fontSize: 12,
@@ -399,7 +666,7 @@ class _CategoryVenuesPageState extends State<CategoryVenuesPage> {
                           text: TextSpan(
                             children: [
                               TextSpan(
-                                text: venue['price'],
+                                text: venue['priceText'],
                                 style: TextStyle(
                                   color: AppColors.primaryBlue,
                                   fontWeight: FontWeight.bold,
@@ -427,11 +694,9 @@ class _CategoryVenuesPageState extends State<CategoryVenuesPage> {
                     ),
                     ElevatedButton(
                       onPressed: venue['available'] ? () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Booking ${venue['name']}...'),
-                            backgroundColor: AppColors.primaryBlue,
-                          ),
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const VenueDetailPage()),
                         );
                       } : null,
                       style: ElevatedButton.styleFrom(
@@ -527,6 +792,7 @@ class _CategoryVenuesPageState extends State<CategoryVenuesPage> {
           selectedFilter = title;
         });
         Navigator.pop(context);
+        _applyFiltersAndSort(); // Apply filter immediately
       },
     );
   }
@@ -540,7 +806,238 @@ class _CategoryVenuesPageState extends State<CategoryVenuesPage> {
           selectedSort = title;
         });
         Navigator.pop(context);
+        _applyFiltersAndSort(); // Apply sort immediately
       },
+    );
+  }
+}
+
+// ==========================================
+// SEARCH DELEGATE FOR VENUE SEARCH
+// ==========================================
+
+class VenueSearchDelegate extends SearchDelegate<String> {
+  final List<Map<String, dynamic>> venues;
+  final String categoryName;
+  final IconData categoryIcon;
+  final Color categoryColor;
+
+  VenueSearchDelegate({
+    required this.venues,
+    required this.categoryName,
+    required this.categoryIcon,
+    required this.categoryColor,
+  });
+
+  @override
+  String get searchFieldLabel => 'Cari venue ${categoryName.toLowerCase()}...';
+
+  @override
+  List<Widget> buildActions(BuildContext context) {
+    return [
+      IconButton(
+        icon: const Icon(Icons.clear),
+        onPressed: () {
+          query = '';
+        },
+      ),
+    ];
+  }
+
+  @override
+  Widget buildLeading(BuildContext context) {
+    return IconButton(
+      icon: const Icon(Icons.arrow_back),
+      onPressed: () {
+        close(context, '');
+      },
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    return _buildSearchResults();
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    return _buildSearchResults();
+  }
+
+  Widget _buildSearchResults() {
+    final filteredVenues = venues.where((venue) {
+      return venue['name'].toLowerCase().contains(query.toLowerCase()) ||
+             venue['location'].toLowerCase().contains(query.toLowerCase());
+    }).toList();
+
+    if (query.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.search,
+              size: 64,
+              color: Colors.grey[400],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Cari venue ${categoryName.toLowerCase()}',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Ketik nama venue atau lokasi',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[500],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (filteredVenues.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.search_off,
+              size: 64,
+              color: Colors.grey[400],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Tidak ada hasil untuk "$query"',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey[600],
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Coba kata kunci lain',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[500],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: filteredVenues.length,
+      itemBuilder: (context, index) {
+        final venue = filteredVenues[index];
+        return _buildSearchResultCard(context, venue);
+      },
+    );
+  }
+
+  Widget _buildSearchResultCard(BuildContext context, Map<String, dynamic> venue) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.all(16),
+        leading: Container(
+          width: 50,
+          height: 50,
+          decoration: BoxDecoration(
+            color: categoryColor.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(
+            categoryIcon,
+            color: categoryColor,
+            size: 24,
+          ),
+        ),
+        title: Text(
+          venue['name'],
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                Icon(Icons.location_on_outlined, size: 14, color: Colors.grey[600]),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    venue['location'],
+                    style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                  ),
+                ),
+                Text(
+                  venue['distanceText'] ?? '-- km',
+                  style: const TextStyle(
+                    color: Color(0xFF0047FF),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(Icons.star, color: Colors.orange, size: 14),
+                const SizedBox(width: 4),
+                Text(
+                  venue['rating'],
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                ),
+                const SizedBox(width: 16),
+                Text(
+                  venue['priceText'],
+                  style: const TextStyle(
+                    color: Color(0xFF0047FF),
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        trailing: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: venue['available'] ? Colors.green : Colors.red,
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Text(
+            venue['available'] ? 'Tersedia' : 'Penuh',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        onTap: () {
+          // Handle venue selection
+          close(context, venue['name']);
+        },
+      ),
     );
   }
 }

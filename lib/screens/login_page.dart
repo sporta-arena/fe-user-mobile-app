@@ -91,7 +91,8 @@ class _LoginPageState extends State<LoginPage> {
       String inputEmail = _emailController.text.trim();
       String inputPassword = _passwordController.text;
 
-      if (inputEmail == "okta@test.com" && inputPassword == "Okta1234#") {
+      if ((inputEmail == "okta@test.com" && inputPassword == "Okta1234#") || 
+    (inputEmail == "diki@test.com" && inputPassword == "Diki1234#")) {
         
         // --- A. JIKA BENAR ---
         ScaffoldMessenger.of(context).showSnackBar(
