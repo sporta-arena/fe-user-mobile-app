@@ -9,13 +9,16 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  // User data (dummy)
+  // User data (dummy) - data yang lebih lengkap
   final String _userName = "Okta The Super";
   final String _userEmail = "okta@test.com";
   final String _userPhone = "0876532123423";
   final String _memberSince = "Oktober 2021";
   final int _totalBookings = 12;
   final int _loyaltyPoints = 150;
+  final String _memberLevel = "Gold Member";
+  final int _totalSpent = 2450000;
+  final int _favoriteVenues = 5;
 
   @override
   Widget build(BuildContext context) {
@@ -129,7 +132,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
-                "Member sejak $_memberSince",
+                "$_memberLevel • Member sejak $_memberSince",
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 12,
@@ -143,28 +146,55 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  // Stats Section
+  // Stats Section dengan 3 kartu
   Widget _buildStatsSection() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Row(
+      child: Column(
         children: [
-          Expanded(
-            child: _buildStatCard(
-              icon: Icons.confirmation_number,
-              title: "Total Booking",
-              value: "$_totalBookings",
-              color: Colors.blue,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatCard(
+                  icon: Icons.confirmation_number,
+                  title: "Total Booking",
+                  value: "$_totalBookings",
+                  color: Colors.blue,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildStatCard(
+                  icon: Icons.stars,
+                  title: "Loyalty Points",
+                  value: "$_loyaltyPoints",
+                  color: Colors.orange,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: _buildStatCard(
-              icon: Icons.stars,
-              title: "Loyalty Points",
-              value: "$_loyaltyPoints",
-              color: Colors.orange,
-            ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatCard(
+                  icon: Icons.account_balance_wallet,
+                  title: "Total Spent",
+                  value: _formatCurrency(_totalSpent),
+                  color: Colors.green,
+                  isSmallText: true,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildStatCard(
+                  icon: Icons.favorite,
+                  title: "Favorite Venues",
+                  value: "$_favoriteVenues",
+                  color: Colors.red,
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -176,9 +206,10 @@ class _ProfilePageState extends State<ProfilePage> {
     required String title,
     required String value,
     required Color color,
+    bool isSmallText = false,
   }) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -193,29 +224,30 @@ class _ProfilePageState extends State<ProfilePage> {
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: color.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: color, size: 24),
+            child: Icon(icon, color: color, size: 20),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 24,
+            style: TextStyle(
+              fontSize: isSmallText ? 16 : 20,
               fontWeight: FontWeight.bold,
               color: Colors.black87,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
           Text(
             title,
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 10,
               color: Colors.grey[600],
             ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
@@ -514,5 +546,13 @@ class _ProfilePageState extends State<ProfilePage> {
         ],
       ),
     );
+  }
+
+  // Helper function untuk format currency
+  String _formatCurrency(int amount) {
+    return "Rp ${amount.toString().replaceAllMapped(
+      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), 
+      (Match m) => '${m[1]}.'
+    )}";
   }
 }

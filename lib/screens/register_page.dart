@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Untuk membatasi input hanya angka
-import 'otp_page.dart'; // Pastikan file ini sudah ada (sesuai langkah sebelumnya)
+import 'home_page.dart';
+import '../services/auth_service.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -119,21 +120,54 @@ class _RegisterPageState extends State<RegisterPage> {
     // 2. Loading State
     setState(() => _isLoading = true);
 
-    // 3. Simulasi Request API (2 detik)
-    await Future.delayed(const Duration(seconds: 2));
+    // 3. Call API Register
+    final result = await AuthService.register(
+      name: _nameController.text.trim(),
+      email: _emailController.text.trim(),
+      phone: _phoneController.text.trim(),
+      password: _passwordController.text,
+      passwordConfirmation: _confirmPasswordController.text,
+    );
 
     if (mounted) {
       setState(() => _isLoading = false);
-      
-      // 4. Navigasi ke OTP Page (Membawa No HP)
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => OtpVerificationPage(
-            phoneNumber: _phoneController.text, // Kirim data HP ke OTP Page
+
+      if (result.success) {
+        // --- REGISTER BERHASIL ---
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result.message ?? "Registrasi Berhasil!"),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
           ),
-        ),
-      ); 
+        );
+
+        // Langsung ke HomePage (sudah login otomatis)
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const HomePage()),
+          (route) => false,
+        );
+      } else {
+        // --- REGISTER GAGAL ---
+        // Set error dari API jika ada
+        if (result.errors != null) {
+          setState(() {
+            _nameError = result.errors!['name']?.first;
+            _emailError = result.errors!['email']?.first;
+            _phoneError = result.errors!['phone']?.first;
+            _passwordError = result.errors!['password']?.first;
+          });
+        }
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result.message ?? "Registrasi gagal!"),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     }
   }
 

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'register_page.dart';
 import 'forgot_password_page.dart';
-import 'home_page.dart'; // <--- PASTIKAN SUDAH ADA FILE home_page.dart
+import 'home_page.dart';
+import '../services/auth_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -43,78 +44,58 @@ class _LoginPageState extends State<LoginPage> {
 
     // Validasi Password
     final password = _passwordController.text;
-    bool hasMinLength = password.length >= 8;
-    bool hasUppercase = password.contains(RegExp(r'[A-Z]'));
-    bool hasLowercase = password.contains(RegExp(r'[a-z]'));
-    bool hasDigits    = password.contains(RegExp(r'[0-9]'));
-    bool hasSpecial   = password.contains(RegExp(r'[!@#\$%^&*(),.?":{}|<>]'));
-
     if (password.isEmpty) {
       setState(() => _passwordError = "Password tidak boleh kosong");
       isValid = false;
-    } else if (!hasMinLength) {
-      setState(() => _passwordError = "Minimal 8 karakter");
-      isValid = false;
-    } else {
-      List<String> missing = [];
-      if (!hasUppercase) missing.add("Huruf Besar");
-      if (!hasLowercase) missing.add("Huruf Kecil");
-      if (!hasDigits) missing.add("Angka");
-      if (!hasSpecial) missing.add("Simbol");
-
-      if (missing.isNotEmpty) {
-        setState(() {
-          _passwordError = "Kurang: ${missing.join(', ')}";
-        });
-        isValid = false;
-      }
     }
 
     return isValid;
   }
 
-  // --- FUNGSI LOGIN (HARDCODED) ---
+  // --- FUNGSI LOGIN (API) ---
   void _handleLogin() async {
     // 1. Cek Validasi Input dulu
     if (!_validateInputs()) return;
 
     setState(() => _isLoading = true);
 
-    // 2. Simulasi Loading (2 detik)
-    await Future.delayed(const Duration(seconds: 2));
+    // 2. Call API Login
+    final result = await AuthService.login(
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
+    );
 
     if (mounted) {
       setState(() => _isLoading = false);
 
-      // --- 3. CEK KREDENSIAL (HARDCODE) ---
-      // Kita tentukan akun rahasia untuk testing
-      String inputEmail = _emailController.text.trim();
-      String inputPassword = _passwordController.text;
-
-      if ((inputEmail == "okta@test.com" && inputPassword == "Okta1234#") || 
-    (inputEmail == "diki@test.com" && inputPassword == "Diki1234#")) {
-        
-        // --- A. JIKA BENAR ---
+      if (result.success) {
+        // --- LOGIN BERHASIL ---
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Login Berhasil! Selamat Datang."),
+          SnackBar(
+            content: Text(result.message ?? "Login Berhasil! Selamat Datang."),
             backgroundColor: Colors.green,
             behavior: SnackBarBehavior.floating,
           ),
         );
 
-        // Pindah ke Dashboard (User tidak bisa back ke login)
+        // Pindah ke HomePage (User tidak bisa back ke login)
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const HomePage()),
         );
-
       } else {
-        
-        // --- B. JIKA SALAH ---
+        // --- LOGIN GAGAL ---
+        // Set error dari API jika ada
+        if (result.errors != null) {
+          setState(() {
+            _emailError = result.errors!['email']?.first;
+            _passwordError = result.errors!['password']?.first;
+          });
+        }
+
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Email atau Password salah!"),
+          SnackBar(
+            content: Text(result.message ?? "Email atau Password salah!"),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
           ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'booking_success_page.dart'; // Import halaman sukses
+import 'payment_processing_page.dart'; // Import halaman payment processing
 
 class BookingConfirmationPage extends StatefulWidget {
   final String venueName;
@@ -342,11 +342,19 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                   return;
                 }
                 
-                // Aksi Bayar -> Pindah ke Halaman Sukses
-                Navigator.pushReplacement(
+                // Aksi Bayar -> Pindah ke Halaman Payment Processing
+                Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const BookingSuccessPage()
+                    builder: (context) => PaymentProcessingPage(
+                      venueName: widget.venueName,
+                      selectedDate: widget.selectedDate,
+                      selectedTime: widget.selectedTime,
+                      price: widget.price,
+                      paymentMethodId: _selectedPaymentMethod,
+                      customerName: _nameController.text.trim(),
+                      customerPhone: _phoneController.text.trim(),
+                    ),
                   ),
                 );
               },
@@ -397,23 +405,6 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
             contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
           ),
           keyboardType: label.contains("WhatsApp") ? TextInputType.phone : TextInputType.name,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTextField(String label, String initialValue) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label, 
-          style: const TextStyle(fontSize: 12, color: Colors.grey)
-        ),
-        const SizedBox(height: 4),
-        Text(
-          initialValue, 
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)
         ),
       ],
     );

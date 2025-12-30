@@ -9,6 +9,9 @@ import 'loyalty_page.dart'; // Import Halaman Loyalty
 import 'venue_detail_page.dart'; // Import Halaman Detail Venue
 import 'my_booking_page.dart'; // Import Halaman My Booking
 import 'profile_page.dart'; // Import Halaman Profile
+import '../services/venue_service.dart';
+import '../services/auth_service.dart';
+import '../models/venue.dart' as model;
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -88,79 +91,16 @@ class DashboardContent extends StatefulWidget {
 
 class _DashboardContentState extends State<DashboardContent> {
   // Variabel Lokasi
-  String _currentAddress = "Mencari Lokasi..."; 
+  String _currentAddress = "Mencari Lokasi...";
   bool _isLoadingLocation = false;
+  bool _isLoadingVenues = false;
   Position? _currentPosition; // Tambah variabel untuk menyimpan posisi GPS
 
-  // Data venue dengan koordinat GPS (dummy data Jakarta area)
-  final List<Map<String, dynamic>> _allVenues = [
-    {
-      'name': 'Gor Bulutangkis Sejahtera',
-      'location': 'Tebet, Jakarta Selatan',
-      'price': 'Rp 60.000',
-      'rating': '4.8',
-      'imageColor': Colors.blueAccent,
-      'category': 'Badminton',
-      'latitude': -6.2297, // Tebet area
-      'longitude': 106.8467,
-      'facilities': ['Parkir', 'AC', 'Shower', 'Kantin'],
-    },
-    {
-      'name': 'Futsal Champions Arena',
-      'location': 'Kemang, Jakarta Selatan',
-      'price': 'Rp 150.000',
-      'rating': '4.9',
-      'imageColor': Colors.green,
-      'category': 'Futsal',
-      'latitude': -6.2615, // Kemang area
-      'longitude': 106.8106,
-      'facilities': ['Parkir', 'Kantin', 'AC', 'Shower'],
-    },
-    {
-      'name': 'Basketball Hall A',
-      'location': 'Senayan, Jakarta Pusat',
-      'price': 'Rp 200.000',
-      'rating': '4.7',
-      'imageColor': Colors.orange,
-      'category': 'Basketball',
-      'latitude': -6.2088, // Senayan area
-      'longitude': 106.8456,
-      'facilities': ['Parkir', 'AC', 'Locker'],
-    },
-    {
-      'name': 'Sporta Swimming Pool',
-      'location': 'Pancoran, Jakarta Selatan',
-      'price': 'Rp 80.000',
-      'rating': '4.6',
-      'imageColor': Colors.cyan,
-      'category': 'Swimming',
-      'latitude': -6.2441, // Pancoran area
-      'longitude': 106.8495,
-      'facilities': ['Parkir', 'Shower', 'Locker'],
-    },
-    {
-      'name': 'Victory Gym Center',
-      'location': 'Kuningan, Jakarta Selatan',
-      'price': 'Rp 100.000',
-      'rating': '4.5',
-      'imageColor': Colors.red,
-      'category': 'Gym',
-      'latitude': -6.2382, // Kuningan area
-      'longitude': 106.8306,
-      'facilities': ['Parkir', 'AC', 'Shower'],
-    },
-    {
-      'name': 'Tennis Court Premium',
-      'location': 'Menteng, Jakarta Pusat',
-      'price': 'Rp 120.000',
-      'rating': '4.4',
-      'imageColor': Colors.purple,
-      'category': 'Tennis',
-      'latitude': -6.1944, // Menteng area
-      'longitude': 106.8294,
-      'facilities': ['Parkir', 'Kantin'],
-    },
-  ];
+  // Data venue dari API
+  List<model.Venue> _apiVenues = [];
+
+  // Data venue dari API (tidak pakai hardcode lagi)
+  // Hardcoded dummy data sudah di-comment out - hanya ambil dari API
 
   // List venue terdekat (akan diupdate berdasarkan lokasi)
   List<Map<String, dynamic>> _nearbyVenues = [];
@@ -168,8 +108,82 @@ class _DashboardContentState extends State<DashboardContent> {
   @override
   void initState() {
     super.initState();
+    _loadVenuesFromApi(); // Load venues dari API
     _getCurrentLocation(); // Otomatis cari lokasi saat dibuka
-    _setDefaultVenues(); // Set venue default dulu
+    // _setDefaultVenues(); // DISABLED - tidak pakai hardcode lagi
+  }
+
+  // --- LOAD VENUES DARI API ---
+  Future<void> _loadVenuesFromApi() async {
+    setState(() => _isLoadingVenues = true);
+
+    try {
+      final result = await VenueService.getVenues();
+
+      if (mounted && result.success && result.venues != null) {
+        setState(() {
+          _apiVenues = result.venues!;
+          _isLoadingVenues = false;
+        });
+
+        // Convert API venues to map format untuk nearby
+        _convertApiVenuesToNearby();
+      } else {
+        setState(() => _isLoadingVenues = false);
+      }
+    } catch (e) {
+      debugPrint("Error loading venues: $e");
+      if (mounted) {
+        setState(() => _isLoadingVenues = false);
+      }
+    }
+  }
+
+  // --- CONVERT API VENUES KE FORMAT MAP ---
+  void _convertApiVenuesToNearby() {
+    if (_apiVenues.isEmpty) return;
+
+    final colors = [Colors.blueAccent, Colors.green, Colors.orange, Colors.cyan, Colors.red, Colors.purple];
+
+    List<Map<String, dynamic>> venuesFromApi = _apiVenues.map((venue) {
+      int index = _apiVenues.indexOf(venue) % colors.length;
+      return {
+        'id': venue.id,
+        'name': venue.name,
+        'location': '${venue.address}, ${venue.city}',
+        'price': 'Lihat Detail',
+        'rating': '4.5',
+        'imageColor': colors[index],
+        'category': 'Olahraga',
+        'latitude': venue.latitude ?? -6.2,
+        'longitude': venue.longitude ?? 106.8,
+        'facilities': venue.facilities,
+        'coverImageUrl': venue.coverImageUrl,
+      };
+    }).toList();
+
+    setState(() {
+      if (_currentPosition != null) {
+        // Sort berdasarkan jarak jika ada posisi
+        for (var venue in venuesFromApi) {
+          if (venue['latitude'] != null && venue['longitude'] != null) {
+            double distance = Geolocator.distanceBetween(
+              _currentPosition!.latitude,
+              _currentPosition!.longitude,
+              venue['latitude'],
+              venue['longitude'],
+            );
+            venue['distance'] = distance / 1000;
+            venue['distanceText'] = distance < 1000
+                ? '${distance.round()} m'
+                : '${(distance / 1000).toStringAsFixed(1)} km';
+          }
+        }
+        venuesFromApi.sort((a, b) => (a['distance'] ?? 999).compareTo(b['distance'] ?? 999));
+      }
+
+      _nearbyVenues = venuesFromApi.take(3).toList();
+    });
   }
 
   // --- LOGIKA MENCARI LOKASI ---
@@ -204,12 +218,15 @@ class _DashboardContentState extends State<DashboardContent> {
       if (mounted) {
         setState(() {
           _currentPosition = position;
-          _currentAddress = "${place.subLocality}, ${place.locality}"; 
+          _currentAddress = "${place.subLocality}, ${place.locality}";
           _isLoadingLocation = false;
         });
-        
-        // Update nearby venues berdasarkan lokasi
-        _updateNearbyVenues();
+
+        // Update nearby venues berdasarkan lokasi (hanya dari API)
+        if (_apiVenues.isNotEmpty) {
+          _convertApiVenuesToNearby();
+        }
+        // Tidak ada fallback ke hardcode lagi
       }
 
     } catch (e) {
@@ -218,9 +235,11 @@ class _DashboardContentState extends State<DashboardContent> {
           _currentAddress = "Gagal memuat lokasi";
           _isLoadingLocation = false;
         });
-        
-        // Jika gagal dapat lokasi, tampilkan venue default
-        _setDefaultVenues();
+
+        // Tidak pakai hardcode fallback - tetap ambil dari API
+        if (_apiVenues.isNotEmpty) {
+          _convertApiVenuesToNearby();
+        }
       }
       debugPrint("Error Lokasi: $e");
     }
@@ -451,7 +470,7 @@ class _DashboardContentState extends State<DashboardContent> {
             const SizedBox(height: 16),
 
             // Loading atau list venue terdekat
-            _isLoadingLocation 
+            (_isLoadingLocation || _isLoadingVenues)
               ? const Center(
                   child: Padding(
                     padding: EdgeInsets.all(40.0),
@@ -459,7 +478,7 @@ class _DashboardContentState extends State<DashboardContent> {
                       children: [
                         CircularProgressIndicator(color: Color(0xFF0047FF)),
                         SizedBox(height: 16),
-                        Text('Mencari venue terdekat...', style: TextStyle(color: Colors.grey)),
+                        Text('Memuat venue dari server...', style: TextStyle(color: Colors.grey)),
                       ],
                     ),
                   ),
@@ -473,11 +492,16 @@ class _DashboardContentState extends State<DashboardContent> {
                     ),
                     child: const Column(
                       children: [
-                        Icon(Icons.location_off, size: 40, color: Colors.grey),
+                        Icon(Icons.sports_outlined, size: 40, color: Colors.grey),
                         SizedBox(height: 8),
                         Text(
-                          'Tidak dapat menemukan venue terdekat',
+                          'Belum ada venue tersedia',
                           style: TextStyle(color: Colors.grey),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          'Data diambil dari database',
+                          style: TextStyle(color: Colors.grey, fontSize: 12),
                         ),
                       ],
                     ),
