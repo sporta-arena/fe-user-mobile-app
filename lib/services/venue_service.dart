@@ -47,13 +47,16 @@ class VenueService {
   static Future<VenueResult> getVenues({
     String? city,
     String? search,
+    String? type, // Filter by field type (e.g., 'futsal', 'badminton')
     int page = 1,
   }) async {
     try {
       final queryParams = <String, String>{};
       if (city != null) queryParams['city'] = city;
       if (search != null) queryParams['search'] = search;
+      if (type != null) queryParams['type'] = type;
       queryParams['page'] = page.toString();
+      queryParams['with'] = 'fields'; // Request fields to be included
 
       final uri = Uri.parse(ApiConfig.venuesUrl).replace(queryParameters: queryParams);
 
@@ -73,9 +76,9 @@ class VenueService {
           success: true,
           venues: venues,
           pagination: {
-            'current_page': data['meta']?['current_page'],
-            'last_page': data['meta']?['last_page'],
-            'total': data['meta']?['total'],
+            'current_page': data['current_page'],
+            'last_page': data['last_page'],
+            'total': data['total'],
           },
         );
       } else {

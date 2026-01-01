@@ -1,4 +1,7 @@
 class ApiConfig {
+  // Server URL - Backend di VPS
+  static const String serverUrl = 'http://103.174.114.140:81';
+
   // Ngrok URL - Ganti ini setiap kali ngrok restart
   static const String ngrokUrl = 'https://unobviated-prefixable-gerardo.ngrok-free.dev';
 
@@ -15,10 +18,11 @@ class ApiConfig {
   static bool get isProduction => const bool.fromEnvironment('dart.vm.product');
 
   // PILIH SATU:
-  // - 'ngrok' = HP fisik
+  // - 'server' = VPS Server (103.174.114.140)
+  // - 'ngrok' = HP fisik via ngrok
   // - 'ios' = iOS Simulator (localhost)
   // - 'android' = Android Emulator (10.0.2.2)
-  static String devMode = 'ios'; // GANTI SESUAI DEVICE
+  static String devMode = 'server'; // GANTI SESUAI DEVICE
 
   // Get base URL
   static String get baseUrl {
@@ -27,6 +31,8 @@ class ApiConfig {
     }
     // Untuk development
     switch (devMode) {
+      case 'server':
+        return serverUrl; // VPS server
       case 'ios':
         return localUrl; // localhost works for iOS simulator
       case 'android':
@@ -56,12 +62,19 @@ class ApiConfig {
   // Fields
   static String fieldDetailUrl(int venueId, int fieldId) => '$apiUrl/venues/$venueId/fields/$fieldId';
   static String availableSlotsUrl(int fieldId) => '$apiUrl/fields/$fieldId/available-slots';
+  static String get fieldTypesUrl => '$apiUrl/field-types';
 
   // Bookings
   static String get bookingsUrl => '$apiUrl/bookings';
   static String bookingDetailUrl(int id) => '$apiUrl/bookings/$id';
   static String cancelBookingUrl(int id) => '$apiUrl/bookings/$id/cancel';
   static String simulatePaymentUrl(int id) => '$apiUrl/bookings/$id/simulate-payment';
+
+  // Refunds
+  static String get refundsUrl => '$apiUrl/refunds';
+  static String refundDetailUrl(int id) => '$apiUrl/refunds/$id';
+  static String requestRefundUrl(int bookingId) => '$apiUrl/bookings/$bookingId/refund';
+  static String refundPolicyUrl(int bookingId) => '$apiUrl/bookings/$bookingId/refund-policy';
 
   // Partner
   static String get partnerBookingsUrl => '$apiUrl/partner/bookings';

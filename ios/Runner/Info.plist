@@ -47,5 +47,20 @@
 	<true/>
 	<key>NSLocationWhenInUseUsageDescription</key>
 <string>Aplikasi butuh lokasi untuk menemukan lapangan olahraga terdekat.</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+		<key>NSExceptionDomains</key>
+		<dict>
+			<key>103.174.114.140</key>
+			<dict>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
+				<key>NSIncludesSubdomains</key>
+				<true/>
+			</dict>
+		</dict>
+	</dict>
 </dict>
 </plist>

@@ -1,4 +1,5 @@
 import 'venue.dart';
+import '../utils/timezone_utils.dart';
 
 class Field {
   final int id;
@@ -34,8 +35,8 @@ class Field {
       description: json['description'],
       pricePerHour: double.parse(json['price_per_hour'].toString()),
       status: json['status'] ?? 'active',
-      createdAt: DateTime.parse(json['created_at']),
-      updatedAt: DateTime.parse(json['updated_at']),
+      createdAt: TimezoneUtils.parseUtcToLocal(json['created_at']),
+      updatedAt: TimezoneUtils.parseUtcToLocal(json['updated_at']),
       venue: json['venue'] != null ? Venue.fromJson(json['venue']) : null,
     );
   }

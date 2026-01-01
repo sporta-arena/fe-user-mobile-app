@@ -39,7 +39,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
 
         // Pindah ke Dashboard Utama (Hapus semua history back agar user gak bisa balik ke login)
         Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const HomePage()), // Kita buat dummy HomePage di bawah
+          MaterialPageRoute(builder: (context) => const HomePage()),
           (route) => false,
         );
 

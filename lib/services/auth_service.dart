@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import '../config/api_config.dart';
 import '../models/user.dart';
 
@@ -24,9 +25,69 @@ class AuthService {
   static String? _token;
   static User? _currentUser;
 
+  static const String _tokenKey = 'auth_token';
+  static const String _userKey = 'auth_user';
+  static const String _onboardingKey = 'has_seen_onboarding';
+
   static String? get token => _token;
   static User? get currentUser => _currentUser;
   static bool get isLoggedIn => _token != null && _currentUser != null;
+
+  /// Initialize auth state from storage
+  static Future<bool> initializeAuth() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    _token = prefs.getString(_tokenKey);
+    final userJson = prefs.getString(_userKey);
+
+    if (userJson != null) {
+      try {
+        _currentUser = User.fromJson(jsonDecode(userJson));
+      } catch (e) {
+        // Invalid user data, clear it
+        await prefs.remove(_userKey);
+        _currentUser = null;
+      }
+    }
+
+    // If we have a token, verify it's still valid
+    if (_token != null) {
+      final result = await getUser();
+      if (!result.success) {
+        // Token expired or invalid, clear session
+        await clearSession();
+        return false;
+      }
+      return true;
+    }
+
+    return false;
+  }
+
+  /// Check if user has seen onboarding
+  static Future<bool> hasSeenOnboarding() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_onboardingKey) ?? false;
+  }
+
+  /// Mark onboarding as seen
+  static Future<void> setOnboardingSeen() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_onboardingKey, true);
+  }
+
+  /// Save auth data to storage
+  static Future<void> _saveAuthData() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    if (_token != null) {
+      await prefs.setString(_tokenKey, _token!);
+    }
+
+    if (_currentUser != null) {
+      await prefs.setString(_userKey, jsonEncode(_currentUser!.toJson()));
+    }
+  }
 
   /// Login dengan email dan password
   static Future<AuthResult> login({
@@ -48,6 +109,9 @@ class AuthService {
       if (response.statusCode == 200) {
         _token = data['token'];
         _currentUser = User.fromJson(data['user']);
+
+        // Save to persistent storage
+        await _saveAuthData();
 
         return AuthResult(
           success: true,
@@ -109,6 +173,9 @@ class AuthService {
         _token = data['token'];
         _currentUser = User.fromJson(data['user']);
 
+        // Save to persistent storage
+        await _saveAuthData();
+
         return AuthResult(
           success: true,
           message: data['message'],
@@ -149,6 +216,10 @@ class AuthService {
 
       if (response.statusCode == 200) {
         _currentUser = User.fromJson(data['user']);
+
+        // Update stored user data
+        await _saveAuthData();
+
         return AuthResult(
           success: true,
           user: _currentUser,
@@ -196,6 +267,10 @@ class AuthService {
 
       if (response.statusCode == 200) {
         _currentUser = User.fromJson(data['user']);
+
+        // Update stored user data
+        await _saveAuthData();
+
         return AuthResult(
           success: true,
           message: data['message'],
@@ -230,8 +305,7 @@ class AuthService {
       final data = jsonDecode(response.body);
 
       // Clear local data regardless of response
-      _token = null;
-      _currentUser = null;
+      await clearSession();
 
       if (response.statusCode == 200) {
         return AuthResult(
@@ -246,8 +320,7 @@ class AuthService {
       }
     } catch (e) {
       // Still clear local data
-      _token = null;
-      _currentUser = null;
+      await clearSession();
 
       return AuthResult(
         success: false,
@@ -271,8 +344,7 @@ class AuthService {
       final data = jsonDecode(response.body);
 
       // Clear local data
-      _token = null;
-      _currentUser = null;
+      await clearSession();
 
       if (response.statusCode == 200) {
         return AuthResult(
@@ -286,8 +358,7 @@ class AuthService {
         );
       }
     } catch (e) {
-      _token = null;
-      _currentUser = null;
+      await clearSession();
 
       return AuthResult(
         success: false,
@@ -301,9 +372,13 @@ class AuthService {
     _token = token;
   }
 
-  /// Clear session
-  static void clearSession() {
+  /// Clear session from memory and storage
+  static Future<void> clearSession() async {
     _token = null;
     _currentUser = null;
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_tokenKey);
+    await prefs.remove(_userKey);
   }
 }

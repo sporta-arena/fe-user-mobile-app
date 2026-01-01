@@ -32,6 +32,7 @@ class BookingService {
     required String startTime,
     required int durationHours,
     String? notes,
+    String? paymentMethod,
   }) async {
     if (AuthService.token == null) {
       return BookingResult(success: false, message: 'Silakan login terlebih dahulu');
@@ -47,6 +48,7 @@ class BookingService {
           'start_time': startTime,
           'duration_hours': durationHours,
           'notes': notes,
+          'payment_method': paymentMethod ?? 'QRIS',
         }),
       );
 
@@ -103,9 +105,9 @@ class BookingService {
           success: true,
           bookings: bookings,
           pagination: {
-            'current_page': data['meta']?['current_page'],
-            'last_page': data['meta']?['last_page'],
-            'total': data['meta']?['total'],
+            'current_page': data['current_page'],
+            'last_page': data['last_page'],
+            'total': data['total'],
           },
         );
       } else {
@@ -251,9 +253,9 @@ class BookingService {
           success: true,
           bookings: bookings,
           pagination: {
-            'current_page': data['meta']?['current_page'],
-            'last_page': data['meta']?['last_page'],
-            'total': data['meta']?['total'],
+            'current_page': data['current_page'],
+            'last_page': data['last_page'],
+            'total': data['total'],
           },
         );
       } else {

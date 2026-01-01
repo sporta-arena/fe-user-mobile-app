@@ -1,3 +1,5 @@
+import '../utils/timezone_utils.dart';
+
 class User {
   final int id;
   final String name;
@@ -34,13 +36,13 @@ class User {
       avatar: json['avatar'],
       avatarUrl: json['avatar_url'],
       emailVerifiedAt: json['email_verified_at'] != null
-          ? DateTime.parse(json['email_verified_at'])
+          ? TimezoneUtils.parseUtcToLocal(json['email_verified_at'])
           : null,
       createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'])
+          ? TimezoneUtils.parseUtcToLocal(json['created_at'])
           : null,
       updatedAt: json['updated_at'] != null
-          ? DateTime.parse(json['updated_at'])
+          ? TimezoneUtils.parseUtcToLocal(json['updated_at'])
           : null,
       roles: json['roles'] != null
           ? (json['roles'] as List).map((r) => Role.fromJson(r)).toList()

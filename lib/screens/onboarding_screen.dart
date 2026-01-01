@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'login_page.dart';
+import '../services/auth_service.dart';
 
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({super.key});
@@ -31,12 +32,17 @@ class _OnboardingPageState extends State<OnboardingPage> {
     },
   ];
 
-  void _finishOnboarding() {
+  void _finishOnboarding() async {
+    // Mark onboarding as seen so it won't show again
+    await AuthService.setOnboardingSeen();
+
     // pushReplacement agar user tidak bisa tekan tombol 'Back' ke onboarding lagi
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const LoginPage()),
-    );
+    if (mounted) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginPage()),
+      );
+    }
   }
 
   @override

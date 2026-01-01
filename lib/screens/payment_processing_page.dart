@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import '../services/xendit_service.dart';
 import 'booking_success_page.dart';
 import 'dart:math' as math;
@@ -167,62 +168,67 @@ class _PaymentProcessingPageState extends State<PaymentProcessingPage> {
     try {
       final selectedMethod = _paymentMethods[widget.paymentMethodId];
       _paymentType = selectedMethod['type'];
-      
-      // Simulate API delay
-      await Future.delayed(const Duration(seconds: 2));
-      
-      // Create mock payment data for development
-      Map<String, dynamic> result = _createMockPaymentData(selectedMethod);
 
-      setState(() {
-        _paymentData = result;
-        _isLoading = false;
-      });
+      final fee = selectedMethod['fee'] as int;
+      final totalAmount = widget.price + fee;
+      final description = 'Booking ${widget.venueName} - ${widget.selectedDate} ${widget.selectedTime}';
+
+      Map<String, dynamic>? result;
+
+      switch (_paymentType) {
+        case 'qris':
+          result = await XenditService.createQRISPayment(
+            amount: totalAmount,
+            description: description,
+            customerName: widget.customerName,
+          );
+          break;
+
+        case 'va':
+          result = await XenditService.createVirtualAccount(
+            amount: totalAmount,
+            bankCode: selectedMethod['bankCode'],
+            description: description,
+            customerName: widget.customerName,
+          );
+          break;
+
+        case 'retail':
+          result = await XenditService.createRetailPayment(
+            amount: totalAmount,
+            retailOutletName: selectedMethod['retailCode'],
+            description: description,
+            customerName: widget.customerName,
+          );
+          break;
+
+        case 'credit_card':
+          result = await XenditService.createCreditCardPayment(
+            amount: _calculateCreditCardFee(),
+            description: description,
+            customerName: widget.customerName,
+          );
+          break;
+      }
+
+      if (result != null) {
+        setState(() {
+          _paymentData = result;
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _hasError = true;
+          _errorMessage = 'Gagal membuat pembayaran. Silakan coba lagi.';
+          _isLoading = false;
+        });
+      }
     } catch (e) {
       setState(() {
         _hasError = true;
         _errorMessage = 'Terjadi kesalahan: $e';
         _isLoading = false;
       });
-    }
-  }
-
-  Map<String, dynamic> _createMockPaymentData(Map<String, dynamic> method) {
-    final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
-    
-    switch (method['type']) {
-      case 'qris':
-        return {
-          'id': 'qr_$timestamp',
-          'qr_string': 'mock_qr_string_for_development',
-          'status': 'ACTIVE',
-        };
-        
-      case 'va':
-        return {
-          'id': 'va_$timestamp',
-          'account_number': '${method['bankCode'] == 'BCA' ? '70012' : '88810'}${timestamp.substring(7)}',
-          'bank_code': method['bankCode'],
-          'status': 'ACTIVE',
-        };
-        
-      case 'retail':
-        return {
-          'id': 'retail_$timestamp',
-          'payment_code': timestamp.substring(7),
-          'retail_outlet_name': method['retailCode'],
-          'status': 'ACTIVE',
-        };
-        
-      case 'credit_card':
-        return {
-          'id': 'invoice_$timestamp',
-          'invoice_url': 'https://checkout.xendit.co/web/$timestamp',
-          'status': 'PENDING',
-        };
-        
-      default:
-        return {'id': 'mock_$timestamp', 'status': 'ACTIVE'};
     }
   }
 
@@ -345,34 +351,42 @@ class _PaymentProcessingPageState extends State<PaymentProcessingPage> {
                 ),
                 const SizedBox(height: 20),
                 
-                // QR Code placeholder dengan pattern yang lebih realistis
+                // QR Code dari Xendit
                 Container(
-                  width: 200,
-                  height: 200,
+                  width: 220,
+                  height: 220,
+                  padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     border: Border.all(color: Colors.grey.shade300),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: CustomPaint(
-                    painter: QRCodePainter(),
-                    child: const Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SizedBox(height: 160),
-                          Text(
-                            "SCAN ME", 
-                            style: TextStyle(
-                              color: Colors.black87, 
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
+                  child: _paymentData != null && _paymentData!['qr_string'] != null
+                      ? QrImageView(
+                          data: _paymentData!['qr_string'],
+                          version: QrVersions.auto,
+                          size: 200,
+                          backgroundColor: Colors.white,
+                        )
+                      : CustomPaint(
+                          painter: QRCodePainter(),
+                          child: const Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                SizedBox(height: 160),
+                                Text(
+                                  "LOADING...",
+                                  style: TextStyle(
+                                    color: Colors.black87,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                  ),
+                        ),
                 ),
                 
                 const SizedBox(height: 20),
@@ -783,14 +797,47 @@ class _PaymentProcessingPageState extends State<PaymentProcessingPage> {
     );
   }
 
-  void _checkPaymentStatus() {
-    // In real app, check actual payment status
+  Future<void> _checkPaymentStatus() async {
+    if (_paymentData == null) return;
+
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text("Mengecek status pembayaran..."),
         backgroundColor: Color(0xFF0047FF),
       ),
     );
+
+    final paymentId = _paymentData!['id'];
+    final result = await XenditService.checkPaymentStatus(paymentId, _paymentType);
+
+    if (!mounted) return;
+
+    if (result != null) {
+      final status = result['status'];
+      if (status == 'COMPLETED' || status == 'PAID' || status == 'SETTLED') {
+        // Payment successful
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const BookingSuccessPage(),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Status pembayaran: $status"),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Gagal mengecek status pembayaran"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   void _simulatePaymentSuccess() {

@@ -1,5 +1,6 @@
 import 'user.dart';
 import 'field.dart';
+import '../utils/timezone_utils.dart';
 
 class Venue {
   final int id;
@@ -21,6 +22,8 @@ class Venue {
   final DateTime updatedAt;
   final User? partner;
   final List<Field>? fields;
+  final double? averageRating;
+  final int? reviewCount;
 
   Venue({
     required this.id,
@@ -42,6 +45,8 @@ class Venue {
     required this.updatedAt,
     this.partner,
     this.fields,
+    this.averageRating,
+    this.reviewCount,
   });
 
   factory Venue.fromJson(Map<String, dynamic> json) {
@@ -67,12 +72,16 @@ class Venue {
       coverImage: json['cover_image'],
       coverImageUrl: json['cover_image_url'],
       status: json['status'] ?? 'pending',
-      createdAt: DateTime.parse(json['created_at']),
-      updatedAt: DateTime.parse(json['updated_at']),
+      createdAt: TimezoneUtils.parseUtcToLocal(json['created_at']),
+      updatedAt: TimezoneUtils.parseUtcToLocal(json['updated_at']),
       partner: json['partner'] != null ? User.fromJson(json['partner']) : null,
       fields: json['fields'] != null
           ? (json['fields'] as List).map((f) => Field.fromJson(f)).toList()
           : null,
+      averageRating: json['average_rating'] != null
+          ? double.tryParse(json['average_rating'].toString())
+          : null,
+      reviewCount: json['review_count'],
     );
   }
 

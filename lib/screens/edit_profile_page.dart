@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'change_password_page.dart';
+import '../services/auth_service.dart';
 
 class EditProfilePage extends StatefulWidget {
   const EditProfilePage({super.key});
@@ -10,34 +11,65 @@ class EditProfilePage extends StatefulWidget {
 
 class _EditProfilePageState extends State<EditProfilePage> {
   // --- CONTROLLERS ---
-  // Di aplikasi nyata, isi ini dengan data user yang sedang login
-  final TextEditingController _nameController = TextEditingController(text: "Okta (Admin)");
-  final TextEditingController _emailController = TextEditingController(text: "okta@test.com");
-  final TextEditingController _phoneController = TextEditingController(text: "081234567890");
-  
+  late TextEditingController _nameController;
+  late TextEditingController _emailController;
+  late TextEditingController _phoneController;
+
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Ambil data user yang sedang login dari AuthService
+    final user = AuthService.currentUser;
+    _nameController = TextEditingController(text: user?.name ?? '');
+    _emailController = TextEditingController(text: user?.email ?? '');
+    _phoneController = TextEditingController(text: user?.phone ?? '');
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
+    super.dispose();
+  }
 
   // --- FUNGSI SIMPAN ---
   void _saveProfile() async {
     setState(() => _isLoading = true);
-    
-    // Simulasi Request API (2 detik)
-    await Future.delayed(const Duration(seconds: 2));
-    
+
+    // Panggil API untuk update profile
+    final result = await AuthService.updateProfile(
+      name: _nameController.text,
+      phone: _phoneController.text,
+    );
+
     if (mounted) {
       setState(() => _isLoading = false);
-      
-      // Tampilkan Pesan Sukses
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Profil berhasil diperbarui!"),
-          backgroundColor: Colors.green,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      
-      // Kembali ke halaman sebelumnya
-      Navigator.pop(context);
+
+      if (result.success) {
+        // Tampilkan Pesan Sukses
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Profil berhasil diperbarui!"),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+
+        // Kembali ke halaman sebelumnya
+        Navigator.pop(context);
+      } else {
+        // Tampilkan Pesan Error
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result.message ?? "Gagal memperbarui profil"),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     }
   }
 
@@ -75,16 +107,21 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       border: Border.all(color: Colors.white, width: 4),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1), 
-                          blurRadius: 10, 
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 10,
                           offset: const Offset(0, 5)
                         )
                       ],
-                      image: const DecorationImage(
-                        image: NetworkImage("https://i.pravatar.cc/300"), // Dummy Image
-                        fit: BoxFit.cover,
-                      ),
+                      image: AuthService.currentUser?.avatarUrl != null
+                          ? DecorationImage(
+                              image: NetworkImage(AuthService.currentUser!.avatarUrl!),
+                              fit: BoxFit.cover,
+                            )
+                          : null,
                     ),
+                    child: AuthService.currentUser?.avatarUrl == null
+                        ? const Icon(Icons.person, size: 50, color: Colors.grey)
+                        : null,
                   ),
                   
                   // Tombol Kamera Kecil

@@ -1,5 +1,6 @@
 import 'field.dart';
 import 'user.dart';
+import '../utils/timezone_utils.dart';
 
 class Booking {
   final int id;
@@ -57,13 +58,16 @@ class Booking {
       pricePerHour: double.parse(json['price_per_hour'].toString()),
       totalPrice: double.parse(json['total_price'].toString()),
       status: json['status'],
+      // Parse UTC datetime from server
       expiresAt: json['expires_at'] != null
-          ? DateTime.parse(json['expires_at'])
+          ? TimezoneUtils.parseUtcToLocal(json['expires_at'])
           : null,
-      paidAt: json['paid_at'] != null ? DateTime.parse(json['paid_at']) : null,
+      paidAt: json['paid_at'] != null
+          ? TimezoneUtils.parseUtcToLocal(json['paid_at'])
+          : null,
       notes: json['notes'],
-      createdAt: DateTime.parse(json['created_at']),
-      updatedAt: DateTime.parse(json['updated_at']),
+      createdAt: TimezoneUtils.parseUtcToLocal(json['created_at']),
+      updatedAt: TimezoneUtils.parseUtcToLocal(json['updated_at']),
       field: json['field'] != null ? Field.fromJson(json['field']) : null,
       user: json['user'] != null ? User.fromJson(json['user']) : null,
       payment: json['payment'] != null ? Payment.fromJson(json['payment']) : null,
@@ -72,11 +76,13 @@ class Booking {
 
   bool get isPending => status == 'pending';
   bool get isConfirmed => status == 'confirmed';
+  bool get isCheckedIn => status == 'checked_in';
   bool get isCompleted => status == 'completed';
   bool get isCancelled => status == 'cancelled';
   bool get isExpired => status == 'expired';
 
   bool get canCancel => isPending || isConfirmed;
+  bool get isActive => isConfirmed || isCheckedIn; // User can play
 
   String get formattedTotalPrice => 'Rp ${_formatNumber(totalPrice.toInt())}';
 
@@ -103,6 +109,8 @@ class Booking {
         return 'Menunggu Pembayaran';
       case 'confirmed':
         return 'Terkonfirmasi';
+      case 'checked_in':
+        return 'Sedang Bermain';
       case 'completed':
         return 'Selesai';
       case 'cancelled':
@@ -151,12 +159,15 @@ class Payment {
       status: json['status'],
       paymentMethod: json['payment_method'] ?? 'qris',
       qrString: json['qr_string'],
-      paidAt: json['paid_at'] != null ? DateTime.parse(json['paid_at']) : null,
-      expiresAt: json['expires_at'] != null
-          ? DateTime.parse(json['expires_at'])
+      // Parse UTC datetime from server
+      paidAt: json['paid_at'] != null
+          ? TimezoneUtils.parseUtcToLocal(json['paid_at'])
           : null,
-      createdAt: DateTime.parse(json['created_at']),
-      updatedAt: DateTime.parse(json['updated_at']),
+      expiresAt: json['expires_at'] != null
+          ? TimezoneUtils.parseUtcToLocal(json['expires_at'])
+          : null,
+      createdAt: TimezoneUtils.parseUtcToLocal(json['created_at']),
+      updatedAt: TimezoneUtils.parseUtcToLocal(json['updated_at']),
     );
   }
 

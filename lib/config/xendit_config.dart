@@ -14,10 +14,10 @@ class XenditConfig {
   // Get current API key based on environment
   static String get apiKey => isProduction ? productionApiKey : developmentApiKey;
   
-  // Callback URLs (ganti dengan URL aplikasi Anda)
-  static const String callbackUrl = 'https://your-app.com/xendit-callback';
-  static const String successRedirectUrl = 'https://your-app.com/payment-success';
-  static const String failureRedirectUrl = 'https://your-app.com/payment-failed';
+  // Callback URLs - Backend server handles Xendit webhooks
+  static const String callbackUrl = 'http://103.174.114.140/api/xendit/callback';
+  static const String successRedirectUrl = 'http://103.174.114.140/payment-success';
+  static const String failureRedirectUrl = 'http://103.174.114.140/payment-failed';
   
   // Payment method configurations
   static const Map<String, Map<String, dynamic>> paymentMethods = {

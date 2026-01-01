@@ -4,6 +4,10 @@ import 'edit_profile_page.dart';
 import 'notifications_page.dart';
 import 'about_page.dart';
 import 'login_page.dart';
+import 'chat_history_page.dart';
+import 'change_password_page.dart';
+import '../services/auth_service.dart';
+import '../services/booking_service.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -13,44 +17,141 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  // User data (dummy) - data yang lebih lengkap
-  final String _userName = "Okta The Super";
-  final String _userEmail = "okta@test.com";
-  final String _userPhone = "0876532123423";
-  final String _memberSince = "Oktober 2021";
-  final int _totalBookings = 12;
-  final int _loyaltyPoints = 150;
-  final String _memberLevel = "Gold Member";
-  final int _totalSpent = 2450000;
-  final int _favoriteVenues = 5;
+  // User data dari AuthService
+  String get _userName => AuthService.currentUser?.name ?? "User";
+  String get _userEmail => AuthService.currentUser?.email ?? "-";
+  String get _userPhone => AuthService.currentUser?.phone ?? "-";
+  String get _memberSince {
+    final createdAt = AuthService.currentUser?.createdAt;
+    if (createdAt != null) {
+      return _formatMonth(createdAt);
+    }
+    return "-";
+  }
+
+  // Helper format bulan Indonesia
+  String _formatMonth(DateTime date) {
+    const months = [
+      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+    return '${months[date.month - 1]} ${date.year}';
+  }
+
+  // Data statistik dari database
+  int _totalBookings = 0;
+  int _completedBookings = 0;
+  int _loyaltyPoints = 0;
+  String _memberLevel = "Member";
+  int _totalSpent = 0;
+  bool _isLoadingStats = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserStats();
+  }
+
+  Future<void> _loadUserStats() async {
+    setState(() => _isLoadingStats = true);
+
+    try {
+      // Load all bookings to calculate stats
+      final result = await BookingService.getMyBookings(page: 1);
+
+      if (result.success && result.bookings != null) {
+        int total = 0;
+        int completed = 0;
+        double spent = 0;
+
+        for (var booking in result.bookings!) {
+          total++;
+          if (booking.status == 'completed') {
+            completed++;
+            spent += booking.totalPrice;
+          } else if (booking.status == 'confirmed' || booking.status == 'checked_in') {
+            spent += booking.totalPrice;
+          }
+        }
+
+        // Get total from pagination if available
+        if (result.pagination != null && result.pagination!['total'] != null) {
+          total = result.pagination!['total'];
+        }
+
+        // Calculate member level based on total spent
+        String level = "Member";
+        int points = (spent / 10000).floor(); // 1 point per 10k spent
+        if (spent >= 5000000) {
+          level = "Platinum";
+        } else if (spent >= 2000000) {
+          level = "Gold";
+        } else if (spent >= 500000) {
+          level = "Silver";
+        }
+
+        if (mounted) {
+          setState(() {
+            _totalBookings = total;
+            _completedBookings = completed;
+            _totalSpent = spent.toInt();
+            _loyaltyPoints = points;
+            _memberLevel = level;
+            _isLoadingStats = false;
+          });
+        }
+      } else {
+        if (mounted) {
+          setState(() => _isLoadingStats = false);
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoadingStats = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      body: SafeArea(
+      body: RefreshIndicator(
+        onRefresh: _loadUserStats,
+        color: const Color(0xFF0047FF),
         child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
           child: Column(
             children: [
               // Header Profile
               _buildProfileHeader(),
-              
-              const SizedBox(height: 20),
-              
+
+              const SizedBox(height: 40), // Extra space for translated card
+
               // Stats Cards
               _buildStatsSection(),
-              
-              const SizedBox(height: 20),
-              
+
+              const SizedBox(height: 16),
+
+              // Divider
+              _buildSectionDivider(),
+
+              const SizedBox(height: 16),
+
               // Menu Options
               _buildMenuSection(),
-              
-              const SizedBox(height: 20),
+
+              const SizedBox(height: 16),
+
+              // Divider
+              _buildSectionDivider(),
+
+              const SizedBox(height: 16),
 
               // Logout Button
               _buildLogoutSection(),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 32),
             ],
           ),
         ),
@@ -58,102 +159,247 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  // Profile Header
+  // Profile Header with new design
   Widget _buildProfileHeader() {
-    return Container(
-      width: double.infinity,
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Color(0xFF0047FF), Color(0xFF002299)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+    return Stack(
+      children: [
+        // Background gradient
+        Container(
+          width: double.infinity,
+          height: 280,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF0047FF), Color(0xFF0033CC)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
         ),
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(30)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(30),
-        child: Column(
-          children: [
-            // Profile Picture
-            Stack(
-              children: [
-                Container(
-                  width: 100,
-                  height: 100,
+        // Content
+        SafeArea(
+          child: Column(
+            children: [
+              // Title
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                child: Row(
+                  children: [
+                    Text(
+                      "Profil",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Profile Card
+              Transform.translate(
+                offset: const Offset(0, 20),
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 4),
                     color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.1),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
                   ),
-                  child: const Icon(
-                    Icons.person,
-                    size: 50,
-                    color: Color(0xFF0047FF),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          // Profile Picture
+                          Container(
+                            width: 72,
+                            height: 72,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: LinearGradient(
+                                colors: [
+                                  const Color(0xFF0047FF).withValues(alpha: 0.2),
+                                  const Color(0xFF0047FF).withValues(alpha: 0.1),
+                                ],
+                              ),
+                              border: Border.all(
+                                color: const Color(0xFF0047FF),
+                                width: 2,
+                              ),
+                            ),
+                            child: const Icon(
+                              Icons.person,
+                              size: 36,
+                              color: Color(0xFF0047FF),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          // User Info
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _userName,
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  _userEmail,
+                                  style: TextStyle(
+                                    color: Colors.grey[600],
+                                    fontSize: 13,
+                                  ),
+                                ),
+                                if (_userPhone != "-") ...[
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    _userPhone,
+                                    style: TextStyle(
+                                      color: Colors.grey[500],
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      // Member info row
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[50],
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            // Member Since
+                            Row(
+                              children: [
+                                Icon(Icons.calendar_today_outlined, size: 16, color: Colors.grey[600]),
+                                const SizedBox(width: 8),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Member sejak",
+                                      style: TextStyle(fontSize: 10, color: Colors.grey[500]),
+                                    ),
+                                    Text(
+                                      _memberSince,
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            // Divider
+                            Container(
+                              width: 1,
+                              height: 30,
+                              color: Colors.grey[300],
+                            ),
+                            // Member Level
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(6),
+                                  decoration: BoxDecoration(
+                                    color: _getMemberLevelColor().withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Icon(
+                                    Icons.workspace_premium,
+                                    size: 16,
+                                    color: _getMemberLevelColor(),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Level",
+                                      style: TextStyle(fontSize: 10, color: Colors.grey[500]),
+                                    ),
+                                    Text(
+                                      _memberLevel,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        color: _getMemberLevelColor(),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: Container(
-                    width: 30,
-                    height: 30,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFE0FF00),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.camera_alt,
-                      size: 16,
-                      color: Color(0xFF0047FF),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            
-            const SizedBox(height: 20),
-            
-            // User Info
-            Text(
-              _userName,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
               ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              _userEmail,
-              style: const TextStyle(
-                color: Colors.white70,
-                fontSize: 14,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                "$_memberLevel • Member sejak $_memberSince",
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
+      ],
     );
   }
 
-  // Stats Section dengan 3 kartu
+  Color _getMemberLevelColor() {
+    switch (_memberLevel) {
+      case "Platinum":
+        return Colors.purple;
+      case "Gold":
+        return Colors.amber.shade700;
+      case "Silver":
+        return Colors.blueGrey;
+      default:
+        return const Color(0xFF0047FF);
+    }
+  }
+
+  // Stats Section dengan 4 kartu
   Widget _buildStatsSection() {
+    if (_isLoadingStats) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Container(
+          padding: const EdgeInsets.all(32),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: const Center(
+            child: CircularProgressIndicator(
+              color: Color(0xFF0047FF),
+              strokeWidth: 2,
+            ),
+          ),
+        ),
+      );
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
@@ -162,19 +408,19 @@ class _ProfilePageState extends State<ProfilePage> {
             children: [
               Expanded(
                 child: _buildStatCard(
-                  icon: Icons.confirmation_number,
+                  icon: Icons.confirmation_number_outlined,
                   title: "Total Booking",
                   value: "$_totalBookings",
-                  color: Colors.blue,
+                  color: const Color(0xFF0047FF),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: _buildStatCard(
-                  icon: Icons.stars,
-                  title: "Loyalty Points",
-                  value: "$_loyaltyPoints",
-                  color: Colors.orange,
+                  icon: Icons.check_circle_outline,
+                  title: "Selesai",
+                  value: "$_completedBookings",
+                  color: Colors.green,
                 ),
               ),
             ],
@@ -184,20 +430,20 @@ class _ProfilePageState extends State<ProfilePage> {
             children: [
               Expanded(
                 child: _buildStatCard(
-                  icon: Icons.account_balance_wallet,
+                  icon: Icons.account_balance_wallet_outlined,
                   title: "Total Spent",
                   value: _formatCurrency(_totalSpent),
-                  color: Colors.green,
+                  color: Colors.teal,
                   isSmallText: true,
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: _buildStatCard(
-                  icon: Icons.favorite,
-                  title: "Favorite Venues",
-                  value: "$_favoriteVenues",
-                  color: Colors.red,
+                  icon: Icons.stars_outlined,
+                  title: "Poin",
+                  value: "$_loyaltyPoints",
+                  color: Colors.orange,
                 ),
               ),
             ],
@@ -221,7 +467,7 @@ class _ProfilePageState extends State<ProfilePage> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -232,25 +478,25 @@ class _ProfilePageState extends State<ProfilePage> {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              shape: BoxShape.circle,
+              color: color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: color, size: 20),
+            child: Icon(icon, color: color, size: 22),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           Text(
             value,
             style: TextStyle(
-              fontSize: isSmallText ? 16 : 20,
+              fontSize: isSmallText ? 15 : 20,
               fontWeight: FontWeight.bold,
               color: Colors.black87,
             ),
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: 4),
           Text(
             title,
             style: TextStyle(
-              fontSize: 10,
+              fontSize: 11,
               color: Colors.grey[600],
             ),
             textAlign: TextAlign.center,
@@ -264,83 +510,167 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget _buildMenuSection() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Akun Section
+          _buildSectionTitle("Akun"),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
-          ],
-        ),
-        child: Column(
-          children: [
-            _buildMenuItem(
-              icon: Icons.person_outline,
-              title: "Edit Profile",
-              subtitle: "Update informasi personal",
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const EditProfilePage()),
-                );
-              },
+            child: Column(
+              children: [
+                _buildMenuItem(
+                  icon: Icons.person_outline,
+                  title: "Edit Profile",
+                  subtitle: "Update informasi personal",
+                  onTap: () async {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const EditProfilePage()),
+                    );
+                    if (mounted) {
+                      setState(() {});
+                      _loadUserStats();
+                    }
+                  },
+                ),
+                _buildDivider(),
+                _buildMenuItem(
+                  icon: Icons.lock_outline,
+                  title: "Ubah Password",
+                  subtitle: "Ganti password akun",
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const ChangePasswordPage()),
+                    );
+                  },
+                ),
+                _buildDivider(),
+                _buildMenuItem(
+                  icon: Icons.stars_outlined,
+                  title: "Loyalty Program",
+                  subtitle: "$_loyaltyPoints poin tersedia",
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const LoyaltyPage()),
+                    );
+                  },
+                ),
+              ],
             ),
-            _buildDivider(),
-            _buildMenuItem(
-              icon: Icons.stars_outlined,
-              title: "Loyalty Program",
-              subtitle: "Lihat poin dan reward",
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const LoyaltyPage()),
-                );
-              },
+          ),
+
+          const SizedBox(height: 20),
+
+          // Aktivitas Section
+          _buildSectionTitle("Aktivitas"),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
-            _buildDivider(),
-            // _buildMenuItem(
-            //   icon: Icons.payment_outlined,
-            //   title: "Payment Methods",
-            //   subtitle: "Kelola metode pembayaran",
-            //   onTap: () => _showComingSoonDialog("Payment Methods"),
-            // ),
-            // _buildDivider(),
-            _buildMenuItem(
-              icon: Icons.delete_outline,
-              title: "Hapus Akun",
-              subtitle: "Hapus akun secara permanen",
-              onTap: () => _showDeleteAccountDialog(),
-              isDestructive: true,
+            child: Column(
+              children: [
+                _buildMenuItem(
+                  icon: Icons.chat_outlined,
+                  title: "Riwayat Pesan",
+                  subtitle: "Lihat histori chat dengan venue",
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const ChatHistoryPage()),
+                    );
+                  },
+                ),
+                _buildDivider(),
+                _buildMenuItem(
+                  icon: Icons.notifications_outlined,
+                  title: "Notifikasi",
+                  subtitle: "Pengaturan notifikasi",
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const NotificationsPage()),
+                    );
+                  },
+                ),
+              ],
             ),
-            _buildDivider(),
-            _buildMenuItem(
-              icon: Icons.notifications_outlined,
-              title: "Notifications",
-              subtitle: "Pengaturan notifikasi",
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const NotificationsPage()),
-                );
-              },
+          ),
+
+          const SizedBox(height: 20),
+
+          // Lainnya Section
+          _buildSectionTitle("Lainnya"),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
-            _buildDivider(),
-            _buildMenuItem(
-              icon: Icons.info_outline,
-              title: "About Sporta",
-              subtitle: "Versi 1.0.0",
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const AboutPage()),
-                );
-              },
+            child: Column(
+              children: [
+                _buildMenuItem(
+                  icon: Icons.info_outline,
+                  title: "Tentang Sporta",
+                  subtitle: "Versi 1.0.0",
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const AboutPage()),
+                    );
+                  },
+                ),
+                _buildDivider(),
+                _buildMenuItem(
+                  icon: Icons.delete_outline,
+                  title: "Hapus Akun",
+                  subtitle: "Hapus akun secara permanen",
+                  onTap: () => _showDeleteAccountDialog(),
+                  isDestructive: true,
+                ),
+              ],
             ),
-          ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4, bottom: 12),
+      child: Text(
+        title,
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          color: Colors.grey[600],
         ),
       ),
     );
@@ -358,10 +688,10 @@ class _ProfilePageState extends State<ProfilePage> {
     return ListTile(
       onTap: onTap,
       leading: Container(
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: itemColor.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(8),
+          color: itemColor.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(10),
         ),
         child: Icon(icon, color: itemColor, size: 20),
       ),
@@ -369,23 +699,23 @@ class _ProfilePageState extends State<ProfilePage> {
         title,
         style: TextStyle(
           fontWeight: FontWeight.w600,
-          fontSize: 16,
+          fontSize: 15,
           color: isDestructive ? Colors.red : Colors.black87,
         ),
       ),
       subtitle: Text(
         subtitle,
         style: TextStyle(
-          color: Colors.grey[600],
+          color: Colors.grey[500],
           fontSize: 12,
         ),
       ),
-      trailing: const Icon(
+      trailing: Icon(
         Icons.arrow_forward_ios,
         size: 16,
-        color: Colors.grey,
+        color: Colors.grey[400],
       ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
     );
   }
 
@@ -398,66 +728,40 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  Widget _buildSectionDivider() {
+    return Container(
+      width: double.infinity,
+      height: 8,
+      color: Colors.grey[100],
+    );
+  }
+
   // Logout Section
   Widget _buildLogoutSection() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Container(
+      child: SizedBox(
         width: double.infinity,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: ListTile(
-          onTap: () => _showLogoutDialog(),
-          leading: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.red.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Icon(Icons.logout, color: Colors.red, size: 20),
-          ),
-          title: const Text(
-            "Logout",
+        child: ElevatedButton.icon(
+          onPressed: () => _showLogoutDialog(),
+          icon: const Icon(Icons.logout, color: Colors.white, size: 20),
+          label: const Text(
+            "Keluar dari Akun",
             style: TextStyle(
               fontWeight: FontWeight.w600,
-              fontSize: 16,
-              color: Colors.red,
+              fontSize: 15,
+              color: Colors.white,
             ),
           ),
-          subtitle: Text(
-            "Keluar dari akun",
-            style: TextStyle(
-              color: Colors.grey[600],
-              fontSize: 12,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.red,
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
             ),
+            elevation: 0,
           ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         ),
-      ),
-    );
-  }
-
-  void _showComingSoonDialog(String feature) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Coming Soon"),
-        content: Text("$feature feature will be available in the next update."),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("OK"),
-          ),
-        ],
       ),
     );
   }
@@ -589,7 +893,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  void _performLogout() {
+  void _performLogout() async {
     // Tampilkan loading dialog
     showDialog(
       context: context,
@@ -617,38 +921,38 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
     );
 
-    // Simulasi proses logout
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) {
-        Navigator.pop(context); // Tutup loading dialog
-        
-        // Tampilkan success message
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Row(
-              children: [
-                Icon(Icons.check_circle, color: Colors.white),
-                SizedBox(width: 12),
-                Text("Berhasil keluar dari akun"),
-              ],
-            ),
-            backgroundColor: Colors.green,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            margin: const EdgeInsets.all(16),
+    // Panggil API logout
+    await AuthService.logout();
+
+    if (mounted) {
+      Navigator.pop(context); // Tutup loading dialog
+
+      // Tampilkan success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Row(
+            children: [
+              Icon(Icons.check_circle, color: Colors.white),
+              SizedBox(width: 12),
+              Text("Berhasil keluar dari akun"),
+            ],
           ),
-        );
-        
-        // Navigate ke login page
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginPage()),
-          (route) => false,
-        );
-      }
-    });
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          margin: const EdgeInsets.all(16),
+        ),
+      );
+
+      // Navigate ke login page
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginPage()),
+        (route) => false,
+      );
+    }
   }
 
   void _showDeleteAccountDialog() {
