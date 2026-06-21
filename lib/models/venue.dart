@@ -51,18 +51,18 @@ class Venue {
 
   factory Venue.fromJson(Map<String, dynamic> json) {
     return Venue(
-      id: json['id'],
-      partnerId: json['partner_id'],
-      name: json['name'],
+      id: json['id'] ?? 0,
+      partnerId: json['partner_id'] ?? json['partner']?['id'] ?? 0,
+      name: json['name'] ?? '',
       phone: json['phone'],
-      address: json['address'],
-      city: json['city'],
+      address: json['address'] ?? '',
+      city: json['city'] ?? '',
       description: json['description'],
       facilities: json['facilities'] != null
           ? List<String>.from(json['facilities'])
           : [],
-      openHour: json['open_hour'],
-      closeHour: json['close_hour'],
+      openHour: json['open_hour'] ?? '08:00',
+      closeHour: json['close_hour'] ?? '22:00',
       latitude: json['latitude'] != null
           ? double.tryParse(json['latitude'].toString())
           : null,
@@ -72,8 +72,12 @@ class Venue {
       coverImage: json['cover_image'],
       coverImageUrl: json['cover_image_url'],
       status: json['status'] ?? 'pending',
-      createdAt: TimezoneUtils.parseUtcToLocal(json['created_at']),
-      updatedAt: TimezoneUtils.parseUtcToLocal(json['updated_at']),
+      createdAt: json['created_at'] != null
+          ? TimezoneUtils.parseUtcToLocal(json['created_at'])
+          : DateTime.now(),
+      updatedAt: json['updated_at'] != null
+          ? TimezoneUtils.parseUtcToLocal(json['updated_at'])
+          : DateTime.now(),
       partner: json['partner'] != null ? User.fromJson(json['partner']) : null,
       fields: json['fields'] != null
           ? (json['fields'] as List).map((f) => Field.fromJson(f)).toList()

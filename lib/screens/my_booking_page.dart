@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:intl/intl.dart';
 import '../constants/colors.dart';
@@ -86,16 +87,17 @@ class _MyBookingPageState extends State<MyBookingPage> with SingleTickerProvider
     // Check if user is not logged in
     if (AuthService.token == null) {
       return Scaffold(
-        backgroundColor: Colors.grey[50],
+        backgroundColor: AppColors.bg,
         appBar: AppBar(
           title: const Text(
             "Pesanan Saya",
-            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)
+            style: TextStyle(color: AppColors.onDark, fontWeight: FontWeight.bold)
           ),
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.bg,
+          systemOverlayStyle: SystemUiOverlayStyle.light,
           elevation: 0,
           leading: widget.showBackButton ? IconButton(
-            icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+            icon: const Icon(Icons.arrow_back_ios, color: AppColors.onDark),
             onPressed: () {
               if (Navigator.canPop(context)) {
                 Navigator.pop(context);
@@ -108,11 +110,11 @@ class _MyBookingPageState extends State<MyBookingPage> with SingleTickerProvider
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.login, size: 80, color: Colors.grey[300]),
+              const Icon(Icons.login, size: 80, color: AppColors.onDarkMuted),
               const SizedBox(height: 16),
-              Text(
+              const Text(
                 "Silakan login untuk melihat pesanan",
-                style: TextStyle(color: Colors.grey[500], fontSize: 16),
+                style: TextStyle(color: AppColors.onDarkMuted, fontSize: 16),
               ),
               const SizedBox(height: 24),
               ElevatedButton(
@@ -123,15 +125,15 @@ class _MyBookingPageState extends State<MyBookingPage> with SingleTickerProvider
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryBlue,
+                  backgroundColor: AppColors.brandYellow,
                   padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(999),
                   ),
                 ),
                 child: const Text(
                   "Login",
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.w700),
                 ),
               ),
             ],
@@ -141,7 +143,7 @@ class _MyBookingPageState extends State<MyBookingPage> with SingleTickerProvider
     }
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: AppColors.bg,
       body: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
@@ -149,9 +151,10 @@ class _MyBookingPageState extends State<MyBookingPage> with SingleTickerProvider
               expandedHeight: 140,
               floating: false,
               pinned: true,
-              backgroundColor: const Color(0xFF0047FF),
+              backgroundColor: AppColors.bg,
+              systemOverlayStyle: SystemUiOverlayStyle.light,
               leading: widget.showBackButton ? IconButton(
-                icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                icon: const Icon(Icons.arrow_back_ios, color: AppColors.onDark),
                 onPressed: () {
                   if (Navigator.canPop(context)) {
                     Navigator.pop(context);
@@ -162,11 +165,7 @@ class _MyBookingPageState extends State<MyBookingPage> with SingleTickerProvider
               flexibleSpace: FlexibleSpaceBar(
                 background: Container(
                   decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [Color(0xFF0047FF), Color(0xFF002299)],
-                    ),
+                    color: AppColors.bg,
                   ),
                   child: SafeArea(
                     child: Padding(
@@ -177,7 +176,7 @@ class _MyBookingPageState extends State<MyBookingPage> with SingleTickerProvider
                           const Text(
                             "Pesanan Saya",
                             style: TextStyle(
-                              color: Colors.white,
+                              color: AppColors.onDark,
                               fontSize: 28,
                               fontWeight: FontWeight.bold,
                             ),
@@ -185,8 +184,8 @@ class _MyBookingPageState extends State<MyBookingPage> with SingleTickerProvider
                           const SizedBox(height: 4),
                           Text(
                             "${_allBookings.length} total pesanan",
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.8),
+                            style: const TextStyle(
+                              color: AppColors.onDarkMuted,
                               fontSize: 14,
                             ),
                           ),
@@ -200,14 +199,14 @@ class _MyBookingPageState extends State<MyBookingPage> with SingleTickerProvider
                 preferredSize: const Size.fromHeight(50),
                 child: Container(
                   decoration: const BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.bg,
                     borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                   ),
                   child: TabBar(
                     controller: _tabController,
-                    labelColor: const Color(0xFF0047FF),
-                    unselectedLabelColor: Colors.grey,
-                    indicatorColor: const Color(0xFF0047FF),
+                    labelColor: AppColors.brandYellow,
+                    unselectedLabelColor: AppColors.onDarkMuted,
+                    indicatorColor: AppColors.brandYellow,
                     indicatorWeight: 3,
                     indicatorSize: TabBarIndicatorSize.label,
                     labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
@@ -227,9 +226,9 @@ class _MyBookingPageState extends State<MyBookingPage> with SingleTickerProvider
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircularProgressIndicator(color: AppColors.primaryBlue),
+                  CircularProgressIndicator(color: AppColors.brandYellow),
                   SizedBox(height: 16),
-                  Text('Memuat data booking...'),
+                  Text('Memuat data booking...', style: TextStyle(color: AppColors.onDarkMuted)),
                 ],
               ),
             )
@@ -238,22 +237,22 @@ class _MyBookingPageState extends State<MyBookingPage> with SingleTickerProvider
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.error_outline, size: 60, color: Colors.grey[400]),
+                      const Icon(Icons.error_outline, size: 60, color: AppColors.onDarkMuted),
                       const SizedBox(height: 16),
                       Text(
                         _errorMessage!,
-                        style: TextStyle(color: Colors.grey[600]),
+                        style: const TextStyle(color: AppColors.onDarkMuted),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 16),
                       ElevatedButton(
                         onPressed: _loadBookings,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryBlue,
+                          backgroundColor: AppColors.brandYellow,
                         ),
                         child: const Text(
                           'Coba Lagi',
-                          style: TextStyle(color: Colors.white),
+                          style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.w700),
                         ),
                       ),
                     ],
@@ -261,7 +260,7 @@ class _MyBookingPageState extends State<MyBookingPage> with SingleTickerProvider
                 )
               : RefreshIndicator(
                   onRefresh: _loadBookings,
-                  color: AppColors.primaryBlue,
+                  color: AppColors.brandYellow,
                   child: TabBarView(
                     controller: _tabController,
                     children: [
@@ -302,11 +301,11 @@ class _MyBookingPageState extends State<MyBookingPage> with SingleTickerProvider
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.assignment_outlined, size: 80, color: Colors.grey[300]),
+            const Icon(Icons.assignment_outlined, size: 80, color: AppColors.onDarkMuted),
             const SizedBox(height: 16),
-            Text(
+            const Text(
               "Belum ada booking di sini",
-              style: TextStyle(color: Colors.grey[500])
+              style: TextStyle(color: AppColors.onDarkMuted)
             ),
           ],
         ),
@@ -318,7 +317,7 @@ class _MyBookingPageState extends State<MyBookingPage> with SingleTickerProvider
       itemCount: filteredData.length,
       separatorBuilder: (context, index) => Padding(
         padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Divider(color: Colors.grey.shade200, thickness: 1),
+        child: Divider(color: AppColors.surfaceBorder, thickness: 1),
       ),
       itemBuilder: (context, index) {
         return BookingCard(
@@ -516,16 +515,16 @@ class BookingCard extends StatelessWidget {
         themeColor = Colors.orange;
         statusText = "Menunggu Pembayaran";
         mainBtnText = "BAYAR SEKARANG";
-        btnColor = AppColors.primaryBlue;
+        btnColor = AppColors.brandYellow;
         statusIcon = Icons.timer_outlined;
         onMainAction = () => _goToPaymentDirect(context);
         showSecondaryBtn = true;
         break;
       case 'confirmed':
-        themeColor = AppColors.primaryBlue;
+        themeColor = AppColors.brandYellow;
         statusText = "Booking Confirmed";
         mainBtnText = "LIHAT E-TICKET";
-        btnColor = AppColors.primaryBlue;
+        btnColor = AppColors.brandYellow;
         statusIcon = Icons.verified;
         onMainAction = () => _goToTicket(context);
         break;
@@ -533,7 +532,7 @@ class BookingCard extends StatelessWidget {
         themeColor = Colors.red;
         statusText = "Dibatalkan";
         mainBtnText = "BOOKING LAGI";
-        btnColor = AppColors.primaryBlue;
+        btnColor = AppColors.brandYellow;
         statusIcon = Icons.cancel_outlined;
         onMainAction = () => _rebook(context);
         break;
@@ -541,23 +540,23 @@ class BookingCard extends StatelessWidget {
         themeColor = Colors.green;
         statusText = "Selesai";
         mainBtnText = "BERI RATING";
-        btnColor = AppColors.primaryBlue;
+        btnColor = AppColors.brandYellow;
         statusIcon = Icons.thumb_up_alt_outlined;
         onMainAction = () => _showRatingDialog(context);
         break;
       case 'expired':
-        themeColor = Colors.grey;
+        themeColor = AppColors.onDarkMuted;
         statusText = "Kadaluarsa";
         mainBtnText = "BOOKING LAGI";
-        btnColor = AppColors.primaryBlue;
+        btnColor = AppColors.brandYellow;
         statusIcon = Icons.timer_off_outlined;
         onMainAction = () => _rebook(context);
         break;
       default:
-        themeColor = Colors.grey;
+        themeColor = AppColors.onDarkMuted;
         statusText = "Unknown";
         mainBtnText = "DETAIL";
-        btnColor = AppColors.primaryBlue;
+        btnColor = AppColors.brandYellow;
         statusIcon = Icons.help_outline;
         onMainAction = () {};
     }
@@ -565,17 +564,17 @@ class BookingCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.2),
             spreadRadius: 1,
             blurRadius: 10,
             offset: const Offset(0, 4)
           )
         ],
-        border: Border.all(color: Colors.grey.shade100),
+        border: Border.all(color: AppColors.surfaceBorder),
       ),
       child: Column(
         children: [
@@ -583,7 +582,7 @@ class BookingCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: themeColor.withOpacity(0.1),
+              color: themeColor.withValues(alpha: 0.15),
               borderRadius: const BorderRadius.vertical(top: Radius.circular(20))
             ),
             child: Row(
@@ -607,7 +606,7 @@ class BookingCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.bg,
                       borderRadius: BorderRadius.circular(10)
                     ),
                     child: Row(
@@ -639,10 +638,10 @@ class BookingCard extends StatelessWidget {
                   height: 64,
                   width: 64,
                   decoration: BoxDecoration(
-                    color: Colors.grey[100],
+                    color: AppColors.bg,
                     borderRadius: BorderRadius.circular(16)
                   ),
-                  child: Icon(Icons.sports_soccer, color: Colors.grey[400]),
+                  child: const Icon(Icons.sports_soccer, color: AppColors.onDarkMuted),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -654,7 +653,7 @@ class BookingCard extends StatelessWidget {
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
-                          color: Colors.black87
+                          color: AppColors.onDark
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis
@@ -662,7 +661,7 @@ class BookingCard extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         booking.field?.name ?? "Unknown Field",
-                        style: TextStyle(color: Colors.grey[600], fontSize: 13)
+                        style: const TextStyle(color: AppColors.onDarkMuted, fontSize: 13)
                       ),
                       const SizedBox(height: 8),
                       Wrap(
@@ -672,12 +671,12 @@ class BookingCard extends StatelessWidget {
                           Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.calendar_today_outlined, size: 12, color: Colors.grey[500]),
+                              const Icon(Icons.calendar_today_outlined, size: 12, color: AppColors.onDarkMuted),
                               const SizedBox(width: 4),
                               Text(
                                 _formatDate(booking.bookingDate),
-                                style: TextStyle(
-                                  color: Colors.grey[600],
+                                style: const TextStyle(
+                                  color: AppColors.onDarkMuted,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500
                                 )
@@ -687,12 +686,12 @@ class BookingCard extends StatelessWidget {
                           Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.schedule, size: 12, color: Colors.grey[500]),
+                              const Icon(Icons.schedule, size: 12, color: AppColors.onDarkMuted),
                               const SizedBox(width: 4),
                               Text(
                                 _formatTimeRange(booking.startTime, booking.endTime),
-                                style: TextStyle(
-                                  color: Colors.grey[600],
+                                style: const TextStyle(
+                                  color: AppColors.onDarkMuted,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500
                                 )
@@ -708,7 +707,7 @@ class BookingCard extends StatelessWidget {
             ),
           ),
 
-          Divider(height: 1, color: Colors.grey.shade100, thickness: 1),
+          Divider(height: 1, color: AppColors.surfaceBorder, thickness: 1),
 
           // FOOTER
           Padding(
@@ -723,7 +722,7 @@ class BookingCard extends StatelessWidget {
                       children: [
                         const Text(
                           "Total Harga",
-                          style: TextStyle(fontSize: 11, color: Colors.grey)
+                          style: TextStyle(fontSize: 11, color: AppColors.onDarkMuted)
                         ),
                         const SizedBox(height: 2),
                         Text(
@@ -731,7 +730,7 @@ class BookingCard extends StatelessWidget {
                           style: const TextStyle(
                             fontWeight: FontWeight.w900,
                             fontSize: 18,
-                            color: Colors.black
+                            color: AppColors.onDark
                           )
                         ),
                       ],
@@ -740,9 +739,9 @@ class BookingCard extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFE0F7FA),
+                          color: Colors.cyan.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: Colors.cyan.withOpacity(0.3)),
+                          border: Border.all(color: Colors.cyan.withValues(alpha: 0.4)),
                         ),
                         child: const Row(
                           children: [
@@ -770,8 +769,8 @@ class BookingCard extends StatelessWidget {
                         child: OutlinedButton(
                           onPressed: () => _goToPaymentSelector(context),
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.grey[700],
-                            side: BorderSide(color: Colors.grey.shade300),
+                            foregroundColor: AppColors.onDark,
+                            side: const BorderSide(color: AppColors.surfaceBorder),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12)
                             ),
@@ -779,7 +778,7 @@ class BookingCard extends StatelessWidget {
                           ),
                           child: const Text(
                             "Ganti",
-                            style: TextStyle(fontWeight: FontWeight.bold)
+                            style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.onDark)
                           ),
                         ),
                       ),
@@ -792,7 +791,7 @@ class BookingCard extends StatelessWidget {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: btnColor,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)
+                            borderRadius: BorderRadius.circular(999)
                           ),
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           elevation: 0,
@@ -800,8 +799,8 @@ class BookingCard extends StatelessWidget {
                         child: Text(
                           mainBtnText,
                           style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold
+                            color: AppColors.ink,
+                            fontWeight: FontWeight.w700
                           )
                         ),
                       ),
@@ -837,7 +836,7 @@ class PaymentSelectorSheet extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.only(top: 10),
       decoration: const BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
@@ -849,7 +848,7 @@ class PaymentSelectorSheet extends StatelessWidget {
             height: 4,
             margin: const EdgeInsets.only(bottom: 20),
             decoration: BoxDecoration(
-              color: Colors.grey[300],
+              color: AppColors.surfaceBorder,
               borderRadius: BorderRadius.circular(10)
             ),
           ),
@@ -857,26 +856,26 @@ class PaymentSelectorSheet extends StatelessWidget {
             padding: EdgeInsets.symmetric(horizontal: 24),
             child: Text(
               "Pilih Pembayaran",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.onDark)
             ),
           ),
-          const Divider(height: 1),
+          const Divider(height: 1, color: AppColors.surfaceBorder),
 
           // Ringkasan Tagihan
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(20),
-            color: const Color(0xFFF8F9FA),
+            color: AppColors.bg,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text("Total Tagihan", style: TextStyle(color: Colors.grey)),
+                const Text("Total Tagihan", style: TextStyle(color: AppColors.onDarkMuted)),
                 Text(
                   formatCurrency(totalPrice),
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w900,
-                    color: Colors.black
+                    color: AppColors.onDark
                   )
                 ),
               ],
@@ -946,7 +945,7 @@ class PaymentSelectorSheet extends StatelessWidget {
         style: const TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.bold,
-          color: Colors.grey
+          color: AppColors.onDarkMuted
         )
       ),
     );
@@ -978,15 +977,15 @@ class PaymentSelectorSheet extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isRecommended ? const Color(0xFF0047FF) : Colors.grey.shade200
+            color: isRecommended ? AppColors.brandYellow : AppColors.surfaceBorder
           ),
           boxShadow: [
             if(isRecommended)
               BoxShadow(
-                color: const Color(0xFF0047FF).withOpacity(0.1),
+                color: AppColors.brandYellow.withValues(alpha: 0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 4)
               )
@@ -998,7 +997,7 @@ class PaymentSelectorSheet extends StatelessWidget {
               height: 50,
               width: 50,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(12)
               ),
               child: Icon(icon, color: color, size: 28),
@@ -1015,7 +1014,8 @@ class PaymentSelectorSheet extends StatelessWidget {
                           title,
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 14
+                            fontSize: 14,
+                            color: AppColors.onDark
                           ),
                           overflow: TextOverflow.ellipsis
                         )
@@ -1025,14 +1025,14 @@ class PaymentSelectorSheet extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF0047FF),
+                            color: AppColors.brandYellow,
                             borderRadius: BorderRadius.circular(4)
                           ),
                           child: const Text(
                             "PROMO",
                             style: TextStyle(
                               fontSize: 8,
-                              color: Colors.white,
+                              color: AppColors.ink,
                               fontWeight: FontWeight.bold
                             )
                           ),
@@ -1045,13 +1045,13 @@ class PaymentSelectorSheet extends StatelessWidget {
                     fee == 0 ? "Bebas Biaya Admin" : "Biaya Admin: ${formatCurrency(fee)}",
                     style: TextStyle(
                       fontSize: 12,
-                      color: fee == 0 ? Colors.green : Colors.grey[600]
+                      color: fee == 0 ? Colors.green : AppColors.onDarkMuted
                     ),
                   ),
                 ],
               ),
             ),
-            Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey[400]),
+            const Icon(Icons.arrow_forward_ios, size: 16, color: AppColors.onDarkMuted),
           ],
         ),
       ),
@@ -1184,24 +1184,25 @@ class _PaymentWaitingPageState extends State<PaymentWaitingPage> {
     String paymentCode = qrString ?? "8800 1234 5678 9012";
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
         title: const Text(
           "Selesaikan Pembayaran",
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          style: TextStyle(color: AppColors.onDark, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.bg,
+        systemOverlayStyle: SystemUiOverlayStyle.light,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black),
+        iconTheme: const IconThemeData(color: AppColors.onDark),
       ),
       body: _isProcessing
           ? const Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircularProgressIndicator(color: AppColors.primaryBlue),
+                  CircularProgressIndicator(color: AppColors.brandYellow),
                   SizedBox(height: 16),
-                  Text('Memproses...'),
+                  Text('Memproses...', style: TextStyle(color: AppColors.onDarkMuted)),
                 ],
               ),
             )
@@ -1215,16 +1216,16 @@ class _PaymentWaitingPageState extends State<PaymentWaitingPage> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.orange.shade50,
+                      color: Colors.orange.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.orange.shade200),
+                      border: Border.all(color: Colors.orange.withValues(alpha: 0.4)),
                     ),
                     child: Row(
                       children: [
                         Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: Colors.orange.shade100,
+                            color: Colors.orange.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: const Icon(Icons.timer_outlined, color: Colors.orange, size: 24),
@@ -1236,7 +1237,7 @@ class _PaymentWaitingPageState extends State<PaymentWaitingPage> {
                             children: [
                               const Text(
                                 "Selesaikan pembayaran dalam",
-                                style: TextStyle(fontSize: 12, color: Colors.black54),
+                                style: TextStyle(fontSize: 12, color: AppColors.onDarkMuted),
                               ),
                               const SizedBox(height: 4),
                               Text(
@@ -1260,16 +1261,16 @@ class _PaymentWaitingPageState extends State<PaymentWaitingPage> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.surface,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey.shade200),
+                      border: Border.all(color: AppColors.surfaceBorder),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
                           "Detail Booking",
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.onDark),
                         ),
                         const SizedBox(height: 12),
                         _buildDetailRow("Kode Booking", widget.booking.bookingCode),
@@ -1287,16 +1288,16 @@ class _PaymentWaitingPageState extends State<PaymentWaitingPage> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.surface,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey.shade200),
+                      border: Border.all(color: AppColors.surfaceBorder),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
                           "Metode Pembayaran",
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.onDark),
                         ),
                         const SizedBox(height: 12),
                         Row(
@@ -1304,12 +1305,12 @@ class _PaymentWaitingPageState extends State<PaymentWaitingPage> {
                             Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: AppColors.primaryBlue.withOpacity(0.1),
+                                color: AppColors.brandYellow.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Icon(
                                 method.contains("QRIS") ? Icons.qr_code_scanner : Icons.account_balance,
-                                color: AppColors.primaryBlue,
+                                color: AppColors.brandYellow,
                                 size: 20,
                               ),
                             ),
@@ -1317,7 +1318,7 @@ class _PaymentWaitingPageState extends State<PaymentWaitingPage> {
                             Expanded(
                               child: Text(
                                 method,
-                                style: const TextStyle(fontWeight: FontWeight.w600),
+                                style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.onDark),
                               ),
                             ),
                           ],
@@ -1327,14 +1328,14 @@ class _PaymentWaitingPageState extends State<PaymentWaitingPage> {
                           width: double.infinity,
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.grey[100],
+                            color: AppColors.bg,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Column(
                             children: [
                               Text(
                                 method.contains("QRIS") ? "Scan QR Code" : "Nomor Virtual Account",
-                                style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+                                style: const TextStyle(fontSize: 11, color: AppColors.onDarkMuted),
                               ),
                               const SizedBox(height: 6),
                               Row(
@@ -1346,6 +1347,7 @@ class _PaymentWaitingPageState extends State<PaymentWaitingPage> {
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
                                       letterSpacing: 1,
+                                      color: AppColors.onDark,
                                     ),
                                   ),
                                   const SizedBox(width: 8),
@@ -1355,7 +1357,7 @@ class _PaymentWaitingPageState extends State<PaymentWaitingPage> {
                                         const SnackBar(content: Text("Nomor disalin!")),
                                       );
                                     },
-                                    child: Icon(Icons.copy, size: 18, color: AppColors.primaryBlue),
+                                    child: const Icon(Icons.copy, size: 18, color: AppColors.brandYellow),
                                   ),
                                 ],
                               ),
@@ -1372,16 +1374,16 @@ class _PaymentWaitingPageState extends State<PaymentWaitingPage> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.surface,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey.shade200),
+                      border: Border.all(color: AppColors.surfaceBorder),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
                           "Rincian Pembayaran",
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.onDark),
                         ),
                         const SizedBox(height: 12),
                         _buildPriceRow("Subtotal", formatCurrency(subtotal)),
@@ -1389,21 +1391,21 @@ class _PaymentWaitingPageState extends State<PaymentWaitingPage> {
                         _buildPriceRow("Biaya Admin", formatCurrency(adminFee)),
                         const Padding(
                           padding: EdgeInsets.symmetric(vertical: 12),
-                          child: Divider(height: 1),
+                          child: Divider(height: 1, color: AppColors.surfaceBorder),
                         ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             const Text(
                               "Total Pembayaran",
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.onDark),
                             ),
                             Text(
                               formatCurrency(total),
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 18,
-                                color: Colors.black,
+                                color: AppColors.onDark,
                               ),
                             ),
                           ],
@@ -1420,17 +1422,17 @@ class _PaymentWaitingPageState extends State<PaymentWaitingPage> {
                     child: ElevatedButton(
                       onPressed: _simulatePayment,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryBlue,
+                        backgroundColor: AppColors.brandYellow,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(999),
                         ),
                         elevation: 0,
                       ),
                       child: const Text(
                         "Saya Sudah Bayar",
                         style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
+                          color: AppColors.ink,
+                          fontWeight: FontWeight.w700,
                           fontSize: 14,
                         ),
                       ),
@@ -1445,8 +1447,10 @@ class _PaymentWaitingPageState extends State<PaymentWaitingPage> {
                         showDialog(
                           context: context,
                           builder: (context) => Dialog(
+                            backgroundColor: AppColors.surface,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
+                              side: const BorderSide(color: AppColors.surfaceBorder),
                             ),
                             child: Padding(
                               padding: const EdgeInsets.all(24),
@@ -1456,7 +1460,7 @@ class _PaymentWaitingPageState extends State<PaymentWaitingPage> {
                                   Container(
                                     padding: const EdgeInsets.all(16),
                                     decoration: BoxDecoration(
-                                      color: Colors.red.shade50,
+                                      color: Colors.red.withValues(alpha: 0.15),
                                       shape: BoxShape.circle,
                                     ),
                                     child: Icon(
@@ -1471,14 +1475,15 @@ class _PaymentWaitingPageState extends State<PaymentWaitingPage> {
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 20,
+                                      color: AppColors.onDark,
                                     ),
                                   ),
                                   const SizedBox(height: 12),
-                                  Text(
+                                  const Text(
                                     "Apakah kamu yakin ingin membatalkan pesanan ini? Tindakan ini tidak dapat dibatalkan.",
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
-                                      color: Colors.grey[600],
+                                      color: AppColors.onDarkMuted,
                                       fontSize: 14,
                                       height: 1.4,
                                     ),
@@ -1491,15 +1496,15 @@ class _PaymentWaitingPageState extends State<PaymentWaitingPage> {
                                           onPressed: () => Navigator.pop(context),
                                           style: OutlinedButton.styleFrom(
                                             padding: const EdgeInsets.symmetric(vertical: 14),
-                                            side: BorderSide(color: Colors.grey.shade300),
+                                            side: const BorderSide(color: AppColors.surfaceBorder),
                                             shape: RoundedRectangleBorder(
                                               borderRadius: BorderRadius.circular(12),
                                             ),
                                           ),
-                                          child: Text(
+                                          child: const Text(
                                             "Kembali",
                                             style: TextStyle(
-                                              color: Colors.grey[700],
+                                              color: AppColors.onDark,
                                               fontWeight: FontWeight.w600,
                                             ),
                                           ),
@@ -1538,7 +1543,7 @@ class _PaymentWaitingPageState extends State<PaymentWaitingPage> {
                         );
                       },
                       style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: Colors.grey.shade300),
+                        side: const BorderSide(color: AppColors.surfaceBorder),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -1565,11 +1570,11 @@ class _PaymentWaitingPageState extends State<PaymentWaitingPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: TextStyle(color: Colors.grey[600], fontSize: 13)),
+          Text(label, style: const TextStyle(color: AppColors.onDarkMuted, fontSize: 13)),
           Flexible(
             child: Text(
               value,
-              style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
+              style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13, color: AppColors.onDark),
               textAlign: TextAlign.right,
             ),
           ),
@@ -1582,8 +1587,8 @@ class _PaymentWaitingPageState extends State<PaymentWaitingPage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: TextStyle(color: Colors.grey[600], fontSize: 13)),
-        Text(value, style: const TextStyle(fontSize: 13)),
+        Text(label, style: const TextStyle(color: AppColors.onDarkMuted, fontSize: 13)),
+        Text(value, style: const TextStyle(fontSize: 13, color: AppColors.onDark)),
       ],
     );
   }
@@ -1641,7 +1646,7 @@ Tunjukkan e-ticket ini saat datang ke venue.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0047FF),
+      backgroundColor: AppColors.bg,
       body: SafeArea(
         child: Column(
           children: [
@@ -1655,10 +1660,11 @@ Tunjukkan e-ticket ini saat datang ke venue.
                     child: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
+                        color: AppColors.surface,
                         borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: AppColors.surfaceBorder),
                       ),
-                      child: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
+                      child: const Icon(Icons.arrow_back_ios_new, color: AppColors.onDark, size: 20),
                     ),
                   ),
                   const Expanded(
@@ -1666,7 +1672,7 @@ Tunjukkan e-ticket ini saat datang ke venue.
                       "E-Ticket",
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: Colors.white,
+                        color: AppColors.onDark,
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
@@ -1677,10 +1683,11 @@ Tunjukkan e-ticket ini saat datang ke venue.
                     child: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
+                        color: AppColors.surface,
                         borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: AppColors.surfaceBorder),
                       ),
-                      child: const Icon(Icons.share, color: Colors.white, size: 20),
+                      child: const Icon(Icons.share, color: AppColors.onDark, size: 20),
                     ),
                   ),
                 ],
@@ -1692,7 +1699,7 @@ Tunjukkan e-ticket ini saat datang ke venue.
               child: Container(
                 width: double.infinity,
                 decoration: const BoxDecoration(
-                  color: Color(0xFFF5F5F5),
+                  color: AppColors.bg,
                   borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
                 ),
                 child: SingleChildScrollView(
@@ -1703,11 +1710,12 @@ Tunjukkan e-ticket ini saat datang ke venue.
                       Container(
                         width: double.infinity,
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: AppColors.surface,
                           borderRadius: BorderRadius.circular(24),
+                          border: Border.all(color: AppColors.surfaceBorder),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.08),
+                              color: Colors.black.withValues(alpha: 0.2),
                               blurRadius: 20,
                               offset: const Offset(0, 8),
                             ),
@@ -1724,19 +1732,19 @@ Tunjukkan e-ticket ini saat datang ke venue.
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                                     decoration: BoxDecoration(
-                                      color: Colors.green.shade50,
+                                      color: Colors.green.withValues(alpha: 0.15),
                                       borderRadius: BorderRadius.circular(30),
-                                      border: Border.all(color: Colors.green.shade200),
+                                      border: Border.all(color: Colors.green.withValues(alpha: 0.4)),
                                     ),
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        Icon(Icons.check_circle, size: 16, color: Colors.green.shade600),
+                                        Icon(Icons.check_circle, size: 16, color: Colors.green.shade400),
                                         const SizedBox(width: 6),
                                         Text(
                                           "Booking Confirmed",
                                           style: TextStyle(
-                                            color: Colors.green.shade700,
+                                            color: Colors.green.shade300,
                                             fontWeight: FontWeight.w600,
                                             fontSize: 13,
                                           ),
@@ -1751,21 +1759,17 @@ Tunjukkan e-ticket ini saat datang ke venue.
                                     width: 80,
                                     height: 80,
                                     decoration: BoxDecoration(
-                                      gradient: const LinearGradient(
-                                        colors: [Color(0xFF0047FF), Color(0xFF00A3FF)],
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                      ),
+                                      color: AppColors.brandYellow,
                                       borderRadius: BorderRadius.circular(20),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: const Color(0xFF0047FF).withValues(alpha: 0.3),
+                                          color: AppColors.brandYellow.withValues(alpha: 0.3),
                                           blurRadius: 15,
                                           offset: const Offset(0, 8),
                                         ),
                                       ],
                                     ),
-                                    child: const Icon(Icons.sports_soccer, color: Colors.white, size: 40),
+                                    child: const Icon(Icons.sports_soccer, color: AppColors.ink, size: 40),
                                   ),
                                   const SizedBox(height: 16),
 
@@ -1775,15 +1779,15 @@ Tunjukkan e-ticket ini saat datang ke venue.
                                     style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 22,
-                                      color: Colors.black87,
+                                      color: AppColors.onDark,
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
                                     booking.field?.name ?? "Field",
-                                    style: TextStyle(
-                                      color: Colors.grey[600],
+                                    style: const TextStyle(
+                                      color: AppColors.onDarkMuted,
                                       fontSize: 15,
                                     ),
                                   ),
@@ -1792,12 +1796,12 @@ Tunjukkan e-ticket ini saat datang ke venue.
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
-                                        Icon(Icons.location_on_outlined, size: 14, color: Colors.grey[500]),
+                                        const Icon(Icons.location_on_outlined, size: 14, color: AppColors.onDarkMuted),
                                         const SizedBox(width: 4),
                                         Flexible(
                                           child: Text(
                                             booking.field?.venue?.address ?? "-",
-                                            style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                                            style: const TextStyle(color: AppColors.onDarkMuted, fontSize: 12),
                                             textAlign: TextAlign.center,
                                             maxLines: 2,
                                             overflow: TextOverflow.ellipsis,
@@ -1825,7 +1829,7 @@ Tunjukkan e-ticket ini saat datang ke venue.
                                             height: 2,
                                             margin: const EdgeInsets.symmetric(horizontal: 2),
                                             decoration: BoxDecoration(
-                                              color: Colors.grey[300],
+                                              color: AppColors.surfaceBorder,
                                               borderRadius: BorderRadius.circular(1),
                                             ),
                                           ),
@@ -1841,7 +1845,7 @@ Tunjukkan e-ticket ini saat datang ke venue.
                                     width: 30,
                                     height: 30,
                                     decoration: const BoxDecoration(
-                                      color: Color(0xFFF5F5F5),
+                                      color: AppColors.bg,
                                       shape: BoxShape.circle,
                                     ),
                                   ),
@@ -1853,7 +1857,7 @@ Tunjukkan e-ticket ini saat datang ke venue.
                                     width: 30,
                                     height: 30,
                                     decoration: const BoxDecoration(
-                                      color: Color(0xFFF5F5F5),
+                                      color: AppColors.bg,
                                       shape: BoxShape.circle,
                                     ),
                                   ),
@@ -1925,7 +1929,7 @@ Tunjukkan e-ticket ini saat datang ke venue.
                                         Container(
                                           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                                           decoration: BoxDecoration(
-                                            color: const Color(0xFF0047FF).withValues(alpha: 0.08),
+                                            color: AppColors.ink.withValues(alpha: 0.06),
                                             borderRadius: BorderRadius.circular(12),
                                           ),
                                           child: Column(
@@ -1946,7 +1950,7 @@ Tunjukkan e-ticket ini saat datang ke venue.
                                                   fontWeight: FontWeight.w900,
                                                   fontSize: 24,
                                                   letterSpacing: 3,
-                                                  color: Color(0xFF0047FF),
+                                                  color: AppColors.ink,
                                                 ),
                                               ),
                                             ],
@@ -1967,26 +1971,26 @@ Tunjukkan e-ticket ini saat datang ke venue.
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.amber.shade50,
+                          color: Colors.amber.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.amber.shade200),
+                          border: Border.all(color: Colors.amber.withValues(alpha: 0.4)),
                         ),
                         child: Row(
                           children: [
                             Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: Colors.amber.shade100,
+                                color: Colors.amber.withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(10),
                               ),
-                              child: Icon(Icons.info_outline_rounded, color: Colors.amber.shade700, size: 20),
+                              child: Icon(Icons.info_outline_rounded, color: Colors.amber.shade400, size: 20),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
                                 "Tunjukkan QR code atau kode booking ke petugas saat datang ke venue",
                                 style: TextStyle(
-                                  color: Colors.amber.shade900,
+                                  color: Colors.amber.shade200,
                                   fontSize: 13,
                                   height: 1.4,
                                 ),
@@ -2012,22 +2016,22 @@ Tunjukkan e-ticket ini saat datang ke venue.
                               );
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF0047FF),
+                              backgroundColor: AppColors.brandYellow,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
+                                borderRadius: BorderRadius.circular(999),
                               ),
                               elevation: 0,
                             ),
                             child: const Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.chat_bubble_outline_rounded, color: Colors.white, size: 20),
+                                Icon(Icons.chat_bubble_outline_rounded, color: AppColors.ink, size: 20),
                                 SizedBox(width: 10),
                                 Text(
                                   "Chat dengan Partner",
                                   style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.ink,
+                                    fontWeight: FontWeight.w700,
                                     fontSize: 15,
                                   ),
                                 ),
@@ -2046,20 +2050,20 @@ Tunjukkan e-ticket ini saat datang ke venue.
                               child: OutlinedButton(
                                 onPressed: _shareTicket,
                                 style: OutlinedButton.styleFrom(
-                                  side: BorderSide(color: Colors.grey.shade300, width: 1.5),
+                                  side: const BorderSide(color: AppColors.surfaceBorder, width: 1.5),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(16),
                                   ),
                                 ),
-                                child: Row(
+                                child: const Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(Icons.share_outlined, color: Colors.grey[700], size: 20),
-                                    const SizedBox(width: 8),
+                                    Icon(Icons.share_outlined, color: AppColors.onDark, size: 20),
+                                    SizedBox(width: 8),
                                     Text(
                                       "Bagikan",
                                       style: TextStyle(
-                                        color: Colors.grey[700],
+                                        color: AppColors.onDark,
                                         fontWeight: FontWeight.w600,
                                         fontSize: 14,
                                       ),
@@ -2087,20 +2091,20 @@ Tunjukkan e-ticket ini saat datang ke venue.
                                   }
                                 },
                                 style: OutlinedButton.styleFrom(
-                                  side: BorderSide(color: Colors.grey.shade300, width: 1.5),
+                                  side: const BorderSide(color: AppColors.surfaceBorder, width: 1.5),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(16),
                                   ),
                                 ),
-                                child: Row(
+                                child: const Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(Icons.location_on_outlined, color: Colors.grey[700], size: 20),
-                                    const SizedBox(width: 8),
+                                    Icon(Icons.location_on_outlined, color: AppColors.onDark, size: 20),
+                                    SizedBox(width: 8),
                                     Text(
                                       "Lihat Venue",
                                       style: TextStyle(
-                                        color: Colors.grey[700],
+                                        color: AppColors.onDark,
                                         fontWeight: FontWeight.w600,
                                         fontSize: 14,
                                       ),
@@ -2134,9 +2138,9 @@ Tunjukkan e-ticket ini saat datang ke venue.
       width: fullWidth ? double.infinity : null,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: AppColors.bg,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: AppColors.surfaceBorder),
       ),
       child: Row(
         mainAxisSize: fullWidth ? MainAxisSize.max : MainAxisSize.min,
@@ -2144,10 +2148,10 @@ Tunjukkan e-ticket ini saat datang ke venue.
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: const Color(0xFF0047FF).withValues(alpha: 0.1),
+              color: AppColors.brandYellow.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, color: const Color(0xFF0047FF), size: 20),
+            child: Icon(icon, color: AppColors.brandYellow, size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -2156,9 +2160,9 @@ Tunjukkan e-ticket ini saat datang ke venue.
               children: [
                 Text(
                   label,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 10,
-                    color: Colors.grey[500],
+                    color: AppColors.onDarkMuted,
                     fontWeight: FontWeight.w500,
                     letterSpacing: 0.5,
                   ),
@@ -2169,7 +2173,7 @@ Tunjukkan e-ticket ini saat datang ke venue.
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
-                    color: Colors.black87,
+                    color: AppColors.onDark,
                   ),
                 ),
               ],
@@ -2215,7 +2219,11 @@ class _RatingDialogState extends State<RatingDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      backgroundColor: AppColors.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: const BorderSide(color: AppColors.surfaceBorder),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -2224,12 +2232,12 @@ class _RatingDialogState extends State<RatingDialog> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.primaryBlue.withOpacity(0.1),
+                color: AppColors.brandYellow.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
                 Icons.rate_review_rounded,
-                color: AppColors.primaryBlue,
+                color: AppColors.brandYellow,
                 size: 40,
               ),
             ),
@@ -2240,6 +2248,7 @@ class _RatingDialogState extends State<RatingDialog> {
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
+                color: AppColors.onDark,
               ),
             ),
             const SizedBox(height: 8),
@@ -2247,8 +2256,8 @@ class _RatingDialogState extends State<RatingDialog> {
             Text(
               "Bagaimana pengalaman main di ${widget.venueName}?",
               textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.grey[600],
+              style: const TextStyle(
+                color: AppColors.onDarkMuted,
                 fontSize: 14,
               ),
             ),
@@ -2257,7 +2266,7 @@ class _RatingDialogState extends State<RatingDialog> {
             Container(
               padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
               decoration: BoxDecoration(
-                color: Colors.grey[50],
+                color: AppColors.bg,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
@@ -2272,7 +2281,7 @@ class _RatingDialogState extends State<RatingDialog> {
                           padding: const EdgeInsets.symmetric(horizontal: 6),
                           child: Icon(
                             isSelected ? Icons.star_rounded : Icons.star_outline_rounded,
-                            color: isSelected ? AppColors.primaryBlue : Colors.grey[400],
+                            color: isSelected ? AppColors.brandYellow : AppColors.onDarkMuted,
                             size: 36,
                           ),
                         ),
@@ -2283,7 +2292,7 @@ class _RatingDialogState extends State<RatingDialog> {
                   Text(
                     _getRatingLabel(),
                     style: TextStyle(
-                      color: _selectedStars > 0 ? AppColors.primaryBlue : Colors.grey,
+                      color: _selectedStars > 0 ? AppColors.brandYellow : AppColors.onDarkMuted,
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
                     ),
@@ -2295,22 +2304,23 @@ class _RatingDialogState extends State<RatingDialog> {
 
             TextField(
               controller: _reviewController,
+              style: const TextStyle(color: AppColors.onDark),
               decoration: InputDecoration(
                 hintText: "Tulis ulasan (opsional)...",
-                hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+                hintStyle: const TextStyle(color: AppColors.onDarkMuted, fontSize: 14),
                 filled: true,
-                fillColor: Colors.grey[50],
+                fillColor: AppColors.bg,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.shade200),
+                  borderSide: const BorderSide(color: AppColors.surfaceBorder),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.shade200),
+                  borderSide: const BorderSide(color: AppColors.surfaceBorder),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: AppColors.primaryBlue, width: 1.5),
+                  borderSide: const BorderSide(color: AppColors.brandYellow, width: 1.5),
                 ),
                 contentPadding: const EdgeInsets.all(16),
               ),
@@ -2325,15 +2335,15 @@ class _RatingDialogState extends State<RatingDialog> {
                     onPressed: () => Navigator.pop(context),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      side: BorderSide(color: Colors.grey.shade300),
+                      side: const BorderSide(color: AppColors.surfaceBorder),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: Text(
+                    child: const Text(
                       "Nanti Saja",
                       style: TextStyle(
-                        color: Colors.grey[600],
+                        color: AppColors.onDark,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -2353,7 +2363,7 @@ class _RatingDialogState extends State<RatingDialog> {
                               Text("Terima kasih atas penilaiannya!"),
                             ],
                           ),
-                          backgroundColor: AppColors.primaryBlue,
+                          backgroundColor: AppColors.brandYellow,
                           behavior: SnackBarBehavior.floating,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
@@ -2362,19 +2372,19 @@ class _RatingDialogState extends State<RatingDialog> {
                       );
                     } : null,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryBlue,
-                      disabledBackgroundColor: Colors.grey[300],
+                      backgroundColor: AppColors.brandYellow,
+                      disabledBackgroundColor: AppColors.surfaceBorder,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(999),
                       ),
                       elevation: 0,
                     ),
                     child: const Text(
                       "Kirim",
                       style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
+                        color: AppColors.ink,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),

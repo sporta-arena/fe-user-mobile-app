@@ -77,10 +77,12 @@ class RefundService {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
+        // API returns 'data' not 'refund'
+        final refundData = data['data'] ?? data['refund'];
         return RefundResult(
           success: true,
           message: data['message'] ?? 'Permintaan refund berhasil diajukan',
-          refund: data['refund'] != null ? Refund.fromJson(data['refund']) : null,
+          refund: refundData != null ? Refund.fromJson(refundData) : null,
         );
       } else {
         return RefundResult(
@@ -148,9 +150,11 @@ class RefundService {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
+        // API returns 'data' not 'refund'
+        final refundData = data['data'] ?? data['refund'];
         return RefundResult(
           success: true,
-          refund: Refund.fromJson(data['refund']),
+          refund: Refund.fromJson(refundData),
         );
       } else {
         return RefundResult(

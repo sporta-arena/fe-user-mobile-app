@@ -76,9 +76,9 @@ class VenueService {
           success: true,
           venues: venues,
           pagination: {
-            'current_page': data['current_page'],
-            'last_page': data['last_page'],
-            'total': data['total'],
+            'current_page': data['meta']?['current_page'] ?? data['current_page'],
+            'last_page': data['meta']?['last_page'] ?? data['last_page'],
+            'total': data['meta']?['total'] ?? data['total'],
           },
         );
       } else {
@@ -106,9 +106,11 @@ class VenueService {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
+        // API returns 'data' not 'venue'
+        final venueData = data['data'] ?? data['venue'];
         return VenueResult(
           success: true,
-          venue: Venue.fromJson(data['venue']),
+          venue: Venue.fromJson(venueData),
         );
       } else {
         return VenueResult(
@@ -135,7 +137,9 @@ class VenueService {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        final fields = (data['fields'] as List)
+        // API returns 'data' not 'fields'
+        final fieldsData = data['data'] ?? data['fields'];
+        final fields = (fieldsData as List)
             .map((f) => Field.fromJson(f))
             .toList();
 
@@ -168,9 +172,11 @@ class VenueService {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
+        // API returns 'data' not 'field'
+        final fieldData = data['data'] ?? data['field'];
         return FieldResult(
           success: true,
-          field: Field.fromJson(data['field']),
+          field: Field.fromJson(fieldData),
         );
       } else {
         return FieldResult(
@@ -204,13 +210,17 @@ class VenueService {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        final slots = (data['slots'] as List)
+        // API may return 'slots' or 'data'
+        final slotsData = data['slots'] ?? data['data'] ?? [];
+        final slots = (slotsData as List)
             .map((s) => TimeSlot.fromJson(s))
             .toList();
 
+        // API may return 'field' or nested in 'data'
+        final fieldData = data['field'] ?? data['data']?['field'];
         return FieldResult(
           success: true,
-          field: data['field'] != null ? Field.fromJson(data['field']) : null,
+          field: fieldData != null ? Field.fromJson(fieldData) : null,
           slots: slots,
         );
       } else {

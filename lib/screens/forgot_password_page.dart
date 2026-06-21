@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'otp_page.dart';
+import '../services/auth_service.dart';
+import '../constants/colors.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
@@ -12,7 +16,13 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   bool _isLoading = false;
   String? _emailError;
 
-  void _handleResetPassword() async {
+  @override
+  void dispose() {
+    _emailController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleResetPassword() async {
     setState(() => _emailError = null);
 
     final email = _emailController.text.trim();
@@ -28,72 +38,192 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
     setState(() => _isLoading = true);
 
-    await Future.delayed(const Duration(seconds: 2));
+    final result = await AuthService.forgotPassword(email: email);
 
     if (mounted) {
       setState(() => _isLoading = false);
 
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (ctx) => Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
+      if (result.success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result.message ?? "Kode OTP telah dikirim ke email Anda"),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+
+        // Navigate to OTP verification page for password reset
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => OtpVerificationPage(
+              email: email,
+              otpType: OtpType.passwordReset,
+            ),
+          ),
+        );
+      } else {
+        if (result.errors != null && result.errors!['email'] != null) {
+          setState(() => _emailError = result.errors!['email']!.first);
+        }
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result.message ?? "Gagal mengirim kode OTP"),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    OutlineInputBorder border(Color c, double w) => OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: c, width: w),
+        );
+
+    return Scaffold(
+      backgroundColor: AppColors.bg,
+      body: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.light,
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
             child: Column(
-              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.green.shade50,
-                    shape: BoxShape.circle,
+                // Back button
+                if (Navigator.canPop(context)) ...[
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    padding: EdgeInsets.zero,
+                    alignment: Alignment.centerLeft,
+                    icon: const Icon(Icons.arrow_back_rounded,
+                        color: AppColors.onDark, size: 26),
                   ),
-                  child: Icon(
-                    Icons.mark_email_read_outlined,
-                    color: Colors.green.shade600,
-                    size: 48,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                const Text(
-                  "Cek Email Anda",
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  "Link untuk reset password telah dikirim ke $email. Silakan cek Inbox atau Spam.",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 14,
-                    height: 1.5,
-                  ),
-                ),
+                  const SizedBox(height: 16),
+                ],
+
+                // Brand mark
+                Image.asset('assets/sportago_mark.png', height: 40),
                 const SizedBox(height: 24),
+
+                // Heading
+                const Text(
+                  "Lupa password?",
+                  style: TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.onDark,
+                    height: 1.1,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                const Text(
+                  "Masukkan email yang terdaftar, kami kirim kode OTP untuk verifikasi.",
+                  style: TextStyle(
+                      fontSize: 15, color: AppColors.onDarkMuted, height: 1.4),
+                ),
+                const SizedBox(height: 32),
+
+                // Email
+                const Text(
+                  "Email",
+                  style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                      color: AppColors.onDark),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  style: const TextStyle(color: AppColors.onDark),
+                  decoration: InputDecoration(
+                    hintText: "nama@domain.com",
+                    hintStyle: const TextStyle(color: AppColors.onDarkMuted),
+                    filled: true,
+                    fillColor: AppColors.surface,
+                    errorText: _emailError,
+                    prefixIcon: const Icon(Icons.mail_outline_rounded,
+                        color: AppColors.onDarkMuted, size: 20),
+                    border: border(AppColors.surfaceBorder, 1),
+                    enabledBorder: border(AppColors.surfaceBorder, 1),
+                    focusedBorder: border(AppColors.brandYellow, 1.6),
+                    errorBorder: border(Colors.red.shade400, 1),
+                    focusedErrorBorder: border(Colors.red.shade400, 1.6),
+                  ),
+                ),
+                const SizedBox(height: 28),
+
+                // Submit button (brand yellow pill)
                 SizedBox(
                   width: double.infinity,
-                  height: 50,
+                  height: 54,
                   child: ElevatedButton(
+                    onPressed: _isLoading ? null : _handleResetPassword,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0047FF),
+                      backgroundColor: AppColors.brandYellow,
+                      disabledBackgroundColor:
+                          AppColors.brandYellow.withValues(alpha: 0.5),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(999),
                       ),
                       elevation: 0,
                     ),
-                    onPressed: () {
-                      Navigator.pop(ctx);
-                      Navigator.pop(context);
-                    },
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 22,
+                            width: 22,
+                            child: CircularProgressIndicator(
+                                color: AppColors.ink, strokeWidth: 2),
+                          )
+                        : const Text(
+                            "Kirim kode OTP",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.ink,
+                            ),
+                          ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Info text
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(Icons.info_outline,
+                        size: 16, color: AppColors.onDarkMuted),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        "Kode OTP dikirim ke email kamu dan berlaku selama 10 menit.",
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.onDarkMuted.withValues(alpha: 0.8),
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+
+                // Back to login
+                Center(
+                  child: TextButton(
+                    onPressed: () => Navigator.pop(context),
                     child: const Text(
-                      "KEMBALI KE LOGIN",
+                      "Kembali ke Login",
                       style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
+                        color: AppColors.brandYellow,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
                       ),
                     ),
                   ),
@@ -102,246 +232,6 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             ),
           ),
         ),
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          // Background gradient header
-          Container(
-            height: MediaQuery.of(context).size.height * 0.35,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Color(0xFF0047FF), Color(0xFF002299)],
-              ),
-            ),
-            child: Stack(
-              children: [
-                Positioned.fill(
-                  child: Opacity(
-                    opacity: 0.05,
-                    child: Container(
-                      decoration: const BoxDecoration(
-                        image: DecorationImage(
-                          image: NetworkImage('https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800'),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Back button
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: IconButton(
-                onPressed: () => Navigator.pop(context),
-                icon: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
-                ),
-              ),
-            ),
-          ),
-
-          // Main content
-          SafeArea(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  const SizedBox(height: 60),
-
-                  // Icon
-                  Container(
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.2),
-                          blurRadius: 20,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.lock_reset,
-                      size: 50,
-                      color: Color(0xFF0047FF),
-                    ),
-                  ),
-
-                  const SizedBox(height: 40),
-
-                  // Form Card
-                  Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 24),
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(24),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.1),
-                          blurRadius: 30,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        const Text(
-                          "Lupa Password?",
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF0047FF),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          "Jangan khawatir! Masukkan email yang terdaftar, kami akan mengirimkan link untuk membuat password baru.",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[600],
-                            height: 1.5,
-                          ),
-                        ),
-
-                        const SizedBox(height: 32),
-
-                        // Email Input
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: const Text(
-                            "Email Address",
-                            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        TextField(
-                          controller: _emailController,
-                          keyboardType: TextInputType.emailAddress,
-                          decoration: InputDecoration(
-                            hintText: "nama@domain.com",
-                            hintStyle: TextStyle(color: Colors.grey[400]),
-                            filled: true,
-                            fillColor: const Color(0xFFF8F9FA),
-                            errorText: _emailError,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(14),
-                              borderSide: BorderSide.none,
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(14),
-                              borderSide: const BorderSide(color: Color(0xFF0047FF), width: 2),
-                            ),
-                            errorBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(14),
-                              borderSide: const BorderSide(color: Colors.red, width: 1),
-                            ),
-                            focusedErrorBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(14),
-                              borderSide: const BorderSide(color: Colors.red, width: 2),
-                            ),
-                            prefixIcon: Container(
-                              margin: const EdgeInsets.all(12),
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF0047FF).withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Icon(Icons.email_outlined, color: Color(0xFF0047FF), size: 20),
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(height: 32),
-
-                        // Submit Button
-                        SizedBox(
-                          width: double.infinity,
-                          height: 56,
-                          child: ElevatedButton(
-                            onPressed: _isLoading ? null : _handleResetPassword,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF0047FF),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              elevation: 0,
-                            ),
-                            child: _isLoading
-                                ? const SizedBox(
-                                    height: 24,
-                                    width: 24,
-                                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                                  )
-                                : const Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(Icons.send, color: Colors.white, size: 20),
-                                      SizedBox(width: 8),
-                                      Text(
-                                        "KIRIM LINK RESET",
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
-                                          letterSpacing: 0.5,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Back to login link
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.arrow_back, size: 18, color: Colors.grey[600]),
-                        const SizedBox(width: 8),
-                        Text(
-                          "Kembali ke halaman Login",
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

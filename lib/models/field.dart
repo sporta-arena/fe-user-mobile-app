@@ -28,15 +28,21 @@ class Field {
 
   factory Field.fromJson(Map<String, dynamic> json) {
     return Field(
-      id: json['id'],
-      venueId: json['venue_id'],
-      name: json['name'],
-      type: json['type'],
+      id: json['id'] ?? 0,
+      venueId: json['venue_id'] ?? json['venue']?['id'] ?? 0,
+      name: json['name'] ?? '',
+      type: json['type'] ?? '',
       description: json['description'],
-      pricePerHour: double.parse(json['price_per_hour'].toString()),
+      pricePerHour: json['price_per_hour'] != null
+          ? double.parse(json['price_per_hour'].toString())
+          : 0,
       status: json['status'] ?? 'active',
-      createdAt: TimezoneUtils.parseUtcToLocal(json['created_at']),
-      updatedAt: TimezoneUtils.parseUtcToLocal(json['updated_at']),
+      createdAt: json['created_at'] != null
+          ? TimezoneUtils.parseUtcToLocal(json['created_at'])
+          : DateTime.now(),
+      updatedAt: json['updated_at'] != null
+          ? TimezoneUtils.parseUtcToLocal(json['updated_at'])
+          : DateTime.now(),
       venue: json['venue'] != null ? Venue.fromJson(json['venue']) : null,
     );
   }
@@ -99,9 +105,9 @@ class TimeSlot {
 
   factory TimeSlot.fromJson(Map<String, dynamic> json) {
     return TimeSlot(
-      startTime: json['start_time'],
-      endTime: json['end_time'],
-      available: json['available'],
+      startTime: json['start_time'] ?? '',
+      endTime: json['end_time'] ?? '',
+      available: json['available'] ?? false,
     );
   }
 }

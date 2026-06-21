@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'search_page.dart';
 import 'venue_detail_page.dart';
 import '../services/venue_service.dart';
 import '../models/venue.dart' as model;
+import '../constants/colors.dart';
 
 class DiscoverPage extends StatefulWidget {
   const DiscoverPage({super.key});
@@ -40,21 +42,23 @@ class _DiscoverPageState extends State<DiscoverPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: AppColors.bg,
       body: RefreshIndicator(
         onRefresh: _loadVenues,
-        color: const Color(0xFF0047FF),
+        color: AppColors.brandYellow,
+        backgroundColor: AppColors.surface,
         child: CustomScrollView(
           slivers: [
             // App Bar
             SliverAppBar(
-              backgroundColor: Colors.white,
+              backgroundColor: AppColors.bg,
               elevation: 0,
               floating: true,
+              systemOverlayStyle: SystemUiOverlayStyle.light,
               title: const Text(
                 'Discover',
                 style: TextStyle(
-                  color: Colors.black87,
+                  color: AppColors.onDark,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -78,23 +82,17 @@ class _DiscoverPageState extends State<DiscoverPage> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: AppColors.surface,
                           borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 10,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
+                          border: Border.all(color: AppColors.surfaceBorder),
                         ),
-                        child: Row(
+                        child: const Row(
                           children: [
-                            const Icon(Icons.search, color: Colors.grey),
-                            const SizedBox(width: 12),
+                            Icon(Icons.search, color: AppColors.onDarkMuted),
+                            SizedBox(width: 12),
                             Text(
                               "Cari venue, event, komunitas...",
-                              style: TextStyle(color: Colors.grey[500], fontSize: 15),
+                              style: TextStyle(color: AppColors.onDarkMuted, fontSize: 15),
                             ),
                           ],
                         ),
@@ -109,7 +107,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                     SizedBox(
                       height: 200,
                       child: _isLoading
-                          ? const Center(child: CircularProgressIndicator())
+                          ? const Center(child: CircularProgressIndicator(color: AppColors.brandYellow))
                           : ListView.builder(
                               scrollDirection: Axis.horizontal,
                               itemCount: _venues.take(5).length,
@@ -166,7 +164,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                     SizedBox(
                       height: 200,
                       child: _isLoading
-                          ? const Center(child: CircularProgressIndicator())
+                          ? const Center(child: CircularProgressIndicator(color: AppColors.brandYellow))
                           : ListView.builder(
                               scrollDirection: Axis.horizontal,
                               itemCount: _venues.take(5).length,
@@ -252,7 +250,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                     SizedBox(
                       height: 200,
                       child: _isLoading
-                          ? const Center(child: CircularProgressIndicator())
+                          ? const Center(child: CircularProgressIndicator(color: AppColors.brandYellow))
                           : ListView.builder(
                               scrollDirection: Axis.horizontal,
                               itemCount: _venues.take(4).length,
@@ -288,7 +286,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
       width: double.infinity,
       height: 8,
       margin: const EdgeInsets.symmetric(vertical: 8),
-      color: Colors.grey.shade100,
+      color: AppColors.surfaceBorder,
     );
   }
 
@@ -303,10 +301,10 @@ class _DiscoverPageState extends State<DiscoverPage> {
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: (iconColor ?? const Color(0xFF0047FF)).withOpacity(0.1),
+                  color: (iconColor ?? AppColors.brandYellow).withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(icon, color: iconColor ?? const Color(0xFF0047FF), size: 18),
+                child: Icon(icon, color: iconColor ?? AppColors.brandYellow, size: 18),
               ),
               const SizedBox(width: 10),
             ],
@@ -315,6 +313,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 18,
+                color: AppColors.onDark,
               ),
             ),
           ],
@@ -325,7 +324,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
             child: const Text(
               "Lihat Semua",
               style: TextStyle(
-                color: Color(0xFF0047FF),
+                color: AppColors.brandYellow,
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
               ),
@@ -348,15 +347,9 @@ class _DiscoverPageState extends State<DiscoverPage> {
         width: 180,
         margin: const EdgeInsets.only(right: 14),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.06),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          border: Border.all(color: AppColors.surfaceBorder),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -373,8 +366,8 @@ class _DiscoverPageState extends State<DiscoverPage> {
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) => Container(
                       height: 110,
-                      color: Colors.grey[200],
-                      child: const Icon(Icons.image, color: Colors.grey),
+                      color: const Color(0xFF222226),
+                      child: const Icon(Icons.image, color: AppColors.onDarkMuted),
                     ),
                   ),
                 ),
@@ -418,6 +411,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
+                      color: AppColors.onDark,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -425,19 +419,19 @@ class _DiscoverPageState extends State<DiscoverPage> {
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      const Icon(Icons.star, color: Colors.amber, size: 14),
+                      const Icon(Icons.star, color: AppColors.brandYellow, size: 14),
                       const SizedBox(width: 4),
                       Text(
                         venue.averageRating?.toStringAsFixed(1) ?? "4.5",
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.onDark),
                       ),
                       const SizedBox(width: 8),
-                      Icon(Icons.location_on, color: Colors.grey[400], size: 14),
+                      const Icon(Icons.location_on, color: AppColors.onDarkMuted, size: 14),
                       const SizedBox(width: 2),
                       Expanded(
                         child: Text(
                           venue.city ?? "Jakarta",
-                          style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+                          style: const TextStyle(fontSize: 11, color: AppColors.onDarkMuted),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -457,7 +451,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
       case "populer": return Colors.red;
       case "rating": return Colors.amber.shade700;
       case "new": return Colors.green;
-      default: return const Color(0xFF0047FF);
+      default: return AppColors.brandYellow;
     }
   }
 
@@ -491,7 +485,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [color, color.withOpacity(0.7)],
+            colors: [color, color.withValues(alpha: 0.7)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -505,7 +499,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(icon, color: Colors.white, size: 24),
@@ -574,7 +568,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
       builder: (context) => Container(
         height: MediaQuery.of(context).size.height * 0.6,
         decoration: const BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: Column(
@@ -584,7 +578,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey[300],
+                color: AppColors.surfaceBorder,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -599,7 +593,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                       height: 150,
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [color, color.withOpacity(0.7)],
+                          colors: [color, color.withValues(alpha: 0.7)],
                         ),
                         borderRadius: BorderRadius.circular(16),
                       ),
@@ -610,7 +604,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                     const SizedBox(height: 20),
                     Text(
                       title,
-                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.onDark),
                     ),
                     const SizedBox(height: 12),
                     _buildEventInfoRow(Icons.calendar_today, "Tanggal", date),
@@ -627,7 +621,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text("Pendaftaran event akan segera dibuka!"),
-                              backgroundColor: Color(0xFF0047FF),
+                              backgroundColor: AppColors.surface,
                             ),
                           );
                         },
@@ -658,13 +652,13 @@ class _DiscoverPageState extends State<DiscoverPage> {
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
-          Icon(icon, color: Colors.grey[500], size: 20),
+          Icon(icon, color: AppColors.onDarkMuted, size: 20),
           const SizedBox(width: 12),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label, style: TextStyle(fontSize: 11, color: Colors.grey[500])),
-              Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
+              Text(label, style: const TextStyle(fontSize: 11, color: AppColors.onDarkMuted)),
+              Text(value, style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.onDark)),
             ],
           ),
         ],
@@ -692,7 +686,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(Icons.flag, color: Colors.white, size: 24),
@@ -744,7 +738,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                 children: [
                   Text(
                     "Progress: 1/3",
-                    style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 13),
+                    style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 13),
                   ),
                   const Text(
                     "33%",
@@ -756,7 +750,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
               Container(
                 height: 8,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.3),
+                  color: Colors.white.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: FractionallySizedBox(
@@ -779,7 +773,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
               const SizedBox(width: 6),
               Text(
                 "5 hari lagi",
-                style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 12),
+                style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 12),
               ),
               const Spacer(),
               TextButton(
@@ -803,7 +797,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text("Membuka artikel: $title"),
-            backgroundColor: const Color(0xFF0047FF),
+            backgroundColor: AppColors.surface,
           ),
         );
       },
@@ -811,15 +805,9 @@ class _DiscoverPageState extends State<DiscoverPage> {
         width: 200,
         margin: const EdgeInsets.only(right: 14),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.06),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          border: Border.all(color: AppColors.surfaceBorder),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -833,8 +821,8 @@ class _DiscoverPageState extends State<DiscoverPage> {
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) => Container(
                   height: 90,
-                  color: Colors.grey[200],
-                  child: const Icon(Icons.article, color: Colors.grey),
+                  color: const Color(0xFF222226),
+                  child: const Icon(Icons.article, color: AppColors.onDarkMuted),
                 ),
               ),
             ),
@@ -846,7 +834,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.teal.withOpacity(0.1),
+                      color: Colors.teal.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
@@ -864,6 +852,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                     style: const TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
+                      color: AppColors.onDark,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -884,10 +873,10 @@ class _DiscoverPageState extends State<DiscoverPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text("Bergabung dengan $name"),
-            backgroundColor: const Color(0xFF0047FF),
+            backgroundColor: AppColors.surface,
             action: SnackBarAction(
               label: "Gabung",
-              textColor: Colors.white,
+              textColor: AppColors.brandYellow,
               onPressed: () {},
             ),
           ),
@@ -898,9 +887,9 @@ class _DiscoverPageState extends State<DiscoverPage> {
         margin: const EdgeInsets.only(right: 14),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.grey.shade200),
+          border: Border.all(color: AppColors.surfaceBorder),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -908,7 +897,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(icon, color: color, size: 24),
@@ -919,6 +908,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 13,
+                color: AppColors.onDark,
               ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
@@ -926,11 +916,11 @@ class _DiscoverPageState extends State<DiscoverPage> {
             const SizedBox(height: 4),
             Row(
               children: [
-                Icon(Icons.people, size: 14, color: Colors.grey[400]),
+                const Icon(Icons.people, size: 14, color: AppColors.onDarkMuted),
                 const SizedBox(width: 4),
                 Text(
                   "$members members",
-                  style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+                  style: const TextStyle(fontSize: 11, color: AppColors.onDarkMuted),
                 ),
               ],
             ),
@@ -953,15 +943,9 @@ class _DiscoverPageState extends State<DiscoverPage> {
         margin: const EdgeInsets.only(bottom: 14),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          border: Border.all(color: AppColors.surfaceBorder),
         ),
         child: Row(
           children: [
@@ -975,8 +959,8 @@ class _DiscoverPageState extends State<DiscoverPage> {
                 errorBuilder: (context, error, stackTrace) => Container(
                   width: 80,
                   height: 80,
-                  color: Colors.grey[200],
-                  child: const Icon(Icons.image, color: Colors.grey),
+                  color: const Color(0xFF222226),
+                  child: const Icon(Icons.image, color: AppColors.onDarkMuted),
                 ),
               ),
             ),
@@ -988,7 +972,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.pink.withOpacity(0.1),
+                      color: Colors.pink.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Text(
@@ -1006,6 +990,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
+                      color: AppColors.onDark,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -1013,19 +998,19 @@ class _DiscoverPageState extends State<DiscoverPage> {
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      const Icon(Icons.star, color: Colors.amber, size: 14),
+                      const Icon(Icons.star, color: AppColors.brandYellow, size: 14),
                       const SizedBox(width: 4),
                       Text(
                         venue.averageRating?.toStringAsFixed(1) ?? "4.5",
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.onDark),
                       ),
                       const SizedBox(width: 12),
-                      Icon(Icons.location_on, color: Colors.grey[400], size: 14),
+                      const Icon(Icons.location_on, color: AppColors.onDarkMuted, size: 14),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
                           venue.city ?? "Jakarta",
-                          style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                          style: const TextStyle(fontSize: 12, color: AppColors.onDarkMuted),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -1034,7 +1019,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                 ],
               ),
             ),
-            const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+            const Icon(Icons.arrow_forward_ios, size: 16, color: AppColors.onDarkMuted),
           ],
         ),
       ),

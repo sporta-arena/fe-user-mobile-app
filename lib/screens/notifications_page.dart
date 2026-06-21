@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import '../constants/colors.dart';
 
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
@@ -58,16 +60,17 @@ class _NotificationsPageState extends State<NotificationsPage> {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.bg,
         appBar: AppBar(
+          systemOverlayStyle: SystemUiOverlayStyle.light,
           title: const Text(
             "Notifikasi",
-            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)
+            style: TextStyle(color: AppColors.onDark, fontWeight: FontWeight.bold)
           ),
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.bg,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+            icon: const Icon(Icons.arrow_back_ios, color: AppColors.onDark),
             onPressed: () => Navigator.pop(context),
           ),
           actions: [
@@ -76,16 +79,16 @@ class _NotificationsPageState extends State<NotificationsPage> {
               child: Text(
                 "Tandai Dibaca",
                 style: TextStyle(
-                  color: _notifications.isEmpty ? Colors.grey : const Color(0xFF0047FF),
+                  color: _notifications.isEmpty ? AppColors.onDarkMuted : AppColors.brandYellow,
                   fontWeight: FontWeight.bold
                 )
               ),
             )
           ],
           bottom: const TabBar(
-            labelColor: Color(0xFF0047FF),
-            unselectedLabelColor: Colors.grey,
-            indicatorColor: Color(0xFF0047FF),
+            labelColor: AppColors.brandYellow,
+            unselectedLabelColor: AppColors.onDarkMuted,
+            indicatorColor: AppColors.brandYellow,
             tabs: [
               Tab(text: "Transaksi"),
               Tab(text: "Info & Promo"),
@@ -93,7 +96,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
           ),
         ),
         body: _isLoading
-            ? const Center(child: CircularProgressIndicator(color: Color(0xFF0047FF)))
+            ? const Center(child: CircularProgressIndicator(color: AppColors.brandYellow))
             : TabBarView(
                 children: [
                   _buildNotificationList("transaction"),
@@ -117,11 +120,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.notifications_off_outlined, size: 80, color: Colors.grey[300]),
+            const Icon(Icons.notifications_off_outlined, size: 80, color: AppColors.surfaceBorder),
             const SizedBox(height: 16),
-            Text(
+            const Text(
               "Belum ada notifikasi",
-              style: TextStyle(color: Colors.grey[500])
+              style: TextStyle(color: AppColors.onDarkMuted)
             ),
           ],
         ),
@@ -152,11 +155,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
         break;
       case 'system':
         icon = Icons.info;
-        color = Colors.blue;
+        color = AppColors.brandYellow;
         break;
       default:
         icon = Icons.notifications;
-        color = Colors.grey;
+        color = AppColors.onDarkMuted;
     }
 
     bool isUnread = !item['isRead'];
@@ -183,16 +186,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
           margin: const EdgeInsets.only(bottom: 16),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: isUnread ? const Color(0xFFF0F5FF) : Colors.white,
+            color: isUnread ? AppColors.brandYellow.withValues(alpha: 0.15) : AppColors.surface,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.grey.shade200),
-            boxShadow: isUnread ? [] : [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.03),
-                blurRadius: 10,
-                offset: const Offset(0, 4)
-              )
-            ],
+            border: Border.all(color: AppColors.surfaceBorder),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -221,7 +217,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                             style: TextStyle(
                               fontWeight: isUnread ? FontWeight.w900 : FontWeight.bold,
                               fontSize: 14,
-                              color: Colors.black87
+                              color: AppColors.onDark
                             )
                           ),
                         ),
@@ -242,9 +238,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
                     Text(
                       item['message'],
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 12,
-                        color: Colors.grey[600],
+                        color: AppColors.onDarkMuted,
                         height: 1.5
                       ),
                       maxLines: 2,
@@ -255,9 +251,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
                     Text(
                       item['time'],
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 10,
-                        color: Colors.grey[400],
+                        color: AppColors.onDarkMuted,
                         fontWeight: FontWeight.w500
                       )
                     ),

@@ -47,17 +47,21 @@ class Booking {
 
   factory Booking.fromJson(Map<String, dynamic> json) {
     return Booking(
-      id: json['id'],
-      bookingCode: json['booking_code'],
-      userId: json['user_id'],
-      fieldId: json['field_id'],
-      bookingDate: json['booking_date'],
-      startTime: json['start_time'],
-      endTime: json['end_time'],
-      durationHours: json['duration_hours'],
-      pricePerHour: double.parse(json['price_per_hour'].toString()),
-      totalPrice: double.parse(json['total_price'].toString()),
-      status: json['status'],
+      id: json['id'] ?? 0,
+      bookingCode: json['booking_code'] ?? '',
+      userId: json['user_id'] ?? json['user']?['id'] ?? 0,
+      fieldId: json['field_id'] ?? json['field']?['id'] ?? 0,
+      bookingDate: json['booking_date'] ?? '',
+      startTime: json['start_time'] ?? '',
+      endTime: json['end_time'] ?? '',
+      durationHours: json['duration_hours'] ?? 1,
+      pricePerHour: json['price_per_hour'] != null
+          ? double.parse(json['price_per_hour'].toString())
+          : 0,
+      totalPrice: json['total_price'] != null
+          ? double.parse(json['total_price'].toString())
+          : 0,
+      status: json['status'] ?? 'pending',
       // Parse UTC datetime from server
       expiresAt: json['expires_at'] != null
           ? TimezoneUtils.parseUtcToLocal(json['expires_at'])
@@ -66,8 +70,12 @@ class Booking {
           ? TimezoneUtils.parseUtcToLocal(json['paid_at'])
           : null,
       notes: json['notes'],
-      createdAt: TimezoneUtils.parseUtcToLocal(json['created_at']),
-      updatedAt: TimezoneUtils.parseUtcToLocal(json['updated_at']),
+      createdAt: json['created_at'] != null
+          ? TimezoneUtils.parseUtcToLocal(json['created_at'])
+          : DateTime.now(),
+      updatedAt: json['updated_at'] != null
+          ? TimezoneUtils.parseUtcToLocal(json['updated_at'])
+          : DateTime.now(),
       field: json['field'] != null ? Field.fromJson(json['field']) : null,
       user: json['user'] != null ? User.fromJson(json['user']) : null,
       payment: json['payment'] != null ? Payment.fromJson(json['payment']) : null,
@@ -152,11 +160,11 @@ class Payment {
 
   factory Payment.fromJson(Map<String, dynamic> json) {
     return Payment(
-      id: json['id'],
+      id: json['id'] ?? 0,
       xenditId: json['xendit_id'],
-      externalId: json['external_id'],
-      amount: double.parse(json['amount'].toString()),
-      status: json['status'],
+      externalId: json['external_id'] ?? '',
+      amount: json['amount'] != null ? double.parse(json['amount'].toString()) : 0,
+      status: json['status'] ?? 'pending',
       paymentMethod: json['payment_method'] ?? 'qris',
       qrString: json['qr_string'],
       // Parse UTC datetime from server
@@ -166,8 +174,12 @@ class Payment {
       expiresAt: json['expires_at'] != null
           ? TimezoneUtils.parseUtcToLocal(json['expires_at'])
           : null,
-      createdAt: TimezoneUtils.parseUtcToLocal(json['created_at']),
-      updatedAt: TimezoneUtils.parseUtcToLocal(json['updated_at']),
+      createdAt: json['created_at'] != null
+          ? TimezoneUtils.parseUtcToLocal(json['created_at'])
+          : DateTime.now(),
+      updatedAt: json['updated_at'] != null
+          ? TimezoneUtils.parseUtcToLocal(json['updated_at'])
+          : DateTime.now(),
     );
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../constants/colors.dart';
 
 class PromoDetailPage extends StatelessWidget {
   final String title;
@@ -25,22 +26,23 @@ class PromoDetailPage extends StatelessWidget {
     final discount = promoData?['discount'] ?? '';
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: AppColors.bg,
       body: CustomScrollView(
         slivers: [
           // App Bar with Image
           SliverAppBar(
             expandedHeight: 220,
             pinned: true,
-            backgroundColor: color,
+            backgroundColor: AppColors.bg,
+            systemOverlayStyle: SystemUiOverlayStyle.light,
             leading: Container(
               margin: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.9),
+                color: Colors.black.withValues(alpha: 0.4),
                 shape: BoxShape.circle,
               ),
               child: IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.black87),
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
                 onPressed: () => Navigator.pop(context),
               ),
             ),
@@ -48,11 +50,11 @@ class PromoDetailPage extends StatelessWidget {
               Container(
                 margin: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.9),
+                  color: Colors.black.withValues(alpha: 0.4),
                   shape: BoxShape.circle,
                 ),
                 child: IconButton(
-                  icon: const Icon(Icons.share, color: Colors.black87),
+                  icon: const Icon(Icons.share, color: Colors.white),
                   onPressed: () {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text("Promo berhasil dibagikan!")),
@@ -74,7 +76,7 @@ class PromoDetailPage extends StatelessWidget {
                     Container(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [color, color.withOpacity(0.7)],
+                          colors: [color, color.withValues(alpha: 0.7)],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
@@ -84,9 +86,9 @@ class PromoDetailPage extends StatelessWidget {
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
-                          Colors.black.withOpacity(0.6),
+                          Colors.black.withValues(alpha: 0.6),
                           Colors.transparent,
-                          Colors.black.withOpacity(0.4),
+                          Colors.black.withValues(alpha: 0.4),
                         ],
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
@@ -171,15 +173,9 @@ class PromoDetailPage extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.surface,
                       borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
+                      border: Border.all(color: AppColors.surfaceBorder),
                     ),
                     child: Column(
                       children: [
@@ -188,21 +184,21 @@ class PromoDetailPage extends StatelessWidget {
                             Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: color.withOpacity(0.1),
+                                color: AppColors.brandYellow.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: Icon(Icons.confirmation_number, color: color, size: 24),
+                              child: const Icon(Icons.confirmation_number, color: AppColors.brandYellow, size: 24),
                             ),
                             const SizedBox(width: 16),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
+                                  const Text(
                                     "Kode Promo",
                                     style: TextStyle(
                                       fontSize: 12,
-                                      color: Colors.grey[600],
+                                      color: AppColors.onDarkMuted,
                                     ),
                                   ),
                                   const SizedBox(height: 4),
@@ -212,6 +208,7 @@ class PromoDetailPage extends StatelessWidget {
                                       fontSize: 22,
                                       fontWeight: FontWeight.bold,
                                       letterSpacing: 2,
+                                      color: AppColors.onDark,
                                     ),
                                   ),
                                 ],
@@ -237,10 +234,10 @@ class PromoDetailPage extends StatelessWidget {
                               child: Container(
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF0047FF).withOpacity(0.1),
+                                  color: AppColors.brandYellow.withValues(alpha: 0.15),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                child: const Icon(Icons.copy, color: Color(0xFF0047FF)),
+                                child: const Icon(Icons.copy, color: AppColors.brandYellow),
                               ),
                             ),
                           ],
@@ -277,28 +274,23 @@ class PromoDetailPage extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.surface,
                       borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
+                      border: Border.all(color: AppColors.surfaceBorder),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
+                        const Row(
                           children: [
-                            Icon(Icons.info_outline, color: color, size: 20),
-                            const SizedBox(width: 8),
-                            const Text(
+                            Icon(Icons.info_outline, color: AppColors.brandYellow, size: 20),
+                            SizedBox(width: 8),
+                            Text(
                               "Deskripsi Promo",
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
+                                color: AppColors.onDark,
                               ),
                             ),
                           ],
@@ -306,8 +298,8 @@ class PromoDetailPage extends StatelessWidget {
                         const SizedBox(height: 12),
                         Text(
                           description,
-                          style: TextStyle(
-                            color: Colors.grey[700],
+                          style: const TextStyle(
+                            color: AppColors.onDarkMuted,
                             fontSize: 14,
                             height: 1.6,
                           ),
@@ -322,28 +314,23 @@ class PromoDetailPage extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.surface,
                       borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
+                      border: Border.all(color: AppColors.surfaceBorder),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
+                        const Row(
                           children: [
-                            Icon(Icons.rule, color: color, size: 20),
-                            const SizedBox(width: 8),
-                            const Text(
+                            Icon(Icons.rule, color: AppColors.brandYellow, size: 20),
+                            SizedBox(width: 8),
+                            Text(
                               "Syarat & Ketentuan",
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
+                                color: AppColors.onDark,
                               ),
                             ),
                           ],
@@ -370,15 +357,9 @@ class PromoDetailPage extends StatelessWidget {
       // Bottom Button
       bottomNavigationBar: Container(
         padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, -5),
-            ),
-          ],
+        decoration: const BoxDecoration(
+          color: AppColors.bg,
+          border: Border(top: BorderSide(color: AppColors.surfaceBorder)),
         ),
         child: SafeArea(
           child: SizedBox(
@@ -401,22 +382,22 @@ class PromoDetailPage extends StatelessWidget {
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF0047FF),
+                backgroundColor: AppColors.brandYellow,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(999),
                 ),
                 elevation: 0,
               ),
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.local_offer, color: Colors.white, size: 20),
+                  Icon(Icons.local_offer, color: AppColors.ink, size: 20),
                   SizedBox(width: 8),
                   Text(
                     "PAKAI PROMO SEKARANG",
                     style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
+                      color: AppColors.ink,
+                      fontWeight: FontWeight.w700,
                       fontSize: 16,
                     ),
                   ),
@@ -438,7 +419,7 @@ class PromoDetailPage extends StatelessWidget {
       case 'freebie':
         return Colors.purple;
       default:
-        return const Color(0xFF0047FF);
+        return AppColors.brandYellow;
     }
   }
 
@@ -469,8 +450,8 @@ class PromoDetailPage extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              style: TextStyle(
-                color: Colors.grey[700],
+              style: const TextStyle(
+                color: AppColors.onDarkMuted,
                 fontSize: 13,
                 height: 1.4,
               ),
@@ -554,18 +535,19 @@ class AllPromosPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.bg,
         elevation: 0,
+        systemOverlayStyle: SystemUiOverlayStyle.light,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: AppColors.onDark),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           "Semua Promo",
           style: TextStyle(
-            color: Colors.black,
+            color: AppColors.onDark,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -591,7 +573,7 @@ class AllPromosPage extends StatelessWidget {
             builder: (context) => PromoDetailPage(
               title: promo['title']!,
               subtitle: promo['subtitle']!,
-              color: const Color(0xFF0047FF),
+              color: AppColors.brandYellow,
               promoData: promo,
             ),
           ),
@@ -600,15 +582,9 @@ class AllPromosPage extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          border: Border.all(color: AppColors.surfaceBorder),
         ),
         child: Column(
           children: [
@@ -629,7 +605,7 @@ class AllPromosPage extends StatelessWidget {
                       borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                       gradient: LinearGradient(
                         colors: [
-                          Colors.black.withOpacity(0.5),
+                          Colors.black.withValues(alpha: 0.5),
                           Colors.transparent,
                         ],
                         begin: Alignment.bottomCenter,
@@ -695,8 +671,8 @@ class AllPromosPage extends StatelessWidget {
                       children: [
                         Text(
                           promo['subtitle']!,
-                          style: TextStyle(
-                            color: Colors.grey[600],
+                          style: const TextStyle(
+                            color: AppColors.onDarkMuted,
                             fontSize: 13,
                           ),
                         ),
@@ -721,14 +697,14 @@ class AllPromosPage extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0047FF),
-                      borderRadius: BorderRadius.circular(20),
+                      color: AppColors.brandYellow,
+                      borderRadius: BorderRadius.circular(999),
                     ),
                     child: const Text(
                       "Lihat",
                       style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
+                        color: AppColors.ink,
+                        fontWeight: FontWeight.w700,
                         fontSize: 12,
                       ),
                     ),
@@ -751,7 +727,7 @@ class AllPromosPage extends StatelessWidget {
       case 'freebie':
         return Colors.purple;
       default:
-        return const Color(0xFF0047FF);
+        return AppColors.brandYellow;
     }
   }
 }

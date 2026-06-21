@@ -1,10 +1,12 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/rendering.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import '../constants/colors.dart';
 import '../models/booking.dart';
 import '../models/refund.dart';
 import '../services/auth_service.dart';
@@ -158,7 +160,7 @@ class _ETicketPageState extends State<ETicketPage> {
           bottom: MediaQuery.of(context).viewInsets.bottom,
         ),
         decoration: const BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Padding(
@@ -173,7 +175,7 @@ class _ETicketPageState extends State<ETicketPage> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
+                    color: AppColors.surfaceBorder,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -183,7 +185,7 @@ class _ETicketPageState extends State<ETicketPage> {
               // Title
               const Text(
                 "Ajukan Refund",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.onDark),
               ),
               const SizedBox(height: 20),
 
@@ -191,27 +193,27 @@ class _ETicketPageState extends State<ETicketPage> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.orange.shade50,
+                  color: Colors.orange.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.orange.shade200),
+                  border: Border.all(color: Colors.orange.withValues(alpha: 0.4)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.info_outline, color: Colors.orange.shade700, size: 20),
+                        Icon(Icons.info_outline, color: Colors.orange.shade400, size: 20),
                         const SizedBox(width: 8),
                         const Text(
                           "Kebijakan Refund",
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.onDark),
                         ),
                       ],
                     ),
                     const SizedBox(height: 8),
                     Text(
                       policy.description,
-                      style: TextStyle(color: Colors.grey[700], fontSize: 13),
+                      style: const TextStyle(color: AppColors.onDarkMuted, fontSize: 13),
                     ),
                   ],
                 ),
@@ -222,8 +224,9 @@ class _ETicketPageState extends State<ETicketPage> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
+                  color: AppColors.bg,
                   borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.surfaceBorder),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -231,24 +234,24 @@ class _ETicketPageState extends State<ETicketPage> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("Total Pembayaran", style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+                        const Text("Total Pembayaran", style: TextStyle(color: AppColors.onDarkMuted, fontSize: 12)),
                         const SizedBox(height: 4),
                         Text(_formatCurrency(widget.booking.totalPrice.toInt()),
-                            style: const TextStyle(fontWeight: FontWeight.w600)),
+                            style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.onDark)),
                       ],
                     ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text("Jumlah Refund (${policy.percentage}%)",
-                            style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+                            style: const TextStyle(color: AppColors.onDarkMuted, fontSize: 12)),
                         const SizedBox(height: 4),
                         Text(
                           _formatCurrency(refundAmount),
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 18,
-                            color: Color(0xFF0047FF),
+                            color: AppColors.brandYellow,
                           ),
                         ),
                       ],
@@ -259,25 +262,28 @@ class _ETicketPageState extends State<ETicketPage> {
               const SizedBox(height: 16),
 
               // Reason input
-              const Text("Alasan Refund", style: TextStyle(fontWeight: FontWeight.w600)),
+              const Text("Alasan Refund", style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.onDark)),
               const SizedBox(height: 8),
               TextField(
                 controller: reasonController,
                 maxLines: 3,
+                style: const TextStyle(color: AppColors.onDark),
                 decoration: InputDecoration(
                   hintText: "Jelaskan alasan pengajuan refund...",
-                  hintStyle: TextStyle(color: Colors.grey[400]),
+                  hintStyle: const TextStyle(color: AppColors.onDarkMuted),
+                  filled: true,
+                  fillColor: AppColors.bg,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderSide: const BorderSide(color: AppColors.surfaceBorder),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
+                    borderSide: const BorderSide(color: AppColors.surfaceBorder),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFF0047FF)),
+                    borderSide: const BorderSide(color: AppColors.brandYellow),
                   ),
                 ),
               ),
@@ -286,12 +292,12 @@ class _ETicketPageState extends State<ETicketPage> {
               // Note about admin approval
               Row(
                 children: [
-                  Icon(Icons.schedule, size: 14, color: Colors.grey[500]),
+                  const Icon(Icons.schedule, size: 14, color: AppColors.onDarkMuted),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
                       "Pengajuan refund memerlukan persetujuan admin (1-3 hari kerja)",
-                      style: TextStyle(color: Colors.grey[500], fontSize: 11),
+                      style: const TextStyle(color: AppColors.onDarkMuted, fontSize: 11),
                     ),
                   ),
                 ],
@@ -306,9 +312,10 @@ class _ETicketPageState extends State<ETicketPage> {
                       onPressed: () => Navigator.pop(context, false),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 14),
+                        side: const BorderSide(color: AppColors.surfaceBorder),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
-                      child: const Text("Batal"),
+                      child: const Text("Batal", style: TextStyle(color: AppColors.onDark)),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -441,12 +448,13 @@ class _ETicketPageState extends State<ETicketPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFE8F0FE),
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFE8F0FE),
+        backgroundColor: AppColors.bg,
+        systemOverlayStyle: SystemUiOverlayStyle.light,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black87),
+          icon: const Icon(Icons.arrow_back, color: AppColors.onDark),
           onPressed: () {
             Navigator.pushAndRemoveUntil(
               context,
@@ -460,7 +468,7 @@ class _ETicketPageState extends State<ETicketPage> {
         title: const Text(
           "E-Tiket",
           style: TextStyle(
-            color: Colors.black87,
+            color: AppColors.onDark,
             fontWeight: FontWeight.w600,
             fontSize: 18,
           ),
@@ -496,8 +504,9 @@ class _ETicketPageState extends State<ETicketPage> {
                       child: Container(
                         width: double.infinity,
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: AppColors.surface,
                           borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: AppColors.surfaceBorder),
                         ),
                         child: Column(
                           children: [
@@ -512,7 +521,7 @@ class _ETicketPageState extends State<ETicketPage> {
                                     style: const TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.black87,
+                                      color: AppColors.onDark,
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
@@ -547,7 +556,7 @@ class _ETicketPageState extends State<ETicketPage> {
                                   width: 14,
                                   height: 28,
                                   decoration: const BoxDecoration(
-                                    color: Color(0xFFE8F0FE),
+                                    color: AppColors.bg,
                                     borderRadius: BorderRadius.only(
                                       topRight: Radius.circular(14),
                                       bottomRight: Radius.circular(14),
@@ -557,14 +566,14 @@ class _ETicketPageState extends State<ETicketPage> {
                                 Expanded(
                                   child: Container(
                                     height: 1,
-                                    color: Colors.grey.shade300,
+                                    color: AppColors.surfaceBorder,
                                   ),
                                 ),
                                 Container(
                                   width: 14,
                                   height: 28,
                                   decoration: const BoxDecoration(
-                                    color: Color(0xFFE8F0FE),
+                                    color: AppColors.bg,
                                     borderRadius: BorderRadius.only(
                                       topLeft: Radius.circular(14),
                                       bottomLeft: Radius.circular(14),
@@ -585,7 +594,7 @@ class _ETicketPageState extends State<ETicketPage> {
                                   const SizedBox(height: 16),
                                   _buildInfoRow("Lapangan", widget.booking.field?.name ?? "-", "Durasi", "${widget.booking.durationHours} Jam"),
                                   const SizedBox(height: 16),
-                                  _buildInfoRow("Kode Booking", widget.booking.bookingCode, "Total", _formatCurrency(widget.booking.totalPrice.toInt()), valueColor: const Color(0xFF0047FF)),
+                                  _buildInfoRow("Kode Booking", widget.booking.bookingCode, "Total", _formatCurrency(widget.booking.totalPrice.toInt()), valueColor: AppColors.brandYellow),
                                 ],
                               ),
                             ),
@@ -615,7 +624,7 @@ class _ETicketPageState extends State<ETicketPage> {
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                backgroundColor: Colors.white,
+                                backgroundColor: AppColors.surface,
                               ),
                             ),
                           ),
@@ -642,7 +651,7 @@ class _ETicketPageState extends State<ETicketPage> {
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
                                   ),
-                                  backgroundColor: Colors.white,
+                                  backgroundColor: AppColors.surface,
                                 ),
                               ),
                             ),
@@ -657,17 +666,18 @@ class _ETicketPageState extends State<ETicketPage> {
                       width: double.infinity,
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppColors.surface,
                         borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.surfaceBorder),
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.info_outline, color: Colors.grey.shade600, size: 20),
+                          const Icon(Icons.info_outline, color: AppColors.onDarkMuted, size: 20),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
                               "Harap datang 10 menit sebelum jadwal",
-                              style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
+                              style: const TextStyle(color: AppColors.onDarkMuted, fontSize: 13),
                             ),
                           ),
                         ],
@@ -681,10 +691,10 @@ class _ETicketPageState extends State<ETicketPage> {
                         width: double.infinity,
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
-                          color: _canRequestRefund ? Colors.green.shade50 : Colors.red.shade50,
+                          color: (_canRequestRefund ? Colors.green : Colors.red).withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: _canRequestRefund ? Colors.green.shade200 : Colors.red.shade200,
+                            color: (_canRequestRefund ? Colors.green : Colors.red).withValues(alpha: 0.4),
                           ),
                         ),
                         child: Column(
@@ -694,7 +704,7 @@ class _ETicketPageState extends State<ETicketPage> {
                               children: [
                                 Icon(
                                   _canRequestRefund ? Icons.check_circle_outline : Icons.cancel_outlined,
-                                  color: _canRequestRefund ? Colors.green.shade700 : Colors.red.shade700,
+                                  color: _canRequestRefund ? Colors.green.shade400 : Colors.red.shade400,
                                   size: 20,
                                 ),
                                 const SizedBox(width: 10),
@@ -702,7 +712,7 @@ class _ETicketPageState extends State<ETicketPage> {
                                   child: Text(
                                     _refundTimeInfo,
                                     style: TextStyle(
-                                      color: _canRequestRefund ? Colors.green.shade800 : Colors.red.shade800,
+                                      color: _canRequestRefund ? Colors.green.shade300 : Colors.red.shade300,
                                       fontSize: 13,
                                       fontWeight: FontWeight.w600,
                                     ),
@@ -713,8 +723,8 @@ class _ETicketPageState extends State<ETicketPage> {
                             const SizedBox(height: 8),
                             Text(
                               "Kebijakan: Refund 100% jika > 24 jam, 50% jika 12-24 jam, 0% jika < 12 jam sebelum jadwal",
-                              style: TextStyle(
-                                color: Colors.grey.shade600,
+                              style: const TextStyle(
+                                color: AppColors.onDarkMuted,
                                 fontSize: 11,
                               ),
                             ),
@@ -739,22 +749,22 @@ class _ETicketPageState extends State<ETicketPage> {
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: Colors.white,
+                          color: AppColors.ink,
                         ),
                       )
-                    : const Icon(Icons.download, color: Colors.white),
+                    : const Icon(Icons.download, color: AppColors.ink),
                 label: Text(
                   _isDownloading ? "Menyimpan..." : "Download Ticket",
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.ink),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0047FF),
-                  foregroundColor: Colors.white,
-                  disabledBackgroundColor: const Color(0xFF0047FF).withValues(alpha: 0.7),
+                  backgroundColor: AppColors.brandYellow,
+                  foregroundColor: AppColors.ink,
+                  disabledBackgroundColor: AppColors.brandYellow.withValues(alpha: 0.7),
                   elevation: 0,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
+                    borderRadius: BorderRadius.circular(999),
                   ),
                 ),
               ),
@@ -772,9 +782,9 @@ class _ETicketPageState extends State<ETicketPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(leftLabel, style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
+              Text(leftLabel, style: const TextStyle(color: AppColors.onDarkMuted, fontSize: 12)),
               const SizedBox(height: 4),
-              Text(leftValue, style: TextStyle(color: valueColor ?? Colors.black87, fontSize: 14, fontWeight: FontWeight.w600)),
+              Text(leftValue, style: TextStyle(color: valueColor ?? AppColors.onDark, fontSize: 14, fontWeight: FontWeight.w600)),
             ],
           ),
         ),
@@ -782,9 +792,9 @@ class _ETicketPageState extends State<ETicketPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(rightLabel, style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
+              Text(rightLabel, style: const TextStyle(color: AppColors.onDarkMuted, fontSize: 12)),
               const SizedBox(height: 4),
-              Text(rightValue, style: TextStyle(color: valueColor ?? Colors.black87, fontSize: 14, fontWeight: FontWeight.w600), textAlign: TextAlign.end),
+              Text(rightValue, style: TextStyle(color: valueColor ?? AppColors.onDark, fontSize: 14, fontWeight: FontWeight.w600), textAlign: TextAlign.end),
             ],
           ),
         ),

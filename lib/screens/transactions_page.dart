@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../services/booking_service.dart';
@@ -9,6 +10,7 @@ import 'login_page.dart';
 import 'venue_detail_page.dart';
 import 'e_ticket_page.dart';
 import 'chat/chat_page.dart';
+import '../constants/colors.dart';
 
 class TransactionsPage extends StatefulWidget {
   const TransactionsPage({super.key});
@@ -123,24 +125,25 @@ class _TransactionsPageState extends State<TransactionsPage> with SingleTickerPr
     // Check if user is not logged in
     if (AuthService.token == null) {
       return Scaffold(
-        backgroundColor: Colors.grey[50],
+        backgroundColor: AppColors.bg,
         appBar: AppBar(
           title: const Text(
             "Transaksi",
-            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)
+            style: TextStyle(color: AppColors.onDark, fontWeight: FontWeight.bold)
           ),
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.bg,
           elevation: 0,
+          systemOverlayStyle: SystemUiOverlayStyle.light,
         ),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.login, size: 80, color: Colors.grey[300]),
+              const Icon(Icons.login, size: 80, color: AppColors.onDarkMuted),
               const SizedBox(height: 16),
-              Text(
+              const Text(
                 "Silakan login untuk melihat transaksi",
-                style: TextStyle(color: Colors.grey[500], fontSize: 16),
+                style: TextStyle(color: AppColors.onDarkMuted, fontSize: 16),
               ),
               const SizedBox(height: 24),
               ElevatedButton(
@@ -151,15 +154,15 @@ class _TransactionsPageState extends State<TransactionsPage> with SingleTickerPr
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0047FF),
+                  backgroundColor: AppColors.brandYellow,
                   padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(999),
                   ),
                 ),
                 child: const Text(
                   "Login",
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.bold),
                 ),
               ),
             ],
@@ -169,23 +172,24 @@ class _TransactionsPageState extends State<TransactionsPage> with SingleTickerPr
     }
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.bg,
         elevation: 0,
+        systemOverlayStyle: SystemUiOverlayStyle.light,
         title: const Text(
           'Transaksi',
           style: TextStyle(
-            color: Colors.black87,
+            color: AppColors.onDark,
             fontWeight: FontWeight.bold,
           ),
         ),
         centerTitle: true,
         bottom: TabBar(
           controller: _tabController,
-          labelColor: const Color(0xFF0047FF),
-          unselectedLabelColor: Colors.grey,
-          indicatorColor: const Color(0xFF0047FF),
+          labelColor: AppColors.brandYellow,
+          unselectedLabelColor: AppColors.onDarkMuted,
+          indicatorColor: AppColors.brandYellow,
           indicatorWeight: 3,
           labelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
           tabs: const [
@@ -200,9 +204,9 @@ class _TransactionsPageState extends State<TransactionsPage> with SingleTickerPr
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircularProgressIndicator(color: Color(0xFF0047FF)),
+                  CircularProgressIndicator(color: AppColors.brandYellow),
                   SizedBox(height: 16),
-                  Text('Memuat data transaksi...'),
+                  Text('Memuat data transaksi...', style: TextStyle(color: AppColors.onDarkMuted)),
                 ],
               ),
             )
@@ -211,22 +215,22 @@ class _TransactionsPageState extends State<TransactionsPage> with SingleTickerPr
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.error_outline, size: 60, color: Colors.grey[400]),
+                      const Icon(Icons.error_outline, size: 60, color: AppColors.onDarkMuted),
                       const SizedBox(height: 16),
                       Text(
                         _errorMessage!,
-                        style: TextStyle(color: Colors.grey[600]),
+                        style: const TextStyle(color: AppColors.onDarkMuted),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 16),
                       ElevatedButton(
                         onPressed: _loadBookings,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF0047FF),
+                          backgroundColor: AppColors.brandYellow,
                         ),
                         child: const Text(
                           'Coba Lagi',
-                          style: TextStyle(color: Colors.white),
+                          style: TextStyle(color: AppColors.ink),
                         ),
                       ),
                     ],
@@ -272,17 +276,17 @@ class _TransactionsPageState extends State<TransactionsPage> with SingleTickerPr
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(emptyIcon, size: 80, color: Colors.grey[300]),
+            Icon(emptyIcon, size: 80, color: AppColors.onDarkMuted),
             const SizedBox(height: 16),
             Text(
               emptyMessage,
-              style: TextStyle(color: Colors.grey[500], fontSize: 16),
+              style: const TextStyle(color: AppColors.onDarkMuted, fontSize: 16),
             ),
             if (status == 'upcoming') ...[
               const SizedBox(height: 8),
-              Text(
+              const Text(
                 'Yuk booking lapangan favoritmu!',
-                style: TextStyle(color: Colors.grey[400], fontSize: 13),
+                style: TextStyle(color: AppColors.onDarkMuted, fontSize: 13),
               ),
             ],
           ],
@@ -420,7 +424,7 @@ class _BookingCardState extends State<_BookingCard> {
         statusIcon = Icons.timer_outlined;
         break;
       case 'confirmed':
-        themeColor = const Color(0xFF0047FF);
+        themeColor = AppColors.brandYellow;
         statusText = "Terkonfirmasi";
         statusIcon = Icons.verified;
         break;
@@ -455,15 +459,9 @@ class _BookingCardState extends State<_BookingCard> {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.shade200,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border.all(color: AppColors.surfaceBorder),
       ),
       child: Column(
         children: [
@@ -471,7 +469,7 @@ class _BookingCardState extends State<_BookingCard> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
-              color: themeColor.withValues(alpha: 0.1),
+              color: themeColor.withValues(alpha: 0.15),
               borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
             ),
             child: Row(
@@ -493,20 +491,20 @@ class _BookingCardState extends State<_BookingCard> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.bg,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.schedule, size: 12, color: Colors.orange.shade700),
+                        Icon(Icons.schedule, size: 12, color: Colors.orange.shade400),
                         const SizedBox(width: 4),
                         Text(
                           _countdownText,
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
-                            color: Colors.orange.shade700,
+                            color: Colors.orange.shade400,
                           ),
                         ),
                       ],
@@ -527,12 +525,13 @@ class _BookingCardState extends State<_BookingCard> {
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
+                    color: AppColors.onDark,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   booking.field?.name ?? "-",
-                  style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                  style: const TextStyle(color: AppColors.onDarkMuted, fontSize: 14),
                 ),
                 // Venue Address for upcoming bookings
                 if (_isUpcoming && venueAddress != null && venueAddress.isNotEmpty) ...[
@@ -540,12 +539,12 @@ class _BookingCardState extends State<_BookingCard> {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(Icons.location_on_outlined, size: 14, color: Colors.grey[500]),
+                      const Icon(Icons.location_on_outlined, size: 14, color: AppColors.onDarkMuted),
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
                           venueAddress,
-                          style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                          style: const TextStyle(color: AppColors.onDarkMuted, fontSize: 12),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -556,14 +555,14 @@ class _BookingCardState extends State<_BookingCard> {
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    Icon(Icons.calendar_today, size: 14, color: Colors.grey[500]),
+                    const Icon(Icons.calendar_today, size: 14, color: AppColors.onDarkMuted),
                     const SizedBox(width: 6),
                     Text(
                       _formatDate(booking.bookingDate),
-                      style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                      style: const TextStyle(color: AppColors.onDarkMuted, fontSize: 13),
                     ),
                     const SizedBox(width: 16),
-                    Icon(Icons.access_time, size: 14, color: Colors.grey[500]),
+                    const Icon(Icons.access_time, size: 14, color: AppColors.onDarkMuted),
                     const SizedBox(width: 6),
                     Text(
                       booking.formattedTime,
@@ -577,7 +576,7 @@ class _BookingCardState extends State<_BookingCard> {
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
-                    color: Color(0xFF0047FF),
+                    color: AppColors.brandYellow,
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -591,8 +590,8 @@ class _BookingCardState extends State<_BookingCard> {
                           icon: const Icon(Icons.directions, size: 18),
                           label: const Text("Navigasi"),
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: const Color(0xFF0047FF),
-                            side: const BorderSide(color: Color(0xFF0047FF)),
+                            foregroundColor: AppColors.brandYellow,
+                            side: const BorderSide(color: AppColors.brandYellow),
                             padding: const EdgeInsets.symmetric(vertical: 10),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                           ),
@@ -670,10 +669,10 @@ class _BookingCardState extends State<_BookingCard> {
                 MaterialPageRoute(builder: (context) => ETicketPage(booking: booking)),
               );
             },
-            icon: const Icon(Icons.confirmation_number, color: Colors.white, size: 18),
-            label: const Text("LIHAT E-TICKET", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            icon: const Icon(Icons.confirmation_number, color: AppColors.ink, size: 18),
+            label: const Text("LIHAT E-TICKET", style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.bold)),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF0047FF),
+              backgroundColor: AppColors.brandYellow,
               padding: const EdgeInsets.symmetric(vertical: 12),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
@@ -684,9 +683,11 @@ class _BookingCardState extends State<_BookingCard> {
           width: double.infinity,
           child: OutlinedButton.icon(
             onPressed: () => _rebook(context),
-            icon: const Icon(Icons.replay, size: 18),
-            label: const Text("BOOKING LAGI"),
+            icon: const Icon(Icons.replay, size: 18, color: AppColors.brandYellow),
+            label: const Text("BOOKING LAGI", style: TextStyle(color: AppColors.brandYellow)),
             style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.brandYellow,
+              side: const BorderSide(color: AppColors.brandYellow),
               padding: const EdgeInsets.symmetric(vertical: 12),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
@@ -750,13 +751,14 @@ class _BookingCardState extends State<_BookingCard> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text("Batalkan Pesanan?"),
-        content: const Text("Apakah Anda yakin ingin membatalkan pesanan ini?"),
+        title: const Text("Batalkan Pesanan?", style: TextStyle(color: AppColors.onDark)),
+        content: const Text("Apakah Anda yakin ingin membatalkan pesanan ini?", style: TextStyle(color: AppColors.onDarkMuted)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text("Tidak"),
+            child: const Text("Tidak", style: TextStyle(color: AppColors.onDarkMuted)),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
@@ -980,13 +982,14 @@ class _TransactionBookingCardState extends State<TransactionBookingCard> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text("Batalkan Pesanan?"),
-        content: const Text("Apakah Anda yakin ingin membatalkan pesanan ini?"),
+        title: const Text("Batalkan Pesanan?", style: TextStyle(color: AppColors.onDark)),
+        content: const Text("Apakah Anda yakin ingin membatalkan pesanan ini?", style: TextStyle(color: AppColors.onDarkMuted)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text("Tidak"),
+            child: const Text("Tidak", style: TextStyle(color: AppColors.onDarkMuted)),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
@@ -1034,7 +1037,7 @@ class _TransactionBookingCardState extends State<TransactionBookingCard> {
     Color themeColor;
     String statusText;
     String mainBtnText;
-    Color btnColor = const Color(0xFF0047FF);
+    Color btnColor = AppColors.brandYellow;
     IconData statusIcon;
     VoidCallback? onMainAction;
     bool showSecondaryBtn = false;
@@ -1051,7 +1054,7 @@ class _TransactionBookingCardState extends State<TransactionBookingCard> {
         showCancelBtn = true;
         break;
       case 'confirmed':
-        themeColor = const Color(0xFF0047FF);
+        themeColor = AppColors.brandYellow;
         statusText = "Terkonfirmasi";
         mainBtnText = "LIHAT E-TICKET";
         statusIcon = Icons.verified;
@@ -1096,17 +1099,9 @@ class _TransactionBookingCardState extends State<TransactionBookingCard> {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
-            spreadRadius: 1,
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          )
-        ],
-        border: Border.all(color: Colors.grey.shade100),
+        border: Border.all(color: AppColors.surfaceBorder),
       ),
       child: Column(
         children: [
@@ -1114,7 +1109,7 @@ class _TransactionBookingCardState extends State<TransactionBookingCard> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: themeColor.withValues(alpha: 0.1),
+              color: themeColor.withValues(alpha: 0.15),
               borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
             ),
             child: Row(
@@ -1138,7 +1133,7 @@ class _TransactionBookingCardState extends State<TransactionBookingCard> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.bg,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Row(
@@ -1170,10 +1165,10 @@ class _TransactionBookingCardState extends State<TransactionBookingCard> {
                   height: 64,
                   width: 64,
                   decoration: BoxDecoration(
-                    color: Colors.grey[100],
+                    color: AppColors.bg,
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: Icon(Icons.sports_soccer, color: Colors.grey[400]),
+                  child: const Icon(Icons.sports_soccer, color: AppColors.onDarkMuted),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -1185,7 +1180,7 @@ class _TransactionBookingCardState extends State<TransactionBookingCard> {
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
-                          color: Colors.black87,
+                          color: AppColors.onDark,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -1193,7 +1188,7 @@ class _TransactionBookingCardState extends State<TransactionBookingCard> {
                       const SizedBox(height: 4),
                       Text(
                         booking.field?.name ?? "Unknown Field",
-                        style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                        style: const TextStyle(color: AppColors.onDarkMuted, fontSize: 13),
                       ),
                       const SizedBox(height: 8),
                       Wrap(
@@ -1203,12 +1198,12 @@ class _TransactionBookingCardState extends State<TransactionBookingCard> {
                           Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.calendar_today_outlined, size: 12, color: Colors.grey[500]),
+                              const Icon(Icons.calendar_today_outlined, size: 12, color: AppColors.onDarkMuted),
                               const SizedBox(width: 4),
                               Text(
                                 _formatDate(booking.bookingDate),
-                                style: TextStyle(
-                                  color: Colors.grey[600],
+                                style: const TextStyle(
+                                  color: AppColors.onDarkMuted,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -1218,12 +1213,12 @@ class _TransactionBookingCardState extends State<TransactionBookingCard> {
                           Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.schedule, size: 12, color: Colors.grey[500]),
+                              const Icon(Icons.schedule, size: 12, color: AppColors.onDarkMuted),
                               const SizedBox(width: 4),
                               Text(
                                 _formatTimeRange(booking.startTime, booking.endTime),
-                                style: TextStyle(
-                                  color: Colors.grey[600],
+                                style: const TextStyle(
+                                  color: AppColors.onDarkMuted,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -1239,7 +1234,7 @@ class _TransactionBookingCardState extends State<TransactionBookingCard> {
             ),
           ),
 
-          Divider(height: 1, color: Colors.grey.shade100, thickness: 1),
+          const Divider(height: 1, color: AppColors.surfaceBorder, thickness: 1),
 
           // FOOTER
           Padding(
@@ -1254,7 +1249,7 @@ class _TransactionBookingCardState extends State<TransactionBookingCard> {
                       children: [
                         const Text(
                           "Total Harga",
-                          style: TextStyle(fontSize: 11, color: Colors.grey),
+                          style: TextStyle(fontSize: 11, color: AppColors.onDarkMuted),
                         ),
                         const SizedBox(height: 2),
                         Text(
@@ -1262,7 +1257,7 @@ class _TransactionBookingCardState extends State<TransactionBookingCard> {
                           style: const TextStyle(
                             fontWeight: FontWeight.w900,
                             fontSize: 18,
-                            color: Colors.black,
+                            color: AppColors.onDark,
                           ),
                         ),
                       ],
@@ -1303,13 +1298,13 @@ class _TransactionBookingCardState extends State<TransactionBookingCard> {
                       status == 'pending' ? Icons.payment :
                       status == 'confirmed' || status == 'checked_in' ? Icons.confirmation_number :
                       Icons.replay,
-                      color: Colors.white,
+                      color: status == 'pending' ? Colors.white : AppColors.ink,
                       size: 20,
                     ),
                     label: Text(
                       mainBtnText,
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: status == 'pending' ? Colors.white : AppColors.ink,
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
                       ),
@@ -1377,7 +1372,7 @@ class TransactionPaymentSelectorSheet extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.only(top: 10),
       decoration: const BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
@@ -1389,7 +1384,7 @@ class TransactionPaymentSelectorSheet extends StatelessWidget {
             height: 4,
             margin: const EdgeInsets.only(bottom: 20),
             decoration: BoxDecoration(
-              color: Colors.grey[300],
+              color: AppColors.surfaceBorder,
               borderRadius: BorderRadius.circular(10),
             ),
           ),
@@ -1397,26 +1392,26 @@ class TransactionPaymentSelectorSheet extends StatelessWidget {
             padding: EdgeInsets.symmetric(horizontal: 24),
             child: Text(
               "Pilih Pembayaran",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.onDark),
             ),
           ),
-          const Divider(height: 24),
+          const Divider(height: 24, color: AppColors.surfaceBorder),
 
           // Ringkasan Tagihan
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(20),
-            color: const Color(0xFFF8F9FA),
+            color: AppColors.bg,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text("Total Tagihan", style: TextStyle(color: Colors.grey)),
+                const Text("Total Tagihan", style: TextStyle(color: AppColors.onDarkMuted)),
                 Text(
                   formatCurrency(totalPrice),
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w900,
-                    color: Colors.black,
+                    color: AppColors.onDark,
                   ),
                 ),
               ],
@@ -1486,7 +1481,7 @@ class TransactionPaymentSelectorSheet extends StatelessWidget {
         style: const TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.bold,
-          color: Colors.grey,
+          color: AppColors.onDarkMuted,
         ),
       ),
     );
@@ -1519,19 +1514,11 @@ class TransactionPaymentSelectorSheet extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isRecommended ? const Color(0xFF0047FF) : Colors.grey.shade200,
+            color: isRecommended ? AppColors.brandYellow : AppColors.surfaceBorder,
           ),
-          boxShadow: [
-            if (isRecommended)
-              BoxShadow(
-                color: const Color(0xFF0047FF).withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              )
-          ],
         ),
         child: Row(
           children: [
@@ -1539,7 +1526,7 @@ class TransactionPaymentSelectorSheet extends StatelessWidget {
               height: 50,
               width: 50,
               decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
+                color: color.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(icon, color: color, size: 28),
@@ -1557,6 +1544,7 @@ class TransactionPaymentSelectorSheet extends StatelessWidget {
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
+                            color: AppColors.onDark,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -1566,14 +1554,14 @@ class TransactionPaymentSelectorSheet extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF0047FF),
+                            color: AppColors.brandYellow,
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: const Text(
                             "PROMO",
                             style: TextStyle(
                               fontSize: 8,
-                              color: Colors.white,
+                              color: AppColors.ink,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -1586,13 +1574,13 @@ class TransactionPaymentSelectorSheet extends StatelessWidget {
                     fee == 0 ? "Bebas Biaya Admin" : "Biaya Admin: ${formatCurrency(fee)}",
                     style: TextStyle(
                       fontSize: 12,
-                      color: fee == 0 ? Colors.green : Colors.grey[600],
+                      color: fee == 0 ? Colors.green : AppColors.onDarkMuted,
                     ),
                   ),
                 ],
               ),
             ),
-            Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey[400]),
+            const Icon(Icons.arrow_forward_ios, size: 16, color: AppColors.onDarkMuted),
           ],
         ),
       ),
@@ -1712,24 +1700,25 @@ class _TransactionPaymentWaitingPageState extends State<TransactionPaymentWaitin
     String? qrString = widget.booking.payment?.qrString;
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
         title: const Text(
           "Selesaikan Pembayaran",
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          style: TextStyle(color: AppColors.onDark, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.bg,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black),
+        systemOverlayStyle: SystemUiOverlayStyle.light,
+        iconTheme: const IconThemeData(color: AppColors.onDark),
       ),
       body: _isProcessing
           ? const Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircularProgressIndicator(color: Color(0xFF0047FF)),
+                  CircularProgressIndicator(color: AppColors.brandYellow),
                   SizedBox(height: 16),
-                  Text('Memproses...'),
+                  Text('Memproses...', style: TextStyle(color: AppColors.onDarkMuted)),
                 ],
               ),
             )
@@ -1743,16 +1732,16 @@ class _TransactionPaymentWaitingPageState extends State<TransactionPaymentWaitin
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.orange.shade50,
+                      color: AppColors.surface,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.orange.shade200),
+                      border: Border.all(color: Colors.orange.withValues(alpha: 0.4)),
                     ),
                     child: Row(
                       children: [
                         Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: Colors.orange.shade100,
+                            color: Colors.orange.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: const Icon(Icons.timer_outlined, color: Colors.orange, size: 24),
@@ -1764,7 +1753,7 @@ class _TransactionPaymentWaitingPageState extends State<TransactionPaymentWaitin
                             children: [
                               const Text(
                                 "Selesaikan pembayaran dalam",
-                                style: TextStyle(fontSize: 12, color: Colors.black54),
+                                style: TextStyle(fontSize: 12, color: AppColors.onDarkMuted),
                               ),
                               const SizedBox(height: 4),
                               Text(
@@ -1788,24 +1777,24 @@ class _TransactionPaymentWaitingPageState extends State<TransactionPaymentWaitin
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.surface,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey.shade200),
+                      border: Border.all(color: AppColors.surfaceBorder),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.receipt_long, color: Colors.grey[600], size: 18),
+                            Icon(Icons.receipt_long, color: AppColors.onDarkMuted, size: 18),
                             const SizedBox(width: 8),
                             const Text(
                               "Detail Booking",
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.onDark),
                             ),
                           ],
                         ),
-                        const Divider(height: 20),
+                        const Divider(height: 20, color: AppColors.surfaceBorder),
                         _buildDetailRow("Kode Booking", widget.booking.bookingCode),
                         _buildDetailRow("Venue", widget.booking.field?.venue?.name ?? "-"),
                         _buildDetailRow("Lapangan", widget.booking.field?.name ?? "-"),
@@ -1822,41 +1811,41 @@ class _TransactionPaymentWaitingPageState extends State<TransactionPaymentWaitin
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.surface,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey.shade200),
+                      border: Border.all(color: AppColors.surfaceBorder),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.payment, color: Colors.grey[600], size: 18),
+                            Icon(Icons.payment, color: AppColors.onDarkMuted, size: 18),
                             const SizedBox(width: 8),
                             const Text(
                               "Metode Pembayaran",
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.onDark),
                             ),
                           ],
                         ),
-                        const Divider(height: 20),
+                        const Divider(height: 20, color: AppColors.surfaceBorder),
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF0047FF).withOpacity(0.1),
+                            color: AppColors.brandYellow.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Row(
                             children: [
                               Icon(
                                 isQRIS ? Icons.qr_code_scanner : Icons.account_balance,
-                                color: const Color(0xFF0047FF),
+                                color: AppColors.brandYellow,
                               ),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
                                   method,
-                                  style: const TextStyle(fontWeight: FontWeight.bold),
+                                  style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.onDark),
                                 ),
                               ),
                             ],
@@ -1886,7 +1875,7 @@ class _TransactionPaymentWaitingPageState extends State<TransactionPaymentWaitin
                                     "SCAN ME",
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      color: Color(0xFF0047FF),
+                                      color: AppColors.ink,
                                     ),
                                   ),
                                 ],
@@ -1898,16 +1887,16 @@ class _TransactionPaymentWaitingPageState extends State<TransactionPaymentWaitin
                             Center(
                               child: Text(
                                 "Kode: $qrString",
-                                style: TextStyle(color: Colors.grey[600], fontSize: 11),
+                                style: const TextStyle(color: AppColors.onDarkMuted, fontSize: 11),
                                 textAlign: TextAlign.center,
                               ),
                             ),
                           ],
                           const SizedBox(height: 12),
-                          Center(
+                          const Center(
                             child: Text(
                               "Scan dengan aplikasi e-wallet atau m-banking",
-                              style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                              style: TextStyle(color: AppColors.onDarkMuted, fontSize: 12),
                             ),
                           ),
                         ] else ...[
@@ -1915,15 +1904,15 @@ class _TransactionPaymentWaitingPageState extends State<TransactionPaymentWaitin
                           Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: Colors.grey.shade50,
+                              color: AppColors.bg,
                               borderRadius: BorderRadius.circular(10),
-                              border: Border.all(color: Colors.grey.shade200),
+                              border: Border.all(color: AppColors.surfaceBorder),
                             ),
                             child: Column(
                               children: [
-                                Text(
+                                const Text(
                                   "Nomor Virtual Account",
-                                  style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                                  style: TextStyle(color: AppColors.onDarkMuted, fontSize: 12),
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
@@ -1932,6 +1921,7 @@ class _TransactionPaymentWaitingPageState extends State<TransactionPaymentWaitin
                                     fontSize: 24,
                                     fontWeight: FontWeight.bold,
                                     letterSpacing: 2,
+                                    color: AppColors.onDark,
                                   ),
                                 ),
                                 const SizedBox(height: 12),
@@ -1940,25 +1930,25 @@ class _TransactionPaymentWaitingPageState extends State<TransactionPaymentWaitin
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
                                         content: Text("Nomor VA berhasil disalin!"),
-                                        backgroundColor: Color(0xFF0047FF),
+                                        backgroundColor: AppColors.surface,
                                       ),
                                     );
                                   },
                                   icon: const Icon(Icons.copy, size: 16),
                                   label: const Text("Salin"),
                                   style: OutlinedButton.styleFrom(
-                                    foregroundColor: const Color(0xFF0047FF),
-                                    side: const BorderSide(color: Color(0xFF0047FF)),
+                                    foregroundColor: AppColors.brandYellow,
+                                    side: const BorderSide(color: AppColors.brandYellow),
                                   ),
                                 ),
                               ],
                             ),
                           ),
                           const SizedBox(height: 12),
-                          Center(
+                          const Center(
                             child: Text(
                               "Transfer sesuai nominal ke nomor VA di atas",
-                              style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                              style: TextStyle(color: AppColors.onDarkMuted, fontSize: 12),
                             ),
                           ),
                         ],
@@ -1993,28 +1983,28 @@ class _TransactionPaymentWaitingPageState extends State<TransactionPaymentWaitin
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: AppColors.surface,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey.shade200),
+                      border: Border.all(color: AppColors.surfaceBorder),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.receipt, color: Colors.grey[600], size: 18),
+                            Icon(Icons.receipt, color: AppColors.onDarkMuted, size: 18),
                             const SizedBox(width: 8),
                             const Text(
                               "Rincian Pembayaran",
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.onDark),
                             ),
                           ],
                         ),
-                        const Divider(height: 20),
+                        const Divider(height: 20, color: AppColors.surfaceBorder),
                         _buildPriceRow("Harga Lapangan", formatCurrency(widget.booking.pricePerHour.toInt())),
                         _buildPriceRow("Durasi", "${widget.booking.durationHours} jam"),
                         _buildPriceRow("Subtotal", formatCurrency(subtotal)),
-                        const Divider(height: 20),
+                        const Divider(height: 20, color: AppColors.surfaceBorder),
                         _buildPriceRow(
                           "Total Bayar",
                           formatCurrency(total),
@@ -2032,17 +2022,17 @@ class _TransactionPaymentWaitingPageState extends State<TransactionPaymentWaitin
                     height: 52,
                     child: ElevatedButton.icon(
                       onPressed: _simulatePayment,
-                      icon: const Icon(Icons.check_circle_outline, color: Colors.white),
+                      icon: const Icon(Icons.check_circle_outline, color: AppColors.ink),
                       label: const Text(
                         "CEK STATUS PEMBAYARAN",
                         style: TextStyle(
-                          color: Colors.white,
+                          color: AppColors.ink,
                           fontWeight: FontWeight.bold,
                           fontSize: 15,
                         ),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0047FF),
+                        backgroundColor: AppColors.brandYellow,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
@@ -2085,8 +2075,8 @@ class _TransactionPaymentWaitingPageState extends State<TransactionPaymentWaitin
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: TextStyle(color: Colors.grey[600], fontSize: 13)),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13)),
+          Text(label, style: const TextStyle(color: AppColors.onDarkMuted, fontSize: 13)),
+          Text(value, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13, color: AppColors.onDark)),
         ],
       ),
     );
@@ -2100,18 +2090,17 @@ class _TransactionPaymentWaitingPageState extends State<TransactionPaymentWaitin
         children: [
           Text(
             label,
-            style: TextStyle(
-              color: Colors.grey[600],
+            style: const TextStyle(
+              color: AppColors.onDarkMuted,
               fontSize: 13,
-              fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-            ),
+            ).copyWith(fontWeight: isBold ? FontWeight.bold : FontWeight.normal),
           ),
           Text(
             value,
             style: TextStyle(
               fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
               fontSize: isBold ? 16 : 13,
-              color: isBlue ? const Color(0xFF0047FF) : Colors.black,
+              color: isBlue ? AppColors.brandYellow : AppColors.onDark,
             ),
           ),
         ],

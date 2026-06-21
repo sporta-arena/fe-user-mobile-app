@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../constants/colors.dart';
@@ -103,6 +104,7 @@ class _ChatPageState extends State<ChatPage> {
   void _showPartnerInfo() {
     showModalBottomSheet(
       context: context,
+      backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -113,7 +115,7 @@ class _ChatPageState extends State<ChatPage> {
           children: [
             CircleAvatar(
               radius: 40,
-              backgroundColor: AppColors.primaryBlue.withOpacity(0.1),
+              backgroundColor: AppColors.brandYellow.withValues(alpha: 0.15),
               child: Text(
                 _partnerContact?.name.isNotEmpty == true
                     ? _partnerContact!.name[0].toUpperCase()
@@ -121,7 +123,7 @@ class _ChatPageState extends State<ChatPage> {
                 style: const TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.primaryBlue,
+                  color: AppColors.brandYellow,
                 ),
               ),
             ),
@@ -131,28 +133,29 @@ class _ChatPageState extends State<ChatPage> {
               style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
+                color: AppColors.onDark,
               ),
             ),
             const SizedBox(height: 4),
             Text(
               _partnerContact?.venueName ?? '',
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 14,
-                color: Colors.grey[600],
+                color: AppColors.onDarkMuted,
               ),
             ),
             const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.location_on, size: 14, color: Colors.grey[500]),
+                const Icon(Icons.location_on, size: 14, color: AppColors.onDarkMuted),
                 const SizedBox(width: 4),
                 Flexible(
                   child: Text(
                     _partnerContact?.address ?? '',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 12,
-                      color: Colors.grey[500],
+                      color: AppColors.onDarkMuted,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -164,12 +167,13 @@ class _ChatPageState extends State<ChatPage> {
               width: double.infinity,
               child: OutlinedButton.icon(
                 onPressed: _callPartner,
-                icon: const Icon(Icons.phone),
-                label: const Text('Telepon'),
+                icon: const Icon(Icons.phone, color: AppColors.brandYellow),
+                label: const Text('Telepon', style: TextStyle(color: AppColors.brandYellow)),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
+                  side: const BorderSide(color: AppColors.brandYellow),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(999),
                   ),
                 ),
               ),
@@ -184,12 +188,13 @@ class _ChatPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
-        backgroundColor: AppColors.primaryBlue,
+        backgroundColor: AppColors.bg,
         elevation: 0,
+        systemOverlayStyle: SystemUiOverlayStyle.light,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          icon: const Icon(Icons.arrow_back_ios, color: AppColors.onDark),
           onPressed: () => Navigator.pop(context),
         ),
         title: InkWell(
@@ -198,7 +203,7 @@ class _ChatPageState extends State<ChatPage> {
             children: [
               CircleAvatar(
                 radius: 18,
-                backgroundColor: Colors.white.withOpacity(0.2),
+                backgroundColor: AppColors.brandYellow.withValues(alpha: 0.15),
                 child: Text(
                   _partnerContact?.name.isNotEmpty == true
                       ? _partnerContact!.name[0].toUpperCase()
@@ -206,7 +211,7 @@ class _ChatPageState extends State<ChatPage> {
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: AppColors.brandYellow,
                   ),
                 ),
               ),
@@ -220,14 +225,14 @@ class _ChatPageState extends State<ChatPage> {
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: AppColors.onDark,
                       ),
                     ),
                     Text(
                       widget.booking.field?.venue?.name ?? '',
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 12,
-                        color: Colors.white.withOpacity(0.8),
+                        color: AppColors.onDarkMuted,
                       ),
                     ),
                   ],
@@ -238,11 +243,11 @@ class _ChatPageState extends State<ChatPage> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.phone, color: Colors.white),
+            icon: const Icon(Icons.phone, color: AppColors.onDark),
             onPressed: _callPartner,
           ),
           IconButton(
-            icon: const Icon(Icons.more_vert, color: Colors.white),
+            icon: const Icon(Icons.more_vert, color: AppColors.onDark),
             onPressed: _showPartnerInfo,
           ),
         ],
@@ -252,16 +257,16 @@ class _ChatPageState extends State<ChatPage> {
           // Booking info banner
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            color: AppColors.primaryBlue.withOpacity(0.1),
+            color: AppColors.surface,
             child: Row(
               children: [
-                const Icon(Icons.confirmation_number, size: 16, color: AppColors.primaryBlue),
+                const Icon(Icons.confirmation_number, size: 16, color: AppColors.brandYellow),
                 const SizedBox(width: 8),
                 Text(
                   'Booking: ${widget.booking.bookingCode}',
                   style: const TextStyle(
                     fontSize: 13,
-                    color: AppColors.primaryBlue,
+                    color: AppColors.brandYellow,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -270,7 +275,7 @@ class _ChatPageState extends State<ChatPage> {
                   widget.booking.formattedTime,
                   style: const TextStyle(
                     fontSize: 12,
-                    color: AppColors.primaryBlue,
+                    color: AppColors.onDarkMuted,
                   ),
                 ),
               ],
@@ -279,7 +284,7 @@ class _ChatPageState extends State<ChatPage> {
           // Messages list
           Expanded(
             child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
+                ? const Center(child: CircularProgressIndicator(color: AppColors.brandYellow))
                 : ListView.builder(
                     controller: _scrollController,
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -311,18 +316,18 @@ class _ChatPageState extends State<ChatPage> {
                 top: 12,
                 bottom: MediaQuery.of(context).padding.bottom + 12,
               ),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                border: Border(top: BorderSide(color: Colors.grey.shade200)),
+              decoration: const BoxDecoration(
+                color: AppColors.surface,
+                border: Border(top: BorderSide(color: AppColors.surfaceBorder)),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.lock_outline, size: 16, color: Colors.grey[500]),
+                  const Icon(Icons.lock_outline, size: 16, color: AppColors.onDarkMuted),
                   const SizedBox(width: 8),
-                  Text(
+                  const Text(
                     "Chat sudah ditutup karena booking selesai",
-                    style: TextStyle(color: Colors.grey[500], fontSize: 13),
+                    style: TextStyle(color: AppColors.onDarkMuted, fontSize: 13),
                   ),
                 ],
               ),
@@ -335,31 +340,27 @@ class _ChatPageState extends State<ChatPage> {
               top: 12,
               bottom: MediaQuery.of(context).padding.bottom + 12,
             ),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, -2),
-                ),
-              ],
+            decoration: const BoxDecoration(
+              color: AppColors.bg,
+              border: Border(top: BorderSide(color: AppColors.surfaceBorder)),
             ),
             child: Row(
               children: [
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.grey[100],
+                      color: AppColors.surface,
                       borderRadius: BorderRadius.circular(24),
+                      border: Border.all(color: AppColors.surfaceBorder),
                     ),
                     child: TextField(
                       controller: _messageController,
-                      decoration: InputDecoration(
+                      style: const TextStyle(color: AppColors.onDark),
+                      decoration: const InputDecoration(
                         hintText: 'Ketik pesan...',
-                        hintStyle: TextStyle(color: Colors.grey[500]),
+                        hintStyle: TextStyle(color: AppColors.onDarkMuted),
                         border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(
+                        contentPadding: EdgeInsets.symmetric(
                           horizontal: 20,
                           vertical: 12,
                         ),
@@ -373,7 +374,7 @@ class _ChatPageState extends State<ChatPage> {
                 const SizedBox(width: 8),
                 Container(
                   decoration: const BoxDecoration(
-                    color: AppColors.primaryBlue,
+                    color: AppColors.brandYellow,
                     shape: BoxShape.circle,
                   ),
                   child: IconButton(
@@ -384,10 +385,10 @@ class _ChatPageState extends State<ChatPage> {
                             height: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: Colors.white,
+                              color: AppColors.ink,
                             ),
                           )
-                        : const Icon(Icons.send, color: Colors.white),
+                        : const Icon(Icons.send, color: AppColors.ink),
                   ),
                 ),
               ],
@@ -418,18 +419,18 @@ class _ChatPageState extends State<ChatPage> {
       margin: const EdgeInsets.symmetric(vertical: 16),
       child: Row(
         children: [
-          Expanded(child: Divider(color: Colors.grey[300])),
+          const Expanded(child: Divider(color: AppColors.surfaceBorder)),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Text(
               dateText,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 12,
-                color: Colors.grey[500],
+                color: AppColors.onDarkMuted,
               ),
             ),
           ),
-          Expanded(child: Divider(color: Colors.grey[300])),
+          const Expanded(child: Divider(color: AppColors.surfaceBorder)),
         ],
       ),
     );
@@ -447,20 +448,14 @@ class _ChatPageState extends State<ChatPage> {
         ),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: isUser ? AppColors.primaryBlue : Colors.white,
+          color: isUser ? AppColors.brandYellow : AppColors.surface,
+          border: isUser ? null : Border.all(color: AppColors.surfaceBorder),
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(16),
             topRight: const Radius.circular(16),
             bottomLeft: Radius.circular(isUser ? 16 : 4),
             bottomRight: Radius.circular(isUser ? 4 : 16),
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
@@ -469,7 +464,7 @@ class _ChatPageState extends State<ChatPage> {
               message.content,
               style: TextStyle(
                 fontSize: 14,
-                color: isUser ? Colors.white : Colors.grey[800],
+                color: isUser ? AppColors.ink : AppColors.onDark,
               ),
             ),
             const SizedBox(height: 4),
@@ -480,7 +475,9 @@ class _ChatPageState extends State<ChatPage> {
                   DateFormat('HH:mm').format(message.timestamp),
                   style: TextStyle(
                     fontSize: 11,
-                    color: isUser ? Colors.white70 : Colors.grey[500],
+                    color: isUser
+                        ? AppColors.ink.withValues(alpha: 0.6)
+                        : AppColors.onDarkMuted,
                   ),
                 ),
                 if (isUser) ...[
@@ -493,8 +490,8 @@ class _ChatPageState extends State<ChatPage> {
                             : Icons.done,
                     size: 14,
                     color: message.status == MessageStatus.read
-                        ? Colors.white
-                        : Colors.white70,
+                        ? AppColors.ink
+                        : AppColors.ink.withValues(alpha: 0.6),
                   ),
                 ],
               ],

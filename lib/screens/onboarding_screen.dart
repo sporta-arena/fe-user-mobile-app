@@ -10,172 +10,167 @@ class OnboardingPage extends StatefulWidget {
 }
 
 class _OnboardingPageState extends State<OnboardingPage> {
-  final PageController _controller = PageController();
-  int _currentIndex = 0;
-
-  // Data Konten Onboarding
-  final List<Map<String, dynamic>> _contents = [
-    {
-      "title": "Cari Lapangan Terdekat",
-      "desc": "Temukan arena olahraga futsal, badminton, hingga basket di sekitarmu dengan mudah.",
-      "icon": Icons.location_on_outlined,
-    },
-    {
-      "title": "Booking Tanpa Ribet",
-      "desc": "Cek jadwal kosong secara real-time dan booking langsung tanpa perlu telepon sana-sini.",
-      "icon": Icons.calendar_month_outlined,
-    },
-    {
-      "title": "Bayar Praktis & Instan",
-      "desc": "Dukung pembayaran via QRIS, E-Wallet, dan semua Bank besar di Indonesia.",
-      "icon": Icons.qr_code_scanner_rounded,
-    },
-  ];
-
-  void _finishOnboarding() async {
+  Future<void> _continueWithEmail() async {
     // Mark onboarding as seen so it won't show again
     await AuthService.setOnboardingSeen();
 
-    // pushReplacement agar user tidak bisa tekan tombol 'Back' ke onboarding lagi
     if (mounted) {
-      Navigator.pushReplacement(
+      // push (not replace) so Login can back out to this onboarding screen
+      Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const LoginPage()),
       );
     }
   }
 
+  void _comingSoon(String provider) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Continue with $provider belum tersedia'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // --- 1. SKIP BUTTON ---
-            Align(
-              alignment: Alignment.topRight,
-              child: TextButton(
-                onPressed: _finishOnboarding,
-                child: const Text("LEWATI", style: TextStyle(color: Colors.grey)),
-              ),
-            ),
+      backgroundColor: Colors.black,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // --- 1. HERO BACKGROUND PHOTO ---
+          Image.asset(
+            'assets/onboarding_bg.png',
+            fit: BoxFit.cover,
+            alignment: Alignment.topCenter,
+          ),
 
-            // --- 2. SLIDER CONTENT ---
-            Expanded(
-              child: PageView.builder(
-                controller: _controller,
-                itemCount: _contents.length,
-                onPageChanged: (index) {
-                  setState(() => _currentIndex = index);
-                },
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 40),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // Circle Background Icon
-                        Container(
-                          padding: const EdgeInsets.all(30),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF0047FF).withOpacity(0.08),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            _contents[index]['icon'],
-                            size: 100,
-                            color: const Color(0xFF0047FF),
-                          ),
-                        ),
-                        const SizedBox(height: 40),
-                        Text(
-                          _contents[index]['title'],
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w900, // Font tebal modern
-                            color: Color(0xFF0047FF),
-                            letterSpacing: -0.5,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          _contents[index]['desc'],
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 15,
-                            color: Colors.grey[600],
-                            height: 1.5,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
-
-            // --- 3. BOTTOM SECTION (Indicators & Button) ---
-            Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                children: [
-                  // Dot Indicator
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(
-                      _contents.length,
-                      (index) => AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
-                        margin: const EdgeInsets.only(right: 6),
-                        height: 6,
-                        width: _currentIndex == index ? 24 : 6, // Efek memanjang
-                        decoration: BoxDecoration(
-                          color: _currentIndex == index 
-                              ? const Color(0xFF0047FF) 
-                              : Colors.grey.shade300,
-                          borderRadius: BorderRadius.circular(3),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                  
-                  // MAIN BUTTON
-                  SizedBox(
-                    width: double.infinity,
-                    height: 56, // Tinggi tombol modern
-                    child: ElevatedButton(
-                      onPressed: () {
-                        if (_currentIndex == _contents.length - 1) {
-                          _finishOnboarding();
-                        } else {
-                          _controller.nextPage(
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.easeInOut,
-                          );
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0047FF),
-                        elevation: 0, // Flat design modern
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16), // Rounded modern
-                        ),
-                      ),
-                      child: Text(
-                        _currentIndex == _contents.length - 1 ? "MULAI SEKARANG" : "LANJUT",
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1.0,
-                        ),
-                      ),
-                    ),
-                  ),
+          // --- 2. GRADIENT FADE TO BLACK ---
+          const DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                stops: [0.0, 0.45, 0.62, 1.0],
+                colors: [
+                  Colors.transparent,
+                  Colors.transparent,
+                  Color(0xCC000000),
+                  Colors.black,
                 ],
+              ),
+            ),
+          ),
+
+          // --- 3. CONTENT ---
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  // Sportago "S" mark
+                  Image.asset(
+                    'assets/sportago_mark.png',
+                    height: 48,
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Tagline
+                  const Text(
+                    'Premium sports venue at your fingertips. '
+                    'Book futsal, Badminton, Basketball courts in seconds.',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w500,
+                      height: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 28),
+
+                  // Continue with Apple
+                  _AuthButton(
+                    label: 'Continue with Apple',
+                    background: const Color(0xFF141414),
+                    foreground: Colors.white,
+                    leading: const Icon(Icons.apple,
+                        color: Colors.white, size: 22),
+                    onPressed: () => _comingSoon('Apple'),
+                  ),
+                  const SizedBox(height: 8),
+
+                  // Continue with Google
+                  _AuthButton(
+                    label: 'Continue with Google',
+                    background: Colors.white,
+                    foreground: const Color(0xFF141414),
+                    leading: Image.asset('assets/google_logo.png', height: 20),
+                    onPressed: () => _comingSoon('Google'),
+                  ),
+                  const SizedBox(height: 8),
+
+                  // Continue with email
+                  _AuthButton(
+                    label: 'Continue with email',
+                    background: Colors.white.withValues(alpha: 0.14),
+                    foreground: Colors.white,
+                    onPressed: _continueWithEmail,
+                  ),
+                  const SizedBox(height: 12),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AuthButton extends StatelessWidget {
+  final String label;
+  final Color background;
+  final Color foreground;
+  final Widget? leading;
+  final VoidCallback onPressed;
+
+  const _AuthButton({
+    required this.label,
+    required this.background,
+    required this.foreground,
+    required this.onPressed,
+    this.leading,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: 48,
+      child: TextButton(
+        onPressed: onPressed,
+        style: TextButton.styleFrom(
+          backgroundColor: background,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(999),
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (leading != null) ...[
+              leading!,
+              const SizedBox(width: 10),
+            ],
+            Text(
+              label,
+              style: TextStyle(
+                color: foreground,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ],

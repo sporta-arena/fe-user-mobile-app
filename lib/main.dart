@@ -17,10 +17,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Sporta App',
+      title: 'Sportago',
       theme: ThemeData(
         primarySwatch: Colors.blue,
-        fontFamily: 'Arial',
+        fontFamily: 'Archivo',
       ),
       home: const SplashScreen(),
       debugShowCheckedModeBanner: false,
@@ -83,55 +83,16 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
-      backgroundColor: const Color(0xFF0047FF),
+      // Sportago brand yellow (from Figma splash design)
+      backgroundColor: const Color(0xFFFFFF21),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Logo
-            Container(
-              height: 100,
-              width: 100,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.2),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
-              ),
-              child: const Center(
-                child: Icon(Icons.sports_soccer, size: 50, color: Color(0xFF0047FF)),
-              ),
-            ),
-            const SizedBox(height: 24),
-            const Text(
-              "SPORTA",
-              style: TextStyle(
-                fontSize: 36,
-                fontWeight: FontWeight.w900,
-                color: Colors.white,
-                letterSpacing: 4,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              "Booking Arena Olahraga",
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.white.withValues(alpha: 0.8),
-              ),
-            ),
-            const SizedBox(height: 48),
-            const CircularProgressIndicator(
-              color: Colors.white,
-              strokeWidth: 2,
-            ),
-          ],
+        child: Image.asset(
+          'assets/sportago_logo.png',
+          width: screenWidth * 0.6,
+          fit: BoxFit.contain,
         ),
       ),
     );

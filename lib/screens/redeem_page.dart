@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import '../constants/colors.dart';
 
 class RedeemPage extends StatefulWidget {
   final int currentPoints; // Menerima data poin dari Halaman Gacha
@@ -77,6 +79,7 @@ class _RedeemPageState extends State<RedeemPage> {
         context: context,
         barrierDismissible: false, // User harus klik tombol OK
         builder: (ctx) => AlertDialog(
+          backgroundColor: AppColors.surface,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -84,24 +87,25 @@ class _RedeemPageState extends State<RedeemPage> {
               const Icon(Icons.check_circle, color: Colors.green, size: 60),
               const SizedBox(height: 16),
               const Text(
-                "Redeem Berhasil!", 
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)
+                "Redeem Berhasil!",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppColors.onDark)
               ),
               const SizedBox(height: 8),
               Text(
-                "Kamu berhasil menukar $itemName.\nSisa Poin: $_myPoints", 
+                "Kamu berhasil menukar $itemName.\nSisa Poin: $_myPoints",
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey[600]),
+                style: const TextStyle(color: AppColors.onDarkMuted),
               ),
               const SizedBox(height: 20),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0047FF)
+                  backgroundColor: AppColors.brandYellow,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
                 ),
                 onPressed: () => Navigator.pop(ctx),
                 child: const Text(
-                  "OK, MANTAP", 
-                  style: TextStyle(color: Colors.white)
+                  "OK, MANTAP",
+                  style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.w700)
                 ),
               )
             ],
@@ -136,16 +140,17 @@ class _RedeemPageState extends State<RedeemPage> {
         _onBack();
       },
       child: Scaffold(
-        backgroundColor: Colors.grey[50],
+        backgroundColor: AppColors.bg,
         appBar: AppBar(
+          systemOverlayStyle: SystemUiOverlayStyle.light,
           title: const Text(
-            "Tukar Poin", 
-            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)
+            "Tukar Poin",
+            style: TextStyle(color: AppColors.onDark, fontWeight: FontWeight.bold)
           ),
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.bg,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+            icon: const Icon(Icons.arrow_back_ios, color: AppColors.onDark),
             onPressed: _onBack, // Panggil fungsi custom back
           ),
           actions: [
@@ -153,17 +158,17 @@ class _RedeemPageState extends State<RedeemPage> {
               margin: const EdgeInsets.only(right: 16, top: 10, bottom: 10),
               padding: const EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(
-                color: const Color(0xFF0047FF).withOpacity(0.1),
+                color: AppColors.brandYellow.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.stars, color: Color(0xFF0047FF), size: 16),
+                  const Icon(Icons.stars, color: AppColors.brandYellow, size: 16),
                   const SizedBox(width: 4),
                   Text(
-                    "$_myPoints pts", 
+                    "$_myPoints pts",
                     style: const TextStyle(
-                      color: Color(0xFF0047FF), 
+                      color: AppColors.brandYellow,
                       fontWeight: FontWeight.w900
                     ),
                   ),
@@ -187,15 +192,9 @@ class _RedeemPageState extends State<RedeemPage> {
 
             return Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05), 
-                    blurRadius: 10, 
-                    offset: const Offset(0, 4)
-                  )
-                ],
+                border: Border.all(color: AppColors.surfaceBorder),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -205,7 +204,7 @@ class _RedeemPageState extends State<RedeemPage> {
                     flex: 3,
                     child: Container(
                       decoration: BoxDecoration(
-                        color: (item['color'] as Color).withOpacity(0.15),
+                        color: (item['color'] as Color).withValues(alpha: 0.15),
                         borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                       ),
                       child: Center(
@@ -227,28 +226,29 @@ class _RedeemPageState extends State<RedeemPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            item['name'], 
+                            item['name'],
                             style: const TextStyle(
-                              fontWeight: FontWeight.bold, 
-                              fontSize: 14
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: AppColors.onDark
                             ),
-                            maxLines: 2, 
+                            maxLines: 2,
                             overflow: TextOverflow.ellipsis
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            item['desc'], 
-                            style: TextStyle(
-                              fontSize: 10, 
-                              color: Colors.grey[600]
+                            item['desc'],
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: AppColors.onDarkMuted
                             )
                           ),
                           const Spacer(),
                           Text(
-                            "${item['price']} Poin", 
+                            "${item['price']} Poin",
                             style: const TextStyle(
-                              color: Colors.orange, 
-                              fontWeight: FontWeight.w900, 
+                              color: AppColors.brandYellow,
+                              fontWeight: FontWeight.w900,
                               fontSize: 16
                             )
                           ),
@@ -263,19 +263,19 @@ class _RedeemPageState extends State<RedeemPage> {
                                 ? () => _claimReward(item['name'], item['price']) 
                                 : null,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF0047FF),
-                                disabledBackgroundColor: Colors.grey[200],
+                                backgroundColor: AppColors.brandYellow,
+                                disabledBackgroundColor: AppColors.surfaceBorder,
                                 padding: EdgeInsets.zero,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8)
+                                  borderRadius: BorderRadius.circular(999)
                                 ),
                               ),
                               child: Text(
                                 canAfford ? "CLAIM" : "POIN KURANG",
                                 style: TextStyle(
-                                  fontSize: 12, 
-                                  fontWeight: FontWeight.bold,
-                                  color: canAfford ? Colors.white : Colors.grey[500]
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: canAfford ? AppColors.ink : AppColors.onDarkMuted
                                 ),
                               ),
                             ),

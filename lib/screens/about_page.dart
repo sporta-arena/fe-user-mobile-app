@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../constants/colors.dart';
 
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
@@ -7,16 +8,17 @@ class AboutPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
+        systemOverlayStyle: SystemUiOverlayStyle.light,
         title: const Text(
-          "Tentang Sporta", 
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)
+          "Tentang Sporta",
+          style: TextStyle(color: AppColors.onDark, fontWeight: FontWeight.bold)
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.bg,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+          icon: const Icon(Icons.arrow_back_ios, color: AppColors.onDark),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -27,7 +29,7 @@ class AboutPage extends StatelessWidget {
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 40),
-              color: Colors.white,
+              color: AppColors.bg,
               child: Column(
                 children: [
                   // Logo App
@@ -38,7 +40,7 @@ class AboutPage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(25),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF0047FF).withOpacity(0.2),
+                          color: AppColors.brandYellow.withValues(alpha: 0.2),
                           blurRadius: 20,
                           offset: const Offset(0, 8),
                         ),
@@ -60,7 +62,7 @@ class AboutPage extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.w900,
-                      color: Color(0xFF0047FF)
+                      color: AppColors.brandYellow
                     ),
                   ),
 
@@ -69,14 +71,14 @@ class AboutPage extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.grey[100],
+                      color: AppColors.surface,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: const Text(
                       "Version 1.0.0 (Beta)",
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.grey,
+                        color: AppColors.onDarkMuted,
                         fontWeight: FontWeight.bold
                       ),
                     ),
@@ -93,14 +95,14 @@ class AboutPage extends StatelessWidget {
                 children: [
                   const Text(
                     "Solusi Olahraga Masa Kini",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppColors.onDark),
                   ),
-                  
+
                   const SizedBox(height: 10),
-                  
-                  Text(
+
+                  const Text(
                     "Sporta adalah platform digital yang menghubungkan pecinta olahraga dengan penyedia lapangan terbaik. Kami memudahkan proses pencarian, jadwal, booking, hingga pembayaran secara real-time.",
-                    style: TextStyle(color: Colors.grey[600], height: 1.5),
+                    style: TextStyle(color: AppColors.onDarkMuted, height: 1.5),
                     textAlign: TextAlign.justify,
                   ),
                 ],
@@ -124,7 +126,7 @@ class AboutPage extends StatelessWidget {
             ),
 
             const SizedBox(height: 30),
-            const Divider(thickness: 1),
+            const Divider(thickness: 1, color: AppColors.surfaceBorder),
 
             // --- 4. MENU KONTAK & LEGAL ---
             _buildListTile(
@@ -154,7 +156,7 @@ class AboutPage extends StatelessWidget {
               },
             ),
 
-            const Divider(thickness: 1),
+            const Divider(thickness: 1, color: AppColors.surfaceBorder),
 
             _buildListTile(
               icon: Icons.privacy_tip_outlined,
@@ -185,14 +187,14 @@ class AboutPage extends StatelessWidget {
             // --- 5. FOOTER ---
             Column(
               children: [
-                Text(
+                const Text(
                   "Made with ❤️ by Sporta Team",
-                  style: TextStyle(color: Colors.grey[400], fontSize: 12),
+                  style: TextStyle(color: AppColors.onDarkMuted, fontSize: 12),
                 ),
                 const SizedBox(height: 4),
-                Text(
+                const Text(
                   "© 2025 Sporta Indonesia",
-                  style: TextStyle(color: Colors.grey[400], fontSize: 12),
+                  style: TextStyle(color: AppColors.onDarkMuted, fontSize: 12),
                 ),
               ],
             ),
@@ -211,21 +213,21 @@ class AboutPage extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: const Color(0xFFF0F5FF),
+            color: AppColors.brandYellow.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(16),
           ),
-          child: Icon(icon, color: const Color(0xFF0047FF), size: 24),
+          child: Icon(icon, color: AppColors.brandYellow, size: 24),
         ),
-        
+
         const SizedBox(height: 8),
-        
+
         Text(
           label,
           textAlign: TextAlign.center,
           style: const TextStyle(
-            fontSize: 10, 
-            fontWeight: FontWeight.bold, 
-            color: Colors.black87
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+            color: AppColors.onDark
           ),
         ),
       ],
@@ -241,18 +243,18 @@ class AboutPage extends StatelessWidget {
   }) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 0),
-      leading: Icon(icon, color: Colors.grey[700]),
+      leading: Icon(icon, color: AppColors.onDarkMuted),
       title: Text(
-        title, 
-        style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14)
+        title,
+        style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14, color: AppColors.onDark)
       ),
-      subtitle: subtitle != null 
+      subtitle: subtitle != null
         ? Text(
-            subtitle, 
-            style: TextStyle(color: Colors.blue[700], fontSize: 12)
-          ) 
+            subtitle,
+            style: const TextStyle(color: AppColors.brandYellow, fontSize: 12)
+          )
         : null,
-      trailing: const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey),
+      trailing: const Icon(Icons.arrow_forward_ios, size: 14, color: AppColors.onDarkMuted),
       onTap: onTap,
     );
   }
@@ -273,13 +275,14 @@ class AboutPage extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text("Coming Soon"),
-        content: Text("$feature akan segera tersedia dalam update mendatang."),
+        title: const Text("Coming Soon", style: TextStyle(color: AppColors.onDark)),
+        content: Text("$feature akan segera tersedia dalam update mendatang.", style: const TextStyle(color: AppColors.onDarkMuted)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("OK"),
+            child: const Text("OK", style: TextStyle(color: AppColors.brandYellow)),
           ),
         ],
       ),
@@ -290,8 +293,9 @@ class AboutPage extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text("Kebijakan Privasi"),
+        title: const Text("Kebijakan Privasi", style: TextStyle(color: AppColors.onDark)),
         content: const SingleChildScrollView(
           child: Text(
             "Sporta berkomitmen untuk melindungi privasi pengguna. Kami mengumpulkan data yang diperlukan untuk memberikan layanan terbaik, termasuk:\n\n"
@@ -300,13 +304,13 @@ class AboutPage extends StatelessWidget {
             "• Lokasi untuk rekomendasi venue terdekat\n"
             "• Data penggunaan aplikasi untuk peningkatan layanan\n\n"
             "Data Anda tidak akan dibagikan kepada pihak ketiga tanpa persetujuan, kecuali untuk keperluan operasional layanan.",
-            style: TextStyle(height: 1.5),
+            style: TextStyle(height: 1.5, color: AppColors.onDarkMuted),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("Tutup"),
+            child: const Text("Tutup", style: TextStyle(color: AppColors.brandYellow)),
           ),
         ],
       ),
@@ -317,8 +321,9 @@ class AboutPage extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text("Syarat & Ketentuan"),
+        title: const Text("Syarat & Ketentuan", style: TextStyle(color: AppColors.onDark)),
         content: const SingleChildScrollView(
           child: Text(
             "Dengan menggunakan aplikasi Sporta, Anda menyetujui:\n\n"
@@ -328,13 +333,13 @@ class AboutPage extends StatelessWidget {
             "4. Melakukan pembayaran tepat waktu untuk booking yang dibuat\n"
             "5. Mematuhi aturan venue yang telah ditetapkan\n\n"
             "Sporta berhak untuk menangguhkan atau menutup akun yang melanggar ketentuan ini.",
-            style: TextStyle(height: 1.5),
+            style: TextStyle(height: 1.5, color: AppColors.onDarkMuted),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("Tutup"),
+            child: const Text("Tutup", style: TextStyle(color: AppColors.brandYellow)),
           ),
         ],
       ),
@@ -345,8 +350,9 @@ class AboutPage extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text("Lisensi Open Source"),
+        title: const Text("Lisensi Open Source", style: TextStyle(color: AppColors.onDark)),
         content: const SingleChildScrollView(
           child: Text(
             "Sporta menggunakan berbagai library open source:\n\n"
@@ -356,13 +362,13 @@ class AboutPage extends StatelessWidget {
             "• Geolocator (MIT License)\n"
             "• UUID Generator (MIT License)\n\n"
             "Terima kasih kepada komunitas open source yang telah berkontribusi dalam pengembangan aplikasi ini.",
-            style: TextStyle(height: 1.5),
+            style: TextStyle(height: 1.5, color: AppColors.onDarkMuted),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("Tutup"),
+            child: const Text("Tutup", style: TextStyle(color: AppColors.brandYellow)),
           ),
         ],
       ),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'change_password_page.dart';
 import '../services/auth_service.dart';
+import '../constants/colors.dart';
 
 class EditProfilePage extends StatefulWidget {
   const EditProfilePage({super.key});
@@ -76,16 +78,17 @@ class _EditProfilePageState extends State<EditProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
+        systemOverlayStyle: SystemUiOverlayStyle.light,
         title: const Text(
-          "Edit Profil", 
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)
+          "Edit Profil",
+          style: TextStyle(color: AppColors.onDark, fontWeight: FontWeight.bold)
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.bg,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+          icon: const Icon(Icons.arrow_back_ios, color: AppColors.onDark),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -103,11 +106,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     height: 120,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.grey[200],
-                      border: Border.all(color: Colors.white, width: 4),
+                      color: AppColors.surface,
+                      border: Border.all(color: AppColors.surfaceBorder, width: 4),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
+                          color: Colors.black.withValues(alpha: 0.1),
                           blurRadius: 10,
                           offset: const Offset(0, 5)
                         )
@@ -120,7 +123,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                           : null,
                     ),
                     child: AuthService.currentUser?.avatarUrl == null
-                        ? const Icon(Icons.person, size: 50, color: Colors.grey)
+                        ? const Icon(Icons.person, size: 50, color: AppColors.onDarkMuted)
                         : null,
                   ),
                   
@@ -138,11 +141,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       child: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF0047FF),
+                          color: AppColors.brandYellow,
                           shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 2),
+                          border: Border.all(color: AppColors.bg, width: 2),
                         ),
-                        child: const Icon(Icons.camera_alt, color: Colors.white, size: 20),
+                        child: const Icon(Icons.camera_alt, color: AppColors.ink, size: 20),
                       ),
                     ),
                   ),
@@ -192,9 +195,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   );
                 },
                 child: const Text(
-                  "Ganti Password?", 
+                  "Ganti Password?",
                   style: TextStyle(
-                    color: Color(0xFF0047FF), 
+                    color: AppColors.brandYellow,
                     fontWeight: FontWeight.bold
                   )
                 ),
@@ -210,27 +213,26 @@ class _EditProfilePageState extends State<EditProfilePage> {
               child: ElevatedButton(
                 onPressed: _isLoading ? null : _saveProfile,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0047FF),
+                  backgroundColor: AppColors.brandYellow,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16)
+                    borderRadius: BorderRadius.circular(999)
                   ),
-                  elevation: 5,
-                  shadowColor: const Color(0xFF0047FF).withOpacity(0.4),
+                  elevation: 0,
                 ),
-                child: _isLoading 
+                child: _isLoading
                   ? const SizedBox(
-                      height: 24, 
-                      width: 24, 
+                      height: 24,
+                      width: 24,
                       child: CircularProgressIndicator(
-                        color: Colors.white, 
+                        color: AppColors.ink,
                         strokeWidth: 2
                       )
                     )
                   : const Text(
-                      "SIMPAN PERUBAHAN", 
+                      "SIMPAN PERUBAHAN",
                       style: TextStyle(
-                        color: Colors.white, 
-                        fontWeight: FontWeight.bold, 
+                        color: AppColors.ink,
+                        fontWeight: FontWeight.w700,
                         fontSize: 16
                       )
                     ),
@@ -255,53 +257,46 @@ class _EditProfilePageState extends State<EditProfilePage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          label, 
+          label,
           style: const TextStyle(
-            fontWeight: FontWeight.bold, 
-            color: Colors.black87
+            fontWeight: FontWeight.bold,
+            color: AppColors.onDark
           )
         ),
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: isReadOnly ? Colors.grey[100] : Colors.white,
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(12),
-            boxShadow: isReadOnly ? [] : [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05), 
-                blurRadius: 10, 
-                offset: const Offset(0, 4)
-              )
-            ],
           ),
           child: TextField(
             controller: controller,
             readOnly: isReadOnly,
             keyboardType: inputType,
             style: TextStyle(
-              color: isReadOnly ? Colors.grey[600] : Colors.black
+              color: isReadOnly ? AppColors.onDarkMuted : AppColors.onDark
             ),
             decoration: InputDecoration(
               prefixIcon: Icon(
-                icon, 
-                color: isReadOnly ? Colors.grey : const Color(0xFF0047FF)
+                icon,
+                color: isReadOnly ? AppColors.onDarkMuted : AppColors.brandYellow
               ),
               hintText: hint,
-              hintStyle: const TextStyle(fontSize: 12),
+              hintStyle: const TextStyle(fontSize: 12, color: AppColors.onDarkMuted),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none, // Hilangkan garis default
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.grey.shade200),
+                borderSide: const BorderSide(color: AppColors.surfaceBorder),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFF0047FF)),
+                borderSide: const BorderSide(color: AppColors.brandYellow),
               ),
               filled: true,
-              fillColor: isReadOnly ? Colors.grey[100] : Colors.white,
+              fillColor: AppColors.surface,
             ),
           ),
         ),

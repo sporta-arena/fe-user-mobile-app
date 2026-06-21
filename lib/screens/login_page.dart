@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'register_page.dart';
 import 'forgot_password_page.dart';
+import 'onboarding_screen.dart';
 import 'home_page.dart';
 import '../services/auth_service.dart';
+import '../constants/colors.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -34,7 +37,7 @@ class _LoginPageState extends State<LoginPage> {
     if (email.isEmpty) {
       setState(() => _emailError = "Email tidak boleh kosong");
       isValid = false;
-    } else if (!emailRegex.hasMatch(email)) {
+    } else if (email.toLowerCase() != 'demo' && !emailRegex.hasMatch(email)) {
       setState(() => _emailError = "Format email tidak valid");
       isValid = false;
     }
@@ -70,9 +73,11 @@ class _LoginPageState extends State<LoginPage> {
           ),
         );
 
-        Navigator.pushReplacement(
+        // Clear the whole stack so Home is the root (can't back into auth flow)
+        Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => const HomePage()),
+          (route) => false,
         );
       } else {
         if (result.errors != null) {
@@ -96,320 +101,228 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          // Background gradient header
-          Container(
-            height: MediaQuery.of(context).size.height * 0.4,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Color(0xFF0047FF), Color(0xFF002299)],
+      backgroundColor: AppColors.bg,
+      body: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.light,
+        child: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Back button — pop if possible, otherwise go back to onboarding
+              // (so returning users can still reach Apple/Google options)
+              IconButton(
+                onPressed: () {
+                  if (Navigator.canPop(context)) {
+                    Navigator.pop(context);
+                  } else {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const OnboardingPage()),
+                    );
+                  }
+                },
+                padding: EdgeInsets.zero,
+                alignment: Alignment.centerLeft,
+                icon: const Icon(Icons.arrow_back_rounded,
+                    color: AppColors.onDark, size: 26),
               ),
-            ),
-            child: Stack(
-              children: [
-                // Pattern overlay
-                Positioned.fill(
-                  child: Opacity(
-                    opacity: 0.05,
-                    child: Container(
-                      decoration: const BoxDecoration(
-                        image: DecorationImage(
-                          image: NetworkImage('https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800'),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
+              const SizedBox(height: 16),
+
+              // Brand mark
+              Image.asset('assets/sportago_mark.png', height: 44),
+              const SizedBox(height: 32),
+
+              // Heading
+              const Text(
+                "Welcome back",
+                style: TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.onDark,
+                  height: 1.1,
+                ),
+              ),
+              const SizedBox(height: 6),
+              const Text(
+                "Masuk untuk mulai booking arena olahraga.",
+                style: TextStyle(fontSize: 15, color: AppColors.onDarkMuted),
+              ),
+              const SizedBox(height: 32),
+
+              // Email
+              _label("Email"),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
+                style: const TextStyle(color: AppColors.onDark),
+                decoration: _fieldDecoration(
+                  hint: "you@email.com",
+                  icon: Icons.mail_outline_rounded,
+                  errorText: _emailError,
+                ),
+              ),
+              const SizedBox(height: 18),
+
+              // Password
+              _label("Password"),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _passwordController,
+                obscureText: !_isPasswordVisible,
+                style: const TextStyle(color: AppColors.onDark),
+                decoration: _fieldDecoration(
+                  hint: "Masukkan password",
+                  icon: Icons.lock_outline_rounded,
+                  errorText: _passwordError,
+                  suffix: IconButton(
+                    icon: Icon(
+                      _isPasswordVisible
+                          ? Icons.visibility_outlined
+                          : Icons.visibility_off_outlined,
+                      color: AppColors.onDarkMuted,
+                      size: 20,
+                    ),
+                    onPressed: () =>
+                        setState(() => _isPasswordVisible = !_isPasswordVisible),
+                  ),
+                ),
+              ),
+
+              // Forgot password
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const ForgotPasswordPage()),
+                    );
+                  },
+                  child: const Text(
+                    "Lupa password?",
+                    style: TextStyle(
+                      color: AppColors.onDarkMuted,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
                     ),
                   ),
                 ),
-              ],
-            ),
-          ),
+              ),
+              const SizedBox(height: 16),
 
-          // Main content
-          SafeArea(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  // Header section
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 40, 24, 0),
-                    child: Column(
-                      children: [
-                        // Logo
-                        Container(
-                          height: 80,
-                          width: 80,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.2),
-                                blurRadius: 20,
-                                offset: const Offset(0, 10),
-                              ),
-                            ],
-                          ),
-                          child: const Center(
-                            child: Icon(Icons.sports_soccer, size: 40, color: Color(0xFF0047FF)),
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        const Text(
-                          "SPORTA",
-                          style: TextStyle(
-                            fontSize: 32,
-                            fontWeight: FontWeight.w900,
-                            color: Colors.white,
-                            letterSpacing: 4,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          "Booking Arena Olahraga",
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.white.withValues(alpha: 0.8),
-                          ),
-                        ),
-                      ],
+              // Login button (brand yellow pill)
+              SizedBox(
+                width: double.infinity,
+                height: 54,
+                child: ElevatedButton(
+                  onPressed: _isLoading ? null : _handleLogin,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.brandYellow,
+                    disabledBackgroundColor:
+                        AppColors.brandYellow.withValues(alpha: 0.5),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(999),
                     ),
+                    elevation: 0,
                   ),
-
-                  const SizedBox(height: 40),
-
-                  // Form Card
-                  Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 24),
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(24),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.1),
-                          blurRadius: 30,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          "Selamat Datang!",
+                  child: _isLoading
+                      ? const SizedBox(
+                          height: 22,
+                          width: 22,
+                          child: CircularProgressIndicator(
+                              color: AppColors.ink, strokeWidth: 2),
+                        )
+                      : const Text(
+                          "Masuk",
                           style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.ink,
                           ),
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          "Masuk untuk mulai booking arena",
-                          style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                        ),
+                ),
+              ),
+              const SizedBox(height: 28),
 
-                        const SizedBox(height: 28),
-
-                        // Email Input
-                        const Text(
-                          "Email Address",
-                          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                        ),
-                        const SizedBox(height: 8),
-                        TextField(
-                          controller: _emailController,
-                          keyboardType: TextInputType.emailAddress,
-                          decoration: InputDecoration(
-                            hintText: "user@sporta.com",
-                            hintStyle: TextStyle(color: Colors.grey[400]),
-                            filled: true,
-                            fillColor: const Color(0xFFF8F9FA),
-                            errorText: _emailError,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(14),
-                              borderSide: BorderSide.none,
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(14),
-                              borderSide: const BorderSide(color: Color(0xFF0047FF), width: 2),
-                            ),
-                            errorBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(14),
-                              borderSide: const BorderSide(color: Colors.red, width: 1),
-                            ),
-                            focusedErrorBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(14),
-                              borderSide: const BorderSide(color: Colors.red, width: 2),
-                            ),
-                            prefixIcon: Container(
-                              margin: const EdgeInsets.all(12),
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF0047FF).withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Icon(Icons.email_outlined, color: Color(0xFF0047FF), size: 20),
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        // Password Input
-                        const Text(
-                          "Password",
-                          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                        ),
-                        const SizedBox(height: 8),
-                        TextField(
-                          controller: _passwordController,
-                          obscureText: !_isPasswordVisible,
-                          decoration: InputDecoration(
-                            hintText: "Masukkan password",
-                            hintStyle: TextStyle(color: Colors.grey[400]),
-                            filled: true,
-                            fillColor: const Color(0xFFF8F9FA),
-                            errorText: _passwordError,
-                            errorMaxLines: 2,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(14),
-                              borderSide: BorderSide.none,
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(14),
-                              borderSide: const BorderSide(color: Color(0xFF0047FF), width: 2),
-                            ),
-                            errorBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(14),
-                              borderSide: const BorderSide(color: Colors.red, width: 1),
-                            ),
-                            focusedErrorBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(14),
-                              borderSide: const BorderSide(color: Colors.red, width: 2),
-                            ),
-                            prefixIcon: Container(
-                              margin: const EdgeInsets.all(12),
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF0047FF).withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Icon(Icons.lock_outline, color: Color(0xFF0047FF), size: 20),
-                            ),
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                                color: Colors.grey[500],
-                              ),
-                              onPressed: () {
-                                setState(() => _isPasswordVisible = !_isPasswordVisible);
-                              },
-                            ),
-                          ),
-                        ),
-
-                        // Forgot Password
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => const ForgotPasswordPage()),
-                              );
-                            },
-                            child: const Text(
-                              "Lupa Password?",
-                              style: TextStyle(
-                                color: Color(0xFF0047FF),
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(height: 16),
-
-                        // Login Button
-                        SizedBox(
-                          width: double.infinity,
-                          height: 56,
-                          child: ElevatedButton(
-                            onPressed: _isLoading ? null : _handleLogin,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF0047FF),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              elevation: 0,
-                            ),
-                            child: _isLoading
-                                ? const SizedBox(
-                                    height: 24,
-                                    width: 24,
-                                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                                  )
-                                : const Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        "MASUK",
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
-                                          letterSpacing: 1.0,
-                                        ),
-                                      ),
-                                      SizedBox(width: 8),
-                                      Icon(Icons.arrow_forward, color: Colors.white, size: 20),
-                                    ],
-                                  ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Register Link
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text("Belum punya akun? ", style: TextStyle(color: Colors.grey[600])),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const RegisterPage()),
-                          );
-                        },
-                        child: const Text(
-                          "Daftar Sekarang",
-                          style: TextStyle(
-                            color: Color(0xFF0047FF),
-                            fontWeight: FontWeight.bold,
-                          ),
+              // Register link
+              Center(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text("Belum punya akun? ",
+                        style:
+                            TextStyle(color: AppColors.onDarkMuted, fontSize: 14)),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const RegisterPage()),
+                        );
+                      },
+                      child: const Text(
+                        "Daftar",
+                        style: TextStyle(
+                          color: AppColors.brandYellow,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
                         ),
                       ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 40),
-                ],
+                    ),
+                  ],
+                ),
               ),
-            ),
+            ],
           ),
-        ],
+        ),
+        ),
       ),
+    );
+  }
+
+  Widget _label(String text) => Text(
+        text,
+        style: const TextStyle(
+          fontWeight: FontWeight.w600,
+          fontSize: 13,
+          color: AppColors.onDark,
+        ),
+      );
+
+  InputDecoration _fieldDecoration({
+    required String hint,
+    required IconData icon,
+    String? errorText,
+    Widget? suffix,
+  }) {
+    OutlineInputBorder border(Color c, double w) => OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: c, width: w),
+        );
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: const TextStyle(color: AppColors.onDarkMuted),
+      filled: true,
+      fillColor: AppColors.surface,
+      errorText: errorText,
+      errorMaxLines: 2,
+      prefixIcon: Icon(icon, color: AppColors.onDarkMuted, size: 20),
+      suffixIcon: suffix,
+      border: border(AppColors.surfaceBorder, 1),
+      enabledBorder: border(AppColors.surfaceBorder, 1),
+      focusedBorder: border(AppColors.brandYellow, 1.6),
+      errorBorder: border(Colors.red.shade400, 1),
+      focusedErrorBorder: border(Colors.red.shade400, 1.6),
     );
   }
 }

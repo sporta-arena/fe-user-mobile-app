@@ -36,21 +36,29 @@ class Refund {
 
   factory Refund.fromJson(Map<String, dynamic> json) {
     return Refund(
-      id: json['id'],
-      bookingId: json['booking_id'],
-      userId: json['user_id'],
-      amount: double.parse(json['amount'].toString()),
-      refundAmount: double.parse(json['refund_amount'].toString()),
+      id: json['id'] ?? 0,
+      bookingId: json['booking_id'] ?? json['booking']?['id'] ?? 0,
+      userId: json['user_id'] ?? json['user']?['id'] ?? 0,
+      amount: json['amount'] != null
+          ? double.parse(json['amount'].toString())
+          : 0,
+      refundAmount: json['refund_amount'] != null
+          ? double.parse(json['refund_amount'].toString())
+          : 0,
       refundPercentage: json['refund_percentage'] ?? 100,
       reason: json['reason'] ?? '',
-      status: json['status'],
+      status: json['status'] ?? 'pending',
       adminNotes: json['admin_notes'],
       xenditRefundId: json['xendit_refund_id'],
       processedAt: json['processed_at'] != null
           ? TimezoneUtils.parseUtcToLocal(json['processed_at'])
           : null,
-      createdAt: TimezoneUtils.parseUtcToLocal(json['created_at']),
-      updatedAt: TimezoneUtils.parseUtcToLocal(json['updated_at']),
+      createdAt: json['created_at'] != null
+          ? TimezoneUtils.parseUtcToLocal(json['created_at'])
+          : DateTime.now(),
+      updatedAt: json['updated_at'] != null
+          ? TimezoneUtils.parseUtcToLocal(json['updated_at'])
+          : DateTime.now(),
       booking: json['booking'] != null ? Booking.fromJson(json['booking']) : null,
     );
   }

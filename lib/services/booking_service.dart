@@ -55,10 +55,12 @@ class BookingService {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 201) {
+        // API returns 'data' not 'booking'
+        final bookingData = data['data'] ?? data['booking'];
         return BookingResult(
           success: true,
           message: data['message'],
-          booking: Booking.fromJson(data['booking']),
+          booking: Booking.fromJson(bookingData),
           payment: data['payment'],
         );
       } else {
@@ -105,9 +107,9 @@ class BookingService {
           success: true,
           bookings: bookings,
           pagination: {
-            'current_page': data['current_page'],
-            'last_page': data['last_page'],
-            'total': data['total'],
+            'current_page': data['meta']?['current_page'] ?? data['current_page'],
+            'last_page': data['meta']?['last_page'] ?? data['last_page'],
+            'total': data['meta']?['total'] ?? data['total'],
           },
         );
       } else {
@@ -139,9 +141,11 @@ class BookingService {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
+        // API returns 'data' not 'booking'
+        final bookingData = data['data'] ?? data['booking'];
         return BookingResult(
           success: true,
-          booking: Booking.fromJson(data['booking']),
+          booking: Booking.fromJson(bookingData),
         );
       } else {
         return BookingResult(
@@ -172,10 +176,12 @@ class BookingService {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
+        // API returns 'data' not 'booking'
+        final bookingData = data['data'] ?? data['booking'];
         return BookingResult(
           success: true,
           message: data['message'],
-          booking: Booking.fromJson(data['booking']),
+          booking: Booking.fromJson(bookingData),
         );
       } else {
         return BookingResult(
@@ -206,10 +212,12 @@ class BookingService {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
+        // API returns 'data' not 'booking'
+        final bookingData = data['data'] ?? data['booking'];
         return BookingResult(
           success: true,
           message: data['message'],
-          booking: Booking.fromJson(data['booking']),
+          booking: Booking.fromJson(bookingData),
         );
       } else {
         return BookingResult(
@@ -253,9 +261,9 @@ class BookingService {
           success: true,
           bookings: bookings,
           pagination: {
-            'current_page': data['current_page'],
-            'last_page': data['last_page'],
-            'total': data['total'],
+            'current_page': data['meta']?['current_page'] ?? data['current_page'],
+            'last_page': data['meta']?['last_page'] ?? data['last_page'],
+            'total': data['meta']?['total'] ?? data['total'],
           },
         );
       } else {
@@ -300,6 +308,44 @@ class BookingService {
         return {
           'success': false,
           'message': data['message'],
+        };
+      }
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Gagal terhubung ke server: $e',
+      };
+    }
+  }
+
+  /// Get refund preview for a booking
+  static Future<Map<String, dynamic>> getRefundPreview(int bookingId) async {
+    if (AuthService.token == null) {
+      return {'success': false, 'message': 'Silakan login terlebih dahulu'};
+    }
+
+    try {
+      final response = await http.get(
+        Uri.parse(ApiConfig.refundPreviewUrl(bookingId)),
+        headers: ApiConfig.authHeaders(AuthService.token!),
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return {
+          'success': true,
+          'booking': data['booking'] ?? data['data']?['booking'],
+          'refund_percentage': data['refund_percentage'] ?? data['data']?['refund_percentage'],
+          'refund_amount': data['refund_amount'] ?? data['data']?['refund_amount'],
+          'original_amount': data['original_amount'] ?? data['data']?['original_amount'],
+          'policy_description': data['policy_description'] ?? data['data']?['policy_description'],
+          'can_refund': data['can_refund'] ?? data['data']?['can_refund'] ?? false,
+        };
+      } else {
+        return {
+          'success': false,
+          'message': data['message'] ?? 'Gagal memuat preview refund',
         };
       }
     } catch (e) {

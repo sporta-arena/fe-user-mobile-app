@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../services/venue_service.dart';
 import '../models/venue.dart';
+import '../constants/colors.dart';
 import 'venue_detail_page.dart';
 
 class SearchPage extends StatefulWidget {
@@ -49,30 +51,33 @@ class _SearchPageState extends State<SearchPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        systemOverlayStyle: SystemUiOverlayStyle.light,
+        backgroundColor: AppColors.bg,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+          icon: const Icon(Icons.arrow_back_ios, color: AppColors.onDark),
           onPressed: () => Navigator.pop(context),
         ),
         title: Container(
           height: 40,
           decoration: BoxDecoration(
-            color: Colors.grey[100],
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: AppColors.surfaceBorder),
           ),
           child: TextField(
             controller: _searchController,
             onSubmitted: _searchVenues,
+            style: const TextStyle(color: AppColors.onDark),
             decoration: InputDecoration(
               hintText: "Cari venue...",
-              hintStyle: TextStyle(color: Colors.grey[400]),
+              hintStyle: const TextStyle(color: AppColors.onDarkMuted),
               border: InputBorder.none,
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               suffixIcon: IconButton(
-                icon: const Icon(Icons.search, color: Colors.grey),
+                icon: const Icon(Icons.search, color: AppColors.onDarkMuted),
                 onPressed: () => _searchVenues(_searchController.text),
               ),
             ),
@@ -80,19 +85,19 @@ class _SearchPageState extends State<SearchPage> {
         ),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: Color(0xFF0047FF)))
+          ? const Center(child: CircularProgressIndicator(color: AppColors.brandYellow))
           : _venues.isEmpty
               ? Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.search_off, size: 64, color: Colors.grey[300]),
+                      const Icon(Icons.search_off, size: 64, color: AppColors.onDarkMuted),
                       const SizedBox(height: 16),
                       Text(
                         _searchController.text.isEmpty
                             ? "Ketik untuk mencari venue"
                             : "Tidak ada venue ditemukan",
-                        style: TextStyle(color: Colors.grey[500]),
+                        style: const TextStyle(color: AppColors.onDarkMuted),
                       ),
                     ],
                   ),
@@ -121,15 +126,9 @@ class _SearchPageState extends State<SearchPage> {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          border: Border.all(color: AppColors.surfaceBorder),
         ),
         child: Row(
           children: [
@@ -145,15 +144,15 @@ class _SearchPageState extends State<SearchPage> {
                       errorBuilder: (context, error, stackTrace) => Container(
                         width: 80,
                         height: 80,
-                        color: const Color(0xFF0047FF).withValues(alpha: 0.1),
-                        child: const Icon(Icons.sports, color: Color(0xFF0047FF)),
+                        color: AppColors.brandYellow.withValues(alpha: 0.15),
+                        child: const Icon(Icons.sports, color: AppColors.brandYellow),
                       ),
                     )
                   : Container(
                       width: 80,
                       height: 80,
-                      color: const Color(0xFF0047FF).withValues(alpha: 0.1),
-                      child: const Icon(Icons.sports, color: Color(0xFF0047FF)),
+                      color: AppColors.brandYellow.withValues(alpha: 0.15),
+                      child: const Icon(Icons.sports, color: AppColors.brandYellow),
                     ),
             ),
             const SizedBox(width: 12),
@@ -167,6 +166,7 @@ class _SearchPageState extends State<SearchPage> {
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
+                      color: AppColors.onDark,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -174,12 +174,12 @@ class _SearchPageState extends State<SearchPage> {
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      Icon(Icons.location_on, size: 14, color: Colors.grey[400]),
+                      const Icon(Icons.location_on, size: 14, color: AppColors.onDarkMuted),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
                           venue.address,
-                          style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                          style: const TextStyle(color: AppColors.onDarkMuted, fontSize: 12),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -190,24 +190,24 @@ class _SearchPageState extends State<SearchPage> {
                   Row(
                     children: [
                       if (venue.averageRating != null) ...[
-                        const Icon(Icons.star, size: 14, color: Colors.amber),
+                        const Icon(Icons.star, size: 14, color: AppColors.brandYellow),
                         const SizedBox(width: 2),
                         Text(
                           venue.averageRating!.toStringAsFixed(1),
-                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.onDark),
                         ),
                         const SizedBox(width: 8),
                       ],
                       Text(
                         venue.city,
-                        style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                        style: const TextStyle(color: AppColors.onDarkMuted, fontSize: 12),
                       ),
                     ],
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right, color: Colors.grey),
+            const Icon(Icons.chevron_right, color: AppColors.onDarkMuted),
           ],
         ),
       ),

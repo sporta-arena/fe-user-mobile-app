@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../constants/colors.dart';
 import '../models/field_type.dart';
 import '../services/field_type_service.dart';
@@ -37,18 +38,19 @@ class _AllCategoriesPageState extends State<AllCategoriesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundColor,
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
+        systemOverlayStyle: SystemUiOverlayStyle.light,
         title: const Text(
           'Semua Kategori',
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: AppColors.onDark,
           ),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.bg,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black87),
+        iconTheme: const IconThemeData(color: AppColors.onDark),
         centerTitle: true,
       ),
       body: SafeArea(
@@ -56,7 +58,8 @@ class _AllCategoriesPageState extends State<AllCategoriesPage> {
           onRefresh: () => FieldTypeService.getFieldTypes(forceRefresh: true).then((types) {
             setState(() => _categories = types);
           }),
-          color: AppColors.primaryBlue,
+          color: AppColors.brandYellow,
+          backgroundColor: AppColors.surface,
           child: Padding(
             padding: const EdgeInsets.all(20.0),
             child: Column(
@@ -66,14 +69,15 @@ class _AllCategoriesPageState extends State<AllCategoriesPage> {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: AppColors.lightBlue,
+                    color: AppColors.surface,
                     borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.surfaceBorder),
                   ),
                   child: Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.info_outline,
-                        color: AppColors.primaryBlue,
+                        color: AppColors.brandYellow,
                         size: 20,
                       ),
                       const SizedBox(width: 12),
@@ -81,7 +85,7 @@ class _AllCategoriesPageState extends State<AllCategoriesPage> {
                         child: Text(
                           'Pilih kategori olahraga untuk melihat venue terdekat',
                           style: TextStyle(
-                            color: AppColors.primaryBlue,
+                            color: AppColors.onDark,
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
                           ),
@@ -98,7 +102,7 @@ class _AllCategoriesPageState extends State<AllCategoriesPage> {
                   child: _isLoading
                       ? const Center(
                           child: CircularProgressIndicator(
-                            color: AppColors.primaryBlue,
+                            color: AppColors.brandYellow,
                           ),
                         )
                       : _categories.isEmpty
@@ -106,16 +110,16 @@ class _AllCategoriesPageState extends State<AllCategoriesPage> {
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(
+                                  const Icon(
                                     Icons.category_outlined,
                                     size: 64,
-                                    color: Colors.grey[400],
+                                    color: AppColors.onDarkMuted,
                                   ),
                                   const SizedBox(height: 16),
-                                  Text(
+                                  const Text(
                                     'Tidak ada kategori tersedia',
                                     style: TextStyle(
-                                      color: Colors.grey[600],
+                                      color: AppColors.onDarkMuted,
                                       fontSize: 16,
                                     ),
                                   ),
@@ -162,15 +166,9 @@ class _AllCategoriesPageState extends State<AllCategoriesPage> {
       },
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          border: Border.all(color: AppColors.surfaceBorder),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -180,13 +178,13 @@ class _AllCategoriesPageState extends State<AllCategoriesPage> {
               width: 60,
               height: 60,
               decoration: BoxDecoration(
-                color: category.color.withOpacity(0.1),
+                color: AppColors.brandYellow.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Icon(
                 category.icon,
                 size: 30,
-                color: category.color,
+                color: AppColors.brandYellow,
               ),
             ),
 
@@ -198,7 +196,7 @@ class _AllCategoriesPageState extends State<AllCategoriesPage> {
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: Colors.black87,
+                color: AppColors.onDark,
               ),
             ),
 
@@ -208,9 +206,9 @@ class _AllCategoriesPageState extends State<AllCategoriesPage> {
                 padding: const EdgeInsets.only(top: 4),
                 child: Text(
                   '${category.venueCount} venue',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 12,
-                    color: Colors.grey[500],
+                    color: AppColors.onDarkMuted,
                   ),
                 ),
               ),

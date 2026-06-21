@@ -1,11 +1,26 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:pinput/pinput.dart'; // Library kotak-kotak OTP
-import 'home_page.dart'; // Nanti kita buat file ini (Dashboard)
+import 'package:flutter/services.dart';
+import 'package:pinput/pinput.dart';
+import 'home_page.dart';
+import 'reset_password_page.dart';
+import '../services/auth_service.dart';
+import '../constants/colors.dart';
+
+enum OtpType {
+  registration,
+  passwordReset,
+}
 
 class OtpVerificationPage extends StatefulWidget {
-  final String phoneNumber; // Menerima data No HP dari halaman Register
+  final String email;
+  final OtpType otpType;
 
-  const OtpVerificationPage({super.key, required this.phoneNumber});
+  const OtpVerificationPage({
+    super.key,
+    required this.email,
+    this.otpType = OtpType.registration,
+  });
 
   @override
   State<OtpVerificationPage> createState() => _OtpVerificationPageState();
@@ -14,172 +29,373 @@ class OtpVerificationPage extends StatefulWidget {
 class _OtpVerificationPageState extends State<OtpVerificationPage> {
   final _pinController = TextEditingController();
   bool _isLoading = false;
+  bool _isResending = false;
+  int _resendCountdown = 0;
+  Timer? _countdownTimer;
+  String? _errorMessage;
 
-  // Simulasi kode OTP yang benar (Hardcode dulu untuk testing)
-  final String _correctOtp = "1234"; 
+  @override
+  void initState() {
+    super.initState();
+    _startResendCountdown();
+  }
 
-  void _verifyOtp() async {
+  @override
+  void dispose() {
+    _pinController.dispose();
+    _countdownTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startResendCountdown() {
+    setState(() => _resendCountdown = 60);
+    _countdownTimer?.cancel();
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_resendCountdown > 0) {
+        setState(() => _resendCountdown--);
+      } else {
+        timer.cancel();
+      }
+    });
+  }
+
+  Future<void> _verifyOtp() async {
     final inputCode = _pinController.text;
 
-    if (inputCode.length != 4) return;
+    if (inputCode.length != 6) {
+      setState(() => _errorMessage = "Masukkan 6 digit kode OTP");
+      return;
+    }
 
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
 
-    // Simulasi Request ke Server
-    await Future.delayed(const Duration(seconds: 2));
+    if (widget.otpType == OtpType.registration) {
+      // Verify registration OTP
+      final result = await AuthService.verifyOtp(
+        email: widget.email,
+        code: inputCode,
+      );
+
+      if (mounted) {
+        setState(() => _isLoading = false);
+
+        if (result.success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(result.message ?? "Verifikasi berhasil!"),
+              backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+
+          // Navigate to Home, clear all previous routes
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => const HomePage()),
+            (route) => false,
+          );
+        } else {
+          setState(() => _errorMessage = result.message ?? "Kode OTP salah");
+          _pinController.clear();
+        }
+      }
+    } else {
+      // Verify password reset OTP
+      final result = await AuthService.verifyResetOtp(
+        email: widget.email,
+        code: inputCode,
+      );
+
+      if (mounted) {
+        setState(() => _isLoading = false);
+
+        if (result.success) {
+          final resetToken = result.data?['reset_token'];
+
+          // Navigate to Reset Password page
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ResetPasswordPage(
+                email: widget.email,
+                resetToken: resetToken,
+              ),
+            ),
+          );
+        } else {
+          setState(() => _errorMessage = result.message ?? "Kode OTP salah");
+          _pinController.clear();
+        }
+      }
+    }
+  }
+
+  Future<void> _resendOtp() async {
+    if (_resendCountdown > 0 || _isResending) return;
+
+    setState(() {
+      _isResending = true;
+      _errorMessage = null;
+    });
+
+    final result = widget.otpType == OtpType.registration
+        ? await AuthService.resendOtp(email: widget.email)
+        : await AuthService.forgotPassword(email: widget.email);
 
     if (mounted) {
-      setState(() => _isLoading = false);
+      setState(() => _isResending = false);
 
-      if (inputCode == _correctOtp) {
-        // --- SUKSES ---
+      if (result.success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Verifikasi Berhasil! Selamat Datang."), backgroundColor: Colors.green),
+          SnackBar(
+            content: Text(result.message ?? "Kode OTP baru telah dikirim"),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+          ),
         );
-
-        // Pindah ke Dashboard Utama (Hapus semua history back agar user gak bisa balik ke login)
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const HomePage()),
-          (route) => false,
-        );
-
+        _startResendCountdown();
       } else {
-        // --- GAGAL ---
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Kode OTP Salah! Coba lagi (1234)."), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text(result.message ?? "Gagal mengirim ulang kode"),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
         );
-        _pinController.clear(); // Hapus inputan
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // --- STYLE UNTUK PINPUT (Kotak OTP) ---
     final defaultPinTheme = PinTheme(
-      width: 56,
+      width: 48,
       height: 56,
-      textStyle: const TextStyle(fontSize: 20, color: Colors.black, fontWeight: FontWeight.w600),
+      textStyle: const TextStyle(
+        fontSize: 22,
+        color: AppColors.onDark,
+        fontWeight: FontWeight.w700,
+      ),
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F7FA),
-        border: Border.all(color: Colors.grey.shade300),
-        borderRadius: BorderRadius.circular(12),
+        color: AppColors.surface,
+        border: Border.all(color: AppColors.surfaceBorder),
+        borderRadius: BorderRadius.circular(14),
       ),
     );
 
     final focusedPinTheme = defaultPinTheme.copyDecorationWith(
-      border: Border.all(color: const Color(0xFF0047FF), width: 2), // Biru saat diklik
-      borderRadius: BorderRadius.circular(12),
+      border: Border.all(color: AppColors.brandYellow, width: 1.6),
+      borderRadius: BorderRadius.circular(14),
     );
 
     final errorPinTheme = defaultPinTheme.copyDecorationWith(
-      border: Border.all(color: Colors.red, width: 2),
+      border: Border.all(color: Colors.red.shade400, width: 1.6),
+      borderRadius: BorderRadius.circular(14),
     );
 
+    final submittedPinTheme = defaultPinTheme.copyDecorationWith(
+      border: Border.all(color: AppColors.surfaceBorder),
+      borderRadius: BorderRadius.circular(14),
+    );
+
+    final isPasswordReset = widget.otpType == OtpType.passwordReset;
+    final title = isPasswordReset ? "Reset Password" : "Verifikasi Email";
+    final subtitle = isPasswordReset
+        ? "Masukkan kode 6 digit yang dikirim ke email kamu untuk mereset password."
+        : "Masukkan kode 6 digit yang dikirim ke email kamu untuk verifikasi akun.";
+
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 20),
-              // Icon Gembok / OTP
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF0047FF).withOpacity(0.1),
-                  shape: BoxShape.circle,
+      backgroundColor: AppColors.bg,
+      body: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.light,
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Back button (only when there's somewhere to go back to)
+                if (Navigator.canPop(context)) ...[
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    padding: EdgeInsets.zero,
+                    alignment: Alignment.centerLeft,
+                    icon: const Icon(Icons.arrow_back_rounded,
+                        color: AppColors.onDark, size: 26),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+
+                // Brand mark
+                Image.asset('assets/sportago_mark.png', height: 40),
+                const SizedBox(height: 24),
+
+                // Heading
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.onDark,
+                    height: 1.1,
+                  ),
                 ),
-                child: const Icon(Icons.lock_clock_outlined, size: 50, color: Color(0xFF0047FF)),
-              ),
-              
-              const SizedBox(height: 30),
-              
-              const Text(
-                "Verifikasi OTP",
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF0047FF)),
-              ),
-              const SizedBox(height: 10),
-              
-              // Text Rich untuk menampilkan No HP bold
-              RichText(
-                textAlign: TextAlign.center,
-                text: TextSpan(
-                  text: "Kode 4 digit telah dikirim ke WhatsApp\n",
-                  style: TextStyle(color: Colors.grey[600], fontSize: 14, height: 1.5),
+                const SizedBox(height: 6),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                      fontSize: 15, color: AppColors.onDarkMuted, height: 1.4),
+                ),
+                const SizedBox(height: 6),
+
+                // Email
+                Text(
+                  widget.email,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    color: AppColors.brandYellow,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 32),
+
+                // OTP Input
+                Pinput(
+                  length: 6,
+                  controller: _pinController,
+                  defaultPinTheme: defaultPinTheme,
+                  focusedPinTheme: focusedPinTheme,
+                  submittedPinTheme: submittedPinTheme,
+                  errorPinTheme: errorPinTheme,
+                  pinputAutovalidateMode: PinputAutovalidateMode.onSubmit,
+                  showCursor: true,
+                  cursor: Center(
+                    child: Container(
+                      width: 2,
+                      height: 24,
+                      color: AppColors.brandYellow,
+                    ),
+                  ),
+                  onCompleted: (pin) => _verifyOtp(),
+                  onChanged: (_) {
+                    if (_errorMessage != null) {
+                      setState(() => _errorMessage = null);
+                    }
+                  },
+                ),
+
+                // Error message
+                if (_errorMessage != null) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    _errorMessage!,
+                    style: const TextStyle(color: Colors.red, fontSize: 13),
+                  ),
+                ],
+
+                const SizedBox(height: 32),
+
+                // Verify button (brand yellow pill)
+                SizedBox(
+                  width: double.infinity,
+                  height: 54,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _verifyOtp,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.brandYellow,
+                      disabledBackgroundColor:
+                          AppColors.brandYellow.withValues(alpha: 0.5),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 22,
+                            width: 22,
+                            child: CircularProgressIndicator(
+                                color: AppColors.ink, strokeWidth: 2),
+                          )
+                        : const Text(
+                            "Verifikasi",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.ink,
+                            ),
+                          ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Resend OTP
+                Center(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        "Tidak menerima kode? ",
+                        style:
+                            TextStyle(color: AppColors.onDarkMuted, fontSize: 14),
+                      ),
+                      if (_resendCountdown > 0)
+                        Text(
+                          "Tunggu ${_resendCountdown}s",
+                          style: const TextStyle(
+                            color: AppColors.onDarkMuted,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        )
+                      else
+                        GestureDetector(
+                          onTap: _isResending ? null : _resendOtp,
+                          child: _isResending
+                              ? const SizedBox(
+                                  height: 16,
+                                  width: 16,
+                                  child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: AppColors.brandYellow),
+                                )
+                              : const Text(
+                                  "Kirim Ulang",
+                                  style: TextStyle(
+                                    color: AppColors.brandYellow,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                        ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 28),
+
+                // Info text
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    TextSpan(
-                      text: widget.phoneNumber, // Data dinamis dari register
-                      style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                    const Icon(Icons.info_outline,
+                        size: 16, color: AppColors.onDarkMuted),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        "Kode OTP kadaluarsa dalam 10 menit. Cek folder spam jika email tidak ditemukan.",
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.onDarkMuted.withValues(alpha: 0.8),
+                          height: 1.4,
+                        ),
+                      ),
                     ),
                   ],
                 ),
-              ),
-
-              const SizedBox(height: 40),
-
-              // --- INPUT OTP (PINPUT) ---
-              Pinput(
-                length: 4,
-                controller: _pinController,
-                defaultPinTheme: defaultPinTheme,
-                focusedPinTheme: focusedPinTheme,
-                errorPinTheme: errorPinTheme,
-                pinputAutovalidateMode: PinputAutovalidateMode.onSubmit,
-                showCursor: true,
-                onCompleted: (pin) {
-                  // Otomatis submit saat user selesai ketik 4 digit
-                  _verifyOtp();
-                },
-              ),
-
-              const SizedBox(height: 40),
-
-              // --- TOMBOL VERIFIKASI ---
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _verifyOtp,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0047FF),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  ),
-                  child: _isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text("VERIFIKASI", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              // --- KIRIM ULANG (RESEND) ---
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text("Tidak terima kode? ", style: TextStyle(color: Colors.grey)),
-                  GestureDetector(
-                    onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Kode baru dikirim!")));
-                    },
-                    child: const Text(
-                      "Kirim Ulang",
-                      style: TextStyle(color: Color(0xFF0047FF), fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

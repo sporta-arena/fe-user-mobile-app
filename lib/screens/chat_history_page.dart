@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import '../constants/colors.dart';
 import '../services/booking_service.dart';
 import '../services/auth_service.dart';
 import '../models/booking.dart';
@@ -84,16 +86,17 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
     // Check if user is not logged in
     if (AuthService.token == null) {
       return Scaffold(
-        backgroundColor: Colors.grey[50],
+        backgroundColor: AppColors.bg,
         appBar: AppBar(
+          systemOverlayStyle: SystemUiOverlayStyle.light,
           title: const Text(
             "Riwayat Pesan",
-            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)
+            style: TextStyle(color: AppColors.onDark, fontWeight: FontWeight.bold)
           ),
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.bg,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+            icon: const Icon(Icons.arrow_back_ios, color: AppColors.onDark),
             onPressed: () => Navigator.pop(context),
           ),
         ),
@@ -101,11 +104,11 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.login, size: 80, color: Colors.grey[300]),
+              const Icon(Icons.login, size: 80, color: AppColors.onDarkMuted),
               const SizedBox(height: 16),
-              Text(
+              const Text(
                 "Silakan login untuk melihat riwayat pesan",
-                style: TextStyle(color: Colors.grey[500], fontSize: 16),
+                style: TextStyle(color: AppColors.onDarkMuted, fontSize: 16),
               ),
               const SizedBox(height: 24),
               ElevatedButton(
@@ -116,15 +119,15 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0047FF),
+                  backgroundColor: AppColors.brandYellow,
                   padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(999),
                   ),
                 ),
                 child: const Text(
                   "Login",
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.w700),
                 ),
               ),
             ],
@@ -134,44 +137,48 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
     }
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
+        systemOverlayStyle: SystemUiOverlayStyle.light,
         title: const Text(
           "Riwayat Pesan",
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)
+          style: TextStyle(color: AppColors.onDark, fontWeight: FontWeight.bold)
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.bg,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+          icon: const Icon(Icons.arrow_back_ios, color: AppColors.onDark),
           onPressed: () => Navigator.pop(context),
         ),
       ),
       body: _isLoading
           ? const Center(
-              child: CircularProgressIndicator(color: Color(0xFF0047FF)),
+              child: CircularProgressIndicator(color: AppColors.brandYellow),
             )
           : _errorMessage != null
               ? Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.error_outline, size: 60, color: Colors.grey[400]),
+                      const Icon(Icons.error_outline, size: 60, color: AppColors.onDarkMuted),
                       const SizedBox(height: 16),
                       Text(
                         _errorMessage!,
-                        style: TextStyle(color: Colors.grey[600]),
+                        style: const TextStyle(color: AppColors.onDarkMuted),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 16),
                       ElevatedButton(
                         onPressed: _loadBookingsWithChat,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF0047FF),
+                          backgroundColor: AppColors.brandYellow,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(999),
+                          ),
                         ),
                         child: const Text(
                           'Coba Lagi',
-                          style: TextStyle(color: Colors.white),
+                          style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.w700),
                         ),
                       ),
                     ],
@@ -182,28 +189,29 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.chat_bubble_outline, size: 80, color: Colors.grey[300]),
+                          const Icon(Icons.chat_bubble_outline, size: 80, color: AppColors.onDarkMuted),
                           const SizedBox(height: 16),
-                          Text(
+                          const Text(
                             "Belum ada riwayat pesan",
                             style: TextStyle(
-                              color: Colors.grey[500],
+                              color: AppColors.onDarkMuted,
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
                           const SizedBox(height: 8),
-                          Text(
+                          const Text(
                             "Riwayat chat akan muncul setelah\nbooking selesai",
                             textAlign: TextAlign.center,
-                            style: TextStyle(color: Colors.grey[400], fontSize: 14),
+                            style: TextStyle(color: AppColors.onDarkMuted, fontSize: 14),
                           ),
                         ],
                       ),
                     )
                   : RefreshIndicator(
                       onRefresh: _loadBookingsWithChat,
-                      color: const Color(0xFF0047FF),
+                      color: AppColors.brandYellow,
+                      backgroundColor: AppColors.surface,
                       child: ListView.builder(
                         padding: const EdgeInsets.all(16),
                         itemCount: _bookingsWithChat.length,
@@ -234,15 +242,9 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          border: Border.all(color: AppColors.surfaceBorder),
         ),
         child: Row(
           children: [
@@ -251,16 +253,11 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
               width: 56,
               height: 56,
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: isActive
-                      ? [const Color(0xFF0047FF), const Color(0xFF00A3FF)]
-                      : [Colors.grey.shade400, Colors.grey.shade500],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
+                color: isActive ? AppColors.brandYellow : AppColors.surfaceBorder,
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: const Icon(Icons.sports_soccer, color: Colors.white, size: 28),
+              child: Icon(Icons.sports_soccer,
+                  color: isActive ? AppColors.ink : AppColors.onDarkMuted, size: 28),
             ),
             const SizedBox(width: 14),
 
@@ -277,6 +274,7 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 15,
+                            color: AppColors.onDark,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -302,13 +300,13 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                           decoration: BoxDecoration(
-                            color: Colors.grey.shade100,
+                            color: AppColors.surfaceBorder,
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: Text(
+                          child: const Text(
                             "Selesai",
                             style: TextStyle(
-                              color: Colors.grey.shade600,
+                              color: AppColors.onDarkMuted,
                               fontSize: 10,
                               fontWeight: FontWeight.bold,
                             ),
@@ -319,23 +317,23 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
                   const SizedBox(height: 4),
                   Text(
                     booking.field?.name ?? "Field",
-                    style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                    style: const TextStyle(color: AppColors.onDarkMuted, fontSize: 13),
                   ),
                   const SizedBox(height: 6),
                   Row(
                     children: [
-                      Icon(Icons.calendar_today_outlined, size: 12, color: Colors.grey[400]),
+                      const Icon(Icons.calendar_today_outlined, size: 12, color: AppColors.onDarkMuted),
                       const SizedBox(width: 4),
                       Text(
                         _formatDate(booking.bookingDate),
-                        style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                        style: const TextStyle(color: AppColors.onDarkMuted, fontSize: 12),
                       ),
                       const SizedBox(width: 12),
-                      Icon(Icons.access_time_outlined, size: 12, color: Colors.grey[400]),
+                      const Icon(Icons.access_time_outlined, size: 12, color: AppColors.onDarkMuted),
                       const SizedBox(width: 4),
                       Text(
                         booking.formattedTime,
-                        style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                        style: const TextStyle(color: AppColors.onDarkMuted, fontSize: 12),
                       ),
                     ],
                   ),
@@ -344,7 +342,7 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
             ),
 
             // Arrow
-            Icon(Icons.chevron_right, color: Colors.grey[400]),
+            const Icon(Icons.chevron_right, color: AppColors.onDarkMuted),
           ],
         ),
       ),

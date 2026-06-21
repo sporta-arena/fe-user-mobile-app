@@ -11,6 +11,7 @@ class AuthResult {
   final User? user;
   final String? token;
   final Map<String, List<String>>? errors;
+  final Map<String, dynamic>? data;
 
   AuthResult({
     required this.success,
@@ -18,6 +19,7 @@ class AuthResult {
     this.user,
     this.token,
     this.errors,
+    this.data,
   });
 }
 
@@ -28,6 +30,25 @@ class AuthService {
   static const String _tokenKey = 'auth_token';
   static const String _userKey = 'auth_user';
   static const String _onboardingKey = 'has_seen_onboarding';
+
+  // DEMO/OFFLINE BYPASS — hardcoded local account, dipakai saat server mati.
+  // Hapus block ini begitu server stabil.
+  static const String _demoEmail = 'demo';
+  static const String _demoPassword = 'password';
+  static const String _demoToken = 'demo_offline_token';
+  static Map<String, dynamic> _demoUserJson() => {
+        'id': 999999,
+        'name': 'Demo User',
+        'email': 'demo@sporta.local',
+        'phone': '08000000000',
+        'avatar': null,
+        'avatar_url': null,
+        'roles': [
+          {'id': 1, 'name': 'user', 'guard_name': 'web'}
+        ],
+        'permissions': [],
+      };
+  static bool _isDemoSession() => _token == _demoToken;
 
   static String? get token => _token;
   static User? get currentUser => _currentUser;
@@ -52,6 +73,10 @@ class AuthService {
 
     // If we have a token, verify it's still valid
     if (_token != null) {
+      // Demo offline session — skip server verification
+      if (_isDemoSession()) {
+        return true;
+      }
       final result = await getUser();
       if (!result.success) {
         // Token expired or invalid, clear session
@@ -94,6 +119,19 @@ class AuthService {
     required String email,
     required String password,
   }) async {
+    // DEMO/OFFLINE BYPASS — login lokal tanpa server
+    if (email.trim().toLowerCase() == _demoEmail && password == _demoPassword) {
+      _token = _demoToken;
+      _currentUser = User.fromJson(_demoUserJson());
+      await _saveAuthData();
+      return AuthResult(
+        success: true,
+        message: 'Login demo berhasil (offline mode)',
+        user: _currentUser,
+        token: _token,
+      );
+    }
+
     try {
       final response = await http.post(
         Uri.parse(ApiConfig.loginUrl),
@@ -108,7 +146,9 @@ class AuthService {
 
       if (response.statusCode == 200) {
         _token = data['token'];
-        _currentUser = User.fromJson(data['user']);
+        // API may return 'user' or 'data'
+        final userData = data['user'] ?? data['data'];
+        _currentUser = User.fromJson(userData);
 
         // Save to persistent storage
         await _saveAuthData();
@@ -137,7 +177,7 @@ class AuthService {
     }
   }
 
-  /// Register user baru
+  /// Register user baru - Returns verification info, NOT auto-login
   static Future<AuthResult> register({
     required String name,
     required String email,
@@ -170,8 +210,57 @@ class AuthService {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 201) {
+        // Registration successful - needs OTP verification
+        // DO NOT save token or auto-login
+        return AuthResult(
+          success: true,
+          message: data['message'],
+          data: {
+            'email': email,
+            'verification': data['verification'],
+          },
+        );
+      } else {
+        return AuthResult(
+          success: false,
+          message: data['message'],
+          errors: data['errors'] != null
+              ? Map<String, List<String>>.from(
+                  data['errors'].map((key, value) => MapEntry(key, List<String>.from(value))))
+              : null,
+        );
+      }
+    } catch (e) {
+      return AuthResult(
+        success: false,
+        message: 'Gagal terhubung ke server: $e',
+      );
+    }
+  }
+
+  /// Verify OTP code after registration
+  static Future<AuthResult> verifyOtp({
+    required String email,
+    required String code,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse(ApiConfig.verifyOtpUrl),
+        headers: ApiConfig.defaultHeaders,
+        body: jsonEncode({
+          'email': email,
+          'code': code,
+        }),
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        // OTP verified - now we have the token
         _token = data['token'];
-        _currentUser = User.fromJson(data['user']);
+        // API may return 'user' or 'data'
+        final userData = data['user'] ?? data['data'];
+        _currentUser = User.fromJson(userData);
 
         // Save to persistent storage
         await _saveAuthData();
@@ -181,6 +270,172 @@ class AuthService {
           message: data['message'],
           user: _currentUser,
           token: _token,
+        );
+      } else {
+        return AuthResult(
+          success: false,
+          message: data['message'],
+          errors: data['errors'] != null
+              ? Map<String, List<String>>.from(
+                  data['errors'].map((key, value) => MapEntry(key, List<String>.from(value))))
+              : null,
+        );
+      }
+    } catch (e) {
+      return AuthResult(
+        success: false,
+        message: 'Gagal terhubung ke server: $e',
+      );
+    }
+  }
+
+  /// Resend OTP code
+  static Future<AuthResult> resendOtp({
+    required String email,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse(ApiConfig.resendOtpUrl),
+        headers: ApiConfig.defaultHeaders,
+        body: jsonEncode({
+          'email': email,
+        }),
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return AuthResult(
+          success: true,
+          message: data['message'],
+          data: {
+            'verification': data['verification'],
+          },
+        );
+      } else {
+        return AuthResult(
+          success: false,
+          message: data['message'],
+        );
+      }
+    } catch (e) {
+      return AuthResult(
+        success: false,
+        message: 'Gagal terhubung ke server: $e',
+      );
+    }
+  }
+
+  /// Request password reset - sends OTP to email
+  static Future<AuthResult> forgotPassword({
+    required String email,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse(ApiConfig.forgotPasswordUrl),
+        headers: ApiConfig.defaultHeaders,
+        body: jsonEncode({
+          'email': email,
+        }),
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return AuthResult(
+          success: true,
+          message: data['message'],
+          data: {
+            'email': email,
+            'reset': data['reset'],
+          },
+        );
+      } else {
+        return AuthResult(
+          success: false,
+          message: data['message'],
+          errors: data['errors'] != null
+              ? Map<String, List<String>>.from(
+                  data['errors'].map((key, value) => MapEntry(key, List<String>.from(value))))
+              : null,
+        );
+      }
+    } catch (e) {
+      return AuthResult(
+        success: false,
+        message: 'Gagal terhubung ke server: $e',
+      );
+    }
+  }
+
+  /// Verify password reset OTP - returns reset token
+  static Future<AuthResult> verifyResetOtp({
+    required String email,
+    required String code,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse(ApiConfig.verifyResetOtpUrl),
+        headers: ApiConfig.defaultHeaders,
+        body: jsonEncode({
+          'email': email,
+          'code': code,
+        }),
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return AuthResult(
+          success: true,
+          message: data['message'],
+          data: {
+            'reset_token': data['reset_token'],
+          },
+        );
+      } else {
+        return AuthResult(
+          success: false,
+          message: data['message'],
+          errors: data['errors'] != null
+              ? Map<String, List<String>>.from(
+                  data['errors'].map((key, value) => MapEntry(key, List<String>.from(value))))
+              : null,
+        );
+      }
+    } catch (e) {
+      return AuthResult(
+        success: false,
+        message: 'Gagal terhubung ke server: $e',
+      );
+    }
+  }
+
+  /// Reset password with reset token
+  static Future<AuthResult> resetPassword({
+    required String email,
+    required String resetToken,
+    required String password,
+    required String passwordConfirmation,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse(ApiConfig.resetPasswordUrl),
+        headers: ApiConfig.defaultHeaders,
+        body: jsonEncode({
+          'email': email,
+          'reset_token': resetToken,
+          'password': password,
+          'password_confirmation': passwordConfirmation,
+        }),
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return AuthResult(
+          success: true,
+          message: data['message'],
         );
       } else {
         return AuthResult(
@@ -215,7 +470,9 @@ class AuthService {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        _currentUser = User.fromJson(data['user']);
+        // API may return 'user' or 'data'
+        final userData = data['user'] ?? data['data'];
+        _currentUser = User.fromJson(userData);
 
         // Update stored user data
         await _saveAuthData();
@@ -266,7 +523,9 @@ class AuthService {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        _currentUser = User.fromJson(data['user']);
+        // API may return 'user' or 'data'
+        final userData = data['user'] ?? data['data'];
+        _currentUser = User.fromJson(userData);
 
         // Update stored user data
         await _saveAuthData();
