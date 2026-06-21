@@ -1,3 +1,4 @@
+import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'login_page.dart';
 import 'home_page.dart';
@@ -130,25 +131,28 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   ),
                   const SizedBox(height: 8),
 
-                  // Continue with Google
-                  _AuthButton(
-                    label: _isGoogleLoading
-                        ? 'Menghubungkan…'
-                        : 'Continue with Google',
-                    background: Colors.white,
-                    foreground: const Color(0xFF141414),
-                    leading: _isGoogleLoading
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                                strokeWidth: 2, color: Color(0xFF141414)),
-                          )
-                        : Image.asset('assets/google_logo.png', height: 20),
-                    onPressed:
-                        _isGoogleLoading ? () {} : _continueWithGoogle,
-                  ),
-                  const SizedBox(height: 8),
+                  // Continue with Google — Android only for now
+                  // (iOS Google Sign-In belum dikonfigurasi).
+                  if (!Platform.isIOS) ...[
+                    _AuthButton(
+                      label: _isGoogleLoading
+                          ? 'Menghubungkan…'
+                          : 'Continue with Google',
+                      background: Colors.white,
+                      foreground: const Color(0xFF141414),
+                      leading: _isGoogleLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                  strokeWidth: 2, color: Color(0xFF141414)),
+                            )
+                          : Image.asset('assets/google_logo.png', height: 20),
+                      onPressed:
+                          _isGoogleLoading ? () {} : _continueWithGoogle,
+                    ),
+                    const SizedBox(height: 8),
+                  ],
 
                   // Continue with email
                   _AuthButton(
