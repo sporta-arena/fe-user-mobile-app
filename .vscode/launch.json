@@ -1,0 +1,49 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Sportago • Staging (debug)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "args": ["--dart-define=DEV_MODE=staging"]
+    },
+    {
+      "name": "Sportago • Local BE (iOS sim)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "args": ["--dart-define=DEV_MODE=ios"]
+    },
+    {
+      "name": "Sportago • Local BE (Android emu)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "args": ["--dart-define=DEV_MODE=android"]
+    },
+    {
+      "name": "Sportago • Staging (release / QA)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "flutterMode": "release",
+      "args": ["--dart-define=DEV_MODE=staging"]
+    },
+    {
+      "name": "Sportago • Production (release)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "flutterMode": "release",
+      "args": ["--dart-define=DEV_MODE=production"]
+    },
+    {
+      "name": "Sportago • Production (debug, careful!)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "args": ["--dart-define=DEV_MODE=production"]
+    }
+  ]
+}
