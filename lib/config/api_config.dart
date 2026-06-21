@@ -65,6 +65,13 @@ class ApiConfig {
   // ============================================================
   static String get loginUrl => '$apiUrl/login';
   static String get registerUrl => '$apiUrl/register';
+  static String get googleLoginUrl => '$apiUrl/auth/google';
+
+  // Google OAuth WEB client id (same one the backend validates `aud` against).
+  // Passed as serverClientId to google_sign_in so the ID token's audience
+  // matches GOOGLE_CLIENT_ID on the server.
+  static const String googleServerClientId =
+      '999060732996-h4r5rm4u810uonmuojcitik52j2812in.apps.googleusercontent.com';
   static String get partnerRegisterUrl => '$apiUrl/partner/register';
   static String get managementLoginUrl => '$apiUrl/management/login';
   static String get verifyOtpUrl => '$apiUrl/verify-otp';

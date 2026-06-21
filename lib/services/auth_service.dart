@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../config/api_config.dart';
 import '../models/user.dart';
@@ -115,6 +116,65 @@ class AuthService {
   }
 
   /// Login dengan email dan password
+  /// Sign in with Google. Uses native Google Sign-In to obtain an ID token,
+  /// then exchanges it at POST /auth/google for a Sanctum token (mirrors the
+  /// web flow). serverClientId makes the token's `aud` match the backend's
+  /// GOOGLE_CLIENT_ID.
+  static Future<AuthResult> loginWithGoogle() async {
+    try {
+      final googleSignIn = GoogleSignIn(
+        scopes: const ['email', 'profile'],
+        serverClientId: ApiConfig.googleServerClientId,
+      );
+
+      // Sign out first so the account picker shows every time.
+      await googleSignIn.signOut();
+
+      final account = await googleSignIn.signIn();
+      if (account == null) {
+        return AuthResult(success: false, message: 'Login Google dibatalkan');
+      }
+
+      final auth = await account.authentication;
+      final idToken = auth.idToken;
+      if (idToken == null) {
+        return AuthResult(
+            success: false, message: 'Gagal mendapatkan token dari Google');
+      }
+
+      final response = await http.post(
+        Uri.parse(ApiConfig.googleLoginUrl),
+        headers: ApiConfig.defaultHeaders,
+        body: jsonEncode({'credential': idToken}),
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        _token = data['token'];
+        _currentUser = User.fromJson(data['user'] ?? data['data']);
+        await _saveAuthData();
+        return AuthResult(
+          success: true,
+          message: data['message'],
+          user: _currentUser,
+          token: _token,
+        );
+      } else {
+        return AuthResult(
+          success: false,
+          message: data['message'] ?? 'Login Google gagal',
+          errors: data['errors'] != null
+              ? Map<String, List<String>>.from(data['errors'].map(
+                  (key, value) => MapEntry(key, List<String>.from(value))))
+              : null,
+        );
+      }
+    } catch (e) {
+      return AuthResult(success: false, message: 'Login Google gagal: $e');
+    }
+  }
+
   static Future<AuthResult> login({
     required String email,
     required String password,

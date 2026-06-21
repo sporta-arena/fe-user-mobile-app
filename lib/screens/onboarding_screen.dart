@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'login_page.dart';
+import 'home_page.dart';
 import '../services/auth_service.dart';
 
 class OnboardingPage extends StatefulWidget {
@@ -10,6 +11,33 @@ class OnboardingPage extends StatefulWidget {
 }
 
 class _OnboardingPageState extends State<OnboardingPage> {
+  bool _isGoogleLoading = false;
+
+  Future<void> _continueWithGoogle() async {
+    setState(() => _isGoogleLoading = true);
+    final result = await AuthService.loginWithGoogle();
+    if (!mounted) return;
+    setState(() => _isGoogleLoading = false);
+
+    if (result.success) {
+      await AuthService.setOnboardingSeen();
+      if (!mounted) return;
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const HomePage()),
+        (route) => false,
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result.message ?? 'Login Google gagal'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
   Future<void> _continueWithEmail() async {
     // Mark onboarding as seen so it won't show again
     await AuthService.setOnboardingSeen();
@@ -104,11 +132,21 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
                   // Continue with Google
                   _AuthButton(
-                    label: 'Continue with Google',
+                    label: _isGoogleLoading
+                        ? 'Menghubungkan…'
+                        : 'Continue with Google',
                     background: Colors.white,
                     foreground: const Color(0xFF141414),
-                    leading: Image.asset('assets/google_logo.png', height: 20),
-                    onPressed: () => _comingSoon('Google'),
+                    leading: _isGoogleLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2, color: Color(0xFF141414)),
+                          )
+                        : Image.asset('assets/google_logo.png', height: 20),
+                    onPressed:
+                        _isGoogleLoading ? () {} : _continueWithGoogle,
                   ),
                   const SizedBox(height: 8),
 
