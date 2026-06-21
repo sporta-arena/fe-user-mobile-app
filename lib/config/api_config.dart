@@ -11,31 +11,43 @@ class ApiConfig {
   // Android Emulator URL (10.0.2.2 = localhost dari emulator)
   static const String androidEmulatorUrl = 'http://10.0.2.2:8088';
 
-  // Environment check
-  static bool get isProduction => const bool.fromEnvironment('dart.vm.product');
-
-  // PILIH SATU:
-  // - 'staging' = Staging Server (api.staging.sportago.id)
-  // - 'production' = Production Server (api.sportago.id)
-  // - 'ios' = iOS Simulator (localhost)
-  // - 'android' = Android Emulator (10.0.2.2)
+  // ===========================================================================
+  // ENVIRONMENT SELECTION
+  // ===========================================================================
+  // Pilih target environment saat build/run via --dart-define=DEV_MODE=...
+  //   staging     -> api.staging.sportago.id   (default kalau DEBUG)
+  //   production  -> api.sportago.id           (default kalau RELEASE)
+  //   ios         -> http://localhost:8088     (iOS simulator -> BE lokal)
+  //   android     -> http://10.0.2.2:8088      (Android emulator -> BE lokal)
   //
-  // Default 'staging'. Bisa di-override saat run tanpa edit file, mis:
-  //   flutter run --dart-define=DEV_MODE=ios
-  // start.sh otomatis mengisi ini sesuai device (ios/android) untuk pakai BE lokal.
-  static String devMode =
-      const String.fromEnvironment('DEV_MODE', defaultValue: 'staging');
+  // Contoh:
+  //   flutter run                                      (debug  -> staging)
+  //   flutter run --dart-define=DEV_MODE=ios           (debug  -> BE lokal)
+  //   flutter build apk --release --dart-define=DEV_MODE=staging
+  //   flutter build apk --release --dart-define=DEV_MODE=production
+  static const String _envOverride =
+      String.fromEnvironment('DEV_MODE', defaultValue: '');
+
+  // True kalau di-compile pakai release mode (flutter build / --release).
+  static bool get isReleaseBuild =>
+      const bool.fromEnvironment('dart.vm.product');
+
+  // Environment aktif. DEV_MODE eksplisit SELALU menang; kalau tidak diisi,
+  // release default ke production dan debug default ke staging.
+  static String get environment {
+    if (_envOverride.isNotEmpty) return _envOverride;
+    return isReleaseBuild ? 'production' : 'staging';
+  }
+
+  static bool get isProduction => environment == 'production';
 
   // Get host URL (without /api/v1)
   static String get hostUrl {
-    if (isProduction) {
-      return productionUrl;
-    }
-    switch (devMode) {
-      case 'staging':
-        return stagingUrl;
+    switch (environment) {
       case 'production':
         return productionUrl;
+      case 'staging':
+        return stagingUrl;
       case 'ios':
         return localUrl;
       case 'android':
