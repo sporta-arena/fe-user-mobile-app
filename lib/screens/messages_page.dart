@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import '../theme/app_tokens.dart';
-import 'package:flutter/services.dart';
-import '../constants/colors.dart';
 
 class MessagesPage extends StatelessWidget {
   const MessagesPage({super.key});
@@ -9,15 +7,15 @@ class MessagesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bg,
+      backgroundColor: context.c.surface,
       appBar: AppBar(
-        backgroundColor: AppColors.bg,
+        backgroundColor: context.c.surface,
         elevation: 0,
         systemOverlayStyle: gayaOverlay(context),
-        title: const Text(
+        title: Text(
           'Pesan',
           style: TextStyle(
-            color: AppColors.onDark,
+            color: context.c.ink,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -30,30 +28,30 @@ class MessagesPage extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: AppColors.brandYellow.withValues(alpha: 0.15),
+                color: context.c.accent.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.chat_bubble_outline,
                 size: 64,
-                color: AppColors.brandYellow.withValues(alpha: 0.5),
+                color: context.c.accent.withValues(alpha: 0.5),
               ),
             ),
             const SizedBox(height: 24),
-            const Text(
+            Text(
               'Belum ada pesan',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: AppColors.onDark,
+                color: context.c.ink,
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Pesan dari venue akan muncul di sini',
               style: TextStyle(
                 fontSize: 14,
-                color: AppColors.onDarkMuted,
+                color: context.c.inkSoft,
               ),
             ),
           ],

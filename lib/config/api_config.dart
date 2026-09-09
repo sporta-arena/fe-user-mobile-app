@@ -61,6 +61,41 @@ class ApiConfig {
   static String get apiUrl => '$hostUrl/api/v1';
 
   // ============================================================
+  // REVERB (WEBSOCKET) — chat realtime
+  // ============================================================
+  // Chat tidak memakai polling; pesan didorong server lewat Laravel
+  // Reverb. Kunci aplikasi Reverb bukan rahasia (klien memang harus
+  // mengirimnya saat menyambung) — yang menjaga kanal privat adalah
+  // token Sanctum di /broadcasting/auth.
+  static const String reverbAppKey =
+      String.fromEnvironment('REVERB_APP_KEY', defaultValue: '51440cd26b729010253f');
+
+  // Kosong berarti "ikut host API": lokal lewat port 8080, staging dan
+  // produksi lewat reverse proxy di port TLS yang sama.
+  static const String _reverbPortOverride =
+      String.fromEnvironment('REVERB_PORT', defaultValue: '');
+
+  static String get reverbUrl {
+    final host = Uri.parse(hostUrl);
+    final aman = host.scheme == 'https';
+    final port = _reverbPortOverride.isNotEmpty
+        ? int.tryParse(_reverbPortOverride)
+        : (aman ? null : 8080);
+
+    return Uri(
+      scheme: aman ? 'wss' : 'ws',
+      host: host.host,
+      port: port,
+      path: '/app/$reverbAppKey',
+      queryParameters: const {
+        'protocol': '7',
+        'client': 'flutter',
+        'version': '1.0',
+      },
+    ).toString();
+  }
+
+  // ============================================================
   // AUTH ENDPOINTS
   // ============================================================
   static String get loginUrl => '$apiUrl/login';
@@ -155,7 +190,9 @@ class ApiConfig {
   static String cancelBookingUrl(int id) => '$apiUrl/bookings/$id/cancel';
   static String simulatePaymentUrl(int id) => '$apiUrl/bookings/$id/simulate-payment';
   static String refundPreviewUrl(int id) => '$apiUrl/bookings/$id/refund-preview';
-  static String refundPolicyUrl(int bookingId) => '$apiUrl/bookings/$bookingId/refund-policy';
+  // Kebijakan refund berlaku global, bukan per booking — backend
+  // menyediakannya di /refund-policy tanpa id.
+  static String get refundPolicyUrl => '$apiUrl/refund-policy';
   static String canReviewBookingUrl(int id) => '$apiUrl/bookings/$id/can-review';
 
   // ============================================================
@@ -227,14 +264,41 @@ class ApiConfig {
   // ============================================================
   // REFUNDS
   // ============================================================
-  static String get refundsUrl => '$apiUrl/refunds';
-  static String refundDetailUrl(int id) => '$apiUrl/refunds/$id';
-  static String requestRefundUrl(int bookingId) => '$apiUrl/bookings/$bookingId/refund';
+  // Tidak ada endpoint refund sisi customer, dan itu memang desainnya:
+  // /refund-policy menyatakan `customer_can_request: false`. Refund
+  // dimulai mitra (/partner/bookings/{id}/refund) dan saat ini masih
+  // ditangani manual oleh admin Sportago.
+  //
+  // Sebelumnya di sini ada refundsUrl, refundDetailUrl, dan
+  // requestRefundUrl — ketiganya menunjuk rute yang tidak pernah ada di
+  // backend, jadi setiap pemanggilannya berujung 404.
 
   // ============================================================
   // CHAT
   // ============================================================
   static String get baseUrl => apiUrl;
+
+  /// Membetulkan URL media yang dibentuk backend dari APP_URL-nya sendiri.
+  ///
+  /// Backend lokal menghasilkan `http://localhost:8088/storage/...`.
+  /// Di emulator Android, `localhost` menunjuk ke emulator itu sendiri —
+  /// bukan ke Mac tempat backend jalan — jadi gambarnya tidak pernah muat.
+  /// Host-nya ditukar ke host API yang sedang dipakai.
+  ///
+  /// Tidak berpengaruh di staging/produksi: di sana backend memakai
+  /// domain aslinya, dan cabang ini tidak pernah kena.
+  static String? perbaikiUrlMedia(String? url) {
+    if (url == null || url.isEmpty) return url;
+    if (!url.contains('localhost') && !url.contains('127.0.0.1')) return url;
+    final tujuan = Uri.parse(hostUrl);
+    return Uri.parse(url)
+        .replace(
+          scheme: tujuan.scheme,
+          host: tujuan.host,
+          port: tujuan.hasPort ? tujuan.port : null,
+        )
+        .toString();
+  }
 
   // ============================================================
   // HEALTH CHECK

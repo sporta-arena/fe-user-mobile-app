@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_tokens.dart';
-import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../constants/colors.dart';
 import '../../models/booking.dart';
+import '../../services/realtime_chat.dart';
 import 'chat_models.dart';
 import 'chat_service.dart';
 
@@ -29,17 +28,49 @@ class _ChatPageState extends State<ChatPage> {
   bool _isLoading = true;
   bool _isSending = false;
 
+  // Pesan baru datang lewat WebSocket, bukan dari polling — layar ini
+  // tidak pernah menanyakan ulang ke server selama terbuka.
+  RealtimeChat? _realtime;
+  bool _terhubung = false;
+
   @override
   void initState() {
     super.initState();
     _loadData();
+    if (!widget.isReadOnly) {
+      _realtime = RealtimeChat.dengarkan(
+        widget.booking.id,
+        onPesan: _terimaPesan,
+        onStatus: (tersambung) {
+          if (mounted) setState(() => _terhubung = tersambung);
+        },
+      );
+    }
   }
 
   @override
   void dispose() {
+    _realtime?.tutup();
     _messageController.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  /// Pesan dorongan dari server.
+  ///
+  /// Disaring berdasarkan id: server sudah tidak menyiarkan balik pesan
+  /// kita sendiri (lewat X-Socket-ID), tapi setelah sambungan putus dan
+  /// tersambung lagi socket_id-nya berubah, jadi penyaring ini tetap
+  /// diperlukan supaya tidak ada pesan kembar.
+  void _terimaPesan(Map<String, dynamic> data) {
+    if (!mounted) return;
+
+    final pesan = Message.fromJson(data);
+    if (_messages.any((m) => m.id == pesan.id)) return;
+
+    setState(() => _messages.add(pesan));
+    _scrollToBottom();
+    ChatService.markAsRead(widget.booking.id);
   }
 
   Future<void> _loadData() async {
@@ -54,6 +85,7 @@ class _ChatPageState extends State<ChatPage> {
       _isLoading = false;
     });
     _scrollToBottom();
+    ChatService.markAsRead(widget.booking.id);
   }
 
   void _scrollToBottom() {
@@ -75,7 +107,11 @@ class _ChatPageState extends State<ChatPage> {
     setState(() => _isSending = true);
     _messageController.clear();
 
-    final message = await ChatService.sendMessage(widget.booking.id, content);
+    final message = await ChatService.sendMessage(
+      widget.booking.id,
+      content,
+      socketId: _realtime?.socketId,
+    );
 
     if (message != null) {
       setState(() {
@@ -105,7 +141,7 @@ class _ChatPageState extends State<ChatPage> {
   void _showPartnerInfo() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.surface,
+      backgroundColor: context.c.raised,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -116,47 +152,47 @@ class _ChatPageState extends State<ChatPage> {
           children: [
             CircleAvatar(
               radius: 40,
-              backgroundColor: AppColors.brandYellow.withValues(alpha: 0.15),
+              backgroundColor: context.c.accent.withValues(alpha: 0.15),
               child: Text(
                 _partnerContact?.name.isNotEmpty == true
                     ? _partnerContact!.name[0].toUpperCase()
                     : 'P',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.brandYellow,
+                  color: context.c.accent,
                 ),
               ),
             ),
             const SizedBox(height: 16),
             Text(
               _partnerContact?.name ?? 'Partner',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: AppColors.onDark,
+                color: context.c.ink,
               ),
             ),
             const SizedBox(height: 4),
             Text(
               _partnerContact?.venueName ?? '',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
-                color: AppColors.onDarkMuted,
+                color: context.c.inkSoft,
               ),
             ),
             const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.location_on, size: 14, color: AppColors.onDarkMuted),
+                Icon(Icons.location_on, size: 14, color: context.c.inkSoft),
                 const SizedBox(width: 4),
                 Flexible(
                   child: Text(
                     _partnerContact?.address ?? '',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
-                      color: AppColors.onDarkMuted,
+                      color: context.c.inkSoft,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -168,11 +204,11 @@ class _ChatPageState extends State<ChatPage> {
               width: double.infinity,
               child: OutlinedButton.icon(
                 onPressed: _callPartner,
-                icon: const Icon(Icons.phone, color: AppColors.brandYellow),
-                label: const Text('Telepon', style: TextStyle(color: AppColors.brandYellow)),
+                icon: Icon(Icons.phone, color: context.c.accent),
+                label: Text('Telepon', style: TextStyle(color: context.c.accent)),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
-                  side: const BorderSide(color: AppColors.brandYellow),
+                  side: BorderSide(color: context.c.accent),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(999),
                   ),
@@ -189,13 +225,13 @@ class _ChatPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bg,
+      backgroundColor: context.c.surface,
       appBar: AppBar(
-        backgroundColor: AppColors.bg,
+        backgroundColor: context.c.surface,
         elevation: 0,
         systemOverlayStyle: gayaOverlay(context),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: AppColors.onDark),
+          icon: Icon(Icons.arrow_back_ios, color: context.c.ink),
           onPressed: () => Navigator.pop(context),
         ),
         title: InkWell(
@@ -204,15 +240,15 @@ class _ChatPageState extends State<ChatPage> {
             children: [
               CircleAvatar(
                 radius: 18,
-                backgroundColor: AppColors.brandYellow.withValues(alpha: 0.15),
+                backgroundColor: context.c.accent.withValues(alpha: 0.15),
                 child: Text(
                   _partnerContact?.name.isNotEmpty == true
                       ? _partnerContact!.name[0].toUpperCase()
                       : 'P',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.brandYellow,
+                    color: context.c.accent,
                   ),
                 ),
               ),
@@ -223,17 +259,25 @@ class _ChatPageState extends State<ChatPage> {
                   children: [
                     Text(
                       _partnerContact?.name ?? 'Partner',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.onDark,
+                        color: context.c.ink,
                       ),
                     ),
+                    // Baris kedua biasanya nama venue. Kalau sambungan
+                    // realtime sedang putus, tempat yang sama dipakai
+                    // memberi tahu bahwa pesan baru mungkin tertunda —
+                    // lebih jujur daripada diam-diam berhenti menerima.
                     Text(
-                      widget.booking.field?.venue?.name ?? '',
-                      style: const TextStyle(
+                      (_realtime != null && !_terhubung)
+                          ? 'Menyambungkan\u2026'
+                          : (widget.booking.field?.venue?.name ?? ''),
+                      style: TextStyle(
                         fontSize: 12,
-                        color: AppColors.onDarkMuted,
+                        color: (_realtime != null && !_terhubung)
+                            ? context.c.warn
+                            : context.c.inkSoft,
                       ),
                     ),
                   ],
@@ -244,11 +288,11 @@ class _ChatPageState extends State<ChatPage> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.phone, color: AppColors.onDark),
+            icon: Icon(Icons.phone, color: context.c.ink),
             onPressed: _callPartner,
           ),
           IconButton(
-            icon: const Icon(Icons.more_vert, color: AppColors.onDark),
+            icon: Icon(Icons.more_vert, color: context.c.ink),
             onPressed: _showPartnerInfo,
           ),
         ],
@@ -258,25 +302,25 @@ class _ChatPageState extends State<ChatPage> {
           // Booking info banner
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            color: AppColors.surface,
+            color: context.c.raised,
             child: Row(
               children: [
-                const Icon(Icons.confirmation_number, size: 16, color: AppColors.brandYellow),
+                Icon(Icons.confirmation_number, size: 16, color: context.c.accent),
                 const SizedBox(width: 8),
                 Text(
                   'Booking: ${widget.booking.bookingCode}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
-                    color: AppColors.brandYellow,
+                    color: context.c.accent,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
                 const Spacer(),
                 Text(
                   widget.booking.formattedTime,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
-                    color: AppColors.onDarkMuted,
+                    color: context.c.inkSoft,
                   ),
                 ),
               ],
@@ -285,7 +329,7 @@ class _ChatPageState extends State<ChatPage> {
           // Messages list
           Expanded(
             child: _isLoading
-                ? const Center(child: CircularProgressIndicator(color: AppColors.brandYellow))
+                ? Center(child: CircularProgressIndicator(color: context.c.accent))
                 : ListView.builder(
                     controller: _scrollController,
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -317,18 +361,18 @@ class _ChatPageState extends State<ChatPage> {
                 top: 12,
                 bottom: MediaQuery.of(context).padding.bottom + 12,
               ),
-              decoration: const BoxDecoration(
-                color: AppColors.surface,
-                border: Border(top: BorderSide(color: AppColors.surfaceBorder)),
+              decoration: BoxDecoration(
+                color: context.c.raised,
+                border: Border(top: BorderSide(color: context.c.line)),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.lock_outline, size: 16, color: AppColors.onDarkMuted),
+                  Icon(Icons.lock_outline, size: 16, color: context.c.inkSoft),
                   const SizedBox(width: 8),
-                  const Text(
+                  Text(
                     "Chat sudah ditutup karena booking selesai",
-                    style: TextStyle(color: AppColors.onDarkMuted, fontSize: 13),
+                    style: TextStyle(color: context.c.inkSoft, fontSize: 13),
                   ),
                 ],
               ),
@@ -341,25 +385,25 @@ class _ChatPageState extends State<ChatPage> {
               top: 12,
               bottom: MediaQuery.of(context).padding.bottom + 12,
             ),
-            decoration: const BoxDecoration(
-              color: AppColors.bg,
-              border: Border(top: BorderSide(color: AppColors.surfaceBorder)),
+            decoration: BoxDecoration(
+              color: context.c.surface,
+              border: Border(top: BorderSide(color: context.c.line)),
             ),
             child: Row(
               children: [
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
-                      color: AppColors.surface,
+                      color: context.c.raised,
                       borderRadius: BorderRadius.circular(24),
-                      border: Border.all(color: AppColors.surfaceBorder),
+                      border: Border.all(color: context.c.line),
                     ),
                     child: TextField(
                       controller: _messageController,
-                      style: const TextStyle(color: AppColors.onDark),
-                      decoration: const InputDecoration(
+                      style: TextStyle(color: context.c.ink),
+                      decoration: InputDecoration(
                         hintText: 'Ketik pesan...',
-                        hintStyle: TextStyle(color: AppColors.onDarkMuted),
+                        hintStyle: TextStyle(color: context.c.inkSoft),
                         border: InputBorder.none,
                         contentPadding: EdgeInsets.symmetric(
                           horizontal: 20,
@@ -374,22 +418,22 @@ class _ChatPageState extends State<ChatPage> {
                 ),
                 const SizedBox(width: 8),
                 Container(
-                  decoration: const BoxDecoration(
-                    color: AppColors.brandYellow,
+                  decoration: BoxDecoration(
+                    color: context.c.accent,
                     shape: BoxShape.circle,
                   ),
                   child: IconButton(
                     onPressed: _isSending ? null : _sendMessage,
                     icon: _isSending
-                        ? const SizedBox(
+                        ? SizedBox(
                             width: 20,
                             height: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: AppColors.ink,
+                              color: context.c.onAccent,
                             ),
                           )
-                        : const Icon(Icons.send, color: AppColors.ink),
+                        : Icon(Icons.send, color: context.c.onAccent),
                   ),
                 ),
               ],
@@ -420,18 +464,18 @@ class _ChatPageState extends State<ChatPage> {
       margin: const EdgeInsets.symmetric(vertical: 16),
       child: Row(
         children: [
-          const Expanded(child: Divider(color: AppColors.surfaceBorder)),
+          Expanded(child: Divider(color: context.c.line)),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Text(
               dateText,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12,
-                color: AppColors.onDarkMuted,
+                color: context.c.inkSoft,
               ),
             ),
           ),
-          const Expanded(child: Divider(color: AppColors.surfaceBorder)),
+          Expanded(child: Divider(color: context.c.line)),
         ],
       ),
     );
@@ -449,8 +493,8 @@ class _ChatPageState extends State<ChatPage> {
         ),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: isUser ? AppColors.brandYellow : AppColors.surface,
-          border: isUser ? null : Border.all(color: AppColors.surfaceBorder),
+          color: isUser ? context.c.accent : context.c.raised,
+          border: isUser ? null : Border.all(color: context.c.line),
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(16),
             topRight: const Radius.circular(16),
@@ -465,7 +509,7 @@ class _ChatPageState extends State<ChatPage> {
               message.content,
               style: TextStyle(
                 fontSize: 14,
-                color: isUser ? AppColors.ink : AppColors.onDark,
+                color: isUser ? context.c.onAccent : context.c.ink,
               ),
             ),
             const SizedBox(height: 4),
@@ -477,8 +521,8 @@ class _ChatPageState extends State<ChatPage> {
                   style: TextStyle(
                     fontSize: 11,
                     color: isUser
-                        ? AppColors.ink.withValues(alpha: 0.6)
-                        : AppColors.onDarkMuted,
+                        ? context.c.onAccent.withValues(alpha: 0.6)
+                        : context.c.inkSoft,
                   ),
                 ),
                 if (isUser) ...[
@@ -491,8 +535,8 @@ class _ChatPageState extends State<ChatPage> {
                             : Icons.done,
                     size: 14,
                     color: message.status == MessageStatus.read
-                        ? AppColors.ink
-                        : AppColors.ink.withValues(alpha: 0.6),
+                        ? context.c.onAccent
+                        : context.c.onAccent.withValues(alpha: 0.6),
                   ),
                 ],
               ],
