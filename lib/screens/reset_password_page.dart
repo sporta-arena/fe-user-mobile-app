@@ -97,7 +97,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(result.message ?? "Gagal mereset password"),
-            backgroundColor: Colors.red,
+            backgroundColor: context.c.danger,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -372,8 +372,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         border: border(context.c.line, 1),
         enabledBorder: border(context.c.line, 1),
         focusedBorder: border(context.c.accent, 1.6),
-        errorBorder: border(Colors.red.shade400, 1),
-        focusedErrorBorder: border(Colors.red.shade400, 1.6),
+        errorBorder: border(context.c.danger, 1),
+        focusedErrorBorder: border(context.c.danger, 1.6),
         suffixIcon: isPassword
             ? IconButton(
                 icon: Icon(

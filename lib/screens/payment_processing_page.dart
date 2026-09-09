@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../services/xendit_service.dart';
 import 'booking_success_page.dart';
-import '../constants/colors.dart';
 import 'dart:math' as math;
 
 // Custom painter untuk QR Code visual
@@ -237,17 +236,17 @@ class _PaymentProcessingPageState extends State<PaymentProcessingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bg,
+      backgroundColor: context.c.surface,
       appBar: AppBar(
         systemOverlayStyle: gayaOverlay(context),
-        title: const Text(
+        title: Text(
           "Payment",
-          style: TextStyle(color: AppColors.onDark, fontWeight: FontWeight.bold),
+          style: TextStyle(color: context.c.ink, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: AppColors.bg,
+        backgroundColor: context.c.surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: AppColors.onDark),
+          icon: Icon(Icons.arrow_back_ios, color: context.c.ink),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -260,15 +259,15 @@ class _PaymentProcessingPageState extends State<PaymentProcessingPage> {
   }
 
   Widget _buildLoadingState() {
-    return const Center(
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircularProgressIndicator(color: AppColors.brandYellow),
+          CircularProgressIndicator(color: context.c.accent),
           SizedBox(height: 20),
           Text(
             "Membuat pembayaran...",
-            style: TextStyle(fontSize: 16, color: AppColors.onDarkMuted),
+            style: TextStyle(fontSize: 16, color: context.c.inkSoft),
           ),
         ],
       ),
@@ -282,31 +281,31 @@ class _PaymentProcessingPageState extends State<PaymentProcessingPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 80, color: Colors.red),
+            Icon(Icons.error_outline, size: 80, color: context.c.danger),
             const SizedBox(height: 20),
-            const Text(
+            Text(
               "Pembayaran Gagal",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.onDark),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: context.c.ink),
             ),
             const SizedBox(height: 10),
             Text(
               _errorMessage,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: AppColors.onDarkMuted),
+              style: TextStyle(color: context.c.inkSoft),
             ),
             const SizedBox(height: 30),
             ElevatedButton(
               onPressed: _createPayment,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.brandYellow,
+                backgroundColor: context.c.accent,
                 padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(999),
                 ),
               ),
-              child: const Text(
+              child: Text(
                 "Coba Lagi",
-                style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.w700),
+                style: TextStyle(color: context.c.onAccent, fontWeight: FontWeight.w700),
               ),
             ),
           ],
@@ -339,15 +338,15 @@ class _PaymentProcessingPageState extends State<PaymentProcessingPage> {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: AppColors.surface,
+              color: context.c.raised,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.surfaceBorder),
+              border: Border.all(color: context.c.line),
             ),
             child: Column(
               children: [
-                const Text(
+                Text(
                   "Scan QR Code untuk Bayar",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.onDark),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: context.c.ink),
                 ),
                 const SizedBox(height: 20),
                 
@@ -392,10 +391,10 @@ class _PaymentProcessingPageState extends State<PaymentProcessingPage> {
                 const SizedBox(height: 20),
                 Text(
                   "Total: ${XenditService.formatCurrency(widget.price + (_paymentMethods[0]['fee'] as int))}",
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.brandYellow,
+                    color: context.c.accent,
                   ),
                 ),
               ],
@@ -422,8 +421,8 @@ class _PaymentProcessingPageState extends State<PaymentProcessingPage> {
                 child: OutlinedButton(
                   onPressed: () => _simulatePaymentSuccess(),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.onDark,
-                    side: const BorderSide(color: AppColors.surfaceBorder),
+                    foregroundColor: context.c.ink,
+                    side: BorderSide(color: context.c.line),
                   ),
                   child: const Text("Simulasi Bayar"),
                 ),
@@ -433,11 +432,11 @@ class _PaymentProcessingPageState extends State<PaymentProcessingPage> {
                 child: ElevatedButton(
                   onPressed: () => _checkPaymentStatus(),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.brandYellow,
+                    backgroundColor: context.c.accent,
                   ),
-                  child: const Text(
+                  child: Text(
                     "Cek Status",
-                    style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.w700),
+                    style: TextStyle(color: context.c.onAccent, fontWeight: FontWeight.w700),
                   ),
                 ),
               ),
@@ -460,43 +459,43 @@ class _PaymentProcessingPageState extends State<PaymentProcessingPage> {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: AppColors.surface,
+              color: context.c.raised,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.surfaceBorder),
+              border: Border.all(color: context.c.line),
             ),
             child: Column(
               children: [
                 Text(
                   bankName,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.onDark),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: context.c.ink),
                 ),
                 const SizedBox(height: 20),
 
-                const Text("Nomor Virtual Account:", style: TextStyle(color: AppColors.onDarkMuted)),
+                Text("Nomor Virtual Account:", style: TextStyle(color: context.c.inkSoft)),
                 const SizedBox(height: 8),
 
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: AppColors.bg,
+                    color: context.c.surface,
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppColors.surfaceBorder),
+                    border: Border.all(color: context.c.line),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
                         vaNumber,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 2,
-                          color: AppColors.onDark,
+                          color: context.c.ink,
                         ),
                       ),
                       IconButton(
                         onPressed: () => _copyToClipboard(vaNumber),
-                        icon: const Icon(Icons.copy, color: AppColors.brandYellow),
+                        icon: Icon(Icons.copy, color: context.c.accent),
                       ),
                     ],
                   ),
@@ -505,10 +504,10 @@ class _PaymentProcessingPageState extends State<PaymentProcessingPage> {
                 const SizedBox(height: 20),
                 Text(
                   "Total: ${XenditService.formatCurrency(widget.price + (_paymentMethods[widget.paymentMethodId]['fee'] as int))}",
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.brandYellow,
+                    color: context.c.accent,
                   ),
                 ),
               ],
@@ -536,8 +535,8 @@ class _PaymentProcessingPageState extends State<PaymentProcessingPage> {
                 child: OutlinedButton(
                   onPressed: () => _simulatePaymentSuccess(),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.onDark,
-                    side: const BorderSide(color: AppColors.surfaceBorder),
+                    foregroundColor: context.c.ink,
+                    side: BorderSide(color: context.c.line),
                   ),
                   child: const Text("Simulasi Bayar"),
                 ),
@@ -547,11 +546,11 @@ class _PaymentProcessingPageState extends State<PaymentProcessingPage> {
                 child: ElevatedButton(
                   onPressed: () => _checkPaymentStatus(),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.brandYellow,
+                    backgroundColor: context.c.accent,
                   ),
-                  child: const Text(
+                  child: Text(
                     "Cek Status",
-                    style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.w700),
+                    style: TextStyle(color: context.c.onAccent, fontWeight: FontWeight.w700),
                   ),
                 ),
               ),
@@ -574,43 +573,43 @@ class _PaymentProcessingPageState extends State<PaymentProcessingPage> {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: AppColors.surface,
+              color: context.c.raised,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.surfaceBorder),
+              border: Border.all(color: context.c.line),
             ),
             child: Column(
               children: [
                 Text(
                   "Bayar di $retailName",
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.onDark),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: context.c.ink),
                 ),
                 const SizedBox(height: 20),
 
-                const Text("Kode Pembayaran:", style: TextStyle(color: AppColors.onDarkMuted)),
+                Text("Kode Pembayaran:", style: TextStyle(color: context.c.inkSoft)),
                 const SizedBox(height: 8),
 
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: AppColors.bg,
+                    color: context.c.surface,
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppColors.surfaceBorder),
+                    border: Border.all(color: context.c.line),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
                         paymentCode,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 2,
-                          color: AppColors.onDark,
+                          color: context.c.ink,
                         ),
                       ),
                       IconButton(
                         onPressed: () => _copyToClipboard(paymentCode),
-                        icon: const Icon(Icons.copy, color: AppColors.brandYellow),
+                        icon: Icon(Icons.copy, color: context.c.accent),
                       ),
                     ],
                   ),
@@ -619,10 +618,10 @@ class _PaymentProcessingPageState extends State<PaymentProcessingPage> {
                 const SizedBox(height: 20),
                 Text(
                   "Total: ${XenditService.formatCurrency(widget.price + (_paymentMethods[widget.paymentMethodId]['fee'] as int))}",
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.brandYellow,
+                    color: context.c.accent,
                   ),
                 ),
               ],
@@ -649,8 +648,8 @@ class _PaymentProcessingPageState extends State<PaymentProcessingPage> {
                 child: OutlinedButton(
                   onPressed: () => _simulatePaymentSuccess(),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.onDark,
-                    side: const BorderSide(color: AppColors.surfaceBorder),
+                    foregroundColor: context.c.ink,
+                    side: BorderSide(color: context.c.line),
                   ),
                   child: const Text("Simulasi Bayar"),
                 ),
@@ -660,11 +659,11 @@ class _PaymentProcessingPageState extends State<PaymentProcessingPage> {
                 child: ElevatedButton(
                   onPressed: () => _checkPaymentStatus(),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.brandYellow,
+                    backgroundColor: context.c.accent,
                   ),
-                  child: const Text(
+                  child: Text(
                     "Cek Status",
-                    style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.w700),
+                    style: TextStyle(color: context.c.onAccent, fontWeight: FontWeight.w700),
                   ),
                 ),
               ),
@@ -686,27 +685,27 @@ class _PaymentProcessingPageState extends State<PaymentProcessingPage> {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: AppColors.surface,
+              color: context.c.raised,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.surfaceBorder),
+              border: Border.all(color: context.c.line),
             ),
             child: Column(
               children: [
-                const Text(
+                Text(
                   "Pembayaran Kartu Kredit",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.onDark),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: context.c.ink),
                 ),
                 const SizedBox(height: 20),
 
-                const Icon(Icons.credit_card, size: 80, color: AppColors.brandYellow),
+                Icon(Icons.credit_card, size: 80, color: context.c.accent),
 
                 const SizedBox(height: 20),
                 Text(
                   "Total: ${XenditService.formatCurrency(_calculateCreditCardFee())}",
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.brandYellow,
+                    color: context.c.accent,
                   ),
                 ),
               ],
@@ -733,14 +732,14 @@ class _PaymentProcessingPageState extends State<PaymentProcessingPage> {
             child: ElevatedButton(
               onPressed: () => _openCreditCardPayment(invoiceUrl),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.brandYellow,
+                backgroundColor: context.c.accent,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(999),
                 ),
               ),
-              child: const Text(
+              child: Text(
                 "Bayar dengan Kartu Kredit",
-                style: TextStyle(color: AppColors.ink, fontSize: 16, fontWeight: FontWeight.w700),
+                style: TextStyle(color: context.c.onAccent, fontSize: 16, fontWeight: FontWeight.w700),
               ),
             ),
           ),
@@ -750,8 +749,8 @@ class _PaymentProcessingPageState extends State<PaymentProcessingPage> {
           OutlinedButton(
             onPressed: () => _simulatePaymentSuccess(),
             style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.onDark,
-              side: const BorderSide(color: AppColors.surfaceBorder),
+              foregroundColor: context.c.ink,
+              side: BorderSide(color: context.c.line),
             ),
             child: const Text("Simulasi Bayar"),
           ),
@@ -764,19 +763,19 @@ class _PaymentProcessingPageState extends State<PaymentProcessingPage> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.c.raised,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.surfaceBorder),
+        border: Border.all(color: context.c.line),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             "Cara Pembayaran:",
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: AppColors.brandYellow,
+              color: context.c.accent,
             ),
           ),
           const SizedBox(height: 12),
@@ -784,7 +783,7 @@ class _PaymentProcessingPageState extends State<PaymentProcessingPage> {
             padding: const EdgeInsets.only(bottom: 8),
             child: Text(
               instruction,
-              style: const TextStyle(height: 1.5, color: AppColors.onDark),
+              style: TextStyle(height: 1.5, color: context.c.ink),
             ),
           )).toList(),
         ],
@@ -795,9 +794,9 @@ class _PaymentProcessingPageState extends State<PaymentProcessingPage> {
   void _copyToClipboard(String text) {
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
+      SnackBar(
         content: Text("Berhasil disalin ke clipboard"),
-        backgroundColor: Colors.green,
+        backgroundColor: context.c.ok,
       ),
     );
   }
@@ -806,9 +805,9 @@ class _PaymentProcessingPageState extends State<PaymentProcessingPage> {
     if (_paymentData == null) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Mengecek status pembayaran...", style: TextStyle(color: AppColors.ink)),
-        backgroundColor: AppColors.brandYellow,
+      SnackBar(
+        content: Text("Mengecek status pembayaran...", style: TextStyle(color: context.c.onAccent)),
+        backgroundColor: context.c.accent,
       ),
     );
 
@@ -831,15 +830,15 @@ class _PaymentProcessingPageState extends State<PaymentProcessingPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text("Status pembayaran: $status"),
-            backgroundColor: Colors.orange,
+            backgroundColor: context.c.warn,
           ),
         );
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text("Gagal mengecek status pembayaran"),
-          backgroundColor: Colors.red,
+          backgroundColor: context.c.danger,
         ),
       );
     }
@@ -857,9 +856,9 @@ class _PaymentProcessingPageState extends State<PaymentProcessingPage> {
   void _openCreditCardPayment(String url) {
     // In real app, open WebView or external browser
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Membuka halaman pembayaran kartu kredit...", style: TextStyle(color: AppColors.ink)),
-        backgroundColor: AppColors.brandYellow,
+      SnackBar(
+        content: Text("Membuka halaman pembayaran kartu kredit...", style: TextStyle(color: context.c.onAccent)),
+        backgroundColor: context.c.accent,
       ),
     );
   }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_tokens.dart';
 import 'package:flutter/services.dart';
-import '../constants/colors.dart';
 
 class PromoDetailPage extends StatelessWidget {
   final String title;
@@ -20,21 +19,21 @@ class PromoDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final promoCode = promoData?['code'] ?? 'SPORTA50';
-    final description = promoData?['description'] ?? 'Promo spesial untuk pengguna Sporta.';
+    final description = promoData?['description'] ?? 'Promo spesial untuk pengguna Sportago.';
     final validUntil = promoData?['validUntil'] ?? '31 Jan 2026';
     final promoType = promoData?['type'] ?? 'discount';
     final imageUrl = promoData?['image'];
     final discount = promoData?['discount'] ?? '';
 
     return Scaffold(
-      backgroundColor: AppColors.bg,
+      backgroundColor: context.c.surface,
       body: CustomScrollView(
         slivers: [
           // App Bar with Image
           SliverAppBar(
             expandedHeight: 220,
             pinned: true,
-            backgroundColor: AppColors.bg,
+            backgroundColor: context.c.surface,
             systemOverlayStyle: gayaOverlay(context),
             leading: Container(
               margin: const EdgeInsets.all(8),
@@ -106,7 +105,7 @@ class PromoDetailPage extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
-                            color: _getPromoTypeColor(promoType),
+                            color: _getPromoTypeColor(context, promoType),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
@@ -145,10 +144,10 @@ class PromoDetailPage extends StatelessWidget {
                                 ),
                               ),
                               if (promoType != 'freebie')
-                                const Text(
+                                Text(
                                   "%",
                                   style: TextStyle(
-                                    color: Colors.amber,
+                                    color: context.c.warn,
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -174,9 +173,9 @@ class PromoDetailPage extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: AppColors.surface,
+                      color: context.c.raised,
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: AppColors.surfaceBorder),
+                      border: Border.all(color: context.c.line),
                     ),
                     child: Column(
                       children: [
@@ -185,31 +184,31 @@ class PromoDetailPage extends StatelessWidget {
                             Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: AppColors.brandYellow.withValues(alpha: 0.15),
+                                color: context.c.accent.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: const Icon(Icons.confirmation_number, color: AppColors.brandYellow, size: 24),
+                              child: Icon(Icons.confirmation_number, color: context.c.accent, size: 24),
                             ),
                             const SizedBox(width: 16),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text(
+                                  Text(
                                     "Kode Promo",
                                     style: TextStyle(
                                       fontSize: 12,
-                                      color: AppColors.onDarkMuted,
+                                      color: context.c.inkSoft,
                                     ),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
                                     promoCode,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 22,
                                       fontWeight: FontWeight.bold,
                                       letterSpacing: 2,
-                                      color: AppColors.onDark,
+                                      color: context.c.ink,
                                     ),
                                   ),
                                 ],
@@ -227,7 +226,7 @@ class PromoDetailPage extends StatelessWidget {
                                         Text("Kode $promoCode berhasil disalin!"),
                                       ],
                                     ),
-                                    backgroundColor: Colors.green,
+                                    backgroundColor: context.c.ok,
                                     behavior: SnackBarBehavior.floating,
                                   ),
                                 );
@@ -235,10 +234,10 @@ class PromoDetailPage extends StatelessWidget {
                               child: Container(
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  color: AppColors.brandYellow.withValues(alpha: 0.15),
+                                  color: context.c.accent.withValues(alpha: 0.15),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                child: const Icon(Icons.copy, color: AppColors.brandYellow),
+                                child: Icon(Icons.copy, color: context.c.accent),
                               ),
                             ),
                           ],
@@ -247,17 +246,17 @@ class PromoDetailPage extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                           decoration: BoxDecoration(
-                            color: Colors.orange.shade50,
+                            color: context.c.warnSoft,
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Row(
                             children: [
-                              Icon(Icons.access_time, size: 18, color: Colors.orange.shade700),
+                              Icon(Icons.access_time, size: 18, color: context.c.warn),
                               const SizedBox(width: 8),
                               Text(
                                 "Berlaku hingga $validUntil",
                                 style: TextStyle(
-                                  color: Colors.orange.shade700,
+                                  color: context.c.warn,
                                   fontWeight: FontWeight.w600,
                                   fontSize: 13,
                                 ),
@@ -275,23 +274,23 @@ class PromoDetailPage extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: AppColors.surface,
+                      color: context.c.raised,
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: AppColors.surfaceBorder),
+                      border: Border.all(color: context.c.line),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Row(
+                        Row(
                           children: [
-                            Icon(Icons.info_outline, color: AppColors.brandYellow, size: 20),
+                            Icon(Icons.info_outline, color: context.c.accent, size: 20),
                             SizedBox(width: 8),
                             Text(
                               "Deskripsi Promo",
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
-                                color: AppColors.onDark,
+                                color: context.c.ink,
                               ),
                             ),
                           ],
@@ -299,8 +298,8 @@ class PromoDetailPage extends StatelessWidget {
                         const SizedBox(height: 12),
                         Text(
                           description,
-                          style: const TextStyle(
-                            color: AppColors.onDarkMuted,
+                          style: TextStyle(
+                            color: context.c.inkSoft,
                             fontSize: 14,
                             height: 1.6,
                           ),
@@ -315,34 +314,34 @@ class PromoDetailPage extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: AppColors.surface,
+                      color: context.c.raised,
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: AppColors.surfaceBorder),
+                      border: Border.all(color: context.c.line),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Row(
+                        Row(
                           children: [
-                            Icon(Icons.rule, color: AppColors.brandYellow, size: 20),
+                            Icon(Icons.rule, color: context.c.accent, size: 20),
                             SizedBox(width: 8),
                             Text(
                               "Syarat & Ketentuan",
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
-                                color: AppColors.onDark,
+                                color: context.c.ink,
                               ),
                             ),
                           ],
                         ),
                         const SizedBox(height: 16),
-                        _buildSyarat("Promo berlaku untuk semua pengguna Sporta."),
-                        _buildSyarat("Minimum transaksi booking Rp 100.000."),
-                        _buildSyarat("Berlaku untuk semua venue di aplikasi."),
-                        _buildSyarat("Tidak dapat digabung dengan promo lain."),
-                        _buildSyarat("Periode promo: hingga $validUntil."),
-                        _buildSyarat("Sporta berhak membatalkan promo sewaktu-waktu."),
+                        _buildSyarat(context, "Promo berlaku untuk semua pengguna Sportago."),
+                        _buildSyarat(context, "Minimum transaksi booking Rp 100.000."),
+                        _buildSyarat(context, "Berlaku untuk semua venue di aplikasi."),
+                        _buildSyarat(context, "Tidak dapat digabung dengan promo lain."),
+                        _buildSyarat(context, "Periode promo: hingga $validUntil."),
+                        _buildSyarat(context, "Sportago berhak membatalkan promo sewaktu-waktu."),
                       ],
                     ),
                   ),
@@ -358,9 +357,9 @@ class PromoDetailPage extends StatelessWidget {
       // Bottom Button
       bottomNavigationBar: Container(
         padding: const EdgeInsets.all(20),
-        decoration: const BoxDecoration(
-          color: AppColors.bg,
-          border: Border(top: BorderSide(color: AppColors.surfaceBorder)),
+        decoration: BoxDecoration(
+          color: context.c.surface,
+          border: Border(top: BorderSide(color: context.c.line)),
         ),
         child: SafeArea(
           child: SizedBox(
@@ -377,27 +376,27 @@ class PromoDetailPage extends StatelessWidget {
                         Text("Promo $promoCode berhasil diaktifkan!"),
                       ],
                     ),
-                    backgroundColor: Colors.green,
+                    backgroundColor: context.c.ok,
                     behavior: SnackBarBehavior.floating,
                   ),
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.brandYellow,
+                backgroundColor: context.c.accent,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(999),
                 ),
                 elevation: 0,
               ),
-              child: const Row(
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.local_offer, color: AppColors.ink, size: 20),
+                  Icon(Icons.local_offer, color: context.c.onAccent, size: 20),
                   SizedBox(width: 8),
                   Text(
                     "PAKAI PROMO SEKARANG",
                     style: TextStyle(
-                      color: AppColors.ink,
+                      color: context.c.onAccent,
                       fontWeight: FontWeight.w700,
                       fontSize: 16,
                     ),
@@ -411,16 +410,16 @@ class PromoDetailPage extends StatelessWidget {
     );
   }
 
-  Color _getPromoTypeColor(String type) {
+  Color _getPromoTypeColor(BuildContext context, String type) {
     switch (type) {
       case 'discount':
-        return Colors.red;
+        return context.c.danger;
       case 'cashback':
-        return Colors.green;
+        return context.c.ok;
       case 'freebie':
         return Colors.purple;
       default:
-        return AppColors.brandYellow;
+        return context.c.accent;
     }
   }
 
@@ -437,7 +436,7 @@ class PromoDetailPage extends StatelessWidget {
     }
   }
 
-  Widget _buildSyarat(String text) {
+  Widget _buildSyarat(BuildContext context, String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
@@ -445,14 +444,14 @@ class PromoDetailPage extends StatelessWidget {
         children: [
           Container(
             margin: const EdgeInsets.only(top: 2),
-            child: const Icon(Icons.check_circle, color: Colors.green, size: 18),
+            child: Icon(Icons.check_circle, color: context.c.ok, size: 18),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(
-                color: AppColors.onDarkMuted,
+              style: TextStyle(
+                color: context.c.inkSoft,
                 fontSize: 13,
                 height: 1.4,
               ),
@@ -489,7 +488,7 @@ class AllPromosPage extends StatelessWidget {
       'title': 'Gratis Booking',
       'discount': '1x',
       'subtitle': 'Booking pertama gratis | S&K Berlaku',
-      'description': 'Khusus member baru! Nikmati gratis 1x booking untuk pengalaman pertamamu di Sporta. Daftar sekarang dan langsung main!',
+      'description': 'Khusus member baru! Nikmati gratis 1x booking untuk pengalaman pertamamu di Sportago. Daftar sekarang dan langsung main!',
       'validUntil': '28 Feb 2026',
       'code': 'NEWMEMBER',
       'type': 'freebie',
@@ -501,7 +500,7 @@ class AllPromosPage extends StatelessWidget {
       'title': 'Cashback',
       'discount': '20',
       'subtitle': 'Sabtu & Minggu | S&K Berlaku',
-      'description': 'Main di weekend lebih hemat! Dapatkan cashback 20% untuk setiap booking di hari Sabtu dan Minggu. Cashback masuk ke Sporta Points.',
+      'description': 'Main di weekend lebih hemat! Dapatkan cashback 20% untuk setiap booking di hari Sabtu dan Minggu. Cashback masuk ke Sportago Points.',
       'validUntil': '15 Jan 2026',
       'code': 'WEEKEND20',
       'type': 'cashback',
@@ -536,19 +535,19 @@ class AllPromosPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bg,
+      backgroundColor: context.c.surface,
       appBar: AppBar(
-        backgroundColor: AppColors.bg,
+        backgroundColor: context.c.surface,
         elevation: 0,
         systemOverlayStyle: gayaOverlay(context),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.onDark),
+          icon: Icon(Icons.arrow_back, color: context.c.ink),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           "Semua Promo",
           style: TextStyle(
-            color: AppColors.onDark,
+            color: context.c.ink,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -574,7 +573,7 @@ class AllPromosPage extends StatelessWidget {
             builder: (context) => PromoDetailPage(
               title: promo['title']!,
               subtitle: promo['subtitle']!,
-              color: AppColors.brandYellow,
+              color: context.c.accent,
               promoData: promo,
             ),
           ),
@@ -583,9 +582,9 @@ class AllPromosPage extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: context.c.raised,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.surfaceBorder),
+          border: Border.all(color: context.c.line),
         ),
         child: Column(
           children: [
@@ -620,7 +619,7 @@ class AllPromosPage extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color: _getPromoTypeColor(promo['type']),
+                        color: _getPromoTypeColor(context, promo['type']),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
@@ -649,8 +648,8 @@ class AllPromosPage extends StatelessWidget {
                         const SizedBox(width: 8),
                         Text(
                           "${promo['discount']}${promo['type'] != 'freebie' ? '%' : ''}",
-                          style: const TextStyle(
-                            color: Colors.amber,
+                          style: TextStyle(
+                            color: context.c.warn,
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
                           ),
@@ -672,20 +671,20 @@ class AllPromosPage extends StatelessWidget {
                       children: [
                         Text(
                           promo['subtitle']!,
-                          style: const TextStyle(
-                            color: AppColors.onDarkMuted,
+                          style: TextStyle(
+                            color: context.c.inkSoft,
                             fontSize: 13,
                           ),
                         ),
                         const SizedBox(height: 6),
                         Row(
                           children: [
-                            Icon(Icons.access_time, size: 14, color: Colors.orange.shade600),
+                            Icon(Icons.access_time, size: 14, color: context.c.warn),
                             const SizedBox(width: 4),
                             Text(
                               "s/d ${promo['validUntil']}",
                               style: TextStyle(
-                                color: Colors.orange.shade600,
+                                color: context.c.warn,
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -698,13 +697,13 @@ class AllPromosPage extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                     decoration: BoxDecoration(
-                      color: AppColors.brandYellow,
+                      color: context.c.accent,
                       borderRadius: BorderRadius.circular(999),
                     ),
-                    child: const Text(
+                    child: Text(
                       "Lihat",
                       style: TextStyle(
-                        color: AppColors.ink,
+                        color: context.c.onAccent,
                         fontWeight: FontWeight.w700,
                         fontSize: 12,
                       ),
@@ -719,16 +718,16 @@ class AllPromosPage extends StatelessWidget {
     );
   }
 
-  Color _getPromoTypeColor(String type) {
+  Color _getPromoTypeColor(BuildContext context, String type) {
     switch (type) {
       case 'discount':
-        return Colors.red;
+        return context.c.danger;
       case 'cashback':
-        return Colors.green;
+        return context.c.ok;
       case 'freebie':
         return Colors.purple;
       default:
-        return AppColors.brandYellow;
+        return context.c.accent;
     }
   }
 }

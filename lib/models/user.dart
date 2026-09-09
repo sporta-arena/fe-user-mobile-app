@@ -1,4 +1,5 @@
 import '../utils/timezone_utils.dart';
+import '../config/api_config.dart';
 
 class User {
   final int id;
@@ -34,7 +35,7 @@ class User {
       email: json['email'],
       phone: json['phone'],
       avatar: json['avatar'],
-      avatarUrl: json['avatar_url'],
+      avatarUrl: ApiConfig.perbaikiUrlMedia(json['avatar_url']),
       emailVerifiedAt: json['email_verified_at'] != null
           ? TimezoneUtils.parseUtcToLocal(json['email_verified_at'])
           : null,

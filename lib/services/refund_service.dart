@@ -1,205 +1,101 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../config/api_config.dart';
-import '../models/refund.dart';
 import 'auth_service.dart';
 
-class RefundResult {
-  final bool success;
-  final String? message;
-  final Refund? refund;
-  final List<Refund>? refunds;
-  final RefundPolicy? policy;
-  final Map<String, dynamic>? policyData;
-
-  RefundResult({
-    required this.success,
-    this.message,
-    this.refund,
-    this.refunds,
-    this.policy,
-    this.policyData,
+/// Kebijakan refund yang berlaku, dibaca dari server.
+///
+/// Sengaja tidak menyimpan tier persentase apa pun: **tidak ada jalur
+/// refund dari sisi pemesan**, dan itu memang desainnya — backend
+/// menyatakannya lewat `customer_can_request: false` di
+/// `GET /refund-policy`.
+///
+/// Sebelumnya app ini menghitung sendiri tier 100% / 50% berdasarkan
+/// jarak waktu ke jadwal, lalu memanggil `POST /bookings/{id}/refund`.
+/// Rute itu tidak pernah ada di backend, jadi tombolnya selalu berakhir
+/// 404 — dan tier-nya pun fiksi.
+class KebijakanRefund {
+  const KebijakanRefund({
+    required this.pemesanBisaMengajukan,
+    required this.mitraBisaMengajukan,
+    required this.pesan,
   });
+
+  /// Selalu false pada desain sekarang; tetap dibaca dari server supaya
+  /// app tidak perlu dirilis ulang kalau kebijakannya berubah.
+  final bool pemesanBisaMengajukan;
+
+  /// Refund yang dimulai mitra. Saat mati, refund ditangani manual oleh
+  /// admin Sportago.
+  final bool mitraBisaMengajukan;
+
+  final String pesan;
+
+  factory KebijakanRefund.fromJson(Map<String, dynamic> json) {
+    return KebijakanRefund(
+      pemesanBisaMengajukan: json['customer_can_request'] == true,
+      mitraBisaMengajukan: json['partner_initiated_enabled'] == true,
+      pesan: (json['message'] as String?) ?? '',
+    );
+  }
+
+  /// Dipakai kalau server tidak terjangkau. Menutup jalur pengajuan
+  /// adalah sikap yang aman: lebih baik pemesan diarahkan menghubungi
+  /// venue daripada menekan tombol yang pasti gagal.
+  static const KebijakanRefund tertutup = KebijakanRefund(
+    pemesanBisaMengajukan: false,
+    mitraBisaMengajukan: false,
+    pesan: 'Refund diproses oleh tim Sportago. Hubungi venue atau '
+        'support untuk pengajuan.',
+  );
 }
 
 class RefundService {
-  /// Get refund policy for a booking
-  static Future<RefundResult> getRefundPolicy(int bookingId) async {
-    if (AuthService.token == null) {
-      return RefundResult(success: false, message: 'Silakan login terlebih dahulu');
-    }
+  /// Ambil kebijakan refund yang berlaku.
+  ///
+  /// Tidak pernah melempar: kalau gagal, mengembalikan
+  /// [KebijakanRefund.tertutup].
+  static Future<KebijakanRefund> ambilKebijakan() async {
+    final token = AuthService.token;
+    if (token == null) return KebijakanRefund.tertutup;
 
     try {
       final response = await http.get(
-        Uri.parse(ApiConfig.refundPolicyUrl(bookingId)),
-        headers: ApiConfig.authHeaders(AuthService.token!),
+        Uri.parse(ApiConfig.refundPolicyUrl),
+        headers: ApiConfig.authHeaders(token),
       );
 
-      final data = jsonDecode(response.body);
+      if (response.statusCode != 200) return KebijakanRefund.tertutup;
 
-      if (response.statusCode == 200) {
-        return RefundResult(
-          success: true,
-          policyData: data,
-        );
-      } else {
-        return RefundResult(
-          success: false,
-          message: data['message'] ?? 'Gagal mendapatkan kebijakan refund',
-        );
-      }
-    } catch (e) {
-      return RefundResult(
-        success: false,
-        message: 'Gagal terhubung ke server: $e',
+      return KebijakanRefund.fromJson(
+        jsonDecode(response.body) as Map<String, dynamic>,
       );
+    } catch (_) {
+      return KebijakanRefund.tertutup;
     }
   }
 
-  /// Request a refund for a booking
-  static Future<RefundResult> requestRefund({
-    required int bookingId,
-    required String reason,
-  }) async {
-    if (AuthService.token == null) {
-      return RefundResult(success: false, message: 'Silakan login terlebih dahulu');
-    }
-
-    try {
-      final response = await http.post(
-        Uri.parse(ApiConfig.requestRefundUrl(bookingId)),
-        headers: ApiConfig.authHeaders(AuthService.token!),
-        body: jsonEncode({
-          'reason': reason,
-        }),
-      );
-
-      final data = jsonDecode(response.body);
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        // API returns 'data' not 'refund'
-        final refundData = data['data'] ?? data['refund'];
-        return RefundResult(
-          success: true,
-          message: data['message'] ?? 'Permintaan refund berhasil diajukan',
-          refund: refundData != null ? Refund.fromJson(refundData) : null,
-        );
-      } else {
-        return RefundResult(
-          success: false,
-          message: data['message'] ?? 'Gagal mengajukan refund',
-        );
-      }
-    } catch (e) {
-      return RefundResult(
-        success: false,
-        message: 'Gagal terhubung ke server: $e',
-      );
-    }
-  }
-
-  /// Get my refund requests
-  static Future<RefundResult> getMyRefunds() async {
-    if (AuthService.token == null) {
-      return RefundResult(success: false, message: 'Silakan login terlebih dahulu');
-    }
+  /// Perkiraan nominal refund untuk satu booking.
+  ///
+  /// Ini satu-satunya endpoint refund sisi pemesan yang benar-benar ada
+  /// (`GET /bookings/{id}/refund-preview`). Sifatnya informasi saja —
+  /// tidak mengajukan apa pun.
+  static Future<Map<String, dynamic>?> ambilPerkiraan(int bookingId) async {
+    final token = AuthService.token;
+    if (token == null) return null;
 
     try {
       final response = await http.get(
-        Uri.parse(ApiConfig.refundsUrl),
-        headers: ApiConfig.authHeaders(AuthService.token!),
+        Uri.parse(ApiConfig.refundPreviewUrl(bookingId)),
+        headers: ApiConfig.authHeaders(token),
       );
+
+      if (response.statusCode != 200) return null;
 
       final data = jsonDecode(response.body);
-
-      if (response.statusCode == 200) {
-        final refunds = (data['data'] as List? ?? [])
-            .map((r) => Refund.fromJson(r))
-            .toList();
-
-        return RefundResult(
-          success: true,
-          refunds: refunds,
-        );
-      } else {
-        return RefundResult(
-          success: false,
-          message: data['message'] ?? 'Gagal memuat data refund',
-        );
-      }
-    } catch (e) {
-      return RefundResult(
-        success: false,
-        message: 'Gagal terhubung ke server: $e',
-      );
-    }
-  }
-
-  /// Get refund detail
-  static Future<RefundResult> getRefundDetail(int refundId) async {
-    if (AuthService.token == null) {
-      return RefundResult(success: false, message: 'Silakan login terlebih dahulu');
-    }
-
-    try {
-      final response = await http.get(
-        Uri.parse(ApiConfig.refundDetailUrl(refundId)),
-        headers: ApiConfig.authHeaders(AuthService.token!),
-      );
-
-      final data = jsonDecode(response.body);
-
-      if (response.statusCode == 200) {
-        // API returns 'data' not 'refund'
-        final refundData = data['data'] ?? data['refund'];
-        return RefundResult(
-          success: true,
-          refund: Refund.fromJson(refundData),
-        );
-      } else {
-        return RefundResult(
-          success: false,
-          message: data['message'] ?? 'Gagal memuat detail refund',
-        );
-      }
-    } catch (e) {
-      return RefundResult(
-        success: false,
-        message: 'Gagal terhubung ke server: $e',
-      );
-    }
-  }
-
-  /// Cancel refund request (if still pending)
-  static Future<RefundResult> cancelRefundRequest(int refundId) async {
-    if (AuthService.token == null) {
-      return RefundResult(success: false, message: 'Silakan login terlebih dahulu');
-    }
-
-    try {
-      final response = await http.delete(
-        Uri.parse(ApiConfig.refundDetailUrl(refundId)),
-        headers: ApiConfig.authHeaders(AuthService.token!),
-      );
-
-      final data = jsonDecode(response.body);
-
-      if (response.statusCode == 200) {
-        return RefundResult(
-          success: true,
-          message: data['message'] ?? 'Permintaan refund dibatalkan',
-        );
-      } else {
-        return RefundResult(
-          success: false,
-          message: data['message'] ?? 'Gagal membatalkan permintaan refund',
-        );
-      }
-    } catch (e) {
-      return RefundResult(
-        success: false,
-        message: 'Gagal terhubung ke server: $e',
-      );
+      return data is Map<String, dynamic> ? (data['data'] ?? data) : null;
+    } catch (_) {
+      return null;
     }
   }
 }

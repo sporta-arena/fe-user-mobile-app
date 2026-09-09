@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import '../theme/app_tokens.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
-import '../constants/colors.dart';
 import '../services/venue_service.dart';
 import '../models/venue.dart' as model;
-import '../models/field.dart';
 import 'venue_detail_page.dart';
 
 class CategoryVenuesPage extends StatefulWidget {
@@ -355,7 +353,7 @@ class _CategoryVenuesPageState extends State<CategoryVenuesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bg,
+      backgroundColor: context.c.surface,
       body: AnnotatedRegion<SystemUiOverlayStyle>(
         value: gayaOverlay(context),
         child: SafeArea(
@@ -379,26 +377,26 @@ class _CategoryVenuesPageState extends State<CategoryVenuesPage> {
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.arrow_back, color: AppColors.onDark),
+            icon: Icon(Icons.arrow_back, color: context.c.ink),
             onPressed: () => Navigator.pop(context),
           ),
           const SizedBox(width: 4),
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: AppColors.brandYellow.withValues(alpha: 0.15),
+              color: context.c.accent.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(widget.categoryIcon, color: AppColors.brandYellow, size: 20),
+            child: Icon(widget.categoryIcon, color: context.c.accent, size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               widget.showAllVenues ? 'Semua Venue' : widget.categoryName,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: AppColors.onDark,
+                color: context.c.ink,
               ),
             ),
           ),
@@ -411,31 +409,31 @@ class _CategoryVenuesPageState extends State<CategoryVenuesPage> {
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 12, 16, 8),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.c.raised,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.surfaceBorder),
+        border: Border.all(color: context.c.line),
       ),
       child: TextField(
         controller: _searchController,
-        style: const TextStyle(color: AppColors.onDark),
+        style: TextStyle(color: context.c.ink),
         onChanged: (value) {
           setState(() => searchQuery = value);
           _applyFiltersAndSort();
         },
         decoration: InputDecoration(
           hintText: 'Cari venue ${widget.categoryName.toLowerCase()}...',
-          hintStyle: const TextStyle(color: AppColors.onDarkMuted, fontSize: 14),
-          prefixIcon: const Icon(Icons.search, color: AppColors.onDarkMuted),
+          hintStyle: TextStyle(color: context.c.inkSoft, fontSize: 14),
+          prefixIcon: Icon(Icons.search, color: context.c.inkSoft),
           suffixIcon: GestureDetector(
             onTap: _showFilterBottomSheet,
             child: Container(
               margin: const EdgeInsets.all(8),
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppColors.brandYellow,
+                color: context.c.accent,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(Icons.tune, color: AppColors.ink, size: 18),
+              child: Icon(Icons.tune, color: context.c.onAccent, size: 18),
             ),
           ),
           border: InputBorder.none,
@@ -483,16 +481,16 @@ class _CategoryVenuesPageState extends State<CategoryVenuesPage> {
               margin: const EdgeInsets.only(right: 8),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: isSelected ? AppColors.brandYellow : AppColors.surface,
+                color: isSelected ? context.c.accent : context.c.raised,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: isSelected ? AppColors.brandYellow : AppColors.surfaceBorder,
+                  color: isSelected ? context.c.accent : context.c.line,
                 ),
               ),
               child: Text(
                 filter,
                 style: TextStyle(
-                  color: isSelected ? AppColors.ink : AppColors.onDarkMuted,
+                  color: isSelected ? context.c.onAccent : context.c.inkSoft,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                   fontSize: 13,
                 ),
@@ -512,8 +510,8 @@ class _CategoryVenuesPageState extends State<CategoryVenuesPage> {
         children: [
           Text(
             'Ditemukan ${_filteredVenues.length} venue',
-            style: const TextStyle(
-              color: AppColors.onDarkMuted,
+            style: TextStyle(
+              color: context.c.inkSoft,
               fontSize: 13,
               fontWeight: FontWeight.w500,
             ),
@@ -525,13 +523,13 @@ class _CategoryVenuesPageState extends State<CategoryVenuesPage> {
                 child: Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: !isGridView ? AppColors.brandYellow.withValues(alpha: 0.15) : Colors.transparent,
+                    color: !isGridView ? context.c.accent.withValues(alpha: 0.15) : Colors.transparent,
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Icon(
                     Icons.view_list_rounded,
                     size: 20,
-                    color: !isGridView ? AppColors.brandYellow : AppColors.onDarkMuted,
+                    color: !isGridView ? context.c.accent : context.c.inkSoft,
                   ),
                 ),
               ),
@@ -541,13 +539,13 @@ class _CategoryVenuesPageState extends State<CategoryVenuesPage> {
                 child: Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: isGridView ? AppColors.brandYellow.withValues(alpha: 0.15) : Colors.transparent,
+                    color: isGridView ? context.c.accent.withValues(alpha: 0.15) : Colors.transparent,
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Icon(
                     Icons.grid_view_rounded,
                     size: 20,
-                    color: isGridView ? AppColors.brandYellow : AppColors.onDarkMuted,
+                    color: isGridView ? context.c.accent : context.c.inkSoft,
                   ),
                 ),
               ),
@@ -560,8 +558,8 @@ class _CategoryVenuesPageState extends State<CategoryVenuesPage> {
 
   Widget _buildVenueList() {
     if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(color: AppColors.brandYellow),
+      return Center(
+        child: CircularProgressIndicator(color: context.c.accent),
       );
     }
 
@@ -570,15 +568,15 @@ class _CategoryVenuesPageState extends State<CategoryVenuesPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 64, color: AppColors.onDarkMuted),
+            Icon(Icons.error_outline, size: 64, color: context.c.inkSoft),
             const SizedBox(height: 16),
-            Text(_errorMessage!, style: const TextStyle(color: AppColors.onDarkMuted)),
+            Text(_errorMessage!, style: TextStyle(color: context.c.inkSoft)),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _loadVenuesFromApi,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.brandYellow,
-                foregroundColor: AppColors.ink,
+                backgroundColor: context.c.accent,
+                foregroundColor: context.c.onAccent,
               ),
               child: const Text('Coba Lagi'),
             ),
@@ -592,20 +590,20 @@ class _CategoryVenuesPageState extends State<CategoryVenuesPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.search_off, size: 64, color: AppColors.onDarkMuted),
+            Icon(Icons.search_off, size: 64, color: context.c.inkSoft),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               'Tidak ada venue ditemukan',
               style: TextStyle(
                 fontSize: 16,
-                color: AppColors.onDarkMuted,
+                color: context.c.inkSoft,
                 fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Coba ubah filter atau kata kunci',
-              style: TextStyle(fontSize: 14, color: AppColors.onDarkMuted),
+              style: TextStyle(fontSize: 14, color: context.c.inkSoft),
             ),
           ],
         ),
@@ -614,8 +612,8 @@ class _CategoryVenuesPageState extends State<CategoryVenuesPage> {
 
     return RefreshIndicator(
       onRefresh: _loadVenuesFromApi,
-      color: AppColors.brandYellow,
-      backgroundColor: AppColors.surface,
+      color: context.c.accent,
+      backgroundColor: context.c.raised,
       child: isGridView ? _buildGridView() : _buildListView(),
     );
   }
@@ -667,9 +665,9 @@ class _CategoryVenuesPageState extends State<CategoryVenuesPage> {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: context.c.raised,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.surfaceBorder),
+          border: Border.all(color: context.c.line),
         ),
         child: Row(
           children: [
@@ -679,17 +677,17 @@ class _CategoryVenuesPageState extends State<CategoryVenuesPage> {
               child: Container(
                 width: 80,
                 height: 80,
-                color: AppColors.brandYellow.withValues(alpha: 0.15),
+                color: context.c.accent.withValues(alpha: 0.15),
                 child: venue.coverImageUrl != null
                     ? Image.network(
                         venue.coverImageUrl!,
                         fit: BoxFit.cover,
                         errorBuilder: (_, __, ___) => Center(
-                          child: Icon(widget.categoryIcon, color: AppColors.brandYellow, size: 30),
+                          child: Icon(widget.categoryIcon, color: context.c.accent, size: 30),
                         ),
                       )
                     : Center(
-                        child: Icon(widget.categoryIcon, color: AppColors.brandYellow, size: 30),
+                        child: Icon(widget.categoryIcon, color: context.c.accent, size: 30),
                       ),
               ),
             ),
@@ -701,10 +699,10 @@ class _CategoryVenuesPageState extends State<CategoryVenuesPage> {
                 children: [
                   Text(
                     venue.name,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
-                      color: AppColors.onDark,
+                      color: context.c.ink,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -712,12 +710,12 @@ class _CategoryVenuesPageState extends State<CategoryVenuesPage> {
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      const Icon(Icons.location_on, size: 14, color: AppColors.onDarkMuted),
+                      Icon(Icons.location_on, size: 14, color: context.c.inkSoft),
                       const SizedBox(width: 2),
                       Expanded(
                         child: Text(
                           venue.city,
-                          style: const TextStyle(color: AppColors.onDarkMuted, fontSize: 12),
+                          style: TextStyle(color: context.c.inkSoft, fontSize: 12),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -728,12 +726,12 @@ class _CategoryVenuesPageState extends State<CategoryVenuesPage> {
                   Row(
                     children: [
                       if (venue.averageRating != null) ...[
-                        const Icon(Icons.star, size: 14, color: AppColors.brandYellow),
+                        Icon(Icons.star, size: 14, color: context.c.accent),
                         const SizedBox(width: 2),
                         Text(
                           venue.averageRating!.toStringAsFixed(1),
-                          style: const TextStyle(
-                            color: AppColors.onDark,
+                          style: TextStyle(
+                            color: context.c.ink,
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
                           ),
@@ -741,17 +739,17 @@ class _CategoryVenuesPageState extends State<CategoryVenuesPage> {
                         if (venue.reviewCount != null && venue.reviewCount! > 0)
                           Text(
                             ' (${venue.reviewCount})',
-                            style: const TextStyle(color: AppColors.onDarkMuted, fontSize: 11),
+                            style: TextStyle(color: context.c.inkSoft, fontSize: 11),
                           ),
                         const SizedBox(width: 8),
                       ],
                       if (distanceText.isNotEmpty) ...[
-                        const Icon(Icons.near_me, size: 12, color: AppColors.brandYellow),
+                        Icon(Icons.near_me, size: 12, color: context.c.accent),
                         const SizedBox(width: 2),
                         Text(
                           distanceText,
-                          style: const TextStyle(
-                            color: AppColors.brandYellow,
+                          style: TextStyle(
+                            color: context.c.accent,
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
                           ),
@@ -769,8 +767,8 @@ class _CategoryVenuesPageState extends State<CategoryVenuesPage> {
                 if (price != null)
                   Text(
                     'Rp ${_formatPrice(price)}',
-                    style: const TextStyle(
-                      color: AppColors.brandYellow,
+                    style: TextStyle(
+                      color: context.c.accent,
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
                     ),
@@ -802,9 +800,9 @@ class _CategoryVenuesPageState extends State<CategoryVenuesPage> {
       },
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: context.c.raised,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.surfaceBorder),
+          border: Border.all(color: context.c.line),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -816,17 +814,17 @@ class _CategoryVenuesPageState extends State<CategoryVenuesPage> {
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
                 child: Container(
                   width: double.infinity,
-                  color: AppColors.brandYellow.withValues(alpha: 0.15),
+                  color: context.c.accent.withValues(alpha: 0.15),
                   child: venue.coverImageUrl != null
                       ? Image.network(
                           venue.coverImageUrl!,
                           fit: BoxFit.cover,
                           errorBuilder: (_, __, ___) => Center(
-                            child: Icon(widget.categoryIcon, color: AppColors.brandYellow, size: 40),
+                            child: Icon(widget.categoryIcon, color: context.c.accent, size: 40),
                           ),
                         )
                       : Center(
-                          child: Icon(widget.categoryIcon, color: AppColors.brandYellow, size: 40),
+                          child: Icon(widget.categoryIcon, color: context.c.accent, size: 40),
                         ),
                 ),
               ),
@@ -841,10 +839,10 @@ class _CategoryVenuesPageState extends State<CategoryVenuesPage> {
                   children: [
                     Text(
                       venue.name,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 13,
-                        color: AppColors.onDark,
+                        color: context.c.ink,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -852,7 +850,7 @@ class _CategoryVenuesPageState extends State<CategoryVenuesPage> {
                     const SizedBox(height: 2),
                     Text(
                       venue.city,
-                      style: const TextStyle(color: AppColors.onDarkMuted, fontSize: 11),
+                      style: TextStyle(color: context.c.inkSoft, fontSize: 11),
                       maxLines: 1,
                     ),
                     const Spacer(),
@@ -862,8 +860,8 @@ class _CategoryVenuesPageState extends State<CategoryVenuesPage> {
                         if (price != null)
                           Text(
                             'Rp ${_formatPrice(price)}',
-                            style: const TextStyle(
-                              color: AppColors.brandYellow,
+                            style: TextStyle(
+                              color: context.c.accent,
                               fontWeight: FontWeight.bold,
                               fontSize: 12,
                             ),
@@ -871,8 +869,8 @@ class _CategoryVenuesPageState extends State<CategoryVenuesPage> {
                         if (distanceText.isNotEmpty)
                           Text(
                             distanceText,
-                            style: const TextStyle(
-                              color: AppColors.onDarkMuted,
+                            style: TextStyle(
+                              color: context.c.inkSoft,
                               fontSize: 11,
                             ),
                           ),
@@ -976,8 +974,8 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
   Widget build(BuildContext context) {
     return Container(
       height: MediaQuery.of(context).size.height * 0.75,
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
+      decoration: BoxDecoration(
+        color: context.c.raised,
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: Column(
@@ -988,7 +986,7 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: AppColors.surfaceBorder,
+              color: context.c.line,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -998,22 +996,22 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Filter Venue',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.onDark,
+                    color: context.c.ink,
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close, color: AppColors.onDark),
+                  icon: Icon(Icons.close, color: context.c.ink),
                   onPressed: () => Navigator.pop(context),
                 ),
               ],
             ),
           ),
-          const Divider(height: 1, color: AppColors.surfaceBorder),
+          Divider(height: 1, color: context.c.line),
           // Content
           Expanded(
             child: SingleChildScrollView(
@@ -1087,11 +1085,11 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
                     children: [
                       Text(
                         'Rp ${_formatPriceK(_prices.start)}',
-                        style: const TextStyle(color: AppColors.onDarkMuted, fontSize: 12),
+                        style: TextStyle(color: context.c.inkSoft, fontSize: 12),
                       ),
                       Text(
                         'Rp ${_formatPriceK(_prices.end)}',
-                        style: const TextStyle(color: AppColors.onDarkMuted, fontSize: 12),
+                        style: TextStyle(color: context.c.inkSoft, fontSize: 12),
                       ),
                     ],
                   ),
@@ -1100,8 +1098,8 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
                     min: widget.minPrice,
                     max: widget.maxPrice,
                     divisions: 20,
-                    activeColor: AppColors.brandYellow,
-                    inactiveColor: AppColors.brandYellow.withValues(alpha: 0.2),
+                    activeColor: context.c.accent,
+                    inactiveColor: context.c.accent.withValues(alpha: 0.2),
                     onChanged: (values) {
                       setState(() => _prices = values);
                     },
@@ -1140,9 +1138,9 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
           // Buttons
           Container(
             padding: const EdgeInsets.all(16),
-            decoration: const BoxDecoration(
-              color: AppColors.surface,
-              border: Border(top: BorderSide(color: AppColors.surfaceBorder)),
+            decoration: BoxDecoration(
+              color: context.c.raised,
+              border: Border(top: BorderSide(color: context.c.line)),
             ),
             child: Row(
               children: [
@@ -1153,8 +1151,8 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
                       Navigator.pop(context);
                     },
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.brandYellow,
-                      side: const BorderSide(color: AppColors.brandYellow),
+                      foregroundColor: context.c.accent,
+                      side: BorderSide(color: context.c.accent),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
@@ -1172,8 +1170,8 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
                       Navigator.pop(context);
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.brandYellow,
-                      foregroundColor: AppColors.ink,
+                      backgroundColor: context.c.accent,
+                      foregroundColor: context.c.onAccent,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
@@ -1193,10 +1191,10 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.w600,
-        color: AppColors.onDark,
+        color: context.c.ink,
       ),
     );
   }
@@ -1211,16 +1209,16 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.brandYellow : AppColors.surface,
+          color: isSelected ? context.c.accent : context.c.raised,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? AppColors.brandYellow : AppColors.surfaceBorder,
+            color: isSelected ? context.c.accent : context.c.line,
           ),
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? AppColors.ink : AppColors.onDarkMuted,
+            color: isSelected ? context.c.onAccent : context.c.inkSoft,
             fontSize: 12,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
           ),
@@ -1239,16 +1237,16 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.brandYellow : AppColors.surface,
+          color: isSelected ? context.c.accent : context.c.raised,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? AppColors.brandYellow : AppColors.surfaceBorder,
+            color: isSelected ? context.c.accent : context.c.line,
           ),
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? AppColors.ink : AppColors.onDarkMuted,
+            color: isSelected ? context.c.onAccent : context.c.inkSoft,
             fontSize: 12,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
           ),

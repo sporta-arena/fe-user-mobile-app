@@ -1,4 +1,5 @@
 import 'field.dart';
+import '../utils/waktu_wib.dart';
 import 'user.dart';
 import '../utils/timezone_utils.dart';
 
@@ -94,7 +95,8 @@ class Booking {
 
   String get formattedTotalPrice => 'Rp ${_formatNumber(totalPrice.toInt())}';
 
-  String get formattedTime => '${_formatTimeString(startTime)} - ${_formatTimeString(endTime)}';
+  /// Jam booking dari API adalah UTC; ditampilkan sebagai WIB.
+  String get formattedTime => WaktuWib.rentang(startTime, endTime);
 
   String _formatNumber(int number) {
     return number.toString().replaceAllMapped(
@@ -103,13 +105,6 @@ class Booking {
     );
   }
 
-  String _formatTimeString(String time) {
-    final parts = time.split(':');
-    if (parts.length >= 2) {
-      return '${parts[0]}:${parts[1]}';
-    }
-    return time;
-  }
 
   String get statusLabel {
     switch (status) {

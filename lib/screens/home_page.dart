@@ -598,7 +598,10 @@ class _VenueCard extends StatelessWidget {
     final icons = venue.facilities.take(4).map(_facilityIcon).toList();
     if (icons.isEmpty) {
       return Text(
-        "${venue.openHour} - ${venue.closeHour}",
+        // Pakai formattedOpenHours, bukan nilai mentah: API menyimpan jam
+        // operasional sebagai UTC dan setiap permukaan menggesernya +7.
+        // Tanpa ini, venue yang buka 08.00 tampil buka pukul 01.00.
+        venue.formattedOpenHours,
         style: TextStyle(color: context.c.inkSoft, fontSize: 11),
       );
     }

@@ -34,7 +34,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(result.message ?? 'Login Google gagal'),
-          backgroundColor: Colors.red,
+          backgroundColor: context.c.danger,
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -78,7 +78,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
           ),
 
           // --- 2. GRADIENT FADE TO BLACK ---
-          const DecoratedBox(
+          DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
@@ -87,7 +87,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 colors: [
                   Colors.transparent,
                   Colors.transparent,
-                  Color(0xCC000000),
+                  SportagoColors.scrim.withValues(alpha: 0.8),
                   Colors.black,
                 ],
               ),

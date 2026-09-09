@@ -69,7 +69,7 @@ class _LoginPageState extends State<LoginPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(result.message ?? "Login Berhasil! Selamat Datang."),
-            backgroundColor: Colors.green,
+            backgroundColor: context.c.ok,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -91,7 +91,7 @@ class _LoginPageState extends State<LoginPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(result.message ?? "Email atau Password salah!"),
-            backgroundColor: Colors.red,
+            backgroundColor: context.c.danger,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -322,8 +322,8 @@ class _LoginPageState extends State<LoginPage> {
       border: border(context.c.line, 1),
       enabledBorder: border(context.c.line, 1),
       focusedBorder: border(context.c.accent, 1.6),
-      errorBorder: border(Colors.red.shade400, 1),
-      focusedErrorBorder: border(Colors.red.shade400, 1.6),
+      errorBorder: border(context.c.danger, 1),
+      focusedErrorBorder: border(context.c.danger, 1.6),
     );
   }
 }

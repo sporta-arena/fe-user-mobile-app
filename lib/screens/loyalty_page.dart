@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import '../theme/app_tokens.dart';
 import 'package:flutter/services.dart';
 import 'dart:math';
 import 'redeem_page.dart';
-import '../constants/colors.dart';
 
 class LoyaltyPage extends StatefulWidget {
   const LoyaltyPage({super.key});
@@ -12,10 +12,6 @@ class LoyaltyPage extends StatefulWidget {
 }
 
 class _LoyaltyPageState extends State<LoyaltyPage> with TickerProviderStateMixin {
-  // App theme colors
-  static const Color primaryBlue = Color(0xFF0047FF);
-  static const Color darkBlue = AppColors.bg;
-  static const Color accentGold = AppColors.brandYellow;
 
   // --- STATE VARIABLES ---
   int _currentPoints = 150;
@@ -263,7 +259,7 @@ class _LoyaltyPageState extends State<LoyaltyPage> with TickerProviderStateMixin
         'points': 1000,
         'title': 'GOOOL!',
         'subtitle': 'Tendangan sempurna!',
-        'color': accentGold,
+        'color': context.c.accent,
         'result': 'goal',
       };
     } else if (chance < 15) {
@@ -279,7 +275,7 @@ class _LoyaltyPageState extends State<LoyaltyPage> with TickerProviderStateMixin
         'points': 100,
         'title': 'DITEPIS!',
         'subtitle': 'Kiper berhasil menangkap',
-        'color': primaryBlue,
+        'color': context.c.accent,
         'result': 'saved',
       };
     } else {
@@ -301,9 +297,9 @@ class _LoyaltyPageState extends State<LoyaltyPage> with TickerProviderStateMixin
         child: Container(
           padding: const EdgeInsets.all(28),
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: context.c.raised,
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: AppColors.surfaceBorder),
+            border: Border.all(color: context.c.line),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.4),
@@ -317,26 +313,26 @@ class _LoyaltyPageState extends State<LoyaltyPage> with TickerProviderStateMixin
             children: [
               Container(
                 padding: const EdgeInsets.all(20),
-                decoration: const BoxDecoration(
-                  color: AppColors.bg,
+                decoration: BoxDecoration(
+                  color: context.c.surface,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.confirmation_number_outlined,
                   size: 48,
-                  color: AppColors.brandYellow,
+                  color: context.c.accent,
                 ),
               ),
               const SizedBox(height: 20),
-              const Text(
+              Text(
                 "Tiket Habis!",
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.onDark),
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: context.c.ink),
               ),
               const SizedBox(height: 12),
-              const Text(
+              Text(
                 "Booking lapangan untuk mendapatkan tiket gacha gratis!",
                 textAlign: TextAlign.center,
-                style: TextStyle(color: AppColors.onDarkMuted, fontSize: 14),
+                style: TextStyle(color: context.c.inkSoft, fontSize: 14),
               ),
               const SizedBox(height: 24),
               SizedBox(
@@ -344,14 +340,14 @@ class _LoyaltyPageState extends State<LoyaltyPage> with TickerProviderStateMixin
                 child: ElevatedButton(
                   onPressed: () => Navigator.pop(context),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.brandYellow,
+                    backgroundColor: context.c.accent,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
                     elevation: 0,
                   ),
-                  child: const Text(
+                  child: Text(
                     "Mengerti",
-                    style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.w700, fontSize: 16),
+                    style: TextStyle(color: context.c.onAccent, fontWeight: FontWeight.w700, fontSize: 16),
                   ),
                 ),
               ),
@@ -394,15 +390,15 @@ class _LoyaltyPageState extends State<LoyaltyPage> with TickerProviderStateMixin
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Row(
+        content: Row(
           children: [
-            Icon(Icons.check_circle, color: AppColors.ink),
+            Icon(Icons.check_circle, color: context.c.onAccent),
             SizedBox(width: 12),
             Text("Booking berhasil! +1 Tiket Gacha",
-                style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.w600)),
+                style: TextStyle(color: context.c.onAccent, fontWeight: FontWeight.w600)),
           ],
         ),
-        backgroundColor: AppColors.brandYellow,
+        backgroundColor: context.c.accent,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
@@ -419,7 +415,7 @@ class _LoyaltyPageState extends State<LoyaltyPage> with TickerProviderStateMixin
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: darkBlue,
+      backgroundColor: context.c.surface,
       body: SafeArea(
         child: Column(
           children: [
@@ -532,19 +528,19 @@ class _LoyaltyPageState extends State<LoyaltyPage> with TickerProviderStateMixin
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [accentGold.withValues(alpha: 0.2), accentGold.withValues(alpha: 0.1)],
+                  colors: [context.c.accent.withValues(alpha: 0.2), context.c.accent.withValues(alpha: 0.1)],
                 ),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: accentGold.withValues(alpha: 0.4)),
+                border: Border.all(color: context.c.accent.withValues(alpha: 0.4)),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.stars_rounded, color: accentGold, size: 20),
+                  Icon(Icons.stars_rounded, color: context.c.accent, size: 20),
                   const SizedBox(width: 6),
                   Text(
                     _formatPoints(_currentPoints),
-                    style: const TextStyle(
-                      color: accentGold,
+                    style: TextStyle(
+                      color: context.c.accent,
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
                     ),
@@ -565,7 +561,7 @@ class _LoyaltyPageState extends State<LoyaltyPage> with TickerProviderStateMixin
 
     switch (_kickResult) {
       case 'goal':
-        resultColor = accentGold;
+        resultColor = context.c.accent;
         resultIcon = Icons.emoji_events;
         resultText = 'GOOOL!';
         break;
@@ -575,7 +571,7 @@ class _LoyaltyPageState extends State<LoyaltyPage> with TickerProviderStateMixin
         resultText = 'KENA TIANG!';
         break;
       case 'saved':
-        resultColor = primaryBlue;
+        resultColor = context.c.accent;
         resultIcon = Icons.sports_handball;
         resultText = 'DITEPIS!';
         break;
@@ -650,8 +646,8 @@ class _LoyaltyPageState extends State<LoyaltyPage> with TickerProviderStateMixin
           end: Alignment.bottomCenter,
           colors: [
             Colors.transparent,
-            darkBlue.withValues(alpha: 0.8),
-            darkBlue,
+            context.c.surface.withValues(alpha: 0.8),
+            context.c.surface,
           ],
         ),
       ),
@@ -663,11 +659,11 @@ class _LoyaltyPageState extends State<LoyaltyPage> with TickerProviderStateMixin
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             decoration: BoxDecoration(
               color: _spinTickets > 0
-                  ? AppColors.brandYellow.withValues(alpha: 0.15)
+                  ? context.c.accent.withValues(alpha: 0.15)
                   : Colors.red.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(30),
               border: Border.all(
-                color: _spinTickets > 0 ? AppColors.brandYellow.withValues(alpha: 0.5) : Colors.red.withValues(alpha: 0.5),
+                color: _spinTickets > 0 ? context.c.accent.withValues(alpha: 0.5) : Colors.red.withValues(alpha: 0.5),
                 width: 2,
               ),
             ),
@@ -676,14 +672,14 @@ class _LoyaltyPageState extends State<LoyaltyPage> with TickerProviderStateMixin
               children: [
                 Icon(
                   Icons.confirmation_number_rounded,
-                  color: _spinTickets > 0 ? AppColors.brandYellow : Colors.red,
+                  color: _spinTickets > 0 ? context.c.accent : Colors.red,
                   size: 22,
                 ),
                 const SizedBox(width: 10),
                 Text(
                   _spinTickets > 0 ? "$_spinTickets Tiket Tersedia" : "Tiket Habis",
                   style: TextStyle(
-                    color: _spinTickets > 0 ? AppColors.onDark : Colors.red,
+                    color: _spinTickets > 0 ? context.c.ink : Colors.red,
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                   ),
@@ -743,20 +739,20 @@ class _LoyaltyPageState extends State<LoyaltyPage> with TickerProviderStateMixin
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
         decoration: BoxDecoration(
           color: isPrimary
-              ? AppColors.brandYellow.withValues(alpha: 0.15)
+              ? context.c.accent.withValues(alpha: 0.15)
               : Colors.white.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(30),
-          border: isPrimary ? Border.all(color: AppColors.brandYellow.withValues(alpha: 0.4)) : null,
+          border: isPrimary ? Border.all(color: context.c.accent.withValues(alpha: 0.4)) : null,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: isPrimary ? AppColors.brandYellow : Colors.white54, size: 18),
+            Icon(icon, color: isPrimary ? context.c.accent : Colors.white54, size: 18),
             const SizedBox(width: 8),
             Text(
               label,
               style: TextStyle(
-                color: isPrimary ? AppColors.onDark : Colors.white54,
+                color: isPrimary ? context.c.ink : Colors.white54,
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
@@ -777,8 +773,8 @@ class _LoyaltyPageState extends State<LoyaltyPage> with TickerProviderStateMixin
           maxHeight: MediaQuery.of(context).size.height * 0.6,
         ),
         padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
+        decoration: BoxDecoration(
+          color: context.c.raised,
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(28),
             topRight: Radius.circular(28),
@@ -799,7 +795,7 @@ class _LoyaltyPageState extends State<LoyaltyPage> with TickerProviderStateMixin
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.emoji_events, color: accentGold, size: 24),
+                Icon(Icons.emoji_events, color: context.c.accent, size: 24),
                 const SizedBox(width: 10),
                 const Text(
                   "Hadiah Tendangan",
@@ -816,9 +812,9 @@ class _LoyaltyPageState extends State<LoyaltyPage> with TickerProviderStateMixin
               child: ListView(
                 shrinkWrap: true,
                 children: [
-                  _buildPrizeItem('GOAL', Icons.emoji_events, '1000', accentGold, 'Bola masuk ke gawang!'),
+                  _buildPrizeItem('GOAL', Icons.emoji_events, '1000', context.c.accent, 'Bola masuk ke gawang!'),
                   _buildPrizeItem('Kena Tiang', Icons.sports_soccer, '500', const Color(0xFF9C27B0), 'Hampir masuk!'),
-                  _buildPrizeItem('Ditepis', Icons.sports_handball, '100', primaryBlue, 'Kiper berhasil menangkap'),
+                  _buildPrizeItem('Ditepis', Icons.sports_handball, '100', context.c.accent, 'Kiper berhasil menangkap'),
                   _buildPrizeItem('Meleset', Icons.close, '10', const Color(0xFF78909C), 'Bola keluar gawang'),
                 ],
               ),
@@ -1609,8 +1605,6 @@ class GachaRewardDialog extends StatefulWidget {
 }
 
 class _GachaRewardDialogState extends State<GachaRewardDialog> with TickerProviderStateMixin {
-  static const Color primaryBlue = Color(0xFF0047FF);
-  static const Color accentGold = AppColors.brandYellow;
 
   late AnimationController _scaleController;
   late AnimationController _pulseController;
@@ -1664,8 +1658,8 @@ class _GachaRewardDialogState extends State<GachaRewardDialog> with TickerProvid
         speed: 0.3 + random.nextDouble() * 1.2,
         size: 5 + random.nextDouble() * 8,
         color: [
-          accentGold,
-          primaryBlue,
+          context.c.accent,
+          context.c.accent,
           const Color(0xFF00C6FF),
           Colors.white,
           const Color(0xFF9C27B0),
@@ -1685,9 +1679,9 @@ class _GachaRewardDialogState extends State<GachaRewardDialog> with TickerProvid
 
   Color _getGradientStart() {
     switch (widget.reward['result']) {
-      case 'goal': return accentGold;
+      case 'goal': return context.c.accent;
       case 'post': return const Color(0xFF9C27B0);
-      case 'saved': return primaryBlue;
+      case 'saved': return context.c.accent;
       default: return const Color(0xFF78909C);
     }
   }
@@ -1820,7 +1814,7 @@ class _GachaRewardDialogState extends State<GachaRewardDialog> with TickerProvid
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
-                      color: AppColors.surface,
+                      color: context.c.raised,
                       child: Column(
                         children: [
                           Container(
@@ -1859,8 +1853,8 @@ class _GachaRewardDialogState extends State<GachaRewardDialog> with TickerProvid
                             child: ElevatedButton(
                               onPressed: () => Navigator.pop(context),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.brandYellow,
-                                foregroundColor: AppColors.ink,
+                                backgroundColor: context.c.accent,
+                                foregroundColor: context.c.onAccent,
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
                                 elevation: 0,
                               ),
@@ -1879,9 +1873,9 @@ class _GachaRewardDialogState extends State<GachaRewardDialog> with TickerProvid
             ),
 
             if (isLegendary) ...[
-              Positioned(top: -20, left: 15, child: _buildStar(24, accentGold)),
+              Positioned(top: -20, left: 15, child: _buildStar(24, context.c.accent)),
               Positioned(top: 5, right: 10, child: _buildStar(18, const Color(0xFFFFA500))),
-              Positioned(bottom: 70, left: 5, child: _buildStar(16, accentGold)),
+              Positioned(bottom: 70, left: 5, child: _buildStar(16, context.c.accent)),
             ],
           ],
         ),

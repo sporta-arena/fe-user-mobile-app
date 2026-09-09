@@ -2,14 +2,11 @@ import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import '../theme/app_tokens.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/rendering.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import '../constants/colors.dart';
 import '../models/booking.dart';
-import '../models/refund.dart';
 import '../services/auth_service.dart';
 import '../services/refund_service.dart';
 import 'home_page.dart';
@@ -32,12 +29,21 @@ class _ETicketPageState extends State<ETicketPage> {
   String _userName = "";
   String _userPhone = "";
   bool _isDownloading = false;
-  bool _isRequestingRefund = false;
+
+  /// Kebijakan refund yang berlaku, dibaca dari server saat layar dibuka.
+  /// Null selama belum termuat — kotak keterangannya belum ditampilkan.
+  KebijakanRefund? _kebijakanRefund;
 
   @override
   void initState() {
     super.initState();
     _loadUserData();
+    _muatKebijakanRefund();
+  }
+
+  Future<void> _muatKebijakanRefund() async {
+    final kebijakan = await RefundService.ambilKebijakan();
+    if (mounted) setState(() => _kebijakanRefund = kebijakan);
   }
 
   Future<void> _loadUserData() async {
@@ -60,73 +66,6 @@ class _ETicketPageState extends State<ETicketPage> {
     return widget.booking.status == 'confirmed' || widget.booking.status == 'checked_in';
   }
 
-  bool get _canRequestRefund {
-    // Only confirmed bookings can request refund
-    if (widget.booking.status != 'confirmed') return false;
-
-    // Check if more than 12 hours before booking
-    try {
-      final bookingDate = DateTime.parse(widget.booking.bookingDate.split('T')[0]);
-      final timeParts = widget.booking.startTime.split(':');
-      final bookingDateTime = DateTime(
-        bookingDate.year,
-        bookingDate.month,
-        bookingDate.day,
-        int.parse(timeParts[0]),
-        int.parse(timeParts[1]),
-      );
-      final diff = bookingDateTime.difference(DateTime.now());
-      // Can only refund if more than 12 hours before booking
-      return diff.inHours >= 12;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  String get _refundTimeInfo {
-    try {
-      final bookingDate = DateTime.parse(widget.booking.bookingDate.split('T')[0]);
-      final timeParts = widget.booking.startTime.split(':');
-      final bookingDateTime = DateTime(
-        bookingDate.year,
-        bookingDate.month,
-        bookingDate.day,
-        int.parse(timeParts[0]),
-        int.parse(timeParts[1]),
-      );
-      final diff = bookingDateTime.difference(DateTime.now());
-
-      if (diff.isNegative) {
-        return "";
-      } else if (diff.inHours >= 24) {
-        return "Refund 100% tersedia (${diff.inHours} jam sebelum jadwal)";
-      } else if (diff.inHours >= 12) {
-        return "Refund 50% tersedia (${diff.inHours} jam sebelum jadwal)";
-      } else {
-        return "Refund tidak tersedia (kurang dari 12 jam sebelum jadwal)";
-      }
-    } catch (e) {
-      return "";
-    }
-  }
-
-  RefundPolicy get _refundPolicy {
-    try {
-      final bookingDate = DateTime.parse(widget.booking.bookingDate.split('T')[0]);
-      final timeParts = widget.booking.startTime.split(':');
-      final bookingDateTime = DateTime(
-        bookingDate.year,
-        bookingDate.month,
-        bookingDate.day,
-        int.parse(timeParts[0]),
-        int.parse(timeParts[1]),
-      );
-      return RefundPolicy.calculate(bookingDateTime);
-    } catch (e) {
-      return RefundPolicy(percentage: 0, description: 'Tidak dapat menghitung kebijakan refund', canRefund: false);
-    }
-  }
-
   void _openChat() {
     Navigator.push(
       context,
@@ -136,270 +75,6 @@ class _ETicketPageState extends State<ETicketPage> {
     );
   }
 
-  Future<void> _showRefundDialog() async {
-    final policy = _refundPolicy;
-
-    if (!policy.canRefund) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(policy.description),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    final refundAmount = (widget.booking.totalPrice * policy.percentage / 100).toInt();
-    final reasonController = TextEditingController();
-
-    final result = await showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-        ),
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Handle bar
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: AppColors.surfaceBorder,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Title
-              const Text(
-                "Ajukan Refund",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.onDark),
-              ),
-              const SizedBox(height: 20),
-
-              // Policy info
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.orange.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.orange.withValues(alpha: 0.4)),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.info_outline, color: Colors.orange.shade400, size: 20),
-                        const SizedBox(width: 8),
-                        const Text(
-                          "Kebijakan Refund",
-                          style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.onDark),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      policy.description,
-                      style: const TextStyle(color: AppColors.onDarkMuted, fontSize: 13),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Amount info
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppColors.bg,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.surfaceBorder),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text("Total Pembayaran", style: TextStyle(color: AppColors.onDarkMuted, fontSize: 12)),
-                        const SizedBox(height: 4),
-                        Text(_formatCurrency(widget.booking.totalPrice.toInt()),
-                            style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.onDark)),
-                      ],
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text("Jumlah Refund (${policy.percentage}%)",
-                            style: const TextStyle(color: AppColors.onDarkMuted, fontSize: 12)),
-                        const SizedBox(height: 4),
-                        Text(
-                          _formatCurrency(refundAmount),
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                            color: AppColors.brandYellow,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Reason input
-              const Text("Alasan Refund", style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.onDark)),
-              const SizedBox(height: 8),
-              TextField(
-                controller: reasonController,
-                maxLines: 3,
-                style: const TextStyle(color: AppColors.onDark),
-                decoration: InputDecoration(
-                  hintText: "Jelaskan alasan pengajuan refund...",
-                  hintStyle: const TextStyle(color: AppColors.onDarkMuted),
-                  filled: true,
-                  fillColor: AppColors.bg,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: AppColors.surfaceBorder),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: AppColors.surfaceBorder),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: AppColors.brandYellow),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-
-              // Note about admin approval
-              Row(
-                children: [
-                  const Icon(Icons.schedule, size: 14, color: AppColors.onDarkMuted),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      "Pengajuan refund memerlukan persetujuan admin (1-3 hari kerja)",
-                      style: const TextStyle(color: AppColors.onDarkMuted, fontSize: 11),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-
-              // Buttons
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        side: const BorderSide(color: AppColors.surfaceBorder),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      child: const Text("Batal", style: TextStyle(color: AppColors.onDark)),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    flex: 2,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        if (reasonController.text.trim().isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("Silakan isi alasan refund"),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
-                          return;
-                        }
-                        Navigator.pop(context, true);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      child: const Text(
-                        "Ajukan Refund",
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-
-    if (result == true && mounted) {
-      await _submitRefundRequest(reasonController.text.trim());
-    }
-  }
-
-  Future<void> _submitRefundRequest(String reason) async {
-    setState(() => _isRequestingRefund = true);
-
-    final result = await RefundService.requestRefund(
-      bookingId: widget.booking.id,
-      reason: reason,
-    );
-
-    if (mounted) {
-      setState(() => _isRequestingRefund = false);
-
-      if (result.success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Row(
-              children: [
-                Icon(Icons.check_circle, color: Colors.white, size: 20),
-                SizedBox(width: 12),
-                Expanded(child: Text("Pengajuan refund berhasil! Menunggu persetujuan admin.")),
-              ],
-            ),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 4),
-          ),
-        );
-        // Navigate back to transactions
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => const HomePageWithTab(initialIndex: 2)),
-          (route) => false,
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(result.message ?? "Gagal mengajukan refund"),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
 
   Future<void> _downloadTicket() async {
     if (_isDownloading) return;
@@ -427,7 +102,7 @@ class _ETicketPageState extends State<ETicketPage> {
       if (mounted) {
         await Share.shareXFiles(
           [XFile(file.path)],
-          text: 'E-Tiket Sporta\n${widget.booking.field?.venue?.name ?? "Venue"}\n${widget.booking.bookingCode}',
+          text: 'E-Tiket Sportago\n${widget.booking.field?.venue?.name ?? "Venue"}\n${widget.booking.bookingCode}',
         );
       }
     } catch (e) {
@@ -435,7 +110,7 @@ class _ETicketPageState extends State<ETicketPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Gagal mengunduh tiket: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: context.c.danger,
           ),
         );
       }
@@ -449,13 +124,13 @@ class _ETicketPageState extends State<ETicketPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bg,
+      backgroundColor: context.c.surface,
       appBar: AppBar(
-        backgroundColor: AppColors.bg,
+        backgroundColor: context.c.surface,
         systemOverlayStyle: gayaOverlay(context),
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.onDark),
+          icon: Icon(Icons.arrow_back, color: context.c.ink),
           onPressed: () {
             Navigator.pushAndRemoveUntil(
               context,
@@ -466,10 +141,10 @@ class _ETicketPageState extends State<ETicketPage> {
             );
           },
         ),
-        title: const Text(
+        title: Text(
           "E-Tiket",
           style: TextStyle(
-            color: AppColors.onDark,
+            color: context.c.ink,
             fontWeight: FontWeight.w600,
             fontSize: 18,
           ),
@@ -481,10 +156,10 @@ class _ETicketPageState extends State<ETicketPage> {
               icon: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.green.withValues(alpha: 0.1),
+                  color: context.c.ok.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(Icons.chat_outlined, color: Colors.green, size: 20),
+                child: Icon(Icons.chat_outlined, color: context.c.ok, size: 20),
               ),
               onPressed: _openChat,
             ),
@@ -505,9 +180,9 @@ class _ETicketPageState extends State<ETicketPage> {
                       child: Container(
                         width: double.infinity,
                         decoration: BoxDecoration(
-                          color: AppColors.surface,
+                          color: context.c.raised,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: AppColors.surfaceBorder),
+                          border: Border.all(color: context.c.line),
                         ),
                         child: Column(
                           children: [
@@ -519,10 +194,10 @@ class _ETicketPageState extends State<ETicketPage> {
                                   // Venue Name
                                   Text(
                                     widget.booking.field?.venue?.name ?? "Venue",
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
-                                      color: AppColors.onDark,
+                                      color: context.c.ink,
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
@@ -556,8 +231,8 @@ class _ETicketPageState extends State<ETicketPage> {
                                 Container(
                                   width: 14,
                                   height: 28,
-                                  decoration: const BoxDecoration(
-                                    color: AppColors.bg,
+                                  decoration: BoxDecoration(
+                                    color: context.c.surface,
                                     borderRadius: BorderRadius.only(
                                       topRight: Radius.circular(14),
                                       bottomRight: Radius.circular(14),
@@ -567,14 +242,14 @@ class _ETicketPageState extends State<ETicketPage> {
                                 Expanded(
                                   child: Container(
                                     height: 1,
-                                    color: AppColors.surfaceBorder,
+                                    color: context.c.line,
                                   ),
                                 ),
                                 Container(
                                   width: 14,
                                   height: 28,
-                                  decoration: const BoxDecoration(
-                                    color: AppColors.bg,
+                                  decoration: BoxDecoration(
+                                    color: context.c.surface,
                                     borderRadius: BorderRadius.only(
                                       topLeft: Radius.circular(14),
                                       bottomLeft: Radius.circular(14),
@@ -595,7 +270,7 @@ class _ETicketPageState extends State<ETicketPage> {
                                   const SizedBox(height: 16),
                                   _buildInfoRow("Lapangan", widget.booking.field?.name ?? "-", "Durasi", "${widget.booking.durationHours} Jam"),
                                   const SizedBox(height: 16),
-                                  _buildInfoRow("Kode Booking", widget.booking.bookingCode, "Total", _formatCurrency(widget.booking.totalPrice.toInt()), valueColor: AppColors.brandYellow),
+                                  _buildInfoRow("Kode Booking", widget.booking.bookingCode, "Total", _formatCurrency(widget.booking.totalPrice.toInt()), valueColor: context.c.accent),
                                 ],
                               ),
                             ),
@@ -614,49 +289,21 @@ class _ETicketPageState extends State<ETicketPage> {
                           Expanded(
                             child: OutlinedButton.icon(
                               onPressed: _openChat,
-                              icon: const Icon(Icons.chat_outlined, color: Colors.green, size: 18),
-                              label: const Text(
+                              icon: Icon(Icons.chat_outlined, color: context.c.ok, size: 18),
+                              label: Text(
                                 "Chat Venue",
-                                style: TextStyle(color: Colors.green, fontWeight: FontWeight.w600, fontSize: 13),
+                                style: TextStyle(color: context.c.ok, fontWeight: FontWeight.w600, fontSize: 13),
                               ),
                               style: OutlinedButton.styleFrom(
-                                side: const BorderSide(color: Colors.green),
+                                side: BorderSide(color: context.c.ok),
                                 padding: const EdgeInsets.symmetric(vertical: 12),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                backgroundColor: AppColors.surface,
+                                backgroundColor: context.c.raised,
                               ),
                             ),
                           ),
-                          // Refund Button (only if can request refund)
-                          if (_canRequestRefund) ...[
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                onPressed: _isRequestingRefund ? null : _showRefundDialog,
-                                icon: _isRequestingRefund
-                                    ? const SizedBox(
-                                        width: 16,
-                                        height: 16,
-                                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.red),
-                                      )
-                                    : Icon(Icons.money_off, color: Colors.red.shade400, size: 18),
-                                label: Text(
-                                  "Refund",
-                                  style: TextStyle(color: Colors.red.shade400, fontWeight: FontWeight.w600, fontSize: 13),
-                                ),
-                                style: OutlinedButton.styleFrom(
-                                  side: BorderSide(color: Colors.red.shade300),
-                                  padding: const EdgeInsets.symmetric(vertical: 12),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  backgroundColor: AppColors.surface,
-                                ),
-                              ),
-                            ),
-                          ],
                         ],
                       ),
 
@@ -667,66 +314,74 @@ class _ETicketPageState extends State<ETicketPage> {
                       width: double.infinity,
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: AppColors.surface,
+                        color: context.c.raised,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: AppColors.surfaceBorder),
+                        border: Border.all(color: context.c.line),
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.info_outline, color: AppColors.onDarkMuted, size: 20),
+                          Icon(Icons.info_outline, color: context.c.inkSoft, size: 20),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
                               "Harap datang 10 menit sebelum jadwal",
-                              style: const TextStyle(color: AppColors.onDarkMuted, fontSize: 13),
+                              style: TextStyle(color: context.c.inkSoft, fontSize: 13),
                             ),
                           ),
                         ],
                       ),
                     ),
 
-                    // Refund Info Box (show for confirmed bookings)
-                    if (widget.booking.status == 'confirmed' && _refundTimeInfo.isNotEmpty) ...[
+                    // Keterangan refund.
+                    //
+                    // Dulu di sini ada tier "100% jika >24 jam, 50% jika
+                    // 12-24 jam" yang dihitung sendiri oleh app, plus
+                    // tombol Ajukan Refund. Keduanya tidak berdasar:
+                    // backend menyatakan tidak ada jalur refund dari sisi
+                    // pemesan (`customer_can_request: false`), dan rute
+                    // yang dipanggil tombol itu memang tidak pernah ada.
+                    //
+                    // Sekarang yang ditampilkan adalah cara refund yang
+                    // sebenarnya berlaku, dibaca dari server.
+                    if (widget.booking.status == 'confirmed' &&
+                        _kebijakanRefund != null) ...[
                       const SizedBox(height: 12),
                       Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
-                          color: (_canRequestRefund ? Colors.green : Colors.red).withValues(alpha: 0.15),
+                          color: context.c.raised,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: (_canRequestRefund ? Colors.green : Colors.red).withValues(alpha: 0.4),
-                          ),
+                          border: Border.all(color: context.c.line),
                         ),
-                        child: Column(
+                        child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
-                              children: [
-                                Icon(
-                                  _canRequestRefund ? Icons.check_circle_outline : Icons.cancel_outlined,
-                                  color: _canRequestRefund ? Colors.green.shade400 : Colors.red.shade400,
-                                  size: 20,
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: Text(
-                                    _refundTimeInfo,
+                            Icon(Icons.receipt_long_outlined,
+                                color: context.c.inkSoft, size: 20),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Pembatalan & refund',
                                     style: TextStyle(
-                                      color: _canRequestRefund ? Colors.green.shade300 : Colors.red.shade300,
+                                      color: context.c.ink,
                                       fontSize: 13,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              "Kebijakan: Refund 100% jika > 24 jam, 50% jika 12-24 jam, 0% jika < 12 jam sebelum jadwal",
-                              style: const TextStyle(
-                                color: AppColors.onDarkMuted,
-                                fontSize: 11,
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    _kebijakanRefund!.pesan,
+                                    style: TextStyle(
+                                      color: context.c.inkSoft,
+                                      fontSize: 12,
+                                      height: 1.4,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
@@ -745,23 +400,23 @@ class _ETicketPageState extends State<ETicketPage> {
               child: ElevatedButton.icon(
                 onPressed: _isDownloading ? null : _downloadTicket,
                 icon: _isDownloading
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: AppColors.ink,
+                          color: context.c.onAccent,
                         ),
                       )
-                    : const Icon(Icons.download, color: AppColors.ink),
+                    : Icon(Icons.download, color: context.c.onAccent),
                 label: Text(
                   _isDownloading ? "Menyimpan..." : "Download Ticket",
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.ink),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: context.c.onAccent),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.brandYellow,
-                  foregroundColor: AppColors.ink,
-                  disabledBackgroundColor: AppColors.brandYellow.withValues(alpha: 0.7),
+                  backgroundColor: context.c.accent,
+                  foregroundColor: context.c.onAccent,
+                  disabledBackgroundColor: context.c.accent.withValues(alpha: 0.7),
                   elevation: 0,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
@@ -783,9 +438,9 @@ class _ETicketPageState extends State<ETicketPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(leftLabel, style: const TextStyle(color: AppColors.onDarkMuted, fontSize: 12)),
+              Text(leftLabel, style: TextStyle(color: context.c.inkSoft, fontSize: 12)),
               const SizedBox(height: 4),
-              Text(leftValue, style: TextStyle(color: valueColor ?? AppColors.onDark, fontSize: 14, fontWeight: FontWeight.w600)),
+              Text(leftValue, style: TextStyle(color: valueColor ?? context.c.ink, fontSize: 14, fontWeight: FontWeight.w600)),
             ],
           ),
         ),
@@ -793,9 +448,9 @@ class _ETicketPageState extends State<ETicketPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(rightLabel, style: const TextStyle(color: AppColors.onDarkMuted, fontSize: 12)),
+              Text(rightLabel, style: TextStyle(color: context.c.inkSoft, fontSize: 12)),
               const SizedBox(height: 4),
-              Text(rightValue, style: TextStyle(color: valueColor ?? AppColors.onDark, fontSize: 14, fontWeight: FontWeight.w600), textAlign: TextAlign.end),
+              Text(rightValue, style: TextStyle(color: valueColor ?? context.c.ink, fontSize: 14, fontWeight: FontWeight.w600), textAlign: TextAlign.end),
             ],
           ),
         ),

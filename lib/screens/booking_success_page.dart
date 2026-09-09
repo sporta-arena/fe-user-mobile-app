@@ -3,7 +3,6 @@ import '../theme/app_tokens.dart';
 import 'package:flutter/services.dart';
 import 'my_booking_page.dart';
 import 'home_page.dart';
-import '../constants/colors.dart';
 
 class BookingSuccessPage extends StatelessWidget {
   const BookingSuccessPage({super.key});
@@ -11,7 +10,7 @@ class BookingSuccessPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bg,
+      backgroundColor: context.c.surface,
       body: AnnotatedRegion<SystemUiOverlayStyle>(
         value: gayaOverlay(context),
         child: SafeArea(
@@ -25,25 +24,25 @@ class BookingSuccessPage extends StatelessWidget {
                   width: 120,
                   height: 120,
                   decoration: BoxDecoration(
-                    color: Colors.green.withValues(alpha: 0.1),
+                    color: context.c.ok.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.check_circle,
                     size: 80,
-                    color: Colors.green,
+                    color: context.c.ok,
                   ),
                 ),
 
                 const SizedBox(height: 30),
 
                 // Success Title
-                const Text(
+                Text(
                   "Pembayaran Berhasil!",
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.onDark,
+                    color: context.c.ink,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -51,11 +50,11 @@ class BookingSuccessPage extends StatelessWidget {
                 const SizedBox(height: 12),
 
                 // Success Message
-                const Text(
+                Text(
                   "Booking lapangan Anda telah dikonfirmasi.\nDetail booking telah dikirim ke email Anda.",
                   style: TextStyle(
                     fontSize: 16,
-                    color: AppColors.onDarkMuted,
+                    color: context.c.inkSoft,
                     height: 1.5,
                   ),
                   textAlign: TextAlign.center,
@@ -67,33 +66,33 @@ class BookingSuccessPage extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: AppColors.surface,
+                    color: context.c.raised,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppColors.surfaceBorder),
+                    border: Border.all(color: context.c.line),
                   ),
                   child: Column(
                     children: [
                       Row(
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.confirmation_number,
-                            color: AppColors.brandYellow,
+                            color: context.c.accent,
                             size: 24,
                           ),
                           const SizedBox(width: 12),
-                          const Text(
+                          Text(
                             "Booking ID:",
                             style: TextStyle(
                               fontWeight: FontWeight.w500,
-                              color: AppColors.onDarkMuted,
+                              color: context.c.inkSoft,
                             ),
                           ),
                           const Spacer(),
                           Text(
                             "SPT-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}",
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              color: AppColors.brandYellow,
+                              color: context.c.accent,
                             ),
                           ),
                         ],
@@ -101,17 +100,17 @@ class BookingSuccessPage extends StatelessWidget {
                       const SizedBox(height: 16),
                       Row(
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.access_time,
-                            color: AppColors.brandYellow,
+                            color: context.c.accent,
                             size: 24,
                           ),
                           const SizedBox(width: 12),
-                          const Text(
+                          Text(
                             "Status:",
                             style: TextStyle(
                               fontWeight: FontWeight.w500,
-                              color: AppColors.onDarkMuted,
+                              color: context.c.inkSoft,
                             ),
                           ),
                           const Spacer(),
@@ -121,7 +120,7 @@ class BookingSuccessPage extends StatelessWidget {
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.green,
+                              color: context.c.ok,
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: const Text(
@@ -158,16 +157,16 @@ class BookingSuccessPage extends StatelessWidget {
                           );
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.brandYellow,
+                          backgroundColor: context.c.accent,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(999),
                           ),
                           elevation: 0,
                         ),
-                        child: const Text(
+                        child: Text(
                           "Lihat My Booking",
                           style: TextStyle(
-                            color: AppColors.ink,
+                            color: context.c.onAccent,
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
                           ),
@@ -191,15 +190,15 @@ class BookingSuccessPage extends StatelessWidget {
                           );
                         },
                         style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: AppColors.surfaceBorder),
+                          side: BorderSide(color: context.c.line),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(999),
                           ),
                         ),
-                        child: const Text(
+                        child: Text(
                           "Kembali ke Home",
                           style: TextStyle(
-                            color: AppColors.onDark,
+                            color: context.c.ink,
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
                           ),

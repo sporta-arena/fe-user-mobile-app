@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import '../theme/app_tokens.dart';
-import 'package:flutter/services.dart';
-import '../constants/colors.dart';
 
 class ChangePasswordPage extends StatefulWidget {
   const ChangePasswordPage({super.key});
@@ -45,8 +43,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
             padding: EdgeInsets.only(
               bottom: MediaQuery.of(context).viewInsets.bottom,
             ),
-            decoration: const BoxDecoration(
-              color: AppColors.surface,
+            decoration: BoxDecoration(
+              color: context.c.raised,
               borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
             ),
             child: Padding(
@@ -61,7 +59,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                       width: 40,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: AppColors.surfaceBorder,
+                        color: context.c.line,
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
@@ -73,12 +71,12 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                     child: Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: AppColors.brandYellow.withValues(alpha: 0.15),
+                        color: context.c.accent.withValues(alpha: 0.15),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.lock_reset,
-                        color: AppColors.brandYellow,
+                        color: context.c.accent,
                         size: 40,
                       ),
                     ),
@@ -86,13 +84,13 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                   const SizedBox(height: 20),
 
                   // Title
-                  const Center(
+                  Center(
                     child: Text(
                       "Reset Password",
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.onDark,
+                        color: context.c.ink,
                       ),
                     ),
                   ),
@@ -103,8 +101,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                     child: Text(
                       "Kami akan mengirimkan link reset password ke email terdaftar",
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: AppColors.onDarkMuted,
+                      style: TextStyle(
+                        color: context.c.inkSoft,
                         fontSize: 14,
                       ),
                     ),
@@ -112,39 +110,39 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                   const SizedBox(height: 24),
 
                   // Email field
-                  const Text(
+                  Text(
                     "Email Terdaftar",
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
-                      color: AppColors.onDark,
+                      color: context.c.ink,
                     ),
                   ),
                   const SizedBox(height: 8),
                   TextField(
                     controller: emailController,
                     keyboardType: TextInputType.emailAddress,
-                    style: const TextStyle(color: AppColors.onDark),
+                    style: TextStyle(color: context.c.ink),
                     decoration: InputDecoration(
-                      prefixIcon: const Icon(
+                      prefixIcon: Icon(
                         Icons.email_outlined,
-                        color: AppColors.brandYellow,
+                        color: context.c.accent,
                       ),
                       hintText: "Masukkan email",
-                      hintStyle: const TextStyle(color: AppColors.onDarkMuted),
+                      hintStyle: TextStyle(color: context.c.inkSoft),
                       filled: true,
-                      fillColor: AppColors.surface,
+                      fillColor: context.c.raised,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: AppColors.surfaceBorder),
+                        borderSide: BorderSide(color: context.c.line),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: AppColors.surfaceBorder),
+                        borderSide: BorderSide(color: context.c.line),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: AppColors.brandYellow),
+                        borderSide: BorderSide(color: context.c.accent),
                       ),
                     ),
                   ),
@@ -160,9 +158,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                           : () async {
                               if (emailController.text.isEmpty) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
+                                  SnackBar(
                                     content: Text("Email tidak boleh kosong"),
-                                    backgroundColor: Colors.red,
+                                    backgroundColor: context.c.danger,
                                   ),
                                 );
                                 return;
@@ -177,25 +175,25 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                               }
                             },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.brandYellow,
+                        backgroundColor: context.c.accent,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(999),
                         ),
                         elevation: 0,
                       ),
                       child: isLoading
-                          ? const SizedBox(
+                          ? SizedBox(
                               height: 24,
                               width: 24,
                               child: CircularProgressIndicator(
-                                color: AppColors.ink,
+                                color: context.c.onAccent,
                                 strokeWidth: 2,
                               ),
                             )
-                          : const Text(
+                          : Text(
                               "Kirim Link Reset",
                               style: TextStyle(
-                                color: AppColors.ink,
+                                color: context.c.onAccent,
                                 fontWeight: FontWeight.w700,
                                 fontSize: 16,
                               ),
@@ -217,7 +215,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       context: context,
       barrierDismissible: false,
       builder: (context) => Dialog(
-        backgroundColor: AppColors.surface,
+        backgroundColor: context.c.raised,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
@@ -230,34 +228,34 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.green.withValues(alpha: 0.15),
+                  color: context.c.ok.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.mark_email_read_outlined,
-                  color: Colors.green.shade400,
+                  color: context.c.ok,
                   size: 48,
                 ),
               ),
               const SizedBox(height: 20),
 
               // Title
-              const Text(
+              Text(
                 "Email Terkirim!",
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.onDark,
+                  color: context.c.ink,
                 ),
               ),
               const SizedBox(height: 12),
 
               // Description
-              const Text(
+              Text(
                 "Link reset password telah dikirim ke:",
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: AppColors.onDarkMuted,
+                  color: context.c.inkSoft,
                   fontSize: 14,
                 ),
               ),
@@ -265,23 +263,23 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
-                  color: AppColors.brandYellow.withValues(alpha: 0.15),
+                  color: context.c.accent.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
                   email,
-                  style: const TextStyle(
-                    color: AppColors.brandYellow,
+                  style: TextStyle(
+                    color: context.c.accent,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
               const SizedBox(height: 12),
-              const Text(
+              Text(
                 "Silakan cek inbox atau folder spam email kamu.",
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: AppColors.onDarkMuted,
+                  color: context.c.inkSoft,
                   fontSize: 13,
                 ),
               ),
@@ -294,16 +292,16 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 child: ElevatedButton(
                   onPressed: () => Navigator.pop(context),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.brandYellow,
+                    backgroundColor: context.c.accent,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(999),
                     ),
                     elevation: 0,
                   ),
-                  child: const Text(
+                  child: Text(
                     "Mengerti",
                     style: TextStyle(
-                      color: AppColors.ink,
+                      color: context.c.onAccent,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -323,9 +321,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
         _newPassController.text.isEmpty || 
         _confirmPassController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text("Semua kolom wajib diisi!"), 
-          backgroundColor: Colors.red
+          backgroundColor: context.c.danger
         ),
       );
       return;
@@ -334,9 +332,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     // 2. Validasi Kesamaan Password Baru
     if (_newPassController.text != _confirmPassController.text) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text("Password baru tidak cocok!"), 
-          backgroundColor: Colors.red
+          backgroundColor: context.c.danger
         ),
       );
       return;
@@ -345,9 +343,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     // 3. Validasi Panjang Password (Opsional)
     if (_newPassController.text.length < 6) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text("Password minimal 6 karakter"), 
-          backgroundColor: Colors.red
+          backgroundColor: context.c.danger
         ),
       );
       return;
@@ -356,9 +354,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     // 4. Validasi Password Lama vs Baru (tidak boleh sama)
     if (_currentPassController.text == _newPassController.text) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text("Password baru harus berbeda dari password lama!"), 
-          backgroundColor: Colors.red
+          backgroundColor: context.c.danger
         ),
       );
       return;
@@ -373,9 +371,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       
       // Sukses
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text("Password berhasil diubah!"), 
-          backgroundColor: Colors.green
+          backgroundColor: context.c.ok
         ),
       );
       Navigator.pop(context); // Kembali ke Edit Profile
@@ -385,17 +383,17 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bg,
+      backgroundColor: context.c.surface,
       appBar: AppBar(
         systemOverlayStyle: gayaOverlay(context),
-        title: const Text(
+        title: Text(
           "Ganti Password",
-          style: TextStyle(color: AppColors.onDark, fontWeight: FontWeight.bold)
+          style: TextStyle(color: context.c.ink, fontWeight: FontWeight.bold)
         ),
-        backgroundColor: AppColors.bg,
+        backgroundColor: context.c.surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: AppColors.onDark),
+          icon: Icon(Icons.arrow_back_ios, color: context.c.ink),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -408,17 +406,17 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: context.c.raised,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: AppColors.surfaceBorder,
+                  color: context.c.line,
                 ),
               ),
-              child: const Row(
+              child: Row(
                 children: [
                   Icon(
                     Icons.info_outline,
-                    color: AppColors.brandYellow,
+                    color: context.c.accent,
                     size: 20,
                   ),
                   SizedBox(width: 12),
@@ -426,7 +424,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                     child: Text(
                       "Buat password baru yang kuat dan sulit ditebak agar akunmu tetap aman.",
                       style: TextStyle(
-                        color: AppColors.onDark,
+                        color: context.c.ink,
                         fontSize: 13,
                         height: 1.4,
                       ),
@@ -475,19 +473,19 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: context.c.raised,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.surfaceBorder),
+                border: Border.all(color: context.c.line),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     "Syarat Password:",
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
-                      color: AppColors.onDark,
+                      color: context.c.ink,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -507,25 +505,25 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               child: ElevatedButton(
                 onPressed: _isLoading ? null : _changePassword,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.brandYellow,
+                  backgroundColor: context.c.accent,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(999)
                   ),
                   elevation: 0,
                 ),
                 child: _isLoading
-                  ? const SizedBox(
+                  ? SizedBox(
                       height: 24,
                       width: 24,
                       child: CircularProgressIndicator(
-                        color: AppColors.ink,
+                        color: context.c.onAccent,
                         strokeWidth: 2
                       )
                     )
-                  : const Text(
+                  : Text(
                       "UBAH PASSWORD",
                       style: TextStyle(
-                        color: AppColors.ink,
+                        color: context.c.onAccent,
                         fontWeight: FontWeight.w700,
                         fontSize: 16
                       )
@@ -538,10 +536,10 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
             Center(
               child: TextButton(
                 onPressed: () => _showForgotPasswordSheet(),
-                child: const Text(
+                child: Text(
                   "Lupa Password Lama?",
                   style: TextStyle(
-                    color: AppColors.brandYellow,
+                    color: context.c.accent,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -566,47 +564,47 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: AppColors.onDark
+            color: context.c.ink
           )
         ),
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: context.c.raised,
             borderRadius: BorderRadius.circular(12),
           ),
           child: TextField(
             controller: controller,
             obscureText: isObscure,
             onChanged: (value) => setState(() {}), // Trigger rebuild for requirements
-            style: const TextStyle(color: AppColors.onDark),
+            style: TextStyle(color: context.c.ink),
             decoration: InputDecoration(
-              prefixIcon: Icon(icon, color: AppColors.brandYellow),
+              prefixIcon: Icon(icon, color: context.c.accent),
               suffixIcon: IconButton(
                 icon: Icon(
                   isObscure ? Icons.visibility_off : Icons.visibility,
-                  color: AppColors.onDarkMuted,
+                  color: context.c.inkSoft,
                 ),
                 onPressed: onToggle,
               ),
               hintText: "••••••••",
-              hintStyle: const TextStyle(fontSize: 12, letterSpacing: 2, color: AppColors.onDarkMuted),
+              hintStyle: TextStyle(fontSize: 12, letterSpacing: 2, color: context.c.inkSoft),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: AppColors.surfaceBorder),
+                borderSide: BorderSide(color: context.c.line),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: AppColors.brandYellow),
+                borderSide: BorderSide(color: context.c.accent),
               ),
               filled: true,
-              fillColor: AppColors.surface,
+              fillColor: context.c.raised,
             ),
           ),
         ),
@@ -623,14 +621,14 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
           Icon(
             isValid ? Icons.check_circle : Icons.radio_button_unchecked,
             size: 16,
-            color: isValid ? Colors.green : AppColors.onDarkMuted,
+            color: isValid ? context.c.ok : context.c.inkSoft,
           ),
           const SizedBox(width: 8),
           Text(
             text,
             style: TextStyle(
               fontSize: 12,
-              color: isValid ? Colors.green : AppColors.onDarkMuted,
+              color: isValid ? context.c.ok : context.c.inkSoft,
               fontWeight: isValid ? FontWeight.w500 : FontWeight.normal,
             ),
           ),

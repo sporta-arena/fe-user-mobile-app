@@ -10,7 +10,6 @@ import 'chat_history_page.dart';
 import 'change_password_page.dart';
 import '../services/auth_service.dart';
 import '../services/booking_service.dart';
-import '../constants/colors.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -118,13 +117,13 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bg,
+      backgroundColor: context.c.surface,
       body: AnnotatedRegion<SystemUiOverlayStyle>(
         value: gayaOverlay(context),
         child: RefreshIndicator(
         onRefresh: _loadUserStats,
-        color: AppColors.brandYellow,
-        backgroundColor: AppColors.surface,
+        color: context.c.accent,
+        backgroundColor: context.c.raised,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           child: Column(
@@ -174,8 +173,8 @@ class _ProfilePageState extends State<ProfilePage> {
         Container(
           width: double.infinity,
           height: 280,
-          decoration: const BoxDecoration(
-            color: AppColors.bg,
+          decoration: BoxDecoration(
+            color: context.c.surface,
           ),
         ),
         // Content
@@ -183,14 +182,14 @@ class _ProfilePageState extends State<ProfilePage> {
           child: Column(
             children: [
               // Title
-              const Padding(
+              Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 child: Row(
                   children: [
                     Text(
                       "Profil",
                       style: TextStyle(
-                        color: AppColors.onDark,
+                        color: context.c.ink,
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                       ),
@@ -205,9 +204,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   margin: const EdgeInsets.symmetric(horizontal: 20),
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: AppColors.surface,
+                    color: context.c.raised,
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: AppColors.surfaceBorder),
+                    border: Border.all(color: context.c.line),
                   ),
                   child: Column(
                     children: [
@@ -219,16 +218,16 @@ class _ProfilePageState extends State<ProfilePage> {
                             height: 72,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: AppColors.brandYellow.withValues(alpha: 0.15),
+                              color: context.c.accent.withValues(alpha: 0.15),
                               border: Border.all(
-                                color: AppColors.brandYellow,
+                                color: context.c.accent,
                                 width: 2,
                               ),
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.person,
                               size: 36,
-                              color: AppColors.brandYellow,
+                              color: context.c.accent,
                             ),
                           ),
                           const SizedBox(width: 16),
@@ -239,17 +238,17 @@ class _ProfilePageState extends State<ProfilePage> {
                               children: [
                                 Text(
                                   _userName,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
-                                    color: AppColors.onDark,
+                                    color: context.c.ink,
                                   ),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
                                   _userEmail,
-                                  style: const TextStyle(
-                                    color: AppColors.onDarkMuted,
+                                  style: TextStyle(
+                                    color: context.c.inkSoft,
                                     fontSize: 13,
                                   ),
                                 ),
@@ -257,8 +256,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                   const SizedBox(height: 2),
                                   Text(
                                     _userPhone,
-                                    style: const TextStyle(
-                                      color: AppColors.onDarkMuted,
+                                    style: TextStyle(
+                                      color: context.c.inkSoft,
                                       fontSize: 12,
                                     ),
                                   ),
@@ -273,9 +272,9 @@ class _ProfilePageState extends State<ProfilePage> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         decoration: BoxDecoration(
-                          color: AppColors.bg,
+                          color: context.c.surface,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppColors.surfaceBorder),
+                          border: Border.all(color: context.c.line),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -283,21 +282,21 @@ class _ProfilePageState extends State<ProfilePage> {
                             // Member Since
                             Row(
                               children: [
-                                const Icon(Icons.calendar_today_outlined, size: 16, color: AppColors.onDarkMuted),
+                                Icon(Icons.calendar_today_outlined, size: 16, color: context.c.inkSoft),
                                 const SizedBox(width: 8),
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text(
+                                    Text(
                                       "Member sejak",
-                                      style: TextStyle(fontSize: 10, color: AppColors.onDarkMuted),
+                                      style: TextStyle(fontSize: 10, color: context.c.inkSoft),
                                     ),
                                     Text(
                                       _memberSince,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.w600,
-                                        color: AppColors.onDark,
+                                        color: context.c.ink,
                                       ),
                                     ),
                                   ],
@@ -308,7 +307,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             Container(
                               width: 1,
                               height: 30,
-                              color: AppColors.surfaceBorder,
+                              color: context.c.line,
                             ),
                             // Member Level
                             Row(
@@ -329,9 +328,9 @@ class _ProfilePageState extends State<ProfilePage> {
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text(
+                                    Text(
                                       "Level",
-                                      style: TextStyle(fontSize: 10, color: AppColors.onDarkMuted),
+                                      style: TextStyle(fontSize: 10, color: context.c.inkSoft),
                                     ),
                                     Text(
                                       _memberLevel,
@@ -364,11 +363,11 @@ class _ProfilePageState extends State<ProfilePage> {
       case "Platinum":
         return Colors.purple;
       case "Gold":
-        return Colors.amber.shade700;
+        return context.c.warn;
       case "Silver":
-        return Colors.blueGrey;
+        return context.c.inkDim;
       default:
-        return AppColors.brandYellow;
+        return context.c.accent;
     }
   }
 
@@ -380,13 +379,13 @@ class _ProfilePageState extends State<ProfilePage> {
         child: Container(
           padding: const EdgeInsets.all(32),
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: context.c.raised,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.surfaceBorder),
+            border: Border.all(color: context.c.line),
           ),
-          child: const Center(
+          child: Center(
             child: CircularProgressIndicator(
-              color: AppColors.brandYellow,
+              color: context.c.accent,
               strokeWidth: 2,
             ),
           ),
@@ -405,7 +404,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   icon: Icons.confirmation_number_outlined,
                   title: "Total Booking",
                   value: "$_totalBookings",
-                  color: AppColors.brandYellow,
+                  color: context.c.accent,
                 ),
               ),
               const SizedBox(width: 12),
@@ -414,7 +413,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   icon: Icons.check_circle_outline,
                   title: "Selesai",
                   value: "$_completedBookings",
-                  color: Colors.green,
+                  color: context.c.ok,
                 ),
               ),
             ],
@@ -427,7 +426,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   icon: Icons.account_balance_wallet_outlined,
                   title: "Total Spent",
                   value: _formatCurrency(_totalSpent),
-                  color: Colors.teal,
+                  color: context.c.accent,
                   isSmallText: true,
                 ),
               ),
@@ -437,7 +436,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   icon: Icons.stars_outlined,
                   title: "Poin",
                   value: "$_loyaltyPoints",
-                  color: Colors.orange,
+                  color: context.c.warn,
                 ),
               ),
             ],
@@ -457,9 +456,9 @@ class _ProfilePageState extends State<ProfilePage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.c.raised,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.surfaceBorder),
+        border: Border.all(color: context.c.line),
       ),
       child: Column(
         children: [
@@ -477,15 +476,15 @@ class _ProfilePageState extends State<ProfilePage> {
             style: TextStyle(
               fontSize: isSmallText ? 15 : 20,
               fontWeight: FontWeight.bold,
-              color: AppColors.onDark,
+              color: context.c.ink,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 11,
-              color: AppColors.onDarkMuted,
+              color: context.c.inkSoft,
             ),
             textAlign: TextAlign.center,
           ),
@@ -505,9 +504,9 @@ class _ProfilePageState extends State<ProfilePage> {
           _buildSectionTitle("Akun"),
           Container(
             decoration: BoxDecoration(
-              color: AppColors.surface,
+              color: context.c.raised,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.surfaceBorder),
+              border: Border.all(color: context.c.line),
             ),
             child: Column(
               children: [
@@ -560,9 +559,9 @@ class _ProfilePageState extends State<ProfilePage> {
           _buildSectionTitle("Aktivitas"),
           Container(
             decoration: BoxDecoration(
-              color: AppColors.surface,
+              color: context.c.raised,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.surfaceBorder),
+              border: Border.all(color: context.c.line),
             ),
             child: Column(
               children: [
@@ -599,15 +598,15 @@ class _ProfilePageState extends State<ProfilePage> {
           _buildSectionTitle("Lainnya"),
           Container(
             decoration: BoxDecoration(
-              color: AppColors.surface,
+              color: context.c.raised,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.surfaceBorder),
+              border: Border.all(color: context.c.line),
             ),
             child: Column(
               children: [
                 _buildMenuItem(
                   icon: Icons.info_outline,
-                  title: "Tentang Sporta",
+                  title: "Tentang Sportago",
                   subtitle: "Versi 1.0.0",
                   onTap: () {
                     Navigator.push(
@@ -637,10 +636,10 @@ class _ProfilePageState extends State<ProfilePage> {
       padding: const EdgeInsets.only(left: 4, bottom: 12),
       child: Text(
         title,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w600,
-          color: AppColors.onDarkMuted,
+          color: context.c.inkSoft,
         ),
       ),
     );
@@ -653,7 +652,7 @@ class _ProfilePageState extends State<ProfilePage> {
     required VoidCallback onTap,
     bool isDestructive = false,
   }) {
-    final Color itemColor = isDestructive ? Colors.red : AppColors.brandYellow;
+    final Color itemColor = isDestructive ? context.c.danger : context.c.accent;
 
     return ListTile(
       onTap: onTap,
@@ -670,29 +669,29 @@ class _ProfilePageState extends State<ProfilePage> {
         style: TextStyle(
           fontWeight: FontWeight.w600,
           fontSize: 15,
-          color: isDestructive ? Colors.red : AppColors.onDark,
+          color: isDestructive ? context.c.danger : context.c.ink,
         ),
       ),
       subtitle: Text(
         subtitle,
-        style: const TextStyle(
-          color: AppColors.onDarkMuted,
+        style: TextStyle(
+          color: context.c.inkSoft,
           fontSize: 12,
         ),
       ),
-      trailing: const Icon(
+      trailing: Icon(
         Icons.arrow_forward_ios,
         size: 16,
-        color: AppColors.onDarkMuted,
+        color: context.c.inkSoft,
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
     );
   }
 
   Widget _buildDivider() {
-    return const Divider(
+    return Divider(
       height: 1,
-      color: AppColors.surfaceBorder,
+      color: context.c.line,
       indent: 60,
       endIndent: 20,
     );
@@ -702,7 +701,7 @@ class _ProfilePageState extends State<ProfilePage> {
     return Container(
       width: double.infinity,
       height: 8,
-      color: AppColors.surfaceBorder,
+      color: context.c.line,
     );
   }
 
@@ -724,7 +723,7 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.red,
+            backgroundColor: context.c.danger,
             padding: const EdgeInsets.symmetric(vertical: 14),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -749,8 +748,8 @@ class _ProfilePageState extends State<ProfilePage> {
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
-            color: AppColors.surface,
-            border: Border.all(color: AppColors.surfaceBorder),
+            color: context.c.raised,
+            border: Border.all(color: context.c.line),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -760,25 +759,25 @@ class _ProfilePageState extends State<ProfilePage> {
                 width: 80,
                 height: 80,
                 decoration: BoxDecoration(
-                  color: Colors.red.shade100,
+                  color: context.c.dangerSoft,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.logout_rounded,
                   size: 40,
-                  color: Colors.red.shade600,
+                  color: context.c.danger,
                 ),
               ),
               
               const SizedBox(height: 20),
               
               // Title
-              const Text(
+              Text(
                 "Keluar dari Akun?",
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.onDark,
+                  color: context.c.ink,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -786,11 +785,11 @@ class _ProfilePageState extends State<ProfilePage> {
               const SizedBox(height: 12),
 
               // Subtitle
-              const Text(
-                "Anda akan keluar dari akun Sporta dan perlu login kembali untuk mengakses aplikasi.",
+              Text(
+                "Anda akan keluar dari akun Sportago dan perlu login kembali untuk mengakses aplikasi.",
                 style: TextStyle(
                   fontSize: 14,
-                  color: AppColors.onDarkMuted,
+                  color: context.c.inkSoft,
                   height: 1.4,
                 ),
                 textAlign: TextAlign.center,
@@ -832,7 +831,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         _performLogout();
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
+                        backgroundColor: context.c.danger,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -863,21 +862,21 @@ class _ProfilePageState extends State<ProfilePage> {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        backgroundColor: AppColors.surface,
+        backgroundColor: context.c.raised,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
-        content: const Column(
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             CircularProgressIndicator(
-              color: AppColors.brandYellow,
+              color: context.c.accent,
             ),
             SizedBox(height: 16),
             Text(
               "Sedang keluar...",
               style: TextStyle(
-                color: AppColors.onDarkMuted,
+                color: context.c.inkSoft,
                 fontSize: 14,
               ),
             ),
@@ -902,7 +901,7 @@ class _ProfilePageState extends State<ProfilePage> {
               Text("Berhasil keluar dari akun"),
             ],
           ),
-          backgroundColor: Colors.green,
+          backgroundColor: context.c.ok,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
@@ -931,10 +930,10 @@ class _ProfilePageState extends State<ProfilePage> {
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) {
           return Dialog(
-            backgroundColor: AppColors.surface,
+            backgroundColor: context.c.raised,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
-              side: const BorderSide(color: AppColors.surfaceBorder),
+              side: BorderSide(color: context.c.line),
             ),
             child: Padding(
               padding: const EdgeInsets.all(24),
@@ -945,24 +944,24 @@ class _ProfilePageState extends State<ProfilePage> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.red.withValues(alpha: 0.15),
+                      color: context.c.danger.withValues(alpha: 0.15),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       Icons.warning_amber_rounded,
-                      color: Colors.red.shade600,
+                      color: context.c.danger,
                       size: 48,
                     ),
                   ),
                   const SizedBox(height: 20),
 
                   // Title
-                  const Text(
+                  Text(
                     "Hapus Akun?",
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.onDark,
+                      color: context.c.ink,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -971,15 +970,15 @@ class _ProfilePageState extends State<ProfilePage> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.red.withValues(alpha: 0.15),
+                      color: context.c.danger.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.red.shade200),
+                      border: Border.all(color: context.c.danger),
                     ),
                     child: Row(
                       children: [
                         Icon(
                           Icons.info_outline,
-                          color: Colors.red.shade700,
+                          color: context.c.danger,
                           size: 20,
                         ),
                         const SizedBox(width: 12),
@@ -987,7 +986,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           child: Text(
                             "Tindakan ini tidak dapat dibatalkan. Semua data akan dihapus permanen.",
                             style: TextStyle(
-                              color: Colors.red.shade700,
+                              color: context.c.danger,
                               fontSize: 12,
                               height: 1.4,
                             ),
@@ -1002,45 +1001,45 @@ class _ProfilePageState extends State<ProfilePage> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         "Konfirmasi Password",
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: 14,
-                          color: AppColors.onDark,
+                          color: context.c.ink,
                         ),
                       ),
                       const SizedBox(height: 8),
                       TextField(
                         controller: passwordController,
                         obscureText: obscurePassword,
-                        style: const TextStyle(color: AppColors.onDark),
+                        style: TextStyle(color: context.c.ink),
                         decoration: InputDecoration(
                           hintText: "Masukkan password",
-                          hintStyle: const TextStyle(color: AppColors.onDarkMuted),
-                          prefixIcon: const Icon(Icons.lock_outline, color: AppColors.onDarkMuted),
+                          hintStyle: TextStyle(color: context.c.inkSoft),
+                          prefixIcon: Icon(Icons.lock_outline, color: context.c.inkSoft),
                           suffixIcon: IconButton(
                             icon: Icon(
                               obscurePassword ? Icons.visibility_off : Icons.visibility,
-                              color: AppColors.onDarkMuted,
+                              color: context.c.inkSoft,
                             ),
                             onPressed: () {
                               setDialogState(() => obscurePassword = !obscurePassword);
                             },
                           ),
                           filled: true,
-                          fillColor: AppColors.bg,
+                          fillColor: context.c.surface,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: AppColors.surfaceBorder),
+                            borderSide: BorderSide(color: context.c.line),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: AppColors.surfaceBorder),
+                            borderSide: BorderSide(color: context.c.line),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Colors.red),
+                            borderSide: BorderSide(color: context.c.danger),
                           ),
                         ),
                       ),
@@ -1061,10 +1060,10 @@ class _ProfilePageState extends State<ProfilePage> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          child: const Text(
+                          child: Text(
                             "Batal",
                             style: TextStyle(
-                              color: AppColors.onDarkMuted,
+                              color: context.c.inkSoft,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -1078,9 +1077,9 @@ class _ProfilePageState extends State<ProfilePage> {
                               : () async {
                                   if (passwordController.text.isEmpty) {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
+                                      SnackBar(
                                         content: Text("Password harus diisi"),
-                                        backgroundColor: Colors.red,
+                                        backgroundColor: context.c.danger,
                                       ),
                                     );
                                     return;
@@ -1095,7 +1094,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   }
                                 },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red,
+                            backgroundColor: context.c.danger,
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -1136,10 +1135,10 @@ class _ProfilePageState extends State<ProfilePage> {
       context: context,
       barrierDismissible: false,
       builder: (context) => Dialog(
-        backgroundColor: AppColors.surface,
+        backgroundColor: context.c.raised,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: AppColors.surfaceBorder),
+          side: BorderSide(color: context.c.line),
         ),
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -1150,34 +1149,34 @@ class _ProfilePageState extends State<ProfilePage> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.green.withValues(alpha: 0.15),
+                  color: context.c.ok.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.check_circle_outline,
-                  color: Colors.green.shade600,
+                  color: context.c.ok,
                   size: 48,
                 ),
               ),
               const SizedBox(height: 20),
 
               // Title
-              const Text(
+              Text(
                 "Akun Dihapus",
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.onDark,
+                  color: context.c.ink,
                 ),
               ),
               const SizedBox(height: 12),
 
               // Description
-              const Text(
-                "Akun kamu telah berhasil dihapus. Terima kasih telah menggunakan Sporta.",
+              Text(
+                "Akun kamu telah berhasil dihapus. Terima kasih telah menggunakan Sportago.",
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: AppColors.onDarkMuted,
+                  color: context.c.inkSoft,
                   fontSize: 14,
                   height: 1.4,
                 ),
@@ -1198,16 +1197,16 @@ class _ProfilePageState extends State<ProfilePage> {
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.brandYellow,
+                    backgroundColor: context.c.accent,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                     elevation: 0,
                   ),
-                  child: const Text(
+                  child: Text(
                     "OK",
                     style: TextStyle(
-                      color: AppColors.ink,
+                      color: context.c.onAccent,
                       fontWeight: FontWeight.bold,
                     ),
                   ),

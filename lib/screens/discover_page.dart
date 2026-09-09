@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import '../theme/app_tokens.dart';
-import 'package:flutter/services.dart';
 import 'search_page.dart';
 import 'venue_detail_page.dart';
 import '../services/venue_service.dart';
 import '../models/venue.dart' as model;
-import '../constants/colors.dart';
 
 class DiscoverPage extends StatefulWidget {
   const DiscoverPage({super.key});
@@ -43,23 +41,23 @@ class _DiscoverPageState extends State<DiscoverPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bg,
+      backgroundColor: context.c.surface,
       body: RefreshIndicator(
         onRefresh: _loadVenues,
-        color: AppColors.brandYellow,
-        backgroundColor: AppColors.surface,
+        color: context.c.accent,
+        backgroundColor: context.c.raised,
         child: CustomScrollView(
           slivers: [
             // App Bar
             SliverAppBar(
-              backgroundColor: AppColors.bg,
+              backgroundColor: context.c.surface,
               elevation: 0,
               floating: true,
               systemOverlayStyle: gayaOverlay(context),
-              title: const Text(
+              title: Text(
                 'Discover',
                 style: TextStyle(
-                  color: AppColors.onDark,
+                  color: context.c.ink,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -83,17 +81,17 @@ class _DiscoverPageState extends State<DiscoverPage> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                         decoration: BoxDecoration(
-                          color: AppColors.surface,
+                          color: context.c.raised,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: AppColors.surfaceBorder),
+                          border: Border.all(color: context.c.line),
                         ),
-                        child: const Row(
+                        child: Row(
                           children: [
-                            Icon(Icons.search, color: AppColors.onDarkMuted),
+                            Icon(Icons.search, color: context.c.inkSoft),
                             SizedBox(width: 12),
                             Text(
                               "Cari venue, event, komunitas...",
-                              style: TextStyle(color: AppColors.onDarkMuted, fontSize: 15),
+                              style: TextStyle(color: context.c.inkSoft, fontSize: 15),
                             ),
                           ],
                         ),
@@ -103,12 +101,12 @@ class _DiscoverPageState extends State<DiscoverPage> {
                     const SizedBox(height: 24),
 
                     // === VENUE POPULER ===
-                    _buildSectionHeader("Venue Populer", icon: Icons.trending_up, iconColor: Colors.red),
+                    _buildSectionHeader("Venue Populer", icon: Icons.trending_up, iconColor: context.c.kategori(0)),
                     const SizedBox(height: 14),
                     SizedBox(
                       height: 200,
                       child: _isLoading
-                          ? const Center(child: CircularProgressIndicator(color: AppColors.brandYellow))
+                          ? Center(child: CircularProgressIndicator(color: context.c.accent))
                           : ListView.builder(
                               scrollDirection: Axis.horizontal,
                               itemCount: _venues.take(5).length,
@@ -123,7 +121,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                     const SizedBox(height: 24),
 
                     // === EVENT & TURNAMEN ===
-                    _buildSectionHeader("Event & Turnamen", icon: Icons.emoji_events, iconColor: Colors.amber),
+                    _buildSectionHeader("Event & Turnamen", icon: Icons.emoji_events, iconColor: context.c.kategori(4)),
                     const SizedBox(height: 14),
                     SizedBox(
                       height: 180,
@@ -134,21 +132,21 @@ class _DiscoverPageState extends State<DiscoverPage> {
                             "Turnamen Futsal Antar Kampus",
                             "15-17 Jan 2026",
                             "GOR Sudirman",
-                            Colors.green,
+                            context.c.kategori(0),
                             Icons.sports_soccer,
                           ),
                           _buildEventCard(
                             "Badminton Championship",
                             "22 Jan 2026",
                             "Arena Badminton Center",
-                            Colors.blue,
+                            context.c.kategori(1),
                             Icons.sports_tennis,
                           ),
                           _buildEventCard(
                             "Basketball 3on3 Tournament",
                             "28 Jan 2026",
                             "Sportmall Kelapa Gading",
-                            Colors.orange,
+                            context.c.kategori(2),
                             Icons.sports_basketball,
                           ),
                         ],
@@ -160,12 +158,12 @@ class _DiscoverPageState extends State<DiscoverPage> {
                     const SizedBox(height: 24),
 
                     // === TOP RATED ===
-                    _buildSectionHeader("Top Rated", icon: Icons.star, iconColor: Colors.amber),
+                    _buildSectionHeader("Top Rated", icon: Icons.star, iconColor: context.c.kategori(2)),
                     const SizedBox(height: 14),
                     SizedBox(
                       height: 200,
                       child: _isLoading
-                          ? const Center(child: CircularProgressIndicator(color: AppColors.brandYellow))
+                          ? Center(child: CircularProgressIndicator(color: context.c.accent))
                           : ListView.builder(
                               scrollDirection: Axis.horizontal,
                               itemCount: _venues.take(5).length,
@@ -189,7 +187,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                     const SizedBox(height: 24),
 
                     // === ARTIKEL & TIPS ===
-                    _buildSectionHeader("Artikel & Tips", icon: Icons.article, iconColor: Colors.teal),
+                    _buildSectionHeader("Artikel & Tips", icon: Icons.article, iconColor: context.c.accent),
                     const SizedBox(height: 14),
                     SizedBox(
                       height: 160,
@@ -225,18 +223,18 @@ class _DiscoverPageState extends State<DiscoverPage> {
                     const SizedBox(height: 24),
 
                     // === KOMUNITAS OLAHRAGA ===
-                    _buildSectionHeader("Komunitas Olahraga", icon: Icons.groups, iconColor: Colors.indigo),
+                    _buildSectionHeader("Komunitas Olahraga", icon: Icons.groups, iconColor: context.c.kategori(1)),
                     const SizedBox(height: 14),
                     SizedBox(
                       height: 140,
                       child: ListView(
                         scrollDirection: Axis.horizontal,
                         children: [
-                          _buildCommunityCard("Jakarta Futsal Club", "1.2K", Colors.green, Icons.sports_soccer),
-                          _buildCommunityCard("Badminton Lovers", "890", Colors.blue, Icons.sports_tennis),
-                          _buildCommunityCard("Basketball Warriors", "650", Colors.orange, Icons.sports_basketball),
-                          _buildCommunityCard("Swimming Jakarta", "420", Colors.cyan, Icons.pool),
-                          _buildCommunityCard("Gym Bros Indonesia", "1.5K", Colors.red, Icons.fitness_center),
+                          _buildCommunityCard("Jakarta Futsal Club", "1.2K", context.c.kategori(0), Icons.sports_soccer),
+                          _buildCommunityCard("Badminton Lovers", "890", context.c.kategori(1), Icons.sports_tennis),
+                          _buildCommunityCard("Basketball Warriors", "650", context.c.kategori(2), Icons.sports_basketball),
+                          _buildCommunityCard("Swimming Jakarta", "420", context.c.kategori(5), Icons.pool),
+                          _buildCommunityCard("Gym Bros Indonesia", "1.5K", context.c.kategori(3), Icons.fitness_center),
                         ],
                       ),
                     ),
@@ -246,12 +244,12 @@ class _DiscoverPageState extends State<DiscoverPage> {
                     const SizedBox(height: 24),
 
                     // === VENUE BARU ===
-                    _buildSectionHeader("Venue Baru", icon: Icons.new_releases, iconColor: Colors.green),
+                    _buildSectionHeader("Venue Baru", icon: Icons.new_releases, iconColor: context.c.kategori(5)),
                     const SizedBox(height: 14),
                     SizedBox(
                       height: 200,
                       child: _isLoading
-                          ? const Center(child: CircularProgressIndicator(color: AppColors.brandYellow))
+                          ? Center(child: CircularProgressIndicator(color: context.c.accent))
                           : ListView.builder(
                               scrollDirection: Axis.horizontal,
                               itemCount: _venues.take(4).length,
@@ -287,7 +285,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
       width: double.infinity,
       height: 8,
       margin: const EdgeInsets.symmetric(vertical: 8),
-      color: AppColors.surfaceBorder,
+      color: context.c.line,
     );
   }
 
@@ -302,19 +300,19 @@ class _DiscoverPageState extends State<DiscoverPage> {
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: (iconColor ?? AppColors.brandYellow).withValues(alpha: 0.15),
+                  color: (iconColor ?? context.c.accent).withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(icon, color: iconColor ?? AppColors.brandYellow, size: 18),
+                child: Icon(icon, color: iconColor ?? context.c.accent, size: 18),
               ),
               const SizedBox(width: 10),
             ],
             Text(
               title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 18,
-                color: AppColors.onDark,
+                color: context.c.ink,
               ),
             ),
           ],
@@ -322,10 +320,10 @@ class _DiscoverPageState extends State<DiscoverPage> {
         if (onTap != null)
           GestureDetector(
             onTap: onTap,
-            child: const Text(
+            child: Text(
               "Lihat Semua",
               style: TextStyle(
-                color: AppColors.brandYellow,
+                color: context.c.accent,
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
               ),
@@ -348,9 +346,9 @@ class _DiscoverPageState extends State<DiscoverPage> {
         width: 180,
         margin: const EdgeInsets.only(right: 14),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: context.c.raised,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.surfaceBorder),
+          border: Border.all(color: context.c.line),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -367,8 +365,8 @@ class _DiscoverPageState extends State<DiscoverPage> {
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) => Container(
                       height: 110,
-                      color: const Color(0xFF222226),
-                      child: const Icon(Icons.image, color: AppColors.onDarkMuted),
+                      color: context.c.hoverSurface,
+                      child: Icon(Icons.image, color: context.c.inkSoft),
                     ),
                   ),
                 ),
@@ -409,10 +407,10 @@ class _DiscoverPageState extends State<DiscoverPage> {
                 children: [
                   Text(
                     venue.name,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
-                      color: AppColors.onDark,
+                      color: context.c.ink,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -420,19 +418,19 @@ class _DiscoverPageState extends State<DiscoverPage> {
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      const Icon(Icons.star, color: AppColors.brandYellow, size: 14),
+                      Icon(Icons.star, color: context.c.accent, size: 14),
                       const SizedBox(width: 4),
                       Text(
                         venue.averageRating?.toStringAsFixed(1) ?? "4.5",
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.onDark),
+                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: context.c.ink),
                       ),
                       const SizedBox(width: 8),
-                      const Icon(Icons.location_on, color: AppColors.onDarkMuted, size: 14),
+                      Icon(Icons.location_on, color: context.c.inkSoft, size: 14),
                       const SizedBox(width: 2),
                       Expanded(
                         child: Text(
                           venue.city ?? "Jakarta",
-                          style: const TextStyle(fontSize: 11, color: AppColors.onDarkMuted),
+                          style: TextStyle(fontSize: 11, color: context.c.inkSoft),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -449,10 +447,11 @@ class _DiscoverPageState extends State<DiscoverPage> {
 
   Color _getBadgeColor(String badge) {
     switch (badge) {
-      case "populer": return Colors.red;
-      case "rating": return Colors.amber.shade700;
-      case "new": return Colors.green;
-      default: return AppColors.brandYellow;
+      // Label kategori, bukan keadaan — pakai palet konten.
+      case "populer": return context.c.kategori(0);
+      case "rating": return context.c.kategori(2);
+      case "new": return context.c.kategori(5);
+      default: return context.c.accent;
     }
   }
 
@@ -568,8 +567,8 @@ class _DiscoverPageState extends State<DiscoverPage> {
       isScrollControlled: true,
       builder: (context) => Container(
         height: MediaQuery.of(context).size.height * 0.6,
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
+        decoration: BoxDecoration(
+          color: context.c.raised,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         child: Column(
@@ -579,7 +578,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: AppColors.surfaceBorder,
+                color: context.c.line,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -605,7 +604,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                     const SizedBox(height: 20),
                     Text(
                       title,
-                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.onDark),
+                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: context.c.ink),
                     ),
                     const SizedBox(height: 12),
                     _buildEventInfoRow(Icons.calendar_today, "Tanggal", date),
@@ -620,9 +619,9 @@ class _DiscoverPageState extends State<DiscoverPage> {
                         onPressed: () {
                           Navigator.pop(context);
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
+                            SnackBar(
                               content: Text("Pendaftaran event akan segera dibuka!"),
-                              backgroundColor: AppColors.surface,
+                              backgroundColor: context.c.raised,
                             ),
                           );
                         },
@@ -653,13 +652,13 @@ class _DiscoverPageState extends State<DiscoverPage> {
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
-          Icon(icon, color: AppColors.onDarkMuted, size: 20),
+          Icon(icon, color: context.c.inkSoft, size: 20),
           const SizedBox(width: 12),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label, style: const TextStyle(fontSize: 11, color: AppColors.onDarkMuted)),
-              Text(value, style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.onDark)),
+              Text(label, style: TextStyle(fontSize: 11, color: context.c.inkSoft)),
+              Text(value, style: TextStyle(fontWeight: FontWeight.w600, color: context.c.ink)),
             ],
           ),
         ],
@@ -672,8 +671,8 @@ class _DiscoverPageState extends State<DiscoverPage> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF7C3AED), Color(0xFFA855F7)],
+        gradient: LinearGradient(
+          colors: [context.c.accent, context.c.accentHover],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -718,10 +717,10 @@ class _DiscoverPageState extends State<DiscoverPage> {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Text(
+                child: Text(
                   "50 Poin",
                   style: TextStyle(
-                    color: Color(0xFF7C3AED),
+                    color: context.c.accent,
                     fontWeight: FontWeight.bold,
                     fontSize: 12,
                   ),
@@ -798,7 +797,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text("Membuka artikel: $title"),
-            backgroundColor: AppColors.surface,
+            backgroundColor: context.c.raised,
           ),
         );
       },
@@ -806,9 +805,9 @@ class _DiscoverPageState extends State<DiscoverPage> {
         width: 200,
         margin: const EdgeInsets.only(right: 14),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: context.c.raised,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.surfaceBorder),
+          border: Border.all(color: context.c.line),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -822,43 +821,51 @@ class _DiscoverPageState extends State<DiscoverPage> {
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) => Container(
                   height: 90,
-                  color: const Color(0xFF222226),
-                  child: const Icon(Icons.article, color: AppColors.onDarkMuted),
+                  color: context.c.hoverSurface,
+                  child: Icon(Icons.article, color: context.c.inkSoft),
                 ),
               ),
             ),
-            Padding(
+            // Expanded: isi kartu memakai sisa tinggi yang ada, bukan
+            // menuntut tinggi tetap. Tanpa ini Column-nya meluber 27px
+            // begitu metrik hurufnya sedikit berubah.
+            Expanded(
+              child: Padding(
               padding: const EdgeInsets.all(12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.teal.withValues(alpha: 0.15),
+                      color: context.c.accentSoft,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
                       category,
-                      style: const TextStyle(
-                        color: Colors.teal,
+                      style: TextStyle(
+                        color: context.c.accent,
                         fontSize: 10,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13,
-                      color: AppColors.onDark,
+                  Flexible(
+                    child: Text(
+                      title,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                        color: context.c.ink,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
+              ),
               ),
             ),
           ],
@@ -874,10 +881,10 @@ class _DiscoverPageState extends State<DiscoverPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text("Bergabung dengan $name"),
-            backgroundColor: AppColors.surface,
+            backgroundColor: context.c.raised,
             action: SnackBarAction(
               label: "Gabung",
-              textColor: AppColors.brandYellow,
+              textColor: context.c.accent,
               onPressed: () {},
             ),
           ),
@@ -888,9 +895,9 @@ class _DiscoverPageState extends State<DiscoverPage> {
         margin: const EdgeInsets.only(right: 14),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: context.c.raised,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.surfaceBorder),
+          border: Border.all(color: context.c.line),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -906,10 +913,10 @@ class _DiscoverPageState extends State<DiscoverPage> {
             const Spacer(),
             Text(
               name,
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 13,
-                color: AppColors.onDark,
+                color: context.c.ink,
               ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
@@ -917,11 +924,11 @@ class _DiscoverPageState extends State<DiscoverPage> {
             const SizedBox(height: 4),
             Row(
               children: [
-                const Icon(Icons.people, size: 14, color: AppColors.onDarkMuted),
+                Icon(Icons.people, size: 14, color: context.c.inkSoft),
                 const SizedBox(width: 4),
                 Text(
                   "$members members",
-                  style: const TextStyle(fontSize: 11, color: AppColors.onDarkMuted),
+                  style: TextStyle(fontSize: 11, color: context.c.inkSoft),
                 ),
               ],
             ),
@@ -944,9 +951,9 @@ class _DiscoverPageState extends State<DiscoverPage> {
         margin: const EdgeInsets.only(bottom: 14),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: context.c.raised,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.surfaceBorder),
+          border: Border.all(color: context.c.line),
         ),
         child: Row(
           children: [
@@ -960,8 +967,8 @@ class _DiscoverPageState extends State<DiscoverPage> {
                 errorBuilder: (context, error, stackTrace) => Container(
                   width: 80,
                   height: 80,
-                  color: const Color(0xFF222226),
-                  child: const Icon(Icons.image, color: AppColors.onDarkMuted),
+                  color: context.c.hoverSurface,
+                  child: Icon(Icons.image, color: context.c.inkSoft),
                 ),
               ),
             ),
@@ -988,10 +995,10 @@ class _DiscoverPageState extends State<DiscoverPage> {
                   const SizedBox(height: 8),
                   Text(
                     venue.name,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
-                      color: AppColors.onDark,
+                      color: context.c.ink,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -999,19 +1006,19 @@ class _DiscoverPageState extends State<DiscoverPage> {
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      const Icon(Icons.star, color: AppColors.brandYellow, size: 14),
+                      Icon(Icons.star, color: context.c.accent, size: 14),
                       const SizedBox(width: 4),
                       Text(
                         venue.averageRating?.toStringAsFixed(1) ?? "4.5",
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.onDark),
+                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: context.c.ink),
                       ),
                       const SizedBox(width: 12),
-                      const Icon(Icons.location_on, color: AppColors.onDarkMuted, size: 14),
+                      Icon(Icons.location_on, color: context.c.inkSoft, size: 14),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
                           venue.city ?? "Jakarta",
-                          style: const TextStyle(fontSize: 12, color: AppColors.onDarkMuted),
+                          style: TextStyle(fontSize: 12, color: context.c.inkSoft),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -1020,7 +1027,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                 ],
               ),
             ),
-            const Icon(Icons.arrow_forward_ios, size: 16, color: AppColors.onDarkMuted),
+            Icon(Icons.arrow_forward_ios, size: 16, color: context.c.inkSoft),
           ],
         ),
       ),

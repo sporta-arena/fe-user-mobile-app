@@ -8,7 +8,6 @@ import 'package:geolocator/geolocator.dart';
 import 'venue_detail_page.dart';
 import '../services/venue_service.dart';
 import '../models/venue.dart' as model;
-import '../constants/colors.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -96,7 +95,7 @@ class _MapPageState extends State<MapPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bg,
+      backgroundColor: context.c.surface,
       body: AnnotatedRegion<SystemUiOverlayStyle>(
         value: gayaOverlay(context),
         child: Stack(
@@ -110,12 +109,18 @@ class _MapPageState extends State<MapPage> {
               ),
               children: [
                 TileLayer(
-                  // Free CartoDB dark basemap — matches the app theme, no API key.
-                  urlTemplate:
-                      'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-                  subdomains: const ['a', 'b', 'c', 'd'],
+                  // Basemap CartoDB dark_all yang dipakai sebelumnya
+                  // sekarang MENUNTUT API key dan menimpa peta dengan
+                  // tulisan "API KEY REQUIRED". Pindah ke tile
+                  // OpenStreetMap yang bebas kunci; versi gelapnya
+                  // dihasilkan dari tile terang lewat pembalikan warna,
+                  // jadi petanya ikut tema seperti sisa aplikasi.
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                   retinaMode: RetinaMode.isHighDensity(context),
                   userAgentPackageName: 'id.sportago.app',
+                  tileBuilder: Theme.of(context).brightness == Brightness.dark
+                      ? darkModeTileBuilder
+                      : null,
                 ),
                 if (_userLocation != null)
                   MarkerLayer(markers: [
@@ -125,7 +130,7 @@ class _MapPageState extends State<MapPage> {
                       height: 22,
                       child: Container(
                         decoration: BoxDecoration(
-                          color: Colors.blueAccent,
+                          color: context.c.info,
                           shape: BoxShape.circle,
                           border: Border.all(color: Colors.white, width: 3),
                         ),
@@ -145,10 +150,10 @@ class _MapPageState extends State<MapPage> {
               bottom: _selected != null ? 188 : 28,
               child: FloatingActionButton(
                 heroTag: 'recenter',
-                backgroundColor: AppColors.surface,
+                backgroundColor: context.c.raised,
                 onPressed: _fitToContent,
-                child: const Icon(Icons.my_location_rounded,
-                    color: AppColors.brandYellow),
+                child: Icon(Icons.my_location_rounded,
+                    color: context.c.accent),
               ),
             ),
 
@@ -156,8 +161,8 @@ class _MapPageState extends State<MapPage> {
             if (_selected != null) _venueCard(_selected!),
 
             if (_loading)
-              const Center(
-                child: CircularProgressIndicator(color: AppColors.brandYellow),
+              Center(
+                child: CircularProgressIndicator(color: context.c.accent),
               ),
           ],
         ),
@@ -181,7 +186,7 @@ class _MapPageState extends State<MapPage> {
         child: Icon(
           Icons.location_on,
           size: isSel ? 44 : 36,
-          color: AppColors.brandYellow,
+          color: context.c.accent,
           shadows: const [Shadow(color: Colors.black54, blurRadius: 6)],
         ),
       ),
@@ -204,14 +209,14 @@ class _MapPageState extends State<MapPage> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
+                  color: context.c.raised,
                   borderRadius: BorderRadius.circular(999),
-                  border: Border.all(color: AppColors.surfaceBorder),
+                  border: Border.all(color: context.c.line),
                 ),
                 child: Text(
                   "${_venues.length} arena di sekitar",
-                  style: const TextStyle(
-                    color: AppColors.onDark,
+                  style: TextStyle(
+                    color: context.c.ink,
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                   ),
@@ -231,11 +236,11 @@ class _MapPageState extends State<MapPage> {
         height: 42,
         width: 42,
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: context.c.raised,
           shape: BoxShape.circle,
-          border: Border.all(color: AppColors.surfaceBorder),
+          border: Border.all(color: context.c.line),
         ),
-        child: Icon(icon, color: AppColors.onDark, size: 22),
+        child: Icon(icon, color: context.c.ink, size: 22),
       ),
     );
   }
@@ -253,9 +258,9 @@ class _MapPageState extends State<MapPage> {
         child: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: context.c.raised,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.surfaceBorder),
+            border: Border.all(color: context.c.line),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.4),
@@ -280,8 +285,8 @@ class _MapPageState extends State<MapPage> {
                       v.name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: AppColors.onDark,
+                      style: TextStyle(
+                        color: context.c.ink,
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
                       ),
@@ -289,26 +294,26 @@ class _MapPageState extends State<MapPage> {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        const Icon(Icons.location_on_outlined,
-                            size: 14, color: AppColors.onDarkMuted),
+                        Icon(Icons.location_on_outlined,
+                            size: 14, color: context.c.inkSoft),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
                             v.city,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                                color: AppColors.onDarkMuted, fontSize: 12),
+                            style: TextStyle(
+                                color: context.c.inkSoft, fontSize: 12),
                           ),
                         ),
                         if (v.averageRating != null) ...[
-                          const Icon(Icons.star_rounded,
-                              size: 15, color: AppColors.brandYellow),
+                          Icon(Icons.star_rounded,
+                              size: 15, color: context.c.accent),
                           const SizedBox(width: 2),
                           Text(
                             v.averageRating!.toStringAsFixed(1),
-                            style: const TextStyle(
-                                color: AppColors.onDark,
+                            style: TextStyle(
+                                color: context.c.ink,
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600),
                           ),
@@ -319,8 +324,8 @@ class _MapPageState extends State<MapPage> {
                 ),
               ),
               const SizedBox(width: 8),
-              const Icon(Icons.chevron_right_rounded,
-                  color: AppColors.onDarkMuted),
+              Icon(Icons.chevron_right_rounded,
+                  color: context.c.inkSoft),
             ],
           ),
         ),
@@ -346,9 +351,9 @@ class _MapPageState extends State<MapPage> {
     return Container(
       height: 64,
       width: 64,
-      color: const Color(0xFF222226),
-      child: const Icon(Icons.stadium_rounded,
-          color: AppColors.onDarkMuted, size: 26),
+      color: context.c.hoverSurface,
+      child: Icon(Icons.stadium_rounded,
+          color: context.c.inkSoft, size: 26),
     );
   }
 }

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import '../theme/app_tokens.dart';
-import 'package:flutter/services.dart';
-import '../constants/colors.dart';
 
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
@@ -49,9 +47,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
+      SnackBar(
         content: Text("Notifikasi dihapus"),
-        backgroundColor: Colors.red,
+        backgroundColor: context.c.danger,
       ),
     );
   }
@@ -61,17 +59,17 @@ class _NotificationsPageState extends State<NotificationsPage> {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        backgroundColor: AppColors.bg,
+        backgroundColor: context.c.surface,
         appBar: AppBar(
           systemOverlayStyle: gayaOverlay(context),
-          title: const Text(
+          title: Text(
             "Notifikasi",
-            style: TextStyle(color: AppColors.onDark, fontWeight: FontWeight.bold)
+            style: TextStyle(color: context.c.ink, fontWeight: FontWeight.bold)
           ),
-          backgroundColor: AppColors.bg,
+          backgroundColor: context.c.surface,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios, color: AppColors.onDark),
+            icon: Icon(Icons.arrow_back_ios, color: context.c.ink),
             onPressed: () => Navigator.pop(context),
           ),
           actions: [
@@ -80,16 +78,16 @@ class _NotificationsPageState extends State<NotificationsPage> {
               child: Text(
                 "Tandai Dibaca",
                 style: TextStyle(
-                  color: _notifications.isEmpty ? AppColors.onDarkMuted : AppColors.brandYellow,
+                  color: _notifications.isEmpty ? context.c.inkSoft : context.c.accent,
                   fontWeight: FontWeight.bold
                 )
               ),
             )
           ],
-          bottom: const TabBar(
-            labelColor: AppColors.brandYellow,
-            unselectedLabelColor: AppColors.onDarkMuted,
-            indicatorColor: AppColors.brandYellow,
+          bottom: TabBar(
+            labelColor: context.c.accent,
+            unselectedLabelColor: context.c.inkSoft,
+            indicatorColor: context.c.accent,
             tabs: [
               Tab(text: "Transaksi"),
               Tab(text: "Info & Promo"),
@@ -97,7 +95,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
           ),
         ),
         body: _isLoading
-            ? const Center(child: CircularProgressIndicator(color: AppColors.brandYellow))
+            ? Center(child: CircularProgressIndicator(color: context.c.accent))
             : TabBarView(
                 children: [
                   _buildNotificationList("transaction"),
@@ -121,11 +119,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.notifications_off_outlined, size: 80, color: AppColors.surfaceBorder),
+            Icon(Icons.notifications_off_outlined, size: 80, color: context.c.line),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               "Belum ada notifikasi",
-              style: TextStyle(color: AppColors.onDarkMuted)
+              style: TextStyle(color: context.c.inkSoft)
             ),
           ],
         ),
@@ -148,19 +146,19 @@ class _NotificationsPageState extends State<NotificationsPage> {
     switch (item['type']) {
       case 'transaction':
         icon = Icons.receipt_long;
-        color = Colors.green;
+        color = context.c.ok;
         break;
       case 'promo':
         icon = Icons.local_offer;
-        color = Colors.orange;
+        color = context.c.warn;
         break;
       case 'system':
         icon = Icons.info;
-        color = AppColors.brandYellow;
+        color = context.c.accent;
         break;
       default:
         icon = Icons.notifications;
-        color = AppColors.onDarkMuted;
+        color = context.c.inkSoft;
     }
 
     bool isUnread = !item['isRead'];
@@ -168,7 +166,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
     return Dismissible(
       key: Key(item['id'].toString()),
       background: Container(
-        color: Colors.red,
+        color: context.c.danger,
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 20),
         child: const Icon(Icons.delete, color: Colors.white),
@@ -187,9 +185,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
           margin: const EdgeInsets.only(bottom: 16),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: isUnread ? AppColors.brandYellow.withValues(alpha: 0.15) : AppColors.surface,
+            color: isUnread ? context.c.accent.withValues(alpha: 0.15) : context.c.raised,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.surfaceBorder),
+            border: Border.all(color: context.c.line),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -218,7 +216,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                             style: TextStyle(
                               fontWeight: isUnread ? FontWeight.w900 : FontWeight.bold,
                               fontSize: 14,
-                              color: AppColors.onDark
+                              color: context.c.ink
                             )
                           ),
                         ),
@@ -227,8 +225,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
                           Container(
                             width: 8,
                             height: 8,
-                            decoration: const BoxDecoration(
-                              color: Colors.red,
+                            decoration: BoxDecoration(
+                              color: context.c.danger,
                               shape: BoxShape.circle
                             ),
                           )
@@ -239,9 +237,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
                     Text(
                       item['message'],
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
-                        color: AppColors.onDarkMuted,
+                        color: context.c.inkSoft,
                         height: 1.5
                       ),
                       maxLines: 2,
@@ -252,9 +250,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
                     Text(
                       item['time'],
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 10,
-                        color: AppColors.onDarkMuted,
+                        color: context.c.inkSoft,
                         fontWeight: FontWeight.w500
                       )
                     ),

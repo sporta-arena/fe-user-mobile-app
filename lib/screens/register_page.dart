@@ -123,7 +123,7 @@ class _RegisterPageState extends State<RegisterPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(result.message ?? "Kode OTP telah dikirim ke email Anda"),
-            backgroundColor: Colors.green,
+            backgroundColor: context.c.ok,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -151,7 +151,7 @@ class _RegisterPageState extends State<RegisterPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(result.message ?? "Registrasi gagal!"),
-            backgroundColor: Colors.red,
+            backgroundColor: context.c.danger,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -278,7 +278,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         borderRadius: BorderRadius.circular(6),
                       ),
                       side: BorderSide(
-                        color: _termsError ? Colors.red : context.c.line,
+                        color: _termsError ? context.c.danger : context.c.line,
                         width: 2,
                       ),
                       onChanged: (value) {
@@ -325,11 +325,11 @@ class _RegisterPageState extends State<RegisterPage> {
                 ],
               ),
               if (_termsError)
-                const Padding(
+                Padding(
                   padding: EdgeInsets.only(left: 34, top: 4),
                   child: Text(
                     "Wajib disetujui untuk melanjutkan",
-                    style: TextStyle(color: Colors.red, fontSize: 11),
+                    style: TextStyle(color: context.c.danger, fontSize: 11),
                   ),
                 ),
               const SizedBox(height: 28),
@@ -445,8 +445,8 @@ class _RegisterPageState extends State<RegisterPage> {
         border: border(context.c.line, 1),
         enabledBorder: border(context.c.line, 1),
         focusedBorder: border(context.c.accent, 1.6),
-        errorBorder: border(Colors.red.shade400, 1),
-        focusedErrorBorder: border(Colors.red.shade400, 1.6),
+        errorBorder: border(context.c.danger, 1),
+        focusedErrorBorder: border(context.c.danger, 1.6),
         suffixIcon: isPassword
             ? IconButton(
                 icon: Icon(

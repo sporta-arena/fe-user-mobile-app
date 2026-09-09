@@ -1,4 +1,6 @@
 import 'user.dart';
+import '../utils/waktu_wib.dart';
+import '../config/api_config.dart';
 import 'field.dart';
 import '../utils/timezone_utils.dart';
 
@@ -70,7 +72,7 @@ class Venue {
           ? double.tryParse(json['longitude'].toString())
           : null,
       coverImage: json['cover_image'],
-      coverImageUrl: json['cover_image_url'],
+      coverImageUrl: ApiConfig.perbaikiUrlMedia(json['cover_image_url']),
       status: json['status'] ?? 'pending',
       createdAt: json['created_at'] != null
           ? TimezoneUtils.parseUtcToLocal(json['created_at'])
@@ -109,15 +111,10 @@ class Venue {
   bool get isPending => status == 'pending';
   bool get isSuspended => status == 'suspended';
 
-  String get formattedOpenHours => '${_formatTime(openHour)} - ${_formatTime(closeHour)}';
+  /// Jam operasional dari API adalah UTC; ditampilkan sebagai WIB,
+  /// sama seperti fe-web.
+  String get formattedOpenHours => WaktuWib.rentang(openHour, closeHour);
 
-  String _formatTime(String time) {
-    final parts = time.split(':');
-    if (parts.length >= 2) {
-      return '${parts[0]}:${parts[1]}';
-    }
-    return time;
-  }
 
   String get facilitiesText => facilities.join(', ');
 }

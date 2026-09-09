@@ -48,7 +48,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(result.message ?? "Kode OTP telah dikirim ke email Anda"),
-            backgroundColor: Colors.green,
+            backgroundColor: context.c.ok,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -71,7 +71,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(result.message ?? "Gagal mengirim kode OTP"),
-            backgroundColor: Colors.red,
+            backgroundColor: context.c.danger,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -154,8 +154,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                     border: border(context.c.line, 1),
                     enabledBorder: border(context.c.line, 1),
                     focusedBorder: border(context.c.accent, 1.6),
-                    errorBorder: border(Colors.red.shade400, 1),
-                    focusedErrorBorder: border(Colors.red.shade400, 1.6),
+                    errorBorder: border(context.c.danger, 1),
+                    focusedErrorBorder: border(context.c.danger, 1.6),
                   ),
                 ),
                 const SizedBox(height: 28),

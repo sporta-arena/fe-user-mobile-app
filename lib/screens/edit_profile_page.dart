@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_tokens.dart';
-import 'package:flutter/services.dart';
 import 'change_password_page.dart';
 import '../services/auth_service.dart';
-import '../constants/colors.dart';
 
 class EditProfilePage extends StatefulWidget {
   const EditProfilePage({super.key});
@@ -54,9 +52,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
       if (result.success) {
         // Tampilkan Pesan Sukses
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text("Profil berhasil diperbarui!"),
-            backgroundColor: Colors.green,
+            backgroundColor: context.c.ok,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -68,7 +66,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(result.message ?? "Gagal memperbarui profil"),
-            backgroundColor: Colors.red,
+            backgroundColor: context.c.danger,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -79,17 +77,17 @@ class _EditProfilePageState extends State<EditProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bg,
+      backgroundColor: context.c.surface,
       appBar: AppBar(
         systemOverlayStyle: gayaOverlay(context),
-        title: const Text(
+        title: Text(
           "Edit Profil",
-          style: TextStyle(color: AppColors.onDark, fontWeight: FontWeight.bold)
+          style: TextStyle(color: context.c.ink, fontWeight: FontWeight.bold)
         ),
-        backgroundColor: AppColors.bg,
+        backgroundColor: context.c.surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: AppColors.onDark),
+          icon: Icon(Icons.arrow_back_ios, color: context.c.ink),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -107,8 +105,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     height: 120,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: AppColors.surface,
-                      border: Border.all(color: AppColors.surfaceBorder, width: 4),
+                      color: context.c.raised,
+                      border: Border.all(color: context.c.line, width: 4),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withValues(alpha: 0.1),
@@ -124,7 +122,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                           : null,
                     ),
                     child: AuthService.currentUser?.avatarUrl == null
-                        ? const Icon(Icons.person, size: 50, color: AppColors.onDarkMuted)
+                        ? Icon(Icons.person, size: 50, color: context.c.inkSoft)
                         : null,
                   ),
                   
@@ -142,11 +140,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       child: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: AppColors.brandYellow,
+                          color: context.c.accent,
                           shape: BoxShape.circle,
-                          border: Border.all(color: AppColors.bg, width: 2),
+                          border: Border.all(color: context.c.surface, width: 2),
                         ),
-                        child: const Icon(Icons.camera_alt, color: AppColors.ink, size: 20),
+                        child: Icon(Icons.camera_alt, color: context.c.onAccent, size: 20),
                       ),
                     ),
                   ),
@@ -195,10 +193,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     MaterialPageRoute(builder: (context) => const ChangePasswordPage()),
                   );
                 },
-                child: const Text(
+                child: Text(
                   "Ganti Password?",
                   style: TextStyle(
-                    color: AppColors.brandYellow,
+                    color: context.c.accent,
                     fontWeight: FontWeight.bold
                   )
                 ),
@@ -214,25 +212,25 @@ class _EditProfilePageState extends State<EditProfilePage> {
               child: ElevatedButton(
                 onPressed: _isLoading ? null : _saveProfile,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.brandYellow,
+                  backgroundColor: context.c.accent,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(999)
                   ),
                   elevation: 0,
                 ),
                 child: _isLoading
-                  ? const SizedBox(
+                  ? SizedBox(
                       height: 24,
                       width: 24,
                       child: CircularProgressIndicator(
-                        color: AppColors.ink,
+                        color: context.c.onAccent,
                         strokeWidth: 2
                       )
                     )
-                  : const Text(
+                  : Text(
                       "SIMPAN PERUBAHAN",
                       style: TextStyle(
-                        color: AppColors.ink,
+                        color: context.c.onAccent,
                         fontWeight: FontWeight.w700,
                         fontSize: 16
                       )
@@ -259,15 +257,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: AppColors.onDark
+            color: context.c.ink
           )
         ),
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: context.c.raised,
             borderRadius: BorderRadius.circular(12),
           ),
           child: TextField(
@@ -275,29 +273,29 @@ class _EditProfilePageState extends State<EditProfilePage> {
             readOnly: isReadOnly,
             keyboardType: inputType,
             style: TextStyle(
-              color: isReadOnly ? AppColors.onDarkMuted : AppColors.onDark
+              color: isReadOnly ? context.c.inkSoft : context.c.ink
             ),
             decoration: InputDecoration(
               prefixIcon: Icon(
                 icon,
-                color: isReadOnly ? AppColors.onDarkMuted : AppColors.brandYellow
+                color: isReadOnly ? context.c.inkSoft : context.c.accent
               ),
               hintText: hint,
-              hintStyle: const TextStyle(fontSize: 12, color: AppColors.onDarkMuted),
+              hintStyle: TextStyle(fontSize: 12, color: context.c.inkSoft),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none, // Hilangkan garis default
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: AppColors.surfaceBorder),
+                borderSide: BorderSide(color: context.c.line),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: AppColors.brandYellow),
+                borderSide: BorderSide(color: context.c.accent),
               ),
               filled: true,
-              fillColor: AppColors.surface,
+              fillColor: context.c.raised,
             ),
           ),
         ),

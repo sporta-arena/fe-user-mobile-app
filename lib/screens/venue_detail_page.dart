@@ -1,7 +1,9 @@
 import 'dart:io';
+import '../utils/waktu_wib.dart';
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:flutter_map/flutter_map.dart';
 import '../theme/app_tokens.dart';
-import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'booking_confirmation_page.dart';
@@ -205,7 +207,7 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
           _isFavorite ? "Ditambahkan ke favorit" : "Dihapus dari favorit"
         ),
         duration: const Duration(seconds: 2),
-        backgroundColor: _isFavorite ? Colors.green : Colors.grey,
+        backgroundColor: _isFavorite ? context.c.ok : Colors.grey,
       ),
     );
   }
@@ -274,7 +276,7 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
-                      Icon(Icons.location_on, color: Colors.red[600], size: 28),
+                      Icon(Icons.location_on, color: context.c.danger, size: 28),
                       Positioned(
                         top: 8,
                         child: Container(
@@ -309,8 +311,8 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      Colors.green[400]!,
-                      Colors.green[600]!,
+                      context.c.ok!,
+                      context.c.ok!,
                     ],
                   ),
                   borderRadius: BorderRadius.circular(8),
@@ -479,7 +481,7 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
           child: IconButton(
             icon: Icon(
               _isFavorite ? Icons.favorite : Icons.favorite_border,
-              color: Colors.red,
+              color: context.c.danger,
             ),
             onPressed: _toggleFavorite,
           ),
@@ -682,48 +684,56 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
             ),
             child: Stack(
               children: [
-                // Static Map Image from OpenStreetMap
+                // Peta asli, sama seperti di fe-web.
+                //
+                // Sebelumnya di sini dipakai gambar dari
+                // staticmap.openstreetmap.de — layanan peta statis yang
+                // sudah tidak andal, jadi hampir selalu jatuh ke
+                // penggambar grid dan yang tampil cuma kotak-kotak.
+                //
+                // Gerakannya dimatikan supaya peta tidak merebut scroll
+                // halaman; tombol "Buka Maps" di bawah yang mengantar ke
+                // aplikasi peta sungguhan.
                 ClipRRect(
                   borderRadius: BorderRadius.circular(16),
-                  child: hasLocation
-                      ? Image.network(
-                          'https://staticmap.openstreetmap.de/staticmap.php?center=${_venue!.latitude},${_venue!.longitude}&zoom=15&size=600x300&maptype=mapnik',
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          height: 180,
-                          loadingBuilder: (context, child, loadingProgress) {
-                            if (loadingProgress == null) return child;
-                            return Container(
-                              color: context.c.raised,
-                              child: Center(
-                                child: CircularProgressIndicator(
-                                  value: loadingProgress.expectedTotalBytes != null
-                                      ? loadingProgress.cumulativeBytesLoaded /
-                                          loadingProgress.expectedTotalBytes!
-                                      : null,
-                                  strokeWidth: 2,
-                                  color: context.c.accent,
-                                ),
+                  child: SizedBox(
+                    height: 180,
+                    width: double.infinity,
+                    child: hasLocation
+                        ? FlutterMap(
+                            options: MapOptions(
+                              initialCenter: LatLng(
+                                _venue!.latitude!,
+                                _venue!.longitude!,
                               ),
-                            );
-                          },
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              color: context.c.raised,
-                              child: CustomPaint(
-                                size: const Size(double.infinity, 180),
-                                painter: _MapGridPainter(garis: context.c.line),
+                              initialZoom: 15,
+                              interactionOptions: const InteractionOptions(
+                                flags: InteractiveFlag.none,
                               ),
-                            );
-                          },
-                        )
-                      : Container(
-                          color: context.c.raised,
-                          child: CustomPaint(
-                            size: const Size(double.infinity, 180),
-                            painter: _MapGridPainter(garis: context.c.line),
+                            ),
+                            children: [
+                              TileLayer(
+                                urlTemplate:
+                                    'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                                retinaMode:
+                                    RetinaMode.isHighDensity(context),
+                                userAgentPackageName: 'id.sportago.app',
+                                tileBuilder:
+                                    Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? darkModeTileBuilder
+                                        : null,
+                              ),
+                            ],
+                          )
+                        : Container(
+                            color: context.c.raised,
+                            child: CustomPaint(
+                              size: const Size(double.infinity, 180),
+                              painter: _MapGridPainter(garis: context.c.line),
+                            ),
                           ),
-                        ),
+                  ),
                 ),
                 // Center marker overlay
                 if (hasLocation)
@@ -1080,20 +1090,34 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
     );
   }
 
+  /// Apakah slot ini sudah lewat?
+  ///
+  /// [slotTime] adalah nilai mentah dari API, yaitu waktu UTC. Jam di HP
+  /// adalah waktu lokal (WIB). Membandingkan keduanya langsung membuat
+  /// slot dianggap lewat **tujuh jam lebih awal** — sore hari, seluruh
+  /// jadwal malam sudah tercoret padahal masih bisa dipesan. Jadi
+  /// slotnya digeser dulu ke WIB, baru dibandingkan.
   bool _isSlotPassed(String slotTime) {
     final now = DateTime.now();
     final todayDate = DateTime(now.year, now.month, now.day);
-    final selectedDate = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
+    final selectedDate =
+        DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
 
     if (selectedDate.isAfter(todayDate)) return false;
     if (selectedDate.isBefore(todayDate)) return true;
 
     try {
-      final timeParts = slotTime.split(':');
-      final slotHour = int.parse(timeParts[0]);
-      final slotMinute = int.parse(timeParts[1]);
-      final slotDateTime = DateTime(now.year, now.month, now.day, slotHour, slotMinute);
-      return now.isAfter(slotDateTime);
+      final mentah = int.parse(slotTime.split(':')[0]);
+      final menit = int.parse(slotTime.split(':')[1]);
+      final jamWib = (mentah + WaktuWib.offsetJam) % 24;
+
+      // Venue yang buka melewati tengah malam: slot yang jam WIB-nya
+      // lebih kecil dari jam mentahnya sudah masuk hari berikutnya,
+      // jadi belum lewat.
+      if (jamWib < mentah) return false;
+
+      final waktuSlot = DateTime(now.year, now.month, now.day, jamWib, menit);
+      return now.isAfter(waktuSlot);
     } catch (e) {
       return false;
     }
@@ -1144,7 +1168,8 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Dipilih: ${_selectedTimeSlots.length} jam (${_selectedTimeSlots.join(", ")})',
+                    'Dipilih: ${_selectedTimeSlots.length} jam '
+                    '(${_selectedTimeSlots.map(WaktuWib.tampil).join(", ")})',
                     style: TextStyle(
                       color: context.c.ink,
                       fontSize: 12,
@@ -1214,7 +1239,10 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                   border: Border.all(color: borderColor),
                 ),
                 child: Text(
-                  slotTime,
+                  // Label ditampilkan dalam WIB. `slotTime` yang mentah
+                  // tetap dipakai sebagai nilai pilihan, karena itu yang
+                  // dikirim balik ke API.
+                  WaktuWib.tampil(slotTime),
                   style: TextStyle(
                     color: textColor,
                     fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
@@ -1292,12 +1320,16 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                     borderRadius: BorderRadius.circular(999),
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 32),
-                  disabledBackgroundColor: context.c.raised,
+                  // disabledBackgroundColor sengaja TIDAK disetel di sini:
+                  // nilai dari tema (bidang redup + teks redup) sudah benar.
+                  // Sebelumnya di sini dipaksa putih sementara labelnya juga
+                  // putih — tombolnya jadi kotak kosong waktu belum ada jam
+                  // yang dipilih.
                   elevation: 0,
                 ),
-                child: Text(
+                child: const Text(
                   "BOOKING SEKARANG",
-                  style: TextStyle(color: context.c.onAccent, fontWeight: FontWeight.w700),
+                  style: TextStyle(fontWeight: FontWeight.w700),
                 ),
               ),
             ),

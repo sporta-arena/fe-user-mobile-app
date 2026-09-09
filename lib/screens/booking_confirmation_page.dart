@@ -1,4 +1,7 @@
+import 'dart:math' as math;
 import 'dart:async';
+import '../utils/waktu_wib.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import '../theme/app_tokens.dart';
 import 'package:flutter/services.dart';
@@ -8,7 +11,6 @@ import '../models/booking.dart';
 import 'home_page.dart';
 import 'login_page.dart';
 import 'e_ticket_page.dart';
-import '../constants/colors.dart';
 
 class BookingConfirmationPage extends StatefulWidget {
   final int fieldId;
@@ -43,8 +45,14 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
   String _selectedPaymentMethod = "QRIS";
   bool _refundPolicyAccepted = false; // State untuk acknowledgment refund policy
 
-  // Fee constants
-  static const double _platformFeePercent = 0.05; // 5%
+  // Tarif biaya — HARUS sama dengan backend (BookingService::PLATFORM_FEE_RATE
+  // dan PLATFORM_FEE_CAP di be-main). Sebelumnya di sini 5% tanpa batas,
+  // sementara server memakai 8% dengan batas Rp 20.000: layar ini
+  // menampilkan total yang berbeda dari yang benar-benar ditagihkan —
+  // kurang Rp 3.056 pada booking Rp 100.000, dan lebih Rp 17.360 pada
+  // booking Rp 750.000.
+  static const double _platformFeePercent = 0.08;
+  static const int _platformFeeCap = 20000;
 
   // Payment method data with fees
   static final List<Map<String, dynamic>> _paymentMethods = [
@@ -175,7 +183,10 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
   int get _paymentGatewayFee {
     final method = _selectedPaymentData;
     if (method['feeType'] == 'percent') {
-      return (_fieldPrice * (method['feeValue'] as double)).round();
+      // Dasarnya (harga lapangan + platform fee), sama seperti
+      // BookingService di backend — bukan harga lapangan saja.
+      return ((_fieldPrice + _platformFee) * (method['feeValue'] as double))
+          .round();
     } else {
       return method['feeValue'] as int;
     }
@@ -192,9 +203,27 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
     }
   }
 
+
+  /// Label biaya platform, mengikuti tarif yang benar-benar dipakai.
+  ///
+  /// Dulu tertulis mati "(5%)" — dua kali salah: tarifnya 8%, dan pada
+  /// booking besar biayanya kena batas Rp 20.000 sehingga persentase apa
+  /// pun jadi menyesatkan. Contoh: 2 jam x Rp 180.000 menampilkan
+  /// "(5%)" di sebelah angka Rp 20.000, padahal 5% dari 360.000 adalah
+  /// Rp 18.000.
+  String get _labelBiayaPlatform {
+    final penuh = (_fieldPrice * _platformFeePercent).round();
+    if (penuh > _platformFeeCap) {
+      return 'Biaya Platform (maks ${_formatCurrency(_platformFeeCap)})';
+    }
+    final persen = (_platformFeePercent * 100).toStringAsFixed(0);
+    return 'Biaya Platform ($persen%)';
+  }
+
   // Calculate prices
   int get _fieldPrice => widget.price * _durationHours;
-  int get _platformFee => (_fieldPrice * _platformFeePercent).round();
+  int get _platformFee =>
+      math.min((_fieldPrice * _platformFeePercent).round(), _platformFeeCap);
   int get _totalPrice => _fieldPrice + _platformFee + _paymentGatewayFee;
 
   void _showPaymentMethodSheet() {
@@ -207,8 +236,8 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
         maxChildSize: 0.9,
         minChildSize: 0.5,
         builder: (context, scrollController) => Container(
-          decoration: const BoxDecoration(
-            color: AppColors.surface,
+          decoration: BoxDecoration(
+            color: context.c.raised,
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: Column(
@@ -218,23 +247,23 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceBorder,
+                  color: context.c.line,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
+              Text(
                 "Pilih Metode Pembayaran",
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.onDark,
+                  color: context.c.ink,
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
+              Text(
                 "Biaya admin bervariasi per metode",
-                style: TextStyle(color: AppColors.onDarkMuted, fontSize: 12),
+                style: TextStyle(color: context.c.inkSoft, fontSize: 12),
               ),
               const SizedBox(height: 16),
               Expanded(
@@ -286,14 +315,14 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
       padding: const EdgeInsets.only(bottom: 8, top: 4),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: AppColors.brandYellow),
+          Icon(icon, size: 18, color: context.c.accent),
           const SizedBox(width: 8),
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 14,
-              color: AppColors.brandYellow,
+              color: context.c.accent,
             ),
           ),
         ],
@@ -314,10 +343,10 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.brandYellow.withValues(alpha: 0.15) : AppColors.surface,
+          color: isSelected ? context.c.accent.withValues(alpha: 0.15) : context.c.raised,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? AppColors.brandYellow : AppColors.surfaceBorder,
+            color: isSelected ? context.c.accent : context.c.line,
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -327,12 +356,12 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: AppColors.bg,
+                color: context.c.surface,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(
                 method['icon'] as IconData,
-                color: AppColors.onDarkMuted,
+                color: context.c.inkSoft,
                 size: 22,
               ),
             ),
@@ -343,17 +372,17 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                 children: [
                   Text(
                     method['title'] as String,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
-                      color: AppColors.onDark,
+                      color: context.c.ink,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     method['subtitle'] as String,
-                    style: const TextStyle(
-                      color: AppColors.onDarkMuted,
+                    style: TextStyle(
+                      color: context.c.inkSoft,
                       fontSize: 11,
                     ),
                   ),
@@ -364,14 +393,14 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 if (isSelected)
-                  const Icon(Icons.check_circle, color: AppColors.brandYellow, size: 20)
+                  Icon(Icons.check_circle, color: context.c.accent, size: 20)
                 else
-                  const Icon(Icons.circle_outlined, color: AppColors.surfaceBorder, size: 20),
+                  Icon(Icons.circle_outlined, color: context.c.line, size: 20),
                 const SizedBox(height: 4),
                 Text(
                   feeText,
-                  style: const TextStyle(
-                    color: AppColors.onDarkMuted,
+                  style: TextStyle(
+                    color: context.c.inkSoft,
                     fontSize: 10,
                     fontWeight: FontWeight.w500,
                   ),
@@ -397,9 +426,9 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
     // Check if logged in
     if (AuthService.token == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text("Silakan login terlebih dahulu"),
-          backgroundColor: Colors.red,
+          backgroundColor: context.c.danger,
         ),
       );
       Navigator.push(
@@ -452,7 +481,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(errorMessage),
-              backgroundColor: Colors.red,
+              backgroundColor: context.c.danger,
               duration: const Duration(seconds: 3),
             ),
           );
@@ -464,7 +493,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Terjadi kesalahan: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: context.c.danger,
           ),
         );
       }
@@ -474,15 +503,15 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bg,
+      backgroundColor: context.c.surface,
       body: _isLoading
-          ? const Center(
+          ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircularProgressIndicator(color: AppColors.brandYellow),
+                  CircularProgressIndicator(color: context.c.accent),
                   SizedBox(height: 16),
-                  Text('Membuat booking...', style: TextStyle(color: AppColors.onDark)),
+                  Text('Membuat booking...', style: TextStyle(color: context.c.ink)),
                 ],
               ),
             )
@@ -501,14 +530,14 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                         children: [
                           GestureDetector(
                             onTap: () => Navigator.pop(context),
-                            child: const Icon(Icons.arrow_back, size: 24, color: AppColors.onDark),
+                            child: Icon(Icons.arrow_back, size: 24, color: context.c.ink),
                           ),
-                          const Text(
+                          Text(
                             "Konfirmasi Booking",
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w600,
-                              color: AppColors.onDark,
+                              color: context.c.ink,
                             ),
                           ),
                           GestureDetector(
@@ -516,11 +545,11 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                             child: Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: AppColors.surface,
+                                color: context.c.raised,
                                 borderRadius: BorderRadius.circular(10),
-                                border: Border.all(color: AppColors.surfaceBorder),
+                                border: Border.all(color: context.c.line),
                               ),
-                              child: const Icon(Icons.more_horiz, size: 20, color: AppColors.onDark),
+                              child: Icon(Icons.more_horiz, size: 20, color: context.c.ink),
                             ),
                           ),
                         ],
@@ -537,7 +566,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                             width: 80,
                             height: 80,
                             decoration: BoxDecoration(
-                              color: AppColors.surface,
+                              color: context.c.raised,
                               borderRadius: BorderRadius.circular(12),
                               image: const DecorationImage(
                                 image: NetworkImage('https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=200'),
@@ -557,10 +586,10 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                                     Expanded(
                                       child: Text(
                                         widget.venueName,
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 16,
-                                          color: AppColors.onDark,
+                                          color: context.c.ink,
                                         ),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
@@ -568,14 +597,14 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                                     ),
                                     Row(
                                       children: [
-                                        const Icon(Icons.star, color: Colors.amber, size: 16),
+                                        Icon(Icons.star, color: context.c.warn, size: 16),
                                         const SizedBox(width: 4),
-                                        const Text(
+                                        Text(
                                           "4.8",
                                           style: TextStyle(
                                             fontWeight: FontWeight.w600,
                                             fontSize: 14,
-                                            color: AppColors.onDark,
+                                            color: context.c.ink,
                                           ),
                                         ),
                                       ],
@@ -585,13 +614,13 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                                 const SizedBox(height: 4),
                                 Row(
                                   children: [
-                                    Icon(Icons.location_on, color: AppColors.onDarkMuted, size: 14),
+                                    Icon(Icons.location_on, color: context.c.inkSoft, size: 14),
                                     const SizedBox(width: 4),
                                     Expanded(
                                       child: Text(
                                         widget.venueAddress,
-                                        style: const TextStyle(
-                                          color: AppColors.onDarkMuted,
+                                        style: TextStyle(
+                                          color: context.c.inkSoft,
                                           fontSize: 12,
                                         ),
                                         maxLines: 1,
@@ -606,16 +635,16 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                                     children: [
                                       TextSpan(
                                         text: _formatCurrency(widget.price),
-                                        style: const TextStyle(
-                                          color: AppColors.brandYellow,
+                                        style: TextStyle(
+                                          color: context.c.accent,
                                           fontWeight: FontWeight.bold,
                                           fontSize: 16,
                                         ),
                                       ),
-                                      const TextSpan(
+                                      TextSpan(
                                         text: " /jam",
                                         style: TextStyle(
-                                          color: AppColors.onDarkMuted,
+                                          color: context.c.inkSoft,
                                           fontSize: 12,
                                         ),
                                       ),
@@ -631,30 +660,30 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                       const SizedBox(height: 24),
 
                       // --- TANGGAL ---
-                      const Text(
+                      Text(
                         "Tanggal Booking",
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
-                          color: AppColors.onDark,
+                          color: context.c.ink,
                         ),
                       ),
                       const SizedBox(height: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                         decoration: BoxDecoration(
-                          color: AppColors.surface,
+                          color: context.c.raised,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppColors.surfaceBorder),
+                          border: Border.all(color: context.c.line),
                         ),
                         child: Row(
                           children: [
-                            Icon(Icons.calendar_today_outlined, size: 18, color: AppColors.onDarkMuted),
+                            Icon(Icons.calendar_today_outlined, size: 18, color: context.c.inkSoft),
                             const SizedBox(width: 10),
                             Text(
                               widget.selectedDate,
-                              style: const TextStyle(
-                                color: AppColors.onDark,
+                              style: TextStyle(
+                                color: context.c.ink,
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -669,24 +698,24 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text(
+                          Text(
                             "Jam Terpilih",
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
-                              color: AppColors.onDark,
+                              color: context.c.ink,
                             ),
                           ),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
-                              color: AppColors.brandYellow.withValues(alpha: 0.15),
+                              color: context.c.accent.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
                               "${_durationHours} jam",
-                              style: const TextStyle(
-                                color: AppColors.brandYellow,
+                              style: TextStyle(
+                                color: context.c.accent,
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -702,13 +731,17 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                           return Container(
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                             decoration: BoxDecoration(
-                              color: AppColors.brandYellow,
+                              color: context.c.accent,
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Text(
-                              slot,
-                              style: const TextStyle(
-                                color: AppColors.ink,
+                              // `slot` menyimpan nilai mentah dari API
+                              // (UTC) karena itu yang dikirim balik saat
+                              // membuat booking. Yang digeser ke WIB
+                              // hanya labelnya.
+                              WaktuWib.tampil(slot),
+                              style: TextStyle(
+                                color: context.c.onAccent,
                                 fontWeight: FontWeight.w600,
                                 fontSize: 14,
                               ),
@@ -718,27 +751,27 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                       ),
 
                       const SizedBox(height: 24),
-                      const Divider(color: AppColors.surfaceBorder),
+                      Divider(color: context.c.line),
                       const SizedBox(height: 24),
 
                       // --- PAYMENT INFORMATION ---
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text(
+                          Text(
                             "Informasi Pembayaran",
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              color: AppColors.onDark,
+                              color: context.c.ink,
                             ),
                           ),
                           GestureDetector(
                             onTap: _showPaymentMethodSheet,
-                            child: const Text(
+                            child: Text(
                               "Ubah",
                               style: TextStyle(
-                                color: AppColors.brandYellow,
+                                color: context.c.accent,
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -752,9 +785,9 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                         child: Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: AppColors.surface,
+                            color: context.c.raised,
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: AppColors.surfaceBorder),
+                            border: Border.all(color: context.c.line),
                           ),
                           child: Row(
                             children: [
@@ -762,12 +795,12 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                                 width: 44,
                                 height: 44,
                                 decoration: BoxDecoration(
-                                  color: AppColors.bg,
+                                  color: context.c.surface,
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: Icon(
                                   _selectedPaymentData['icon'] as IconData,
-                                  color: AppColors.brandYellow,
+                                  color: context.c.accent,
                                   size: 24,
                                 ),
                               ),
@@ -778,24 +811,24 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                                   children: [
                                     Text(
                                       _selectedPaymentData['title'] as String,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontWeight: FontWeight.w600,
                                         fontSize: 14,
-                                        color: AppColors.onDark,
+                                        color: context.c.ink,
                                       ),
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
                                       _selectedPaymentData['subtitle'] as String,
-                                      style: const TextStyle(
-                                        color: AppColors.onDarkMuted,
+                                      style: TextStyle(
+                                        color: context.c.inkSoft,
                                         fontSize: 12,
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-                              const Icon(Icons.chevron_right, color: AppColors.onDarkMuted),
+                              Icon(Icons.chevron_right, color: context.c.inkSoft),
                             ],
                           ),
                         ),
@@ -805,18 +838,18 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: AppColors.surface,
+                          color: context.c.raised,
                           borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: AppColors.surfaceBorder),
+                          border: Border.all(color: context.c.line),
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.info_outline, size: 18, color: AppColors.brandYellow),
+                            Icon(Icons.info_outline, size: 18, color: context.c.accent),
                             const SizedBox(width: 10),
                             Expanded(
                               child: RichText(
                                 text: TextSpan(
-                                  style: const TextStyle(fontSize: 12, color: AppColors.onDarkMuted),
+                                  style: TextStyle(fontSize: 12, color: context.c.inkSoft),
                                   children: [
                                     const TextSpan(text: 'Biaya admin payment gateway: '),
                                     TextSpan(
@@ -839,33 +872,33 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                       const SizedBox(height: 24),
 
                       // --- CATATAN ---
-                      const Text(
+                      Text(
                         "Catatan (Opsional)",
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
-                          color: AppColors.onDark,
+                          color: context.c.ink,
                         ),
                       ),
                       const SizedBox(height: 8),
                       Container(
                         decoration: BoxDecoration(
-                          color: AppColors.surface,
+                          color: context.c.raised,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppColors.surfaceBorder),
+                          border: Border.all(color: context.c.line),
                         ),
                         child: TextField(
                           controller: _notesController,
-                          style: const TextStyle(color: AppColors.onDark),
+                          style: TextStyle(color: context.c.ink),
                           decoration: InputDecoration(
                             hintText: "Tambahkan catatan...",
-                            hintStyle: const TextStyle(color: AppColors.onDarkMuted, fontSize: 14),
+                            hintStyle: TextStyle(color: context.c.inkSoft, fontSize: 14),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                               borderSide: BorderSide.none,
                             ),
                             filled: true,
-                            fillColor: AppColors.surface,
+                            fillColor: context.c.raised,
                             contentPadding: const EdgeInsets.all(16),
                           ),
                           maxLines: 2,
@@ -873,16 +906,16 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                       ),
 
                       const SizedBox(height: 24),
-                      const Divider(color: AppColors.surfaceBorder),
+                      Divider(color: context.c.line),
                       const SizedBox(height: 24),
 
                       // --- SUMMARY OF CHARGE ---
-                      const Text(
+                      Text(
                         "Rincian Biaya",
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.onDark,
+                          color: context.c.ink,
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -892,7 +925,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                       ),
                       const SizedBox(height: 10),
                       _buildSummaryRow(
-                        "Biaya Platform (5%)",
+                        _labelBiayaPlatform,
                         _formatCurrency(_platformFee),
                       ),
                       const SizedBox(height: 10),
@@ -901,25 +934,25 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                         _formatCurrency(_paymentGatewayFee),
                       ),
                       const SizedBox(height: 16),
-                      const Divider(color: AppColors.surfaceBorder),
+                      Divider(color: context.c.line),
                       const SizedBox(height: 16),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text(
+                          Text(
                             "Total Pembayaran",
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              color: AppColors.onDark,
+                              color: context.c.ink,
                             ),
                           ),
                           Text(
                             _formatCurrency(_totalPrice),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
-                              color: AppColors.brandYellow,
+                              color: context.c.accent,
                             ),
                           ),
                         ],
@@ -930,14 +963,14 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.amber.withValues(alpha: 0.1),
+                          color: context.c.warn.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.amber.withValues(alpha: 0.3)),
+                          border: Border.all(color: context.c.warn.withValues(alpha: 0.3)),
                         ),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Icon(Icons.info_outline_rounded, color: Colors.amber[700], size: 18),
+                            Icon(Icons.info_outline_rounded, color: context.c.warn, size: 18),
                             const SizedBox(width: 10),
                             Expanded(
                               child: Column(
@@ -948,7 +981,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 13,
-                                      color: Colors.amber[800],
+                                      color: context.c.warn,
                                     ),
                                   ),
                                   const SizedBox(height: 4),
@@ -956,7 +989,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                                     "Jika terjadi pembatalan, hanya harga lapangan yang dapat dikembalikan. Biaya admin & platform tidak dapat di-refund.",
                                     style: TextStyle(
                                       fontSize: 12,
-                                      color: AppColors.onDarkMuted,
+                                      color: context.c.inkSoft,
                                       height: 1.4,
                                     ),
                                   ),
@@ -991,9 +1024,9 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                                       _refundPolicyAccepted = value ?? false;
                                     });
                                   },
-                                  activeColor: AppColors.brandYellow,
-                                  checkColor: AppColors.ink,
-                                  side: const BorderSide(color: AppColors.surfaceBorder, width: 2),
+                                  activeColor: context.c.accent,
+                                  checkColor: context.c.onAccent,
+                                  side: BorderSide(color: context.c.line, width: 2),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(4),
                                   ),
@@ -1006,7 +1039,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                                   "Saya memahami dan menyetujui ketentuan refund di atas",
                                   style: TextStyle(
                                     fontSize: 13,
-                                    color: AppColors.onDarkMuted,
+                                    color: context.c.inkSoft,
                                   ),
                                 ),
                               ),
@@ -1024,9 +1057,9 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
       // --- BOTTOM BAR ---
       bottomNavigationBar: Container(
         padding: const EdgeInsets.all(20),
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
-          border: Border(top: BorderSide(color: AppColors.surfaceBorder)),
+        decoration: BoxDecoration(
+          color: context.c.raised,
+          border: Border(top: BorderSide(color: context.c.line)),
         ),
         child: SafeArea(
           child: Column(
@@ -1038,17 +1071,17 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                   margin: const EdgeInsets.only(bottom: 12),
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
-                    color: Colors.red.withValues(alpha: 0.1),
+                    color: context.c.danger.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.warning_amber_rounded, color: Colors.red[400], size: 18),
+                      Icon(Icons.warning_amber_rounded, color: context.c.danger, size: 18),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           "Centang persetujuan ketentuan refund untuk melanjutkan",
-                          style: TextStyle(fontSize: 12, color: Colors.red[700]),
+                          style: TextStyle(fontSize: 12, color: context.c.danger),
                         ),
                       ),
                     ],
@@ -1061,26 +1094,26 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                 child: ElevatedButton(
                   onPressed: (_isLoading || !_refundPolicyAccepted) ? null : _createBooking,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.brandYellow,
+                    backgroundColor: context.c.accent,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(999),
                     ),
-                    disabledBackgroundColor: AppColors.surfaceBorder,
+                    disabledBackgroundColor: context.c.line,
                     elevation: 0,
                   ),
                   child: _isLoading
-                      ? const SizedBox(
+                      ? SizedBox(
                           width: 24,
                           height: 24,
                           child: CircularProgressIndicator(
-                            color: AppColors.ink,
+                            color: context.c.onAccent,
                             strokeWidth: 2,
                           ),
                         )
-                      : const Text(
+                      : Text(
                           "Bayar Sekarang",
                           style: TextStyle(
-                            color: AppColors.ink,
+                            color: context.c.onAccent,
                             fontWeight: FontWeight.w700,
                             fontSize: 16,
                           ),
@@ -1101,18 +1134,18 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
         Expanded(
           child: Text(
             label,
-            style: const TextStyle(
-              color: AppColors.onDarkMuted,
+            style: TextStyle(
+              color: context.c.inkSoft,
               fontSize: 14,
             ),
           ),
         ),
         Text(
           value,
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.w500,
             fontSize: 14,
-            color: AppColors.onDark,
+            color: context.c.ink,
           ),
         ),
       ],
@@ -1124,8 +1157,8 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
+        decoration: BoxDecoration(
+          color: context.c.raised,
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Column(
@@ -1136,24 +1169,24 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: AppColors.surfaceBorder,
+                color: context.c.line,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
             const SizedBox(height: 20),
-            const Text(
+            Text(
               'Opsi Lainnya',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: AppColors.onDark,
+                color: context.c.ink,
               ),
             ),
             const SizedBox(height: 20),
             _buildOptionItem(
               icon: Icons.help_outline_rounded,
-              iconColor: AppColors.brandYellow,
-              iconBgColor: AppColors.brandYellow.withValues(alpha: 0.15),
+              iconColor: context.c.accent,
+              iconBgColor: context.c.accent.withValues(alpha: 0.15),
               title: 'Bantuan',
               subtitle: 'Panduan cara booking',
               onTap: () {
@@ -1163,8 +1196,8 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
             ),
             _buildOptionItem(
               icon: Icons.article_outlined,
-              iconColor: Colors.orange,
-              iconBgColor: Colors.orange.withValues(alpha: 0.1),
+              iconColor: context.c.warn,
+              iconBgColor: context.c.warn.withValues(alpha: 0.1),
               title: 'Syarat & Ketentuan',
               subtitle: 'Kebijakan pemesanan',
               onTap: () {
@@ -1174,8 +1207,8 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
             ),
             _buildOptionItem(
               icon: Icons.share_rounded,
-              iconColor: Colors.green,
-              iconBgColor: Colors.green.withValues(alpha: 0.1),
+              iconColor: context.c.ok,
+              iconBgColor: context.c.ok.withValues(alpha: 0.1),
               title: 'Bagikan',
               subtitle: 'Bagikan info booking',
               onTap: () {
@@ -1183,14 +1216,14 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                 _shareBookingInfo();
               },
             ),
-            const Padding(
+            Padding(
               padding: EdgeInsets.symmetric(horizontal: 20),
-              child: Divider(color: AppColors.surfaceBorder),
+              child: Divider(color: context.c.line),
             ),
             _buildOptionItem(
               icon: Icons.close_rounded,
-              iconColor: Colors.red,
-              iconBgColor: Colors.red.withValues(alpha: 0.1),
+              iconColor: context.c.danger,
+              iconBgColor: context.c.danger.withValues(alpha: 0.1),
               title: 'Batalkan',
               subtitle: 'Batal dan kembali',
               onTap: () {
@@ -1240,23 +1273,23 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 15,
-                      color: isDestructive ? Colors.red : AppColors.onDark,
+                      color: isDestructive ? context.c.danger : context.c.ink,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     subtitle,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
-                      color: AppColors.onDarkMuted,
+                      color: context.c.inkSoft,
                     ),
                   ),
                 ],
               ),
             ),
-            const Icon(
+            Icon(
               Icons.chevron_right,
-              color: AppColors.onDarkMuted,
+              color: context.c.inkSoft,
               size: 20,
             ),
           ],
@@ -1269,10 +1302,10 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
     showDialog(
       context: context,
       builder: (context) => Dialog(
-        backgroundColor: AppColors.surface,
+        backgroundColor: context.c.raised,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: AppColors.surfaceBorder),
+          side: BorderSide(color: context.c.line),
         ),
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -1283,30 +1316,30 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                 width: 72,
                 height: 72,
                 decoration: BoxDecoration(
-                  color: Colors.red.shade50,
+                  color: context.c.dangerSoft,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.warning_amber_rounded,
-                  color: Colors.red.shade400,
+                  color: context.c.danger,
                   size: 40,
                 ),
               ),
               const SizedBox(height: 20),
-              const Text(
+              Text(
                 'Batalkan Booking?',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.onDark,
+                  color: context.c.ink,
                 ),
               ),
               const SizedBox(height: 12),
-              const Text(
+              Text(
                 'Apakah kamu yakin ingin membatalkan proses booking ini? Data yang sudah diisi tidak akan tersimpan.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: AppColors.onDarkMuted,
+                  color: context.c.inkSoft,
                   fontSize: 14,
                   height: 1.5,
                 ),
@@ -1319,16 +1352,16 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                       onPressed: () => Navigator.pop(context),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 14),
-                        side: const BorderSide(color: AppColors.surfaceBorder),
+                        side: BorderSide(color: context.c.line),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text(
+                      child: Text(
                         'Tidak',
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
-                          color: AppColors.onDark,
+                          color: context.c.ink,
                         ),
                       ),
                     ),
@@ -1341,7 +1374,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                         Navigator.pop(context); // Go back from booking page
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
+                        backgroundColor: context.c.danger,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         elevation: 0,
                         shape: RoundedRectangleBorder(
@@ -1372,8 +1405,8 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
+        decoration: BoxDecoration(
+          color: context.c.raised,
           borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         ),
         child: DraggableScrollableSheet(
@@ -1389,7 +1422,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceBorder,
+                  color: context.c.line,
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
@@ -1402,23 +1435,23 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: AppColors.brandYellow,
+                        color: context.c.accent,
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: const Icon(Icons.support_agent_rounded, color: AppColors.ink, size: 28),
+                      child: Icon(Icons.support_agent_rounded, color: context.c.onAccent, size: 28),
                     ),
                     const SizedBox(width: 16),
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             'Pusat Bantuan',
-                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.onDark),
+                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: context.c.ink),
                           ),
                           Text(
                             'Kami siap membantu kamu',
-                            style: TextStyle(fontSize: 13, color: AppColors.onDarkMuted),
+                            style: TextStyle(fontSize: 13, color: context.c.inkSoft),
                           ),
                         ],
                       ),
@@ -1427,18 +1460,18 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                       onPressed: () => Navigator.pop(context),
                       icon: Container(
                         padding: const EdgeInsets.all(6),
-                        decoration: const BoxDecoration(
-                          color: AppColors.bg,
+                        decoration: BoxDecoration(
+                          color: context.c.surface,
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.close, size: 18, color: AppColors.onDarkMuted),
+                        child: Icon(Icons.close, size: 18, color: context.c.inkSoft),
                       ),
                     ),
                   ],
                 ),
               ),
               
-              const Divider(height: 1, color: AppColors.surfaceBorder),
+              Divider(height: 1, color: context.c.line),
 
               // Content
               Expanded(
@@ -1449,7 +1482,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                     // Cara Booking Section
                     _buildHelpSection(
                       icon: Icons.menu_book_rounded,
-                      iconColor: AppColors.brandYellow,
+                      iconColor: context.c.accent,
                       title: 'Cara Booking',
                       child: Column(
                         children: [
@@ -1466,7 +1499,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                     // FAQ Section
                     _buildHelpSection(
                       icon: Icons.quiz_outlined,
-                      iconColor: Colors.orange,
+                      iconColor: context.c.warn,
                       title: 'FAQ',
                       child: Column(
                         children: [
@@ -1491,7 +1524,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                     // Contact Section
                     _buildHelpSection(
                       icon: Icons.headset_mic_rounded,
-                      iconColor: Colors.green,
+                      iconColor: context.c.ok,
                       title: 'Hubungi Kami',
                       child: Column(
                         children: [
@@ -1499,21 +1532,21 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                             Icons.phone_rounded,
                             'WhatsApp',
                             '0812-3456-7890',
-                            Colors.green,
+                            context.c.ok,
                             () {},
                           ),
                           _buildContactItem(
                             Icons.email_rounded,
                             'Email',
                             'help@sporta.id',
-                            Colors.red,
+                            context.c.danger,
                             () {},
                           ),
                           _buildContactItem(
                             Icons.chat_bubble_rounded,
                             'Live Chat',
                             'Chat dengan CS',
-                            AppColors.brandYellow,
+                            context.c.accent,
                             () {},
                           ),
                         ],
@@ -1526,33 +1559,33 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: AppColors.bg,
+                        color: context.c.surface,
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppColors.surfaceBorder),
+                        border: Border.all(color: context.c.line),
                       ),
                       child: Row(
                         children: [
                           Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color: Colors.amber.withValues(alpha: 0.1),
+                              color: context.c.warn.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: const Icon(Icons.access_time_filled, color: Colors.amber, size: 24),
+                            child: Icon(Icons.access_time_filled, color: context.c.warn, size: 24),
                           ),
                           const SizedBox(width: 16),
-                          const Expanded(
+                          Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   'Jam Operasional CS',
-                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.onDark),
+                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: context.c.ink),
                                 ),
                                 SizedBox(height: 4),
                                 Text(
                                   'Senin - Minggu: 08:00 - 22:00 WIB',
-                                  style: TextStyle(color: AppColors.onDarkMuted, fontSize: 13),
+                                  style: TextStyle(color: context.c.inkSoft, fontSize: 13),
                                 ),
                               ],
                             ),
@@ -1560,7 +1593,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
-                              color: Colors.green,
+                              color: context.c.ok,
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: const Text(
@@ -1589,9 +1622,9 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.bg,
+        color: context.c.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.surfaceBorder),
+        border: Border.all(color: context.c.line),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1611,12 +1644,12 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                 const SizedBox(width: 12),
                 Text(
                   title,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.onDark),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: context.c.ink),
                 ),
               ],
             ),
           ),
-          const Divider(height: 1, color: AppColors.surfaceBorder),
+          Divider(height: 1, color: context.c.line),
           Padding(
             padding: const EdgeInsets.all(16),
             child: child,
@@ -1635,13 +1668,13 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
             width: 28,
             height: 28,
             decoration: BoxDecoration(
-              color: AppColors.brandYellow,
+              color: context.c.accent,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Center(
               child: Text(
                 '$number',
-                style: const TextStyle(color: AppColors.ink, fontWeight: FontWeight.bold, fontSize: 13),
+                style: TextStyle(color: context.c.onAccent, fontWeight: FontWeight.bold, fontSize: 13),
               ),
             ),
           ),
@@ -1649,10 +1682,10 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(color: AppColors.onDark, fontSize: 14),
+              style: TextStyle(color: context.c.ink, fontSize: 14),
             ),
           ),
-          Icon(icon, size: 18, color: AppColors.onDarkMuted),
+          Icon(icon, size: 18, color: context.c.inkSoft),
         ],
       ),
     );
@@ -1663,9 +1696,9 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.bg,
+        color: context.c.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.surfaceBorder),
+        border: Border.all(color: context.c.line),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1673,12 +1706,12 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.help_outline, size: 18, color: Colors.orange),
+              Icon(Icons.help_outline, size: 18, color: context.c.warn),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   question,
-                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: AppColors.onDark),
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: context.c.ink),
                 ),
               ),
             ],
@@ -1688,7 +1721,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
             padding: const EdgeInsets.only(left: 26),
             child: Text(
               answer,
-              style: const TextStyle(color: AppColors.onDarkMuted, fontSize: 13, height: 1.4),
+              style: TextStyle(color: context.c.inkSoft, fontSize: 13, height: 1.4),
             ),
           ),
         ],
@@ -1723,13 +1756,13 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: const TextStyle(color: AppColors.onDarkMuted, fontSize: 12)),
+                  Text(title, style: TextStyle(color: context.c.inkSoft, fontSize: 12)),
                   const SizedBox(height: 2),
-                  Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.onDark)),
+                  Text(value, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: context.c.ink)),
                 ],
               ),
             ),
-            const Icon(Icons.arrow_forward_ios, size: 14, color: AppColors.onDarkMuted),
+            Icon(Icons.arrow_forward_ios, size: 14, color: context.c.inkSoft),
           ],
         ),
       ),
@@ -1740,16 +1773,16 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppColors.surface,
+        backgroundColor: context.c.raised,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: AppColors.surfaceBorder),
+          side: BorderSide(color: context.c.line),
         ),
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.description_outlined, color: AppColors.brandYellow),
+            Icon(Icons.description_outlined, color: context.c.accent),
             SizedBox(width: 10),
-            Text('Syarat & Ketentuan', style: TextStyle(fontSize: 18, color: AppColors.onDark)),
+            Text('Syarat & Ketentuan', style: TextStyle(fontSize: 18, color: context.c.ink)),
           ],
         ),
         content: SingleChildScrollView(
@@ -1769,7 +1802,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Tutup', style: TextStyle(color: AppColors.brandYellow)),
+            child: Text('Tutup', style: TextStyle(color: context.c.accent)),
           ),
         ],
       ),
@@ -1786,14 +1819,14 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
             width: 20,
             height: 20,
             decoration: BoxDecoration(
-              color: AppColors.brandYellow.withValues(alpha: 0.15),
+              color: context.c.accent.withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
             child: Center(
               child: Text(
                 number,
-                style: const TextStyle(
-                  color: AppColors.brandYellow,
+                style: TextStyle(
+                  color: context.c.accent,
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
                 ),
@@ -1804,7 +1837,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(color: AppColors.onDarkMuted, fontSize: 13, height: 1.4),
+              style: TextStyle(color: context.c.inkSoft, fontSize: 13, height: 1.4),
             ),
           ),
         ],
@@ -1814,26 +1847,26 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
 
   void _shareBookingInfo() {
     final bookingInfo = '''
-🏟️ Booking Lapangan - Sporta
+🏟️ Booking Lapangan - Sportago
 
 📍 ${widget.venueName}
 🏃 ${widget.fieldName}
 📅 ${widget.selectedDate}
-⏰ ${widget.selectedTimeSlots.join(", ")} (${_durationHours} jam)
+⏰ ${widget.selectedTimeSlots.map(WaktuWib.tampil).join(", ")} (${_durationHours} jam)
 
 💰 Total: ${_formatCurrency(_totalPrice)}
 
-Download Sporta App untuk booking lapangan olahraga!
+Download Sportago App untuk booking lapangan olahraga!
 ''';
 
     // For now, show a snackbar. In production, use share_plus package
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text('Info booking disalin ke clipboard!', style: TextStyle(color: AppColors.ink)),
-        backgroundColor: AppColors.brandYellow,
+        content: Text('Info booking disalin ke clipboard!', style: TextStyle(color: context.c.onAccent)),
+        backgroundColor: context.c.accent,
         action: SnackBarAction(
           label: 'OK',
-          textColor: AppColors.ink,
+          textColor: context.c.onAccent,
           onPressed: () {},
         ),
       ),
@@ -1847,7 +1880,7 @@ Download Sporta App untuk booking lapangan olahraga!
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 18, color: AppColors.onDarkMuted),
+        Icon(icon, size: 18, color: context.c.inkSoft),
         const SizedBox(width: 8),
         Expanded(
           child: Column(
@@ -1855,18 +1888,18 @@ Download Sporta App untuk booking lapangan olahraga!
             children: [
               Text(
                 label,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
-                  color: AppColors.onDarkMuted,
+                  color: context.c.inkSoft,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 value,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: AppColors.onDark,
+                  color: context.c.ink,
                 ),
               ),
             ],
@@ -1882,11 +1915,11 @@ Download Sporta App untuk booking lapangan olahraga!
       children: [
         Text(
           label,
-          style: const TextStyle(color: AppColors.onDarkMuted)
+          style: TextStyle(color: context.c.inkSoft)
         ),
         Text(
           suffix ?? _formatCurrency(amount!),
-          style: const TextStyle(fontWeight: FontWeight.w500, color: AppColors.onDark)
+          style: TextStyle(fontWeight: FontWeight.w500, color: context.c.ink)
         ),
       ],
     );
@@ -2043,10 +2076,30 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
     });
   }
 
-  // TEST FUNCTION - Remove in production
-  void _simulatePaymentSuccess() {
-    // Directly trigger payment success without calling API
-    _onPaymentSuccess();
+  /// Tombol uji: menandai pembayaran berhasil lewat server.
+  ///
+  /// Dulu fungsi ini langsung memanggil `_onPaymentSuccess()` tanpa
+  /// menyentuh API — layar menyatakan "Pembayaran Berhasil, booking
+  /// dikonfirmasi" padahal di server booking-nya masih `pending` dan
+  /// akan kedaluwarsa sepuluh menit kemudian. Sekarang ia memakai
+  /// endpoint simulasi yang sama dengan yang dipakai web, jadi tampilan
+  /// dan server sepakat.
+  Future<void> _simulatePaymentSuccess() async {
+    final hasil = await BookingService.simulatePayment(widget.booking.id);
+
+    if (!mounted) return;
+
+    if (hasil.success) {
+      _onPaymentSuccess();
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(hasil.message ?? 'Simulasi pembayaran gagal'),
+        backgroundColor: context.c.danger,
+      ),
+    );
   }
 
   void _showSuccessPopup() {
@@ -2054,10 +2107,10 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
       context: context,
       barrierDismissible: false,
       builder: (context) => Dialog(
-        backgroundColor: AppColors.surface,
+        backgroundColor: context.c.raised,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24),
-          side: const BorderSide(color: AppColors.surfaceBorder),
+          side: BorderSide(color: context.c.line),
         ),
         child: Padding(
           padding: const EdgeInsets.all(28),
@@ -2070,14 +2123,14 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
                 height: 100,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Colors.green.shade400, Colors.green.shade600],
+                    colors: [context.c.ok, context.c.ok],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.green.withValues(alpha: 0.3),
+                      color: context.c.ok.withValues(alpha: 0.3),
                       blurRadius: 20,
                       offset: const Offset(0, 10),
                     ),
@@ -2090,20 +2143,20 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
                 ),
               ),
               const SizedBox(height: 24),
-              const Text(
+              Text(
                 'Pembayaran Berhasil!',
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.onDark,
+                  color: context.c.ink,
                 ),
               ),
               const SizedBox(height: 12),
-              const Text(
+              Text(
                 'Booking kamu sudah dikonfirmasi.\nSampai jumpa di lapangan!',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: AppColors.onDarkMuted,
+                  color: context.c.inkSoft,
                   fontSize: 14,
                   height: 1.5,
                 ),
@@ -2112,13 +2165,13 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
-                  color: Colors.green.shade50,
+                  color: context.c.okSoft,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   _currentBooking?.bookingCode ?? '',
                   style: TextStyle(
-                    color: Colors.green.shade700,
+                    color: context.c.ok,
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                   ),
@@ -2140,21 +2193,21 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.brandYellow,
+                    backgroundColor: context.c.accent,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(999),
                     ),
                     elevation: 0,
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.confirmation_number_outlined, color: AppColors.ink, size: 20),
+                      Icon(Icons.confirmation_number_outlined, color: context.c.onAccent, size: 20),
                       SizedBox(width: 8),
                       Text(
                         'Lihat E-Tiket',
                         style: TextStyle(
-                          color: AppColors.ink,
+                          color: context.c.onAccent,
                           fontWeight: FontWeight.w700,
                           fontSize: 16,
                         ),
@@ -2178,17 +2231,17 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
                     );
                   },
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: AppColors.surfaceBorder),
+                    side: BorderSide(color: context.c.line),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(999),
                     ),
                   ),
-                  child: const Text(
+                  child: Text(
                     'Kembali ke Beranda',
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 15,
-                      color: AppColors.onDark,
+                      color: context.c.ink,
                     ),
                   ),
                 ),
@@ -2256,14 +2309,14 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
     final isVirtualAccount = widget.paymentMethod?.startsWith('VA_') ?? false;
 
     return Scaffold(
-      backgroundColor: AppColors.bg,
+      backgroundColor: context.c.surface,
       appBar: AppBar(
         systemOverlayStyle: gayaOverlay(context),
-        title: const Text(
+        title: Text(
           "Booking Berhasil",
-          style: TextStyle(color: AppColors.onDark, fontWeight: FontWeight.bold),
+          style: TextStyle(color: context.c.ink, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: AppColors.bg,
+        backgroundColor: context.c.surface,
         elevation: 0,
         automaticallyImplyLeading: false,
       ),
@@ -2285,14 +2338,14 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
                         padding: const EdgeInsets.all(24),
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            colors: [Colors.green.shade400, Colors.green.shade600],
+                            colors: [context.c.ok, context.c.ok],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.green.withValues(alpha: 0.4),
+                              color: context.c.ok.withValues(alpha: 0.4),
                               blurRadius: 30,
                               offset: const Offset(0, 10),
                             ),
@@ -2309,19 +2362,19 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
                 },
               ),
               const SizedBox(height: 20),
-              const Text(
+              Text(
                 "Pembayaran Berhasil!",
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: Colors.green,
+                  color: context.c.ok,
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
+              Text(
                 "Booking kamu sudah dikonfirmasi",
                 style: TextStyle(
-                  color: AppColors.onDarkMuted,
+                  color: context.c.inkSoft,
                   fontSize: 14,
                 ),
                 textAlign: TextAlign.center,
@@ -2331,13 +2384,13 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: _isExpired ? Colors.red.shade50 : Colors.orange.shade50,
+                  color: _isExpired ? context.c.dangerSoft : context.c.warnSoft,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   _isExpired ? Icons.cancel_outlined : Icons.hourglass_top_rounded,
                   size: 64,
-                  color: _isExpired ? Colors.red.shade400 : Colors.orange.shade400,
+                  color: _isExpired ? context.c.danger : context.c.warn,
                 ),
               ),
               const SizedBox(height: 20),
@@ -2346,7 +2399,7 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: _isExpired ? Colors.red.shade700 : AppColors.onDark,
+                  color: _isExpired ? context.c.danger : context.c.ink,
                 ),
               ),
               const SizedBox(height: 8),
@@ -2354,8 +2407,8 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
                 _isExpired
                     ? "Silakan buat booking baru"
                     : "Silakan selesaikan pembayaran sebelum batas waktu",
-                style: const TextStyle(
-                  color: AppColors.onDarkMuted,
+                style: TextStyle(
+                  color: context.c.inkSoft,
                   fontSize: 14,
                 ),
                 textAlign: TextAlign.center,
@@ -2371,7 +2424,7 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
                       height: 14,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: Colors.blue.shade400,
+                        color: context.c.info,
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -2379,7 +2432,7 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
                       "Mengecek status pembayaran...",
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.blue.shade600,
+                        color: context.c.info,
                       ),
                     ),
                   ],
@@ -2393,19 +2446,19 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
               width: double.infinity,
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: context.c.raised,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.surfaceBorder),
+                border: Border.all(color: context.c.line),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     "Detail Booking",
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
-                      color: AppColors.onDark,
+                      color: context.c.ink,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -2426,45 +2479,48 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
               width: double.infinity,
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: context.c.raised,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.green.shade700),
+                border: Border.all(color: context.c.ok),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     "Rincian Biaya",
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
-                      color: AppColors.onDark,
+                      color: context.c.ink,
                     ),
                   ),
                   const SizedBox(height: 16),
                   _buildPriceRow("Harga Lapangan (${booking.field?.name ?? 'Lapangan'})", displayBasePrice),
                   const SizedBox(height: 8),
-                  _buildPriceRow("Biaya Platform (5%)", displayPlatformFee),
+                  // Halaman ini menampilkan angka yang sudah dihitung
+                  // server, jadi tidak perlu menyebut persentase —
+                  // menyebutnya justru berisiko salah saat kena batas.
+                  _buildPriceRow("Biaya Platform", displayPlatformFee),
                   const SizedBox(height: 8),
                   _buildPriceRow("Biaya Admin", displayAdminFee),
-                  const Divider(height: 24, color: AppColors.surfaceBorder),
+                  Divider(height: 24, color: context.c.line),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
+                      Text(
                         "Total Pembayaran",
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
-                          color: AppColors.onDark,
+                          color: context.c.ink,
                         ),
                       ),
                       Text(
                         _formatCurrencyInt(displayTotalPrice),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w900,
                           fontSize: 20,
-                          color: AppColors.brandYellow,
+                          color: context.c.accent,
                         ),
                       ),
                     ],
@@ -2481,10 +2537,10 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
               width: double.infinity,
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: _isExpired ? Colors.red.shade50 : Colors.orange.shade50,
+                color: _isExpired ? context.c.dangerSoft : context.c.warnSoft,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: _isExpired ? Colors.red.shade200 : Colors.orange.shade200,
+                  color: _isExpired ? context.c.danger : context.c.warn,
                 ),
               ),
               child: Column(
@@ -2494,14 +2550,14 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
                     children: [
                       Icon(
                         _isExpired ? Icons.timer_off : Icons.timer_outlined,
-                        color: _isExpired ? Colors.red.shade700 : Colors.orange.shade700,
+                        color: _isExpired ? context.c.danger : context.c.warn,
                       ),
                       const SizedBox(width: 8),
                       Text(
                         _isExpired ? "Waktu Habis" : "Batas Pembayaran",
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          color: _isExpired ? Colors.red.shade700 : Colors.orange.shade700,
+                          color: _isExpired ? context.c.danger : context.c.warn,
                         ),
                       ),
                     ],
@@ -2512,7 +2568,7 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                       decoration: BoxDecoration(
-                        color: _isExpired ? Colors.red.shade100 : Colors.orange.shade100,
+                        color: _isExpired ? context.c.dangerSoft : context.c.warnSoft,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
@@ -2521,7 +2577,7 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
                           fontSize: 32,
                           fontWeight: FontWeight.bold,
                           fontFamily: 'monospace',
-                          color: _isExpired ? Colors.red.shade800 : Colors.orange.shade800,
+                          color: _isExpired ? context.c.danger : context.c.warn,
                         ),
                       ),
                     ),
@@ -2531,7 +2587,7 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
                     Center(
                       child: Text(
                         "Silakan buat booking baru",
-                        style: TextStyle(color: Colors.red.shade700),
+                        style: TextStyle(color: context.c.danger),
                       ),
                     ),
                   ],
@@ -2542,9 +2598,9 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: AppColors.surface,
+                      color: context.c.raised,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppColors.surfaceBorder),
+                      border: Border.all(color: context.c.line),
                     ),
                     child: Column(
                       children: [
@@ -2552,10 +2608,10 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
-                            color: isVirtualAccount ? Colors.purple.shade50 : Colors.blue.shade50,
+                            color: isVirtualAccount ? Colors.purple.shade50 : context.c.infoSoft,
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color: isVirtualAccount ? Colors.purple.shade200 : Colors.blue.shade200,
+                              color: isVirtualAccount ? Colors.purple.shade200 : context.c.info,
                             ),
                           ),
                           child: Row(
@@ -2564,7 +2620,7 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
                               Icon(
                                 isVirtualAccount ? Icons.account_balance : Icons.qr_code_2,
                                 size: 16,
-                                color: isVirtualAccount ? Colors.purple.shade700 : Colors.blue.shade700,
+                                color: isVirtualAccount ? Colors.purple.shade700 : context.c.info,
                               ),
                               const SizedBox(width: 6),
                               Text(
@@ -2572,7 +2628,7 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
-                                  color: isVirtualAccount ? Colors.purple.shade700 : Colors.blue.shade700,
+                                  color: isVirtualAccount ? Colors.purple.shade700 : context.c.info,
                                 ),
                               ),
                             ],
@@ -2584,26 +2640,26 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
                         if (isVirtualAccount) ...[
                           Text(
                             "Nomor Virtual Account:",
-                            style: TextStyle(fontSize: 12, color: AppColors.onDarkMuted),
+                            style: TextStyle(fontSize: 12, color: context.c.inkSoft),
                           ),
                           const SizedBox(height: 8),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                             decoration: BoxDecoration(
-                              color: AppColors.bg,
+                              color: context.c.surface,
                               borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: AppColors.surfaceBorder),
+                              border: Border.all(color: context.c.line),
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
                                   payment?['va_number'] ?? "8800 1234 5678 9012",
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                     letterSpacing: 1.5,
-                                    color: AppColors.onDark,
+                                    color: context.c.ink,
                                   ),
                                 ),
                                 const SizedBox(width: 12),
@@ -2613,7 +2669,7 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
                                       const SnackBar(content: Text("Nomor VA disalin!")),
                                     );
                                   },
-                                  child: const Icon(Icons.copy, size: 20, color: AppColors.brandYellow),
+                                  child: Icon(Icons.copy, size: 20, color: context.c.accent),
                                 ),
                               ],
                             ),
@@ -2621,34 +2677,40 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
                           const SizedBox(height: 12),
                           Text(
                             "Transfer sesuai nominal ke nomor VA di atas",
-                            style: TextStyle(fontSize: 11, color: AppColors.onDarkMuted),
+                            style: TextStyle(fontSize: 11, color: context.c.inkSoft),
                             textAlign: TextAlign.center,
                           ),
-                          // TEST BUTTON - Remove in production
-                          const SizedBox(height: 16),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton.icon(
-                              onPressed: _simulatePaymentSuccess,
-                              icon: const Icon(Icons.bug_report, color: Colors.white, size: 18),
-                              label: const Text(
-                                "TEST: Simulasi Pembayaran Berhasil",
-                                style: TextStyle(color: Colors.white, fontSize: 12),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.purple,
-                                padding: const EdgeInsets.symmetric(vertical: 10),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
+                          // Tombol uji — hanya ada di build debug.
+                          // Komentar lama menulis "remove in production"
+                          // tapi tidak ada yang menegakkannya, jadi
+                          // tombolnya ikut ke rilis.
+                          if (kDebugMode) ...[
+                            const SizedBox(height: 16),
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton.icon(
+                                onPressed: _simulatePaymentSuccess,
+                                icon: const Icon(Icons.bug_report,
+                                    color: Colors.white, size: 18),
+                                label: const Text(
+                                  "TEST: Simulasi Pembayaran Berhasil",
+                                  style: TextStyle(color: Colors.white, fontSize: 12),
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.purple,
+                                  padding: const EdgeInsets.symmetric(vertical: 10),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
+                          ],
                         ] else ...[
                           // QRIS
                           Text(
                             "Scan QR untuk bayar:",
-                            style: TextStyle(fontSize: 12, color: AppColors.onDarkMuted),
+                            style: TextStyle(fontSize: 12, color: context.c.inkSoft),
                           ),
                           const SizedBox(height: 8),
                           Container(
@@ -2676,29 +2738,35 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
                           const SizedBox(height: 12),
                           Text(
                             "Scan dengan aplikasi e-wallet atau m-banking",
-                            style: TextStyle(fontSize: 11, color: AppColors.onDarkMuted),
+                            style: TextStyle(fontSize: 11, color: context.c.inkSoft),
                             textAlign: TextAlign.center,
                           ),
-                          // TEST BUTTON - Remove in production
-                          const SizedBox(height: 16),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton.icon(
-                              onPressed: _simulatePaymentSuccess,
-                              icon: const Icon(Icons.bug_report, color: Colors.white, size: 18),
-                              label: const Text(
-                                "TEST: Simulasi Pembayaran Berhasil",
-                                style: TextStyle(color: Colors.white, fontSize: 12),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.purple,
-                                padding: const EdgeInsets.symmetric(vertical: 10),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
+                          // Tombol uji — hanya ada di build debug.
+                          // Komentar lama menulis "remove in production"
+                          // tapi tidak ada yang menegakkannya, jadi
+                          // tombolnya ikut ke rilis.
+                          if (kDebugMode) ...[
+                            const SizedBox(height: 16),
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton.icon(
+                                onPressed: _simulatePaymentSuccess,
+                                icon: const Icon(Icons.bug_report,
+                                    color: Colors.white, size: 18),
+                                label: const Text(
+                                  "TEST: Simulasi Pembayaran Berhasil",
+                                  style: TextStyle(color: Colors.white, fontSize: 12),
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.purple,
+                                  padding: const EdgeInsets.symmetric(vertical: 10),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
+                          ],
                         ],
                       ],
                     ),
@@ -2725,17 +2793,17 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
                       (route) => false,
                     );
                   },
-                  icon: const Icon(Icons.confirmation_number_outlined, color: AppColors.ink, size: 20),
-                  label: const Text(
+                  icon: Icon(Icons.confirmation_number_outlined, color: context.c.onAccent, size: 20),
+                  label: Text(
                     "Lihat E-Tiket",
                     style: TextStyle(
-                      color: AppColors.ink,
+                      color: context.c.onAccent,
                       fontWeight: FontWeight.w700,
                       fontSize: 16,
                     ),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.brandYellow,
+                    backgroundColor: context.c.accent,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(999),
                     ),
@@ -2758,16 +2826,16 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
                     );
                   },
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: AppColors.surfaceBorder),
+                    side: BorderSide(color: context.c.line),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(999),
                     ),
                   ),
-                  child: const Text(
+                  child: Text(
                     "Kembali ke Beranda",
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
-                      color: AppColors.onDark,
+                      color: context.c.ink,
                     ),
                   ),
                 ),
@@ -2787,17 +2855,17 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
                       (route) => false,
                     );
                   },
-                  icon: const Icon(Icons.add_circle_outline, color: AppColors.ink, size: 20),
-                  label: const Text(
+                  icon: Icon(Icons.add_circle_outline, color: context.c.onAccent, size: 20),
+                  label: Text(
                     "Buat Booking Baru",
                     style: TextStyle(
-                      color: AppColors.ink,
+                      color: context.c.onAccent,
                       fontWeight: FontWeight.w700,
                       fontSize: 16,
                     ),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.brandYellow,
+                    backgroundColor: context.c.accent,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(999),
                     ),
@@ -2820,16 +2888,16 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
                     );
                   },
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: AppColors.surfaceBorder),
+                    side: BorderSide(color: context.c.line),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(999),
                     ),
                   ),
-                  child: const Text(
+                  child: Text(
                     "Lihat Pesanan Saya",
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
-                      color: AppColors.onDark,
+                      color: context.c.ink,
                     ),
                   ),
                 ),
@@ -2862,8 +2930,8 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
                     ),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange.shade600,
-                    disabledBackgroundColor: Colors.orange.shade300,
+                    backgroundColor: context.c.warn,
+                    disabledBackgroundColor: context.c.warn,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
@@ -2886,16 +2954,16 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
                     );
                   },
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: AppColors.surfaceBorder),
+                    side: BorderSide(color: context.c.line),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(999),
                     ),
                   ),
-                  child: const Text(
+                  child: Text(
                     "Lihat Pesanan Saya",
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
-                      color: AppColors.onDark,
+                      color: context.c.ink,
                     ),
                   ),
                 ),
@@ -2911,10 +2979,10 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
                     (route) => false,
                   );
                 },
-                child: const Text(
+                child: Text(
                   "Kembali ke Beranda",
                   style: TextStyle(
-                    color: AppColors.onDarkMuted,
+                    color: context.c.inkSoft,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -2934,18 +3002,18 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
         children: [
           Text(
             label,
-            style: const TextStyle(
-              color: AppColors.onDarkMuted,
+            style: TextStyle(
+              color: context.c.inkSoft,
               fontSize: 14,
             ),
           ),
           Flexible(
             child: Text(
               value,
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w500,
                 fontSize: 14,
-                color: AppColors.onDark,
+                color: context.c.ink,
               ),
               textAlign: TextAlign.right,
             ),
@@ -2962,18 +3030,18 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
         Expanded(
           child: Text(
             label,
-            style: const TextStyle(
-              color: AppColors.onDarkMuted,
+            style: TextStyle(
+              color: context.c.inkSoft,
               fontSize: 14,
             ),
           ),
         ),
         Text(
           _formatCurrencyInt(amount),
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.w500,
             fontSize: 14,
-            color: AppColors.onDark,
+            color: context.c.ink,
           ),
         ),
       ],

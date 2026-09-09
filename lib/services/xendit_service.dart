@@ -68,7 +68,7 @@ class XenditService {
         body: jsonEncode({
           'external_id': _generateExternalId(),
           'bank_code': bankCode,
-          'name': customerName ?? 'Customer Sporta',
+          'name': customerName ?? 'Customer Sportago',
           'expected_amount': amount,
           'description': description,
           'currency': 'IDR',
@@ -107,7 +107,7 @@ class XenditService {
         body: jsonEncode({
           'external_id': _generateExternalId(),
           'retail_outlet_name': retailOutletName,
-          'name': customerName ?? 'Customer Sporta',
+          'name': customerName ?? 'Customer Sportago',
           'expected_amount': amount,
           'description': description,
           'currency': 'IDR',

@@ -87,7 +87,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(result.message ?? "Verifikasi berhasil!"),
-              backgroundColor: Colors.green,
+              backgroundColor: context.c.ok,
               behavior: SnackBarBehavior.floating,
             ),
           );
@@ -152,7 +152,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(result.message ?? "Kode OTP baru telah dikirim"),
-            backgroundColor: Colors.green,
+            backgroundColor: context.c.ok,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -161,7 +161,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(result.message ?? "Gagal mengirim ulang kode"),
-            backgroundColor: Colors.red,
+            backgroundColor: context.c.danger,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -192,7 +192,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
     );
 
     final errorPinTheme = defaultPinTheme.copyDecorationWith(
-      border: Border.all(color: Colors.red.shade400, width: 1.6),
+      border: Border.all(color: context.c.danger, width: 1.6),
       borderRadius: BorderRadius.circular(14),
     );
 
@@ -292,7 +292,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                   const SizedBox(height: 12),
                   Text(
                     _errorMessage!,
-                    style: const TextStyle(color: Colors.red, fontSize: 13),
+                    style: TextStyle(color: context.c.danger, fontSize: 13),
                   ),
                 ],
 
