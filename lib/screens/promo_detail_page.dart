@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_tokens.dart';
 import 'package:flutter/services.dart';
 import '../constants/colors.dart';
 
@@ -34,7 +35,7 @@ class PromoDetailPage extends StatelessWidget {
             expandedHeight: 220,
             pinned: true,
             backgroundColor: AppColors.bg,
-            systemOverlayStyle: SystemUiOverlayStyle.light,
+            systemOverlayStyle: gayaOverlay(context),
             leading: Container(
               margin: const EdgeInsets.all(8),
               decoration: BoxDecoration(
@@ -539,7 +540,7 @@ class AllPromosPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: AppColors.bg,
         elevation: 0,
-        systemOverlayStyle: SystemUiOverlayStyle.light,
+        systemOverlayStyle: gayaOverlay(context),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.onDark),
           onPressed: () => Navigator.pop(context),

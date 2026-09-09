@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_tokens.dart';
 import 'package:flutter/services.dart';
 import '../services/venue_service.dart';
 import '../models/venue.dart';
@@ -53,7 +54,7 @@ class _SearchPageState extends State<SearchPage> {
     return Scaffold(
       backgroundColor: AppColors.bg,
       appBar: AppBar(
-        systemOverlayStyle: SystemUiOverlayStyle.light,
+        systemOverlayStyle: gayaOverlay(context),
         backgroundColor: AppColors.bg,
         elevation: 0,
         leading: IconButton(

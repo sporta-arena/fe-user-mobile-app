@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_tokens.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:intl/intl.dart';
@@ -94,7 +95,7 @@ class _MyBookingPageState extends State<MyBookingPage> with SingleTickerProvider
             style: TextStyle(color: AppColors.onDark, fontWeight: FontWeight.bold)
           ),
           backgroundColor: AppColors.bg,
-          systemOverlayStyle: SystemUiOverlayStyle.light,
+          systemOverlayStyle: gayaOverlay(context),
           elevation: 0,
           leading: widget.showBackButton ? IconButton(
             icon: const Icon(Icons.arrow_back_ios, color: AppColors.onDark),
@@ -152,7 +153,7 @@ class _MyBookingPageState extends State<MyBookingPage> with SingleTickerProvider
               floating: false,
               pinned: true,
               backgroundColor: AppColors.bg,
-              systemOverlayStyle: SystemUiOverlayStyle.light,
+              systemOverlayStyle: gayaOverlay(context),
               leading: widget.showBackButton ? IconButton(
                 icon: const Icon(Icons.arrow_back_ios, color: AppColors.onDark),
                 onPressed: () {
@@ -1191,7 +1192,7 @@ class _PaymentWaitingPageState extends State<PaymentWaitingPage> {
           style: TextStyle(color: AppColors.onDark, fontWeight: FontWeight.bold),
         ),
         backgroundColor: AppColors.bg,
-        systemOverlayStyle: SystemUiOverlayStyle.light,
+        systemOverlayStyle: gayaOverlay(context),
         elevation: 0,
         iconTheme: const IconThemeData(color: AppColors.onDark),
       ),

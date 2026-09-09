@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_tokens.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import '../constants/colors.dart';
@@ -88,7 +89,7 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
       return Scaffold(
         backgroundColor: AppColors.bg,
         appBar: AppBar(
-          systemOverlayStyle: SystemUiOverlayStyle.light,
+          systemOverlayStyle: gayaOverlay(context),
           title: const Text(
             "Riwayat Pesan",
             style: TextStyle(color: AppColors.onDark, fontWeight: FontWeight.bold)
@@ -139,7 +140,7 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
     return Scaffold(
       backgroundColor: AppColors.bg,
       appBar: AppBar(
-        systemOverlayStyle: SystemUiOverlayStyle.light,
+        systemOverlayStyle: gayaOverlay(context),
         title: const Text(
           "Riwayat Pesan",
           style: TextStyle(color: AppColors.onDark, fontWeight: FontWeight.bold)

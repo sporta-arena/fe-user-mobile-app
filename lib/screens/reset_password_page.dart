@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import '../widgets/sportago_mark.dart';
+import '../theme/app_tokens.dart';
 import 'package:flutter/services.dart';
 import 'login_page.dart';
 import '../services/auth_service.dart';
-import '../constants/colors.dart';
 
 class ResetPasswordPage extends StatefulWidget {
   final String email;
@@ -109,7 +110,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       context: context,
       barrierDismissible: false,
       builder: (ctx) => Dialog(
-        backgroundColor: AppColors.surface,
+        backgroundColor: context.c.raised,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -119,31 +120,31 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppColors.brandYellow.withValues(alpha: 0.15),
+                  color: context.c.accent.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.check_rounded,
-                  color: AppColors.brandYellow,
+                  color: context.c.accent,
                   size: 48,
                 ),
               ),
               const SizedBox(height: 20),
-              const Text(
+              Text(
                 "Password berhasil direset!",
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w900,
-                  color: AppColors.onDark,
+                  color: context.c.ink,
                 ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 12),
-              const Text(
+              Text(
                 "Password kamu sudah diperbarui. Silakan login dengan password baru.",
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: AppColors.onDarkMuted,
+                  color: context.c.inkSoft,
                   fontSize: 14,
                   height: 1.5,
                 ),
@@ -154,7 +155,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 height: 52,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.brandYellow,
+                    backgroundColor: context.c.accent,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(999),
                     ),
@@ -168,10 +169,10 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                       (route) => false,
                     );
                   },
-                  child: const Text(
+                  child: Text(
                     "Masuk sekarang",
                     style: TextStyle(
-                      color: AppColors.ink,
+                      color: context.c.onAccent,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -187,9 +188,9 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bg,
+      backgroundColor: context.c.surface,
       body: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: SystemUiOverlayStyle.light,
+        value: gayaOverlay(context),
         child: SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
@@ -202,31 +203,31 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                     onPressed: () => Navigator.pop(context),
                     padding: EdgeInsets.zero,
                     alignment: Alignment.centerLeft,
-                    icon: const Icon(Icons.arrow_back_rounded,
-                        color: AppColors.onDark, size: 26),
+                    icon: Icon(Icons.arrow_back_rounded,
+                        color: context.c.ink, size: 26),
                   ),
                   const SizedBox(height: 16),
                 ],
 
                 // Brand mark
-                Image.asset('assets/sportago_mark.png', height: 40),
+                const SportagoMark(height: 40),
                 const SizedBox(height: 24),
 
                 // Heading
-                const Text(
+                Text(
                   "Buat password baru",
                   style: TextStyle(
                     fontSize: 30,
                     fontWeight: FontWeight.w900,
-                    color: AppColors.onDark,
+                    color: context.c.ink,
                     height: 1.1,
                   ),
                 ),
                 const SizedBox(height: 6),
-                const Text(
+                Text(
                   "Buat password baru yang kuat. Password lama akan dinonaktifkan.",
                   style: TextStyle(
-                      fontSize: 15, color: AppColors.onDarkMuted, height: 1.4),
+                      fontSize: 15, color: context.c.inkSoft, height: 1.4),
                 ),
                 const SizedBox(height: 28),
 
@@ -263,19 +264,19 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    border: Border.all(color: AppColors.surfaceBorder),
+                    color: context.c.raised,
+                    border: Border.all(color: context.c.line),
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         "Password harus mengandung:",
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.onDark,
+                          color: context.c.ink,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -296,27 +297,27 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                   child: ElevatedButton(
                     onPressed: _isLoading ? null : _handleResetPassword,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.brandYellow,
+                      backgroundColor: context.c.accent,
                       disabledBackgroundColor:
-                          AppColors.brandYellow.withValues(alpha: 0.5),
+                          context.c.accent.withValues(alpha: 0.5),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(999),
                       ),
                       elevation: 0,
                     ),
                     child: _isLoading
-                        ? const SizedBox(
+                        ? SizedBox(
                             height: 22,
                             width: 22,
                             child: CircularProgressIndicator(
-                                color: AppColors.ink, strokeWidth: 2),
+                                color: context.c.onAccent, strokeWidth: 2),
                           )
-                        : const Text(
+                        : Text(
                             "Simpan password",
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
-                              color: AppColors.ink,
+                              color: context.c.onAccent,
                             ),
                           ),
                   ),
@@ -334,10 +335,10 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       padding: const EdgeInsets.only(bottom: 8),
       child: Text(
         text,
-        style: const TextStyle(
+        style: TextStyle(
           fontWeight: FontWeight.w600,
           fontSize: 13,
-          color: AppColors.onDark,
+          color: context.c.ink,
         ),
       ),
     );
@@ -359,18 +360,18 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     return TextField(
       controller: controller,
       obscureText: isPassword && !isVisible,
-      style: const TextStyle(color: AppColors.onDark),
+      style: TextStyle(color: context.c.ink),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: const TextStyle(color: AppColors.onDarkMuted),
+        hintStyle: TextStyle(color: context.c.inkSoft),
         filled: true,
-        fillColor: AppColors.surface,
+        fillColor: context.c.raised,
         errorText: errorText,
         errorMaxLines: 2,
-        prefixIcon: Icon(icon, color: AppColors.onDarkMuted, size: 20),
-        border: border(AppColors.surfaceBorder, 1),
-        enabledBorder: border(AppColors.surfaceBorder, 1),
-        focusedBorder: border(AppColors.brandYellow, 1.6),
+        prefixIcon: Icon(icon, color: context.c.inkSoft, size: 20),
+        border: border(context.c.line, 1),
+        enabledBorder: border(context.c.line, 1),
+        focusedBorder: border(context.c.accent, 1.6),
         errorBorder: border(Colors.red.shade400, 1),
         focusedErrorBorder: border(Colors.red.shade400, 1.6),
         suffixIcon: isPassword
@@ -379,7 +380,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                   isVisible
                       ? Icons.visibility_outlined
                       : Icons.visibility_off_outlined,
-                  color: AppColors.onDarkMuted,
+                  color: context.c.inkSoft,
                   size: 20,
                 ),
                 onPressed: onVisibilityToggle,
@@ -394,12 +395,12 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       padding: const EdgeInsets.only(top: 3),
       child: Row(
         children: [
-          const Icon(Icons.check_circle,
-              size: 14, color: AppColors.brandYellow),
+          Icon(Icons.check_circle,
+              size: 14, color: context.c.accent),
           const SizedBox(width: 8),
           Text(
             text,
-            style: const TextStyle(fontSize: 11, color: AppColors.onDarkMuted),
+            style: TextStyle(fontSize: 11, color: context.c.inkSoft),
           ),
         ],
       ),

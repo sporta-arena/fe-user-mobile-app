@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_tokens.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 
@@ -16,7 +17,6 @@ import '../services/venue_service.dart';
 import '../services/field_type_service.dart';
 import '../models/venue.dart' as model;
 import '../models/field_type.dart';
-import '../constants/colors.dart';
 
 class HomePage extends StatefulWidget {
   /// Tab to open initially (0=Home, 1=Discover, 2=Transaksi, 3=Profile).
@@ -49,7 +49,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bg,
+      backgroundColor: context.c.surface,
       body: IndexedStack(index: _selectedIndex, children: _pages),
       bottomNavigationBar: _BottomNav(
         selectedIndex: _selectedIndex,
@@ -78,9 +78,9 @@ class _BottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.bg,
-        border: Border(top: BorderSide(color: AppColors.surfaceBorder)),
+      decoration: BoxDecoration(
+        color: context.c.surface,
+        border: Border(top: BorderSide(color: context.c.line)),
       ),
       child: SafeArea(
         child: Padding(
@@ -99,14 +99,14 @@ class _BottomNav extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(sel ? active : inactive,
-                          color: sel ? AppColors.brandYellow : AppColors.onDarkMuted,
+                          color: sel ? context.c.accent : context.c.inkSoft,
                           size: 24),
                       const SizedBox(height: 4),
                       Text(label,
                           style: TextStyle(
                             color: sel
-                                ? AppColors.brandYellow
-                                : AppColors.onDarkMuted,
+                                ? context.c.accent
+                                : context.c.inkSoft,
                             fontSize: 10,
                             fontWeight: sel ? FontWeight.w700 : FontWeight.w500,
                           )),
@@ -198,8 +198,8 @@ class _DashboardContentState extends State<DashboardContent> {
       child: Stack(
         children: [
           RefreshIndicator(
-            color: AppColors.brandYellow,
-            backgroundColor: AppColors.surface,
+            color: context.c.accent,
+            backgroundColor: context.c.raised,
             onRefresh: () async {
               await Future.wait([_loadVenues(), _loadFieldTypes()]);
             },
@@ -243,22 +243,22 @@ class _DashboardContentState extends State<DashboardContent> {
               onTap: _getLocation,
               child: Row(
                 children: [
-                  const Icon(Icons.location_on_rounded,
-                      color: AppColors.brandYellow, size: 20),
+                  Icon(Icons.location_on_rounded,
+                      color: context.c.accent, size: 20),
                   const SizedBox(width: 6),
                   Flexible(
                     child: Text(
                       _address,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: AppColors.onDark,
+                      style: TextStyle(
+                        color: context.c.ink,
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),
-                  const Icon(Icons.keyboard_arrow_down_rounded,
-                      color: AppColors.onDark, size: 22),
+                  Icon(Icons.keyboard_arrow_down_rounded,
+                      color: context.c.ink, size: 22),
                 ],
               ),
             ),
@@ -279,11 +279,11 @@ class _DashboardContentState extends State<DashboardContent> {
       child: Container(
         height: 42,
         width: 42,
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
+        decoration: BoxDecoration(
+          color: context.c.raised,
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, color: AppColors.onDark, size: 22),
+        child: Icon(icon, color: context.c.ink, size: 22),
       ),
     );
   }
@@ -299,16 +299,16 @@ class _DashboardContentState extends State<DashboardContent> {
           height: 48,
           padding: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: context.c.raised,
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: AppColors.surfaceBorder),
+            border: Border.all(color: context.c.line),
           ),
-          child: const Row(
+          child: Row(
             children: [
-              Icon(Icons.search_rounded, color: AppColors.onDarkMuted, size: 22),
+              Icon(Icons.search_rounded, color: context.c.inkSoft, size: 22),
               SizedBox(width: 10),
               Text("Cari arena",
-                  style: TextStyle(color: AppColors.onDarkMuted, fontSize: 15)),
+                  style: TextStyle(color: context.c.inkSoft, fontSize: 15)),
             ],
           ),
         ),
@@ -333,11 +333,11 @@ class _DashboardContentState extends State<DashboardContent> {
               width: 40,
               margin: const EdgeInsets.only(right: 10),
               decoration: BoxDecoration(
-                color: AppColors.brandYellow,
+                color: context.c.accent,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(Icons.grid_view_rounded,
-                  color: AppColors.ink, size: 20),
+              child: Icon(Icons.grid_view_rounded,
+                  color: context.c.onAccent, size: 20),
             ),
           ),
           ..._fieldTypes.map(_categoryChip),
@@ -363,17 +363,17 @@ class _DashboardContentState extends State<DashboardContent> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: context.c.raised,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.surfaceBorder),
+            border: Border.all(color: context.c.line),
           ),
           child: Row(
             children: [
-              Icon(type.icon, color: AppColors.brandYellow, size: 18),
+              Icon(type.icon, color: context.c.accent, size: 18),
               const SizedBox(width: 8),
               Text(type.label,
-                  style: const TextStyle(
-                      color: AppColors.onDark,
+                  style: TextStyle(
+                      color: context.c.ink,
                       fontSize: 14,
                       fontWeight: FontWeight.w600)),
             ],
@@ -394,16 +394,16 @@ class _DashboardContentState extends State<DashboardContent> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(title,
-                  style: const TextStyle(
-                      color: AppColors.onDark,
+                  style: TextStyle(
+                      color: context.c.ink,
                       fontSize: 18,
                       fontWeight: FontWeight.w700)),
               GestureDetector(
                 onTap: () => Navigator.push(context,
                     MaterialPageRoute(builder: (_) => const SearchPage(keyword: ""))),
-                child: const Text("Lihat semua",
+                child: Text("Lihat semua",
                     style: TextStyle(
-                        color: AppColors.brandYellow,
+                        color: context.c.accent,
                         fontSize: 14,
                         fontWeight: FontWeight.w700)),
               ),
@@ -414,8 +414,8 @@ class _DashboardContentState extends State<DashboardContent> {
         SizedBox(
           height: 232,
           child: _loadingVenues
-              ? const Center(
-                  child: CircularProgressIndicator(color: AppColors.brandYellow))
+              ? Center(
+                  child: CircularProgressIndicator(color: context.c.accent))
               : venues.isEmpty
                   ? _emptyVenues()
                   : ListView.separated(
@@ -431,12 +431,12 @@ class _DashboardContentState extends State<DashboardContent> {
   }
 
   Widget _emptyVenues() {
-    return const Padding(
+    return Padding(
       padding: EdgeInsets.symmetric(horizontal: 20),
       child: Align(
         alignment: Alignment.centerLeft,
         child: Text("Belum ada venue.",
-            style: TextStyle(color: AppColors.onDarkMuted)),
+            style: TextStyle(color: context.c.inkSoft)),
       ),
     );
   }
@@ -451,7 +451,7 @@ class _DashboardContentState extends State<DashboardContent> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         decoration: BoxDecoration(
-          color: AppColors.brandYellow,
+          color: context.c.accent,
           borderRadius: BorderRadius.circular(999),
           boxShadow: [
             BoxShadow(
@@ -461,14 +461,14 @@ class _DashboardContentState extends State<DashboardContent> {
             ),
           ],
         ),
-        child: const Row(
+        child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.map_rounded, color: AppColors.ink, size: 20),
+            Icon(Icons.map_rounded, color: context.c.onAccent, size: 20),
             SizedBox(width: 8),
             Text("Map",
                 style: TextStyle(
-                    color: AppColors.ink,
+                    color: context.c.onAccent,
                     fontSize: 15,
                     fontWeight: FontWeight.w700)),
           ],
@@ -496,9 +496,9 @@ class _VenueCard extends StatelessWidget {
       child: Container(
         width: 216,
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: context.c.raised,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppColors.surfaceBorder),
+          border: Border.all(color: context.c.line),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -507,7 +507,7 @@ class _VenueCard extends StatelessWidget {
             ClipRRect(
               borderRadius:
                   const BorderRadius.vertical(top: Radius.circular(14)),
-              child: _image(),
+              child: _image(context),
             ),
             Padding(
               padding: const EdgeInsets.all(12),
@@ -521,21 +521,21 @@ class _VenueCard extends StatelessWidget {
                           venue.name,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: AppColors.onDark,
+                          style: TextStyle(
+                            color: context.c.ink,
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
                       ),
                       const SizedBox(width: 6),
-                      const Icon(Icons.star_rounded,
-                          color: AppColors.brandYellow, size: 16),
+                      Icon(Icons.star_rounded,
+                          color: context.c.accent, size: 16),
                       const SizedBox(width: 2),
                       Text(
                         rating != null ? rating.toStringAsFixed(1) : "Baru",
-                        style: const TextStyle(
-                          color: AppColors.onDark,
+                        style: TextStyle(
+                          color: context.c.ink,
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                         ),
@@ -545,22 +545,22 @@ class _VenueCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      const Icon(Icons.location_on_outlined,
-                          color: AppColors.onDarkMuted, size: 14),
+                      Icon(Icons.location_on_outlined,
+                          color: context.c.inkSoft, size: 14),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
                           venue.city,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                              color: AppColors.onDarkMuted, fontSize: 12),
+                          style: TextStyle(
+                              color: context.c.inkSoft, fontSize: 12),
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 10),
-                  _facilities(),
+                  _facilities(context),
                 ],
               ),
             ),
@@ -570,7 +570,7 @@ class _VenueCard extends StatelessWidget {
     );
   }
 
-  Widget _image() {
+  Widget _image(BuildContext context) {
     final url = venue.coverImageUrl;
     if (url != null && url.isNotEmpty) {
       return Image.network(
@@ -578,28 +578,28 @@ class _VenueCard extends StatelessWidget {
         height: 120,
         width: 216,
         fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => _placeholder(),
+        errorBuilder: (_, __, ___) => _placeholder(context),
       );
     }
-    return _placeholder();
+    return _placeholder(context);
   }
 
-  Widget _placeholder() {
+  Widget _placeholder(BuildContext context) {
     return Container(
       height: 120,
       width: 216,
-      color: const Color(0xFF222226),
-      child: const Icon(Icons.stadium_rounded,
-          color: AppColors.onDarkMuted, size: 40),
+      color: context.c.hoverSurface,
+      child: Icon(Icons.stadium_rounded,
+          color: context.c.inkSoft, size: 40),
     );
   }
 
-  Widget _facilities() {
+  Widget _facilities(BuildContext context) {
     final icons = venue.facilities.take(4).map(_facilityIcon).toList();
     if (icons.isEmpty) {
       return Text(
         "${venue.openHour} - ${venue.closeHour}",
-        style: const TextStyle(color: AppColors.onDarkMuted, fontSize: 11),
+        style: TextStyle(color: context.c.inkSoft, fontSize: 11),
       );
     }
     return Row(
@@ -607,7 +607,7 @@ class _VenueCard extends StatelessWidget {
         for (final ic in icons)
           Padding(
             padding: const EdgeInsets.only(right: 12),
-            child: Icon(ic, color: AppColors.onDarkMuted, size: 16),
+            child: Icon(ic, color: context.c.inkSoft, size: 16),
           ),
       ],
     );

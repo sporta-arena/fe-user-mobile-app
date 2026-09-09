@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_tokens.dart';
 import 'package:flutter/services.dart';
 import '../constants/colors.dart';
 import '../models/field_type.dart';
@@ -40,7 +41,7 @@ class _AllCategoriesPageState extends State<AllCategoriesPage> {
     return Scaffold(
       backgroundColor: AppColors.bg,
       appBar: AppBar(
-        systemOverlayStyle: SystemUiOverlayStyle.light,
+        systemOverlayStyle: gayaOverlay(context),
         title: const Text(
           'Semua Kategori',
           style: TextStyle(

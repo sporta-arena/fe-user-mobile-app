@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_tokens.dart';
 import 'package:flutter/services.dart';
 import 'loyalty_page.dart';
 import 'edit_profile_page.dart';
@@ -119,7 +120,7 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       backgroundColor: AppColors.bg,
       body: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: SystemUiOverlayStyle.light,
+        value: gayaOverlay(context),
         child: RefreshIndicator(
         onRefresh: _loadUserStats,
         color: AppColors.brandYellow,

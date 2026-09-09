@@ -50,6 +50,8 @@ dependencies:
   flutter_map: ^8.1.0
   latlong2: ^0.9.1
   google_sign_in: ^6.2.1
+  google_fonts: ^8.1.0
+  web_socket_channel: ^3.0.3
 
 dev_dependencies:
   flutter_test:
@@ -126,3 +128,12 @@ flutter_launcher_icons:
   ios: true
   image_path: "assets/app_icon.png" # Path ke icon PNG
   min_sdk_android: 21
+  # Tanpa ini, Android 8+ menjejalkan ikon persegi ke dalam lingkaran
+  # putih berbingkai — lambangnya jadi kecil dan tampak seperti stiker
+  # ditempel. Lapisan depan memakai berkas terpisah karena topeng Android
+  # hanya menjamin sekitar 60% bagian tengah kanvas.
+  # Sama persis dengan app mitra: hitam dengan lambang kuning, warna
+  # asli berkas logo Sportago.
+  adaptive_icon_background: "#000000"
+  adaptive_icon_foreground: "assets/app_icon_foreground.png"
+  remove_alpha_ios: true

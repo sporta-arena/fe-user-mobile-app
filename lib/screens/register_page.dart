@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import '../widgets/sportago_mark.dart';
+import '../theme/app_tokens.dart';
 import 'package:flutter/services.dart';
 import 'otp_page.dart';
 import '../services/auth_service.dart';
-import '../constants/colors.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -161,9 +162,9 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bg,
+      backgroundColor: context.c.surface,
       body: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: SystemUiOverlayStyle.light,
+        value: gayaOverlay(context),
         child: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
@@ -175,29 +176,29 @@ class _RegisterPageState extends State<RegisterPage> {
                 onPressed: () => Navigator.pop(context),
                 padding: EdgeInsets.zero,
                 alignment: Alignment.centerLeft,
-                icon: const Icon(Icons.arrow_back_rounded,
-                    color: AppColors.onDark, size: 26),
+                icon: Icon(Icons.arrow_back_rounded,
+                    color: context.c.ink, size: 26),
               ),
               const SizedBox(height: 16),
 
               // Brand mark
-              Image.asset('assets/sportago_mark.png', height: 40),
+              const SportagoMark(height: 40),
               const SizedBox(height: 24),
 
               // Heading
-              const Text(
+              Text(
                 "Buat akun",
                 style: TextStyle(
                   fontSize: 30,
                   fontWeight: FontWeight.w900,
-                  color: AppColors.onDark,
+                  color: context.c.ink,
                   height: 1.1,
                 ),
               ),
               const SizedBox(height: 6),
-              const Text(
+              Text(
                 "Lengkapi data diri untuk bergabung di Sportago.",
-                style: TextStyle(fontSize: 15, color: AppColors.onDarkMuted),
+                style: TextStyle(fontSize: 15, color: context.c.inkSoft),
               ),
               const SizedBox(height: 28),
 
@@ -271,13 +272,13 @@ class _RegisterPageState extends State<RegisterPage> {
                     width: 24,
                     child: Checkbox(
                       value: _agreedToTerms,
-                      activeColor: AppColors.brandYellow,
-                      checkColor: AppColors.ink,
+                      activeColor: context.c.accent,
+                      checkColor: context.c.onAccent,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(6),
                       ),
                       side: BorderSide(
-                        color: _termsError ? Colors.red : AppColors.surfaceBorder,
+                        color: _termsError ? Colors.red : context.c.line,
                         width: 2,
                       ),
                       onChanged: (value) {
@@ -295,15 +296,15 @@ class _RegisterPageState extends State<RegisterPage> {
                         // TODO: Navigate to Terms & Conditions
                       },
                       child: RichText(
-                        text: const TextSpan(
+                        text: TextSpan(
                           text: 'Saya menyetujui ',
                           style: TextStyle(
-                              color: AppColors.onDarkMuted, fontSize: 13),
+                              color: context.c.inkSoft, fontSize: 13),
                           children: [
                             TextSpan(
                               text: 'Syarat & Ketentuan',
                               style: TextStyle(
-                                color: AppColors.brandYellow,
+                                color: context.c.accent,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
@@ -311,7 +312,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             TextSpan(
                               text: 'Kebijakan Privasi',
                               style: TextStyle(
-                                color: AppColors.brandYellow,
+                                color: context.c.accent,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
@@ -340,27 +341,27 @@ class _RegisterPageState extends State<RegisterPage> {
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : _handleRegister,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.brandYellow,
+                    backgroundColor: context.c.accent,
                     disabledBackgroundColor:
-                        AppColors.brandYellow.withValues(alpha: 0.5),
+                        context.c.accent.withValues(alpha: 0.5),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(999),
                     ),
                     elevation: 0,
                   ),
                   child: _isLoading
-                      ? const SizedBox(
+                      ? SizedBox(
                           height: 22,
                           width: 22,
                           child: CircularProgressIndicator(
-                              color: AppColors.ink, strokeWidth: 2),
+                              color: context.c.onAccent, strokeWidth: 2),
                         )
-                      : const Text(
+                      : Text(
                           "Daftar sekarang",
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.ink,
+                            color: context.c.onAccent,
                           ),
                         ),
                 ),
@@ -372,15 +373,15 @@ class _RegisterPageState extends State<RegisterPage> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text("Sudah punya akun? ",
+                    Text("Sudah punya akun? ",
                         style: TextStyle(
-                            color: AppColors.onDarkMuted, fontSize: 14)),
+                            color: context.c.inkSoft, fontSize: 14)),
                     GestureDetector(
                       onTap: () => Navigator.pop(context),
-                      child: const Text(
+                      child: Text(
                         "Masuk",
                         style: TextStyle(
-                          color: AppColors.brandYellow,
+                          color: context.c.accent,
                           fontWeight: FontWeight.w700,
                           fontSize: 14,
                         ),
@@ -402,10 +403,10 @@ class _RegisterPageState extends State<RegisterPage> {
       padding: const EdgeInsets.only(bottom: 8),
       child: Text(
         text,
-        style: const TextStyle(
+        style: TextStyle(
           fontWeight: FontWeight.w600,
           fontSize: 13,
-          color: AppColors.onDark,
+          color: context.c.ink,
         ),
       ),
     );
@@ -430,20 +431,20 @@ class _RegisterPageState extends State<RegisterPage> {
       controller: controller,
       obscureText: isPassword && !isVisible,
       keyboardType: inputType,
-      style: const TextStyle(color: AppColors.onDark),
+      style: TextStyle(color: context.c.ink),
       inputFormatters:
           isNumberOnly ? [FilteringTextInputFormatter.digitsOnly] : [],
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: const TextStyle(color: AppColors.onDarkMuted),
+        hintStyle: TextStyle(color: context.c.inkSoft),
         filled: true,
-        fillColor: AppColors.surface,
+        fillColor: context.c.raised,
         errorText: errorText,
         errorMaxLines: 2,
-        prefixIcon: Icon(icon, color: AppColors.onDarkMuted, size: 20),
-        border: border(AppColors.surfaceBorder, 1),
-        enabledBorder: border(AppColors.surfaceBorder, 1),
-        focusedBorder: border(AppColors.brandYellow, 1.6),
+        prefixIcon: Icon(icon, color: context.c.inkSoft, size: 20),
+        border: border(context.c.line, 1),
+        enabledBorder: border(context.c.line, 1),
+        focusedBorder: border(context.c.accent, 1.6),
         errorBorder: border(Colors.red.shade400, 1),
         focusedErrorBorder: border(Colors.red.shade400, 1.6),
         suffixIcon: isPassword
@@ -452,7 +453,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   isVisible
                       ? Icons.visibility_outlined
                       : Icons.visibility_off_outlined,
-                  color: AppColors.onDarkMuted,
+                  color: context.c.inkSoft,
                   size: 20,
                 ),
                 onPressed: onVisibilityToggle,

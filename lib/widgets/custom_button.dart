@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../constants/colors.dart';
+import '../theme/app_tokens.dart';
 
 class CustomButton extends StatelessWidget {
 final String text;
@@ -27,8 +27,8 @@ this.height = 45,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            backgroundColor ?? AppColors.primaryBlue,
-            backgroundColor ?? AppColors.darkBlue,
+            backgroundColor ?? context.c.accent,
+            backgroundColor ?? context.c.accentHover,
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,

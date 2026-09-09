@@ -1,29 +1,67 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/login_page.dart';
 import 'screens/home_page.dart';
 import 'services/auth_service.dart';
+import 'theme/app_theme.dart';
+import 'theme/app_tokens.dart';
+import 'widgets/sportago_mark.dart';
+import 'theme/theme_controller.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('id', null);
+  // Tema dibaca sebelum frame pertama supaya layar tidak berkedip
+  // terang lalu gelap waktu aplikasi dibuka.
+  await ThemeController.instance.muat();
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Sportago',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        fontFamily: 'Archivo',
-      ),
-      home: const SplashScreen(),
-      debugShowCheckedModeBanner: false,
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: ThemeController.instance,
+      builder: (context, mode, _) {
+        return MaterialApp(
+          title: 'Sportago',
+          theme: AppTheme.light,
+          darkTheme: AppTheme.dark,
+          // ThemeMode.system dipakai selama pengguna belum pernah
+          // memilih sendiri — sama seperti di fe-web.
+          themeMode: mode,
+          // Ikon bilah status (jam, sinyal, baterai) ikut tema. Tanpa
+          // ini, layar tanpa AppBar — seperti halaman masuk — tetap
+          // memakai ikon terang, dan jamnya hilang di latar putih.
+          builder: (context, child) {
+            final gelap = Theme.of(context).brightness == Brightness.dark;
+            return AnnotatedRegion<SystemUiOverlayStyle>(
+              // Bidangnya disetel eksplisit, bukan lewat konstanta
+              // bernama: di Flutter, `SystemUiOverlayStyle.light` justru
+              // berarti ikonnya GELAP (gaya untuk latar terang), dan
+              // penamaan terbalik itu gampang bikin salah.
+              value: SystemUiOverlayStyle(
+                statusBarColor: Colors.transparent,
+                statusBarIconBrightness:
+                    gelap ? Brightness.light : Brightness.dark,
+                statusBarBrightness:
+                    gelap ? Brightness.dark : Brightness.light,
+                systemNavigationBarColor:
+                    Theme.of(context).scaffoldBackgroundColor,
+                systemNavigationBarIconBrightness:
+                    gelap ? Brightness.light : Brightness.dark,
+              ),
+              child: child ?? const SizedBox.shrink(),
+            );
+          },
+          home: const SplashScreen(),
+          debugShowCheckedModeBanner: false,
+        );
+      },
     );
   }
 }
@@ -85,14 +123,19 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
 
+    // Dulu: logo utuh di atas latar kuning #FFFF21. Logonya bergaris
+    // hitam dengan isian kuning, jadi isiannya lenyap ke latar dan yang
+    // kebaca cuma garis hitamnya — logonya jadi nyaru.
+    //
+    // Sekarang: lambang satu warna yang diwarnai ke aksen tema, plus
+    // wordmark sebagai teks. Kontrasnya benar di terang maupun gelap,
+    // dan warnanya sama persis dengan halaman masuk sesudahnya.
     return Scaffold(
-      // Sportago brand yellow (from Figma splash design)
-      backgroundColor: const Color(0xFFFFFF21),
+      backgroundColor: context.c.surface,
       body: Center(
-        child: Image.asset(
-          'assets/sportago_logo.png',
-          width: screenWidth * 0.6,
-          fit: BoxFit.contain,
+        child: SportagoWordmark(
+          markHeight: screenWidth * 0.16,
+          fontSize: screenWidth * 0.095,
         ),
       ),
     );

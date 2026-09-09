@@ -1,5 +1,7 @@
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
+import '../widgets/sportago_mark.dart';
+import '../theme/app_tokens.dart';
 import 'login_page.dart';
 import 'home_page.dart';
 import '../services/auth_service.dart';
@@ -100,11 +102,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  // Sportago "S" mark
-                  Image.asset(
-                    'assets/sportago_mark.png',
-                    height: 48,
-                  ),
+                  // Lambang duduk di atas foto, jadi warnanya diambil
+                  // dari palet "di atas media".
+                  const SportagoMark(height: 48, onMedia: true),
                   const SizedBox(height: 16),
 
                   // Tagline

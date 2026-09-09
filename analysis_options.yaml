@@ -26,3 +26,11 @@ linter:
 
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options
+
+analyzer:
+  exclude:
+    # Proyek Flutter lama yang tertinggal di dalam repo (Januari 2026).
+    # Bukan bagian dari aplikasi yang dibangun — ikut dipindai analyzer
+    # dan menyumbang 177 dari 210 peringatan, jadi menutupi masalah asli.
+    - sporta_app/**
+    - build/**

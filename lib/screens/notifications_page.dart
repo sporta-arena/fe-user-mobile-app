@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_tokens.dart';
 import 'package:flutter/services.dart';
 import '../constants/colors.dart';
 
@@ -62,7 +63,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
       child: Scaffold(
         backgroundColor: AppColors.bg,
         appBar: AppBar(
-          systemOverlayStyle: SystemUiOverlayStyle.light,
+          systemOverlayStyle: gayaOverlay(context),
           title: const Text(
             "Notifikasi",
             style: TextStyle(color: AppColors.onDark, fontWeight: FontWeight.bold)

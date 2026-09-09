@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_tokens.dart';
 import 'package:flutter/services.dart';
 import 'search_page.dart';
 import 'venue_detail_page.dart';
@@ -54,7 +55,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
               backgroundColor: AppColors.bg,
               elevation: 0,
               floating: true,
-              systemOverlayStyle: SystemUiOverlayStyle.light,
+              systemOverlayStyle: gayaOverlay(context),
               title: const Text(
                 'Discover',
                 style: TextStyle(

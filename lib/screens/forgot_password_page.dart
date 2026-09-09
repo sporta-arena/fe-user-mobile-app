@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import '../widgets/sportago_mark.dart';
+import '../theme/app_tokens.dart';
 import 'package:flutter/services.dart';
 import 'otp_page.dart';
 import '../services/auth_service.dart';
-import '../constants/colors.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
@@ -86,9 +87,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         );
 
     return Scaffold(
-      backgroundColor: AppColors.bg,
+      backgroundColor: context.c.surface,
       body: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: SystemUiOverlayStyle.light,
+        value: gayaOverlay(context),
         child: SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
@@ -101,58 +102,58 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                     onPressed: () => Navigator.pop(context),
                     padding: EdgeInsets.zero,
                     alignment: Alignment.centerLeft,
-                    icon: const Icon(Icons.arrow_back_rounded,
-                        color: AppColors.onDark, size: 26),
+                    icon: Icon(Icons.arrow_back_rounded,
+                        color: context.c.ink, size: 26),
                   ),
                   const SizedBox(height: 16),
                 ],
 
                 // Brand mark
-                Image.asset('assets/sportago_mark.png', height: 40),
+                const SportagoMark(height: 40),
                 const SizedBox(height: 24),
 
                 // Heading
-                const Text(
+                Text(
                   "Lupa password?",
                   style: TextStyle(
                     fontSize: 30,
                     fontWeight: FontWeight.w900,
-                    color: AppColors.onDark,
+                    color: context.c.ink,
                     height: 1.1,
                   ),
                 ),
                 const SizedBox(height: 6),
-                const Text(
+                Text(
                   "Masukkan email yang terdaftar, kami kirim kode OTP untuk verifikasi.",
                   style: TextStyle(
-                      fontSize: 15, color: AppColors.onDarkMuted, height: 1.4),
+                      fontSize: 15, color: context.c.inkSoft, height: 1.4),
                 ),
                 const SizedBox(height: 32),
 
                 // Email
-                const Text(
+                Text(
                   "Email",
                   style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
-                      color: AppColors.onDark),
+                      color: context.c.ink),
                 ),
                 const SizedBox(height: 8),
                 TextField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
-                  style: const TextStyle(color: AppColors.onDark),
+                  style: TextStyle(color: context.c.ink),
                   decoration: InputDecoration(
                     hintText: "nama@domain.com",
-                    hintStyle: const TextStyle(color: AppColors.onDarkMuted),
+                    hintStyle: TextStyle(color: context.c.inkSoft),
                     filled: true,
-                    fillColor: AppColors.surface,
+                    fillColor: context.c.raised,
                     errorText: _emailError,
-                    prefixIcon: const Icon(Icons.mail_outline_rounded,
-                        color: AppColors.onDarkMuted, size: 20),
-                    border: border(AppColors.surfaceBorder, 1),
-                    enabledBorder: border(AppColors.surfaceBorder, 1),
-                    focusedBorder: border(AppColors.brandYellow, 1.6),
+                    prefixIcon: Icon(Icons.mail_outline_rounded,
+                        color: context.c.inkSoft, size: 20),
+                    border: border(context.c.line, 1),
+                    enabledBorder: border(context.c.line, 1),
+                    focusedBorder: border(context.c.accent, 1.6),
                     errorBorder: border(Colors.red.shade400, 1),
                     focusedErrorBorder: border(Colors.red.shade400, 1.6),
                   ),
@@ -166,27 +167,27 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   child: ElevatedButton(
                     onPressed: _isLoading ? null : _handleResetPassword,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.brandYellow,
+                      backgroundColor: context.c.accent,
                       disabledBackgroundColor:
-                          AppColors.brandYellow.withValues(alpha: 0.5),
+                          context.c.accent.withValues(alpha: 0.5),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(999),
                       ),
                       elevation: 0,
                     ),
                     child: _isLoading
-                        ? const SizedBox(
+                        ? SizedBox(
                             height: 22,
                             width: 22,
                             child: CircularProgressIndicator(
-                                color: AppColors.ink, strokeWidth: 2),
+                                color: context.c.onAccent, strokeWidth: 2),
                           )
-                        : const Text(
+                        : Text(
                             "Kirim kode OTP",
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
-                              color: AppColors.ink,
+                              color: context.c.onAccent,
                             ),
                           ),
                   ),
@@ -197,15 +198,15 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.info_outline,
-                        size: 16, color: AppColors.onDarkMuted),
+                    Icon(Icons.info_outline,
+                        size: 16, color: context.c.inkSoft),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         "Kode OTP dikirim ke email kamu dan berlaku selama 10 menit.",
                         style: TextStyle(
                           fontSize: 12,
-                          color: AppColors.onDarkMuted.withValues(alpha: 0.8),
+                          color: context.c.inkSoft.withValues(alpha: 0.8),
                           height: 1.4,
                         ),
                       ),
@@ -218,10 +219,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 Center(
                   child: TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text(
+                    child: Text(
                       "Kembali ke Login",
                       style: TextStyle(
-                        color: AppColors.brandYellow,
+                        color: context.c.accent,
                         fontWeight: FontWeight.w700,
                         fontSize: 14,
                       ),

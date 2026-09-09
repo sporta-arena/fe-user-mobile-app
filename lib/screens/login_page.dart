@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import '../widgets/sportago_mark.dart';
+import '../theme/app_tokens.dart';
 import 'package:flutter/services.dart';
 import 'register_page.dart';
 import 'forgot_password_page.dart';
 import 'onboarding_screen.dart';
 import 'home_page.dart';
 import '../services/auth_service.dart';
-import '../constants/colors.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -101,9 +102,9 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bg,
+      backgroundColor: context.c.surface,
       body: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: SystemUiOverlayStyle.light,
+        value: gayaOverlay(context),
         child: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
@@ -126,29 +127,29 @@ class _LoginPageState extends State<LoginPage> {
                 },
                 padding: EdgeInsets.zero,
                 alignment: Alignment.centerLeft,
-                icon: const Icon(Icons.arrow_back_rounded,
-                    color: AppColors.onDark, size: 26),
+                icon: Icon(Icons.arrow_back_rounded,
+                    color: context.c.ink, size: 26),
               ),
               const SizedBox(height: 16),
 
               // Brand mark
-              Image.asset('assets/sportago_mark.png', height: 44),
+              const SportagoMark(height: 44),
               const SizedBox(height: 32),
 
               // Heading
-              const Text(
+              Text(
                 "Welcome back",
                 style: TextStyle(
                   fontSize: 30,
                   fontWeight: FontWeight.w900,
-                  color: AppColors.onDark,
+                  color: context.c.ink,
                   height: 1.1,
                 ),
               ),
               const SizedBox(height: 6),
-              const Text(
+              Text(
                 "Masuk untuk mulai booking arena olahraga.",
-                style: TextStyle(fontSize: 15, color: AppColors.onDarkMuted),
+                style: TextStyle(fontSize: 15, color: context.c.inkSoft),
               ),
               const SizedBox(height: 32),
 
@@ -158,7 +159,7 @@ class _LoginPageState extends State<LoginPage> {
               TextField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
-                style: const TextStyle(color: AppColors.onDark),
+                style: TextStyle(color: context.c.ink),
                 decoration: _fieldDecoration(
                   hint: "you@email.com",
                   icon: Icons.mail_outline_rounded,
@@ -173,7 +174,7 @@ class _LoginPageState extends State<LoginPage> {
               TextField(
                 controller: _passwordController,
                 obscureText: !_isPasswordVisible,
-                style: const TextStyle(color: AppColors.onDark),
+                style: TextStyle(color: context.c.ink),
                 decoration: _fieldDecoration(
                   hint: "Masukkan password",
                   icon: Icons.lock_outline_rounded,
@@ -183,7 +184,7 @@ class _LoginPageState extends State<LoginPage> {
                       _isPasswordVisible
                           ? Icons.visibility_outlined
                           : Icons.visibility_off_outlined,
-                      color: AppColors.onDarkMuted,
+                      color: context.c.inkSoft,
                       size: 20,
                     ),
                     onPressed: () =>
@@ -208,10 +209,10 @@ class _LoginPageState extends State<LoginPage> {
                           builder: (context) => const ForgotPasswordPage()),
                     );
                   },
-                  child: const Text(
+                  child: Text(
                     "Lupa password?",
                     style: TextStyle(
-                      color: AppColors.onDarkMuted,
+                      color: context.c.inkSoft,
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
                     ),
@@ -227,27 +228,27 @@ class _LoginPageState extends State<LoginPage> {
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : _handleLogin,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.brandYellow,
+                    backgroundColor: context.c.accent,
                     disabledBackgroundColor:
-                        AppColors.brandYellow.withValues(alpha: 0.5),
+                        context.c.accent.withValues(alpha: 0.5),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(999),
                     ),
                     elevation: 0,
                   ),
                   child: _isLoading
-                      ? const SizedBox(
+                      ? SizedBox(
                           height: 22,
                           width: 22,
                           child: CircularProgressIndicator(
-                              color: AppColors.ink, strokeWidth: 2),
+                              color: context.c.onAccent, strokeWidth: 2),
                         )
-                      : const Text(
+                      : Text(
                           "Masuk",
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.ink,
+                            color: context.c.onAccent,
                           ),
                         ),
                 ),
@@ -259,9 +260,9 @@ class _LoginPageState extends State<LoginPage> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text("Belum punya akun? ",
+                    Text("Belum punya akun? ",
                         style:
-                            TextStyle(color: AppColors.onDarkMuted, fontSize: 14)),
+                            TextStyle(color: context.c.inkSoft, fontSize: 14)),
                     GestureDetector(
                       onTap: () {
                         Navigator.push(
@@ -270,10 +271,10 @@ class _LoginPageState extends State<LoginPage> {
                               builder: (context) => const RegisterPage()),
                         );
                       },
-                      child: const Text(
+                      child: Text(
                         "Daftar",
                         style: TextStyle(
-                          color: AppColors.brandYellow,
+                          color: context.c.accent,
                           fontWeight: FontWeight.w700,
                           fontSize: 14,
                         ),
@@ -292,10 +293,10 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget _label(String text) => Text(
         text,
-        style: const TextStyle(
+        style: TextStyle(
           fontWeight: FontWeight.w600,
           fontSize: 13,
-          color: AppColors.onDark,
+          color: context.c.ink,
         ),
       );
 
@@ -311,16 +312,16 @@ class _LoginPageState extends State<LoginPage> {
         );
     return InputDecoration(
       hintText: hint,
-      hintStyle: const TextStyle(color: AppColors.onDarkMuted),
+      hintStyle: TextStyle(color: context.c.inkSoft),
       filled: true,
-      fillColor: AppColors.surface,
+      fillColor: context.c.raised,
       errorText: errorText,
       errorMaxLines: 2,
-      prefixIcon: Icon(icon, color: AppColors.onDarkMuted, size: 20),
+      prefixIcon: Icon(icon, color: context.c.inkSoft, size: 20),
       suffixIcon: suffix,
-      border: border(AppColors.surfaceBorder, 1),
-      enabledBorder: border(AppColors.surfaceBorder, 1),
-      focusedBorder: border(AppColors.brandYellow, 1.6),
+      border: border(context.c.line, 1),
+      enabledBorder: border(context.c.line, 1),
+      focusedBorder: border(context.c.accent, 1.6),
       errorBorder: border(Colors.red.shade400, 1),
       focusedErrorBorder: border(Colors.red.shade400, 1.6),
     );

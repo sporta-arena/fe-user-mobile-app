@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_tokens.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import '../constants/colors.dart';
@@ -356,7 +357,7 @@ class _CategoryVenuesPageState extends State<CategoryVenuesPage> {
     return Scaffold(
       backgroundColor: AppColors.bg,
       body: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: SystemUiOverlayStyle.light,
+        value: gayaOverlay(context),
         child: SafeArea(
         child: Column(
           children: [

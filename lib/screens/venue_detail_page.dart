@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import '../theme/app_tokens.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -8,7 +9,6 @@ import '../services/favorite_service.dart';
 import '../services/venue_service.dart';
 import '../models/venue.dart' as model;
 import '../models/field.dart' as field_model;
-import '../constants/colors.dart';
 
 class VenueDetailPage extends StatefulWidget {
   final int venueId;
@@ -241,7 +241,7 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
   void _showMapChoiceDialog(String googleUrl, String appleUrl) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.surface,
+      backgroundColor: context.c.raised,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -250,9 +250,9 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
+            Text(
               'Buka dengan',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.onDark),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: context.c.ink),
             ),
             const SizedBox(height: 20),
             ListTile(
@@ -290,8 +290,8 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                   ),
                 ),
               ),
-              title: const Text('Google Maps', style: TextStyle(color: AppColors.onDark)),
-              subtitle: const Text('Buka di aplikasi Google Maps', style: TextStyle(fontSize: 12, color: AppColors.onDarkMuted)),
+              title: Text('Google Maps', style: TextStyle(color: context.c.ink)),
+              subtitle: Text('Buka di aplikasi Google Maps', style: TextStyle(fontSize: 12, color: context.c.inkSoft)),
               onTap: () async {
                 Navigator.pop(context);
                 if (await canLaunchUrl(Uri.parse(googleUrl))) {
@@ -319,8 +319,8 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                   child: Icon(Icons.explore, color: Colors.white, size: 24),
                 ),
               ),
-              title: const Text('Apple Maps', style: TextStyle(color: AppColors.onDark)),
-              subtitle: const Text('Buka di aplikasi Apple Maps', style: TextStyle(fontSize: 12, color: AppColors.onDarkMuted)),
+              title: Text('Apple Maps', style: TextStyle(color: context.c.ink)),
+              subtitle: Text('Buka di aplikasi Apple Maps', style: TextStyle(fontSize: 12, color: context.c.inkSoft)),
               onTap: () async {
                 Navigator.pop(context);
                 if (await canLaunchUrl(Uri.parse(appleUrl))) {
@@ -339,33 +339,33 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        backgroundColor: AppColors.bg,
+        backgroundColor: context.c.surface,
         appBar: AppBar(
-          systemOverlayStyle: SystemUiOverlayStyle.light,
-          backgroundColor: AppColors.bg,
+          systemOverlayStyle: gayaOverlay(context),
+          backgroundColor: context.c.surface,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new, color: AppColors.onDark),
+            icon: Icon(Icons.arrow_back_ios_new, color: context.c.ink),
             onPressed: () => Navigator.pop(context),
           ),
           title: Text(widget.venueName ?? 'Detail Venue',
-              style: const TextStyle(color: AppColors.onDark)),
+              style: TextStyle(color: context.c.ink)),
         ),
-        body: const Center(
-          child: CircularProgressIndicator(color: AppColors.brandYellow),
+        body: Center(
+          child: CircularProgressIndicator(color: context.c.accent),
         ),
       );
     }
 
     if (_errorMessage != null) {
       return Scaffold(
-        backgroundColor: AppColors.bg,
+        backgroundColor: context.c.surface,
         appBar: AppBar(
-          systemOverlayStyle: SystemUiOverlayStyle.light,
-          backgroundColor: AppColors.bg,
+          systemOverlayStyle: gayaOverlay(context),
+          backgroundColor: context.c.surface,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new, color: AppColors.onDark),
+            icon: Icon(Icons.arrow_back_ios_new, color: context.c.ink),
             onPressed: () => Navigator.pop(context),
           ),
         ),
@@ -373,15 +373,15 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, size: 64, color: AppColors.onDarkMuted),
+              Icon(Icons.error_outline, size: 64, color: context.c.inkSoft),
               const SizedBox(height: 16),
-              Text(_errorMessage!, style: const TextStyle(color: AppColors.onDarkMuted)),
+              Text(_errorMessage!, style: TextStyle(color: context.c.inkSoft)),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: _loadVenueDetail,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.brandYellow,
-                  foregroundColor: AppColors.ink,
+                  backgroundColor: context.c.accent,
+                  foregroundColor: context.c.onAccent,
                 ),
                 child: const Text('Coba Lagi'),
               ),
@@ -392,7 +392,7 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
     }
 
     return Scaffold(
-      backgroundColor: AppColors.bg,
+      backgroundColor: context.c.surface,
       bottomNavigationBar: _buildBottomBar(),
       body: SafeArea(
         child: CustomScrollView(
@@ -414,25 +414,25 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                       _buildGallerySection(),
                       const SizedBox(height: 24),
                     ],
-                    const Divider(color: AppColors.surfaceBorder),
+                    Divider(color: context.c.line),
                     const SizedBox(height: 20),
 
                     if (_fields.length > 1) ...[
-                      const Text("Pilih Lapangan", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.onDark)),
+                      Text("Pilih Lapangan", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: context.c.ink)),
                       const SizedBox(height: 12),
                       _buildFieldSelector(),
                       const SizedBox(height: 24),
                     ],
 
-                    const Text("Pilih Jadwal Main", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.onDark)),
+                    Text("Pilih Jadwal Main", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: context.c.ink)),
                     const SizedBox(height: 20),
 
-                    const Text("Tanggal", style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.onDarkMuted)),
+                    Text("Tanggal", style: TextStyle(fontWeight: FontWeight.bold, color: context.c.inkSoft)),
                     const SizedBox(height: 12),
                     _buildDatePicker(),
                     const SizedBox(height: 24),
 
-                    const Text("Jam Tersedia", style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.onDarkMuted)),
+                    Text("Jam Tersedia", style: TextStyle(fontWeight: FontWeight.bold, color: context.c.inkSoft)),
                     const SizedBox(height: 12),
                     _buildTimeSlotGrid(),
                     const SizedBox(height: 100),
@@ -452,20 +452,20 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
         : [_venue?.coverImageUrl ?? ''];
 
     return SliverAppBar(
-      systemOverlayStyle: SystemUiOverlayStyle.light,
+      systemOverlayStyle: gayaOverlay(context),
       expandedHeight: 280.0,
       floating: false,
       pinned: true,
-      backgroundColor: AppColors.bg,
+      backgroundColor: context.c.surface,
       elevation: 0,
       leading: Container(
         margin: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: AppColors.surface.withValues(alpha: 0.9),
+          color: context.c.raised.withValues(alpha: 0.9),
           shape: BoxShape.circle,
         ),
         child: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: AppColors.onDark, size: 20),
+          icon: Icon(Icons.arrow_back_ios_new, color: context.c.ink, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -473,7 +473,7 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
         Container(
           margin: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: AppColors.surface.withValues(alpha: 0.9),
+            color: context.c.raised.withValues(alpha: 0.9),
             shape: BoxShape.circle,
           ),
           child: IconButton(
@@ -502,16 +502,16 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                         imageUrl,
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) => Container(
-                          color: AppColors.surface,
-                          child: const Center(
-                            child: Icon(Icons.image, size: 80, color: AppColors.onDarkMuted),
+                          color: context.c.raised,
+                          child: Center(
+                            child: Icon(Icons.image, size: 80, color: context.c.inkSoft),
                           ),
                         ),
                       )
                     : Container(
-                        color: AppColors.surface,
-                        child: const Center(
-                          child: Icon(Icons.image, size: 80, color: AppColors.onDarkMuted),
+                        color: context.c.raised,
+                        child: Center(
+                          child: Icon(Icons.image, size: 80, color: context.c.inkSoft),
                         ),
                       );
               },
@@ -532,7 +532,7 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                       margin: const EdgeInsets.symmetric(horizontal: 3),
                       decoration: BoxDecoration(
                         color: _currentImageIndex == index
-                            ? AppColors.brandYellow
+                            ? context.c.accent
                             : Colors.white.withValues(alpha: 0.5),
                         borderRadius: BorderRadius.circular(4),
                       ),
@@ -568,17 +568,17 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
       children: [
         Text(
           _venue?.name ?? 'Venue',
-          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: AppColors.onDark),
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: context.c.ink),
         ),
         const SizedBox(height: 8),
         Row(
           children: [
-            const Icon(Icons.location_on_outlined, color: AppColors.onDarkMuted, size: 16),
+            Icon(Icons.location_on_outlined, color: context.c.inkSoft, size: 16),
             const SizedBox(width: 4),
             Expanded(
               child: Text(
                 _venue?.address ?? '',
-                style: const TextStyle(color: AppColors.onDarkMuted),
+                style: TextStyle(color: context.c.inkSoft),
               ),
             ),
           ],
@@ -587,12 +587,12 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
           const SizedBox(height: 4),
           Row(
             children: [
-              const Icon(Icons.near_me, color: AppColors.brandYellow, size: 16),
+              Icon(Icons.near_me, color: context.c.accent, size: 16),
               const SizedBox(width: 4),
               Text(
                 _distanceText,
-                style: const TextStyle(
-                  color: AppColors.brandYellow,
+                style: TextStyle(
+                  color: context.c.accent,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -602,11 +602,11 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
         const SizedBox(height: 4),
         Row(
           children: [
-            const Icon(Icons.access_time, color: AppColors.onDarkMuted, size: 16),
+            Icon(Icons.access_time, color: context.c.inkSoft, size: 16),
             const SizedBox(width: 4),
             Text(
               _venue?.formattedOpenHours ?? '',
-              style: const TextStyle(color: AppColors.onDarkMuted),
+              style: TextStyle(color: context.c.inkSoft),
             ),
           ],
         ),
@@ -618,14 +618,14 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("Tentang Arena", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppColors.onDark)),
+        Text("Tentang Arena", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: context.c.ink)),
         const SizedBox(height: 8),
         Text(
           _venue?.description ?? 'Tidak ada deskripsi',
-          style: const TextStyle(color: AppColors.onDarkMuted, height: 1.5),
+          style: TextStyle(color: context.c.inkSoft, height: 1.5),
         ),
         const SizedBox(height: 20),
-        const Text("Fasilitas", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppColors.onDark)),
+        Text("Fasilitas", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: context.c.ink)),
         const SizedBox(height: 12),
         Wrap(
           spacing: 10,
@@ -634,12 +634,12 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: AppColors.brandYellow.withValues(alpha: 0.15),
+                color: context.c.accent.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
                 _formatFacility(facility),
-                style: const TextStyle(color: AppColors.brandYellow, fontSize: 12, fontWeight: FontWeight.w500),
+                style: TextStyle(color: context.c.accent, fontSize: 12, fontWeight: FontWeight.w500),
               ),
             )
           ).toList(),
@@ -657,14 +657,14 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text("Lokasi Venue", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppColors.onDark)),
+            Text("Lokasi Venue", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: context.c.ink)),
             if (hasLocation)
               TextButton.icon(
                 onPressed: _openMapsNavigation,
                 icon: const Icon(Icons.directions, size: 18),
                 label: const Text('Petunjuk Arah'),
                 style: TextButton.styleFrom(
-                  foregroundColor: AppColors.brandYellow,
+                  foregroundColor: context.c.accent,
                 ),
               ),
           ],
@@ -676,9 +676,9 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
             height: 180,
             width: double.infinity,
             decoration: BoxDecoration(
-              color: AppColors.surface,
+              color: context.c.raised,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.surfaceBorder),
+              border: Border.all(color: context.c.line),
             ),
             child: Stack(
               children: [
@@ -694,7 +694,7 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                           loadingBuilder: (context, child, loadingProgress) {
                             if (loadingProgress == null) return child;
                             return Container(
-                              color: AppColors.surface,
+                              color: context.c.raised,
                               child: Center(
                                 child: CircularProgressIndicator(
                                   value: loadingProgress.expectedTotalBytes != null
@@ -702,26 +702,26 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                                           loadingProgress.expectedTotalBytes!
                                       : null,
                                   strokeWidth: 2,
-                                  color: AppColors.brandYellow,
+                                  color: context.c.accent,
                                 ),
                               ),
                             );
                           },
                           errorBuilder: (context, error, stackTrace) {
                             return Container(
-                              color: AppColors.surface,
+                              color: context.c.raised,
                               child: CustomPaint(
                                 size: const Size(double.infinity, 180),
-                                painter: _MapGridPainter(),
+                                painter: _MapGridPainter(garis: context.c.line),
                               ),
                             );
                           },
                         )
                       : Container(
-                          color: AppColors.surface,
+                          color: context.c.raised,
                           child: CustomPaint(
                             size: const Size(double.infinity, 180),
-                            painter: _MapGridPainter(),
+                            painter: _MapGridPainter(garis: context.c.line),
                           ),
                         ),
                 ),
@@ -734,7 +734,7 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
-                            color: AppColors.brandYellow,
+                            color: context.c.accent,
                             borderRadius: BorderRadius.circular(8),
                             boxShadow: [
                               BoxShadow(
@@ -746,23 +746,23 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                           ),
                           child: Text(
                             _venue?.name ?? '',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 12,
-                              color: AppColors.ink,
+                              color: context.c.onAccent,
                             ),
                           ),
                         ),
-                        const Icon(
+                        Icon(
                           Icons.location_on,
-                          color: AppColors.brandYellow,
+                          color: context.c.accent,
                           size: 40,
                         ),
                         Container(
                           width: 8,
                           height: 8,
                           decoration: BoxDecoration(
-                            color: AppColors.brandYellow.withValues(alpha: 0.3),
+                            color: context.c.accent.withValues(alpha: 0.3),
                             shape: BoxShape.circle,
                           ),
                         ),
@@ -776,18 +776,18 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
-                      color: AppColors.brandYellow,
+                      color: context.c.accent,
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.map_outlined, color: AppColors.ink, size: 16),
+                        Icon(Icons.map_outlined, color: context.c.onAccent, size: 16),
                         SizedBox(width: 6),
                         Text(
                           'Buka Maps',
                           style: TextStyle(
-                            color: AppColors.ink,
+                            color: context.c.onAccent,
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                           ),
@@ -804,13 +804,13 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
-                      color: AppColors.surface.withValues(alpha: 0.95),
+                      color: context.c.raised.withValues(alpha: 0.95),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
                       '${_venue?.address ?? ''}, ${_venue?.city ?? ''}',
-                      style: const TextStyle(
-                        color: AppColors.onDarkMuted,
+                      style: TextStyle(
+                        color: context.c.inkSoft,
                         fontSize: 11,
                       ),
                       maxLines: 2,
@@ -838,12 +838,12 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text("Galeri Foto", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppColors.onDark)),
+            Text("Galeri Foto", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: context.c.ink)),
             TextButton(
               onPressed: () => _showFullGallery(),
-              child: const Text(
+              child: Text(
                 'Lihat Semua',
-                style: TextStyle(color: AppColors.brandYellow),
+                style: TextStyle(color: context.c.accent),
               ),
             ),
           ],
@@ -862,7 +862,7 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                   margin: const EdgeInsets.only(right: 12),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.surfaceBorder),
+                    border: Border.all(color: context.c.line),
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12),
@@ -870,8 +870,8 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                       images[index],
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => Container(
-                        color: AppColors.surface,
-                        child: const Icon(Icons.image, color: AppColors.onDarkMuted),
+                        color: context.c.raised,
+                        child: Icon(Icons.image, color: context.c.inkSoft),
                       ),
                     ),
                   ),
@@ -891,8 +891,8 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
         height: MediaQuery.of(context).size.height * 0.8,
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
+        decoration: BoxDecoration(
+          color: context.c.raised,
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Column(
@@ -902,7 +902,7 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: AppColors.surfaceBorder,
+                color: context.c.line,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -911,12 +911,12 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'Galeri Foto',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.onDark),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: context.c.ink),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close, color: AppColors.onDark),
+                    icon: Icon(Icons.close, color: context.c.ink),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ],
@@ -943,8 +943,8 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                         _venueImages[index],
                         fit: BoxFit.cover,
                         errorBuilder: (_, __, ___) => Container(
-                          color: AppColors.surface,
-                          child: const Icon(Icons.image, color: AppColors.onDarkMuted, size: 40),
+                          color: context.c.raised,
+                          child: Icon(Icons.image, color: context.c.inkSoft, size: 40),
                         ),
                       ),
                     ),
@@ -993,10 +993,10 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
               margin: const EdgeInsets.only(right: 12),
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               decoration: BoxDecoration(
-                color: isSelected ? AppColors.brandYellow : AppColors.surface,
+                color: isSelected ? context.c.accent : context.c.raised,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: isSelected ? AppColors.brandYellow : AppColors.surfaceBorder,
+                  color: isSelected ? context.c.accent : context.c.line,
                 ),
               ),
               child: Center(
@@ -1004,7 +1004,7 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                   field.name,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: isSelected ? AppColors.ink : AppColors.onDark,
+                    color: isSelected ? context.c.onAccent : context.c.ink,
                   ),
                 ),
               ),
@@ -1039,14 +1039,14 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
               width: 70,
               margin: const EdgeInsets.only(right: 12),
               decoration: BoxDecoration(
-                color: isSelected ? AppColors.brandYellow : AppColors.surface,
+                color: isSelected ? context.c.accent : context.c.raised,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: isSelected ? AppColors.brandYellow : AppColors.surfaceBorder,
+                  color: isSelected ? context.c.accent : context.c.line,
                 ),
                 boxShadow: isSelected ? [
                   BoxShadow(
-                    color: AppColors.brandYellow.withValues(alpha: 0.3),
+                    color: context.c.accent.withValues(alpha: 0.3),
                     blurRadius: 8,
                     offset: const Offset(0, 4),
                   )
@@ -1059,7 +1059,7 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                     dayNames[date.weekday - 1],
                     style: TextStyle(
                       fontSize: 14,
-                      color: isSelected ? AppColors.ink : AppColors.onDarkMuted,
+                      color: isSelected ? context.c.onAccent : context.c.inkSoft,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -1068,7 +1068,7 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: isSelected ? AppColors.ink : AppColors.onDark,
+                      color: isSelected ? context.c.onAccent : context.c.ink,
                     ),
                   ),
                 ],
@@ -1101,10 +1101,10 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
 
   Widget _buildTimeSlotGrid() {
     if (_isLoadingSlots) {
-      return const Center(
+      return Center(
         child: Padding(
           padding: EdgeInsets.all(20),
-          child: CircularProgressIndicator(color: AppColors.brandYellow),
+          child: CircularProgressIndicator(color: context.c.accent),
         ),
       );
     }
@@ -1115,11 +1115,11 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
-              const Icon(Icons.event_busy, size: 48, color: AppColors.onDarkMuted),
+              Icon(Icons.event_busy, size: 48, color: context.c.inkSoft),
               const SizedBox(height: 12),
-              const Text(
+              Text(
                 'Tidak ada slot tersedia',
-                style: TextStyle(color: AppColors.onDarkMuted),
+                style: TextStyle(color: context.c.inkSoft),
               ),
             ],
           ),
@@ -1135,18 +1135,18 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
             margin: const EdgeInsets.only(bottom: 12),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              color: AppColors.brandYellow.withValues(alpha: 0.15),
+              color: context.c.accent.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
               children: [
-                const Icon(Icons.info_outline, size: 16, color: AppColors.brandYellow),
+                Icon(Icons.info_outline, size: 16, color: context.c.accent),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     'Dipilih: ${_selectedTimeSlots.length} jam (${_selectedTimeSlots.join(", ")})',
-                    style: const TextStyle(
-                      color: AppColors.onDark,
+                    style: TextStyle(
+                      color: context.c.ink,
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
                     ),
@@ -1155,9 +1155,9 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
               ],
             ),
           ),
-        const Text(
+        Text(
           'Pilih jam yang diinginkan (bisa pilih lebih dari 1)',
-          style: TextStyle(color: AppColors.onDarkMuted, fontSize: 12),
+          style: TextStyle(color: context.c.inkSoft, fontSize: 12),
         ),
         const SizedBox(height: 12),
         GridView.builder(
@@ -1182,17 +1182,17 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
             Color borderColor;
 
             if (!isAvailable) {
-              bgColor = AppColors.surface;
-              textColor = AppColors.onDarkMuted;
+              bgColor = context.c.raised;
+              textColor = context.c.inkSoft;
               borderColor = Colors.transparent;
             } else if (isSelected) {
-              bgColor = AppColors.brandYellow;
-              textColor = AppColors.ink;
-              borderColor = AppColors.brandYellow;
+              bgColor = context.c.accent;
+              textColor = context.c.onAccent;
+              borderColor = context.c.accent;
             } else {
-              bgColor = AppColors.surface;
-              textColor = AppColors.onDark;
-              borderColor = AppColors.surfaceBorder;
+              bgColor = context.c.raised;
+              textColor = context.c.ink;
+              borderColor = context.c.line;
             }
 
             return GestureDetector(
@@ -1235,9 +1235,9 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
 
     return Container(
       padding: const EdgeInsets.all(20),
-      decoration: const BoxDecoration(
-        color: AppColors.bg,
-        border: Border(top: BorderSide(color: AppColors.surfaceBorder)),
+      decoration: BoxDecoration(
+        color: context.c.surface,
+        border: Border(top: BorderSide(color: context.c.line)),
       ),
       child: SafeArea(
         child: Row(
@@ -1251,16 +1251,16 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                     _selectedTimeSlots.isEmpty
                         ? "Total Harga"
                         : "Total (${_selectedTimeSlots.length} jam)",
-                    style: const TextStyle(color: AppColors.onDarkMuted, fontSize: 12),
+                    style: TextStyle(color: context.c.inkSoft, fontSize: 12),
                   ),
                   Text(
                     _selectedTimeSlots.isEmpty
                         ? "Rp 0"
                         : "Rp ${_formatPrice(totalPrice.toDouble())}",
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w900,
-                      color: AppColors.brandYellow,
+                      color: context.c.accent,
                     ),
                   ),
                 ],
@@ -1287,17 +1287,17 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.brandYellow,
+                  backgroundColor: context.c.accent,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(999),
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 32),
-                  disabledBackgroundColor: AppColors.surface,
+                  disabledBackgroundColor: context.c.raised,
                   elevation: 0,
                 ),
-                child: const Text(
+                child: Text(
                   "BOOKING SEKARANG",
-                  style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.w700),
+                  style: TextStyle(color: context.c.onAccent, fontWeight: FontWeight.w700),
                 ),
               ),
             ),
@@ -1325,10 +1325,16 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
 
 // Map Grid Painter for location placeholder
 class _MapGridPainter extends CustomPainter {
+  /// CustomPainter tidak punya BuildContext, jadi warnanya dioper dari
+  /// pemanggil yang memang punya akses ke tema.
+  const _MapGridPainter({required this.garis});
+
+  final Color garis;
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = AppColors.surfaceBorder
+      ..color = garis
       ..strokeWidth = 1;
 
     // Draw grid lines

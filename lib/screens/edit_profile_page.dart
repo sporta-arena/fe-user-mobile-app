@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_tokens.dart';
 import 'package:flutter/services.dart';
 import 'change_password_page.dart';
 import '../services/auth_service.dart';
@@ -80,7 +81,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     return Scaffold(
       backgroundColor: AppColors.bg,
       appBar: AppBar(
-        systemOverlayStyle: SystemUiOverlayStyle.light,
+        systemOverlayStyle: gayaOverlay(context),
         title: const Text(
           "Edit Profil",
           style: TextStyle(color: AppColors.onDark, fontWeight: FontWeight.bold)

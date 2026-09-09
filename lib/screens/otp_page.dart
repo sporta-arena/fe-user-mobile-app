@@ -1,11 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../widgets/sportago_mark.dart';
+import '../theme/app_tokens.dart';
 import 'package:flutter/services.dart';
 import 'package:pinput/pinput.dart';
 import 'home_page.dart';
 import 'reset_password_page.dart';
 import '../services/auth_service.dart';
-import '../constants/colors.dart';
 
 enum OtpType {
   registration,
@@ -173,20 +174,20 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
     final defaultPinTheme = PinTheme(
       width: 48,
       height: 56,
-      textStyle: const TextStyle(
+      textStyle: TextStyle(
         fontSize: 22,
-        color: AppColors.onDark,
+        color: context.c.ink,
         fontWeight: FontWeight.w700,
       ),
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border.all(color: AppColors.surfaceBorder),
+        color: context.c.raised,
+        border: Border.all(color: context.c.line),
         borderRadius: BorderRadius.circular(14),
       ),
     );
 
     final focusedPinTheme = defaultPinTheme.copyDecorationWith(
-      border: Border.all(color: AppColors.brandYellow, width: 1.6),
+      border: Border.all(color: context.c.accent, width: 1.6),
       borderRadius: BorderRadius.circular(14),
     );
 
@@ -196,7 +197,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
     );
 
     final submittedPinTheme = defaultPinTheme.copyDecorationWith(
-      border: Border.all(color: AppColors.surfaceBorder),
+      border: Border.all(color: context.c.line),
       borderRadius: BorderRadius.circular(14),
     );
 
@@ -207,9 +208,9 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
         : "Masukkan kode 6 digit yang dikirim ke email kamu untuk verifikasi akun.";
 
     return Scaffold(
-      backgroundColor: AppColors.bg,
+      backgroundColor: context.c.surface,
       body: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: SystemUiOverlayStyle.light,
+        value: gayaOverlay(context),
         child: SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
@@ -222,40 +223,40 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                     onPressed: () => Navigator.pop(context),
                     padding: EdgeInsets.zero,
                     alignment: Alignment.centerLeft,
-                    icon: const Icon(Icons.arrow_back_rounded,
-                        color: AppColors.onDark, size: 26),
+                    icon: Icon(Icons.arrow_back_rounded,
+                        color: context.c.ink, size: 26),
                   ),
                   const SizedBox(height: 16),
                 ],
 
                 // Brand mark
-                Image.asset('assets/sportago_mark.png', height: 40),
+                const SportagoMark(height: 40),
                 const SizedBox(height: 24),
 
                 // Heading
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 30,
                     fontWeight: FontWeight.w900,
-                    color: AppColors.onDark,
+                    color: context.c.ink,
                     height: 1.1,
                   ),
                 ),
                 const SizedBox(height: 6),
                 Text(
                   subtitle,
-                  style: const TextStyle(
-                      fontSize: 15, color: AppColors.onDarkMuted, height: 1.4),
+                  style: TextStyle(
+                      fontSize: 15, color: context.c.inkSoft, height: 1.4),
                 ),
                 const SizedBox(height: 6),
 
                 // Email
                 Text(
                   widget.email,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
-                    color: AppColors.brandYellow,
+                    color: context.c.accent,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -275,7 +276,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                     child: Container(
                       width: 2,
                       height: 24,
-                      color: AppColors.brandYellow,
+                      color: context.c.accent,
                     ),
                   ),
                   onCompleted: (pin) => _verifyOtp(),
@@ -304,27 +305,27 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                   child: ElevatedButton(
                     onPressed: _isLoading ? null : _verifyOtp,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.brandYellow,
+                      backgroundColor: context.c.accent,
                       disabledBackgroundColor:
-                          AppColors.brandYellow.withValues(alpha: 0.5),
+                          context.c.accent.withValues(alpha: 0.5),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(999),
                       ),
                       elevation: 0,
                     ),
                     child: _isLoading
-                        ? const SizedBox(
+                        ? SizedBox(
                             height: 22,
                             width: 22,
                             child: CircularProgressIndicator(
-                                color: AppColors.ink, strokeWidth: 2),
+                                color: context.c.onAccent, strokeWidth: 2),
                           )
-                        : const Text(
+                        : Text(
                             "Verifikasi",
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
-                              color: AppColors.ink,
+                              color: context.c.onAccent,
                             ),
                           ),
                   ),
@@ -336,16 +337,16 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Text(
+                      Text(
                         "Tidak menerima kode? ",
                         style:
-                            TextStyle(color: AppColors.onDarkMuted, fontSize: 14),
+                            TextStyle(color: context.c.inkSoft, fontSize: 14),
                       ),
                       if (_resendCountdown > 0)
                         Text(
                           "Tunggu ${_resendCountdown}s",
-                          style: const TextStyle(
-                            color: AppColors.onDarkMuted,
+                          style: TextStyle(
+                            color: context.c.inkSoft,
                             fontWeight: FontWeight.w600,
                             fontSize: 14,
                           ),
@@ -354,17 +355,17 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                         GestureDetector(
                           onTap: _isResending ? null : _resendOtp,
                           child: _isResending
-                              ? const SizedBox(
+                              ? SizedBox(
                                   height: 16,
                                   width: 16,
                                   child: CircularProgressIndicator(
                                       strokeWidth: 2,
-                                      color: AppColors.brandYellow),
+                                      color: context.c.accent),
                                 )
-                              : const Text(
+                              : Text(
                                   "Kirim Ulang",
                                   style: TextStyle(
-                                    color: AppColors.brandYellow,
+                                    color: context.c.accent,
                                     fontWeight: FontWeight.w700,
                                     fontSize: 14,
                                   ),
@@ -379,15 +380,15 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.info_outline,
-                        size: 16, color: AppColors.onDarkMuted),
+                    Icon(Icons.info_outline,
+                        size: 16, color: context.c.inkSoft),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         "Kode OTP kadaluarsa dalam 10 menit. Cek folder spam jika email tidak ditemukan.",
                         style: TextStyle(
                           fontSize: 12,
-                          color: AppColors.onDarkMuted.withValues(alpha: 0.8),
+                          color: context.c.inkSoft.withValues(alpha: 0.8),
                           height: 1.4,
                         ),
                       ),

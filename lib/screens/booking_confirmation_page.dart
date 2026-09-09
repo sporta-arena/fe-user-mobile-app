@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../theme/app_tokens.dart';
 import 'package:flutter/services.dart';
 import '../services/booking_service.dart';
 import '../services/auth_service.dart';
@@ -486,7 +487,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
               ),
             )
           : AnnotatedRegion<SystemUiOverlayStyle>(
-            value: SystemUiOverlayStyle.light,
+            value: gayaOverlay(context),
             child: SafeArea(
               child: SingleChildScrollView(
                 child: Padding(
@@ -2257,7 +2258,7 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
     return Scaffold(
       backgroundColor: AppColors.bg,
       appBar: AppBar(
-        systemOverlayStyle: SystemUiOverlayStyle.light,
+        systemOverlayStyle: gayaOverlay(context),
         title: const Text(
           "Booking Berhasil",
           style: TextStyle(color: AppColors.onDark, fontWeight: FontWeight.bold),

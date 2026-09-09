@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../theme/app_tokens.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -133,7 +134,7 @@ class _TransactionsPageState extends State<TransactionsPage> with SingleTickerPr
           ),
           backgroundColor: AppColors.bg,
           elevation: 0,
-          systemOverlayStyle: SystemUiOverlayStyle.light,
+          systemOverlayStyle: gayaOverlay(context),
         ),
         body: Center(
           child: Column(
@@ -176,7 +177,7 @@ class _TransactionsPageState extends State<TransactionsPage> with SingleTickerPr
       appBar: AppBar(
         backgroundColor: AppColors.bg,
         elevation: 0,
-        systemOverlayStyle: SystemUiOverlayStyle.light,
+        systemOverlayStyle: gayaOverlay(context),
         title: const Text(
           'Transaksi',
           style: TextStyle(
@@ -1708,7 +1709,7 @@ class _TransactionPaymentWaitingPageState extends State<TransactionPaymentWaitin
         ),
         backgroundColor: AppColors.bg,
         elevation: 0,
-        systemOverlayStyle: SystemUiOverlayStyle.light,
+        systemOverlayStyle: gayaOverlay(context),
         iconTheme: const IconThemeData(color: AppColors.onDark),
       ),
       body: _isProcessing
