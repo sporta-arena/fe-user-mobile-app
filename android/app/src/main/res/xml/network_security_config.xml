@@ -11,5 +11,11 @@
         <domain includeSubdomains="false">10.0.2.2</domain>
         <domain includeSubdomains="false">127.0.0.1</domain>
         <domain includeSubdomains="false">localhost</domain>
+        <!-- SEMENTARA: VPS produksi masih diakses lewat IP mentah karena
+             domainnya belum diarahkan, jadi belum bisa punya sertifikat.
+             CABUT baris ini begitu api.sportago.id hidup dengan HTTPS —
+             membiarkannya berarti aplikasi rilis tetap boleh berbicara
+             tanpa enkripsi ke host itu. -->
+        <domain includeSubdomains="false">43.156.46.189</domain>
     </domain-config>
 </network-security-config>
