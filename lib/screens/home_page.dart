@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../utils/tampilan_venue.dart';
 import '../theme/app_tokens.dart';
+import '../widgets/sampul_venue.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 
@@ -10,7 +11,6 @@ import 'category_venues_page.dart';
 import 'venue_detail_page.dart';
 import 'notifications_page.dart';
 import 'map_page.dart';
-import 'discover_page.dart';
 import 'transactions_page.dart';
 import 'profile_page.dart';
 
@@ -20,7 +20,7 @@ import '../models/venue.dart' as model;
 import '../models/field_type.dart';
 
 class HomePage extends StatefulWidget {
-  /// Tab to open initially (0=Home, 1=Discover, 2=Transaksi, 3=Profile).
+  /// Tab yang dibuka pertama (0=Beranda, 1=Transaksi, 2=Profil).
   final int initialIndex;
   const HomePage({super.key, this.initialIndex = 0});
 
@@ -42,7 +42,6 @@ class _HomePageState extends State<HomePage> {
 
   static const List<Widget> _pages = <Widget>[
     DashboardContent(),
-    DiscoverPage(),
     TransactionsPage(),
     ProfilePage(),
   ];
@@ -70,10 +69,9 @@ class _BottomNav extends StatelessWidget {
   const _BottomNav({required this.selectedIndex, required this.onTap});
 
   static const _items = [
-    (Icons.home_rounded, Icons.home_outlined, 'Home'),
-    (Icons.explore_rounded, Icons.explore_outlined, 'Discover'),
+    (Icons.home_rounded, Icons.home_outlined, 'Beranda'),
     (Icons.receipt_long_rounded, Icons.receipt_long_outlined, 'Transaksi'),
-    (Icons.person_rounded, Icons.person_outline_rounded, 'Profile'),
+    (Icons.person_rounded, Icons.person_outline_rounded, 'Profil'),
   ];
 
   @override
@@ -136,6 +134,12 @@ class DashboardContent extends StatefulWidget {
 class _DashboardContentState extends State<DashboardContent> {
   String _address = "Mencari lokasi…";
 
+  /// Titik pemakai, dipakai untuk mengurutkan daftar terdekat.
+  /// null berarti izin lokasi ditolak atau GPS gagal, dan judul
+  /// bagiannya ikut berubah supaya tidak mengaku "terdekat".
+  double? _lat;
+  double? _lng;
+
   /// Kota yang dipilih lewat chip lokasi; null berarti semua kota.
   String? _kotaTerpilih;
 
@@ -144,6 +148,48 @@ class _DashboardContentState extends State<DashboardContent> {
       : _venues.where((v) => v.city == _kotaTerpilih).toList();
   List<model.Venue> _venues = [];
   List<FieldType> _fieldTypes = [];
+
+  /// Arena yang benar-benar diurutkan dari titik pemakai.
+  ///
+  /// Sebelumnya bagian ini berjudul "Nearby from you" tapi isinya urutan
+  /// apa adanya dari API, tanpa sekalipun menghitung jarak. Sekarang
+  /// urutannya nyata, dan kalau titik pemakai belum ada, judulnya yang
+  /// mengalah lewat [_judulTerdekat].
+  List<model.Venue> get _urutTerdekat {
+    final daftar = [..._venueTampil];
+    if (_lat == null || _lng == null) return daftar;
+    double jarak(model.Venue v) {
+      if (v.latitude == null || v.longitude == null) return double.infinity;
+      return Geolocator.distanceBetween(_lat!, _lng!, v.latitude!, v.longitude!);
+    }
+    daftar.sort((a, b) => jarak(a).compareTo(jarak(b)));
+    return daftar;
+  }
+
+  bool get _adaJarak =>
+      _lat != null &&
+      _lng != null &&
+      _venueTampil.any((v) => v.latitude != null && v.longitude != null);
+
+  String get _judulTerdekat => _adaJarak ? "Terdekat dari kamu" : "Arena tersedia";
+
+  /// Arena yang paling banyak diulas.
+  ///
+  /// Bagian kedua dulu berjudul "Popular" dan isinya daftar yang sama
+  /// persis, cuma dibalik urutannya. Itu peringkat karangan. Sekarang
+  /// dasarnya jumlah ulasan asli, dan bagiannya disembunyikan selama
+  /// belum ada satu pun ulasan.
+  List<model.Venue> get _urutUlasan {
+    final daftar = _venueTampil
+        .where((v) => (v.reviewCount ?? 0) > 0)
+        .toList()
+      ..sort((a, b) {
+        final ulasan = (b.reviewCount ?? 0).compareTo(a.reviewCount ?? 0);
+        if (ulasan != 0) return ulasan;
+        return (b.averageRating ?? 0).compareTo(a.averageRating ?? 0);
+      });
+    return daftar;
+  }
   bool _loadingVenues = true;
 
   @override
@@ -284,6 +330,12 @@ class _DashboardContentState extends State<DashboardContent> {
         return;
       }
       final pos = await Geolocator.getCurrentPosition();
+      if (mounted) {
+        setState(() {
+          _lat = pos.latitude;
+          _lng = pos.longitude;
+        });
+      }
       final placemarks =
           await placemarkFromCoordinates(pos.latitude, pos.longitude);
       if (placemarks.isNotEmpty && mounted) {
@@ -317,9 +369,11 @@ class _DashboardContentState extends State<DashboardContent> {
                 const SizedBox(height: 20),
                 _categories(),
                 const SizedBox(height: 24),
-                _venueSection("Nearby from you", _venueTampil),
-                const SizedBox(height: 24),
-                _venueSection("Popular", _venueTampil.reversed.toList()),
+                _venueSection(_judulTerdekat, _urutTerdekat),
+                if (_urutUlasan.isNotEmpty) ...[
+                  const SizedBox(height: 24),
+                  _venueSection("Paling banyak diulas", _urutUlasan),
+                ],
                 const SizedBox(height: 12),
               ],
             ),
@@ -461,7 +515,7 @@ class _DashboardContentState extends State<DashboardContent> {
             builder: (_) => CategoryVenuesPage(
               categoryName: type.label,
               categoryIcon: type.icon,
-              categoryColor: type.color,
+              categoryColor: context.c.kategori(type.indeksWarna),
             ),
           ),
         ),
@@ -571,7 +625,7 @@ class _DashboardContentState extends State<DashboardContent> {
           children: [
             Icon(Icons.map_rounded, color: context.c.onAccent, size: 20),
             SizedBox(width: 8),
-            Text("Map",
+            Text("Peta",
                 style: TextStyle(
                     color: context.c.onAccent,
                     fontSize: 15,
@@ -676,26 +730,16 @@ class _VenueCard extends StatelessWidget {
   }
 
   Widget _image(BuildContext context) {
-    final url = venue.coverImageUrl;
-    if (url != null && url.isNotEmpty) {
-      return Image.network(
-        url,
-        height: 120,
-        width: 216,
-        fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => _placeholder(context),
-      );
-    }
-    return _placeholder(context);
-  }
-
-  Widget _placeholder(BuildContext context) {
-    return Container(
-      height: 120,
-      width: 216,
-      color: context.c.hoverSurface,
-      child: Icon(Icons.stadium_rounded,
-          color: context.c.inkSoft, size: 40),
+    // Venue tanpa foto dulu semuanya jatuh ke satu kotak abu-abu dengan
+    // ikon stadion yang sama, jadi daftarnya terbaca seperti deretan
+    // kartu kosong. Sampulnya sekarang berwarna dan berinisial.
+    return SampulVenue(
+      nama: venue.name,
+      urlGambar: venue.coverImageUrl,
+      olahraga: venue.fields?.isNotEmpty == true ? venue.fields!.first.type : null,
+      lebar: 216,
+      tinggi: 120,
+      ukuranInisial: 30,
     );
   }
 

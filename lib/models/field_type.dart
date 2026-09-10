@@ -53,38 +53,34 @@ class FieldType {
     }
   }
 
-  // Get color based on field type value
-  Color get color {
-    switch (value.toLowerCase()) {
-      case 'futsal':
-        return Colors.green;
-      case 'badminton':
-        return Colors.blue;
-      case 'basketball':
-        return Colors.orange;
-      case 'volleyball':
-        return Colors.purple;
-      case 'tennis':
-        return Colors.lime;
-      case 'mini_soccer':
-        return Colors.teal;
-      case 'swimming':
-        return Colors.cyan;
-      case 'gym':
-        return Colors.red;
-      case 'padel':
-        return Colors.indigo;
-      case 'billiard':
-        return Colors.brown;
-      case 'bowling':
-        return Colors.deepOrange;
-      case 'golf':
-        return Colors.lightGreen;
-      case 'table_tennis':
-        return Colors.amber;
-      default:
-        return Colors.blueGrey;
-    }
+  /// Indeks warna kategori, bukan warnanya langsung.
+  ///
+  /// Dulu getter ini mengembalikan `Colors.green`, `Colors.purple`,
+  /// `Colors.brown` dan sepuluh lainnya: empat belas warna bawaan
+  /// Material yang tidak satu pun berasal dari palet Sportago, dan yang
+  /// tetap sama di tema gelap sehingga kontrasnya jebol. Sekarang yang
+  /// dikembalikan cuma nomor slot, dan pemanggilnya menerjemahkannya
+  /// lewat `context.c.kategori(...)` yang sudah sadar tema.
+  int get indeksWarna {
+    const urutan = [
+      'futsal',
+      'badminton',
+      'basketball',
+      'volleyball',
+      'tennis',
+      'mini_soccer',
+      'swimming',
+      'gym',
+      'padel',
+      'billiard',
+      'bowling',
+      'golf',
+      'table_tennis',
+    ];
+    final i = urutan.indexOf(value.toLowerCase());
+    // Jenis yang belum dikenal tetap dapat slot yang tetap, diturunkan
+    // dari namanya, supaya warnanya tidak berubah-ubah tiap render.
+    return i >= 0 ? i : value.hashCode.abs();
   }
 
   // Fallback field types if API fails

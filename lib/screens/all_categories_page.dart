@@ -157,7 +157,7 @@ class _AllCategoriesPageState extends State<AllCategoriesPage> {
             builder: (context) => CategoryVenuesPage(
               categoryName: category.label,
               categoryIcon: category.icon,
-              categoryColor: category.color,
+              categoryColor: context.c.kategori(category.indeksWarna),
               fieldType: category.value,
             ),
           ),
