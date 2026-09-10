@@ -4,6 +4,7 @@ import '../utils/waktu_wib.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import '../theme/app_tokens.dart';
+import '../widgets/sampul_venue.dart';
 import 'package:flutter/services.dart';
 import '../services/payment_method_service.dart';
 import '../services/booking_service.dart';
@@ -18,6 +19,12 @@ class BookingConfirmationPage extends StatefulWidget {
   final String venueName;
   final String venueAddress;
   final String fieldName;
+
+  /// Foto sampul venue, kalau mitranya sudah mengunggah.
+  final String? venueImageUrl;
+
+  /// Jenis lapangan, dipakai memilih ikon pengganti foto.
+  final String? fieldType;
   final String selectedDate; // Format: YYYY-MM-DD
   final List<String> selectedTimeSlots; // Changed to List
   final int price;
@@ -26,8 +33,13 @@ class BookingConfirmationPage extends StatefulWidget {
     super.key,
     required this.fieldId,
     required this.venueName,
-    this.venueAddress = "Jl. Sudirman No. 123, Jakarta Selatan",
+    // Dulu alamat ini punya nilai bawaan "Jl. Sudirman No. 123, Jakarta
+    // Selatan". Alamat karangan pada layar yang dipakai orang untuk
+    // memastikan mau ke mana adalah kesalahan yang mahal.
+    required this.venueAddress,
     required this.fieldName,
+    this.venueImageUrl,
+    this.fieldType,
     required this.selectedDate,
     required this.selectedTimeSlots,
     required this.price,
@@ -555,18 +567,19 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Venue Image
-                          Container(
-                            width: 80,
-                            height: 80,
-                            decoration: BoxDecoration(
-                              color: context.c.raised,
-                              borderRadius: BorderRadius.circular(12),
-                              image: const DecorationImage(
-                                image: NetworkImage('https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=200'),
-                                fit: BoxFit.cover,
-                              ),
-                            ),
+                          // Sampul venue.
+                          //
+                          // Dulu di sini terpasang satu foto rumput dari
+                          // Unsplash, sama untuk venue mana pun, bahkan
+                          // untuk lapangan badminton dalam ruangan.
+                          SampulVenue(
+                            nama: widget.venueName,
+                            urlGambar: widget.venueImageUrl,
+                            olahraga: widget.fieldType,
+                            lebar: 80,
+                            tinggi: 80,
+                            ukuranInisial: 22,
+                            radius: BorderRadius.circular(12),
                           ),
                           const SizedBox(width: 16),
                           // Venue Details
@@ -2862,7 +2875,7 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
                     Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const HomePageWithTab(initialIndex: 2),
+                        builder: (context) => const HomePageWithTab(initialIndex: 1),
                       ),
                       (route) => false,
                     );
@@ -2928,7 +2941,7 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
                     Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const HomePageWithTab(initialIndex: 2),
+                        builder: (context) => const HomePageWithTab(initialIndex: 1),
                       ),
                       (route) => false,
                     );

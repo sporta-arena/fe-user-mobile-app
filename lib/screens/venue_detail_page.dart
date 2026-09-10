@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_map/flutter_map.dart';
 import '../theme/app_tokens.dart';
+import '../utils/tampilan_venue.dart';
+import '../widgets/sampul_venue.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'booking_confirmation_page.dart';
@@ -90,6 +92,15 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
     }
   }
 
+  /// Batas jarak yang masih masuk akal untuk ditawarkan, dalam meter.
+  ///
+  /// Kalau GPS meleset jauh (emulator yang titiknya masih di California,
+  /// izin lokasi kasar, atau perangkat yang jamnya kacau), hitungannya
+  /// menghasilkan "14006.0 km dari lokasi Anda". Angka sebesar itu bukan
+  /// informasi, cuma bikin orang ragu pada seluruh halaman. Lewat batas
+  /// ini baris jaraknya disembunyikan saja.
+  static const double _batasJarakMasukAkal = 500 * 1000;
+
   void _calculateDistance() {
     if (_currentPosition == null || _venue == null) return;
     if (_venue!.latitude == null || _venue!.longitude == null) return;
@@ -104,8 +115,11 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
     setState(() {
       if (distance < 1000) {
         _distanceText = '${distance.round()} m dari lokasi Anda';
-      } else {
+      } else if (distance < _batasJarakMasukAkal) {
         _distanceText = '${(distance / 1000).toStringAsFixed(1)} km dari lokasi Anda';
+      } else {
+        // Di luar batas, angkanya tidak dipercaya, jadi tidak ditampilkan.
+        _distanceText = '';
       }
     });
   }
@@ -193,7 +207,8 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
       address: _venue!.address,
       rating: _venue!.averageRating,
       pricePerHour: _selectedField?.pricePerHour.toInt() ?? 0,
-      category: _selectedField?.type ?? 'Sport',
+      category: _selectedField?.type ?? '',
+      imageUrl: _venue!.coverImageUrl,
     );
 
     _favoriteService.toggleFavorite(venue);
@@ -498,24 +513,15 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                 setState(() => _currentImageIndex = index);
               },
               itemBuilder: (context, index) {
-                final imageUrl = images[index];
-                return imageUrl.isNotEmpty
-                    ? Image.network(
-                        imageUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => Container(
-                          color: context.c.raised,
-                          child: Center(
-                            child: Icon(Icons.image, size: 80, color: context.c.inkSoft),
-                          ),
-                        ),
-                      )
-                    : Container(
-                        color: context.c.raised,
-                        child: Center(
-                          child: Icon(Icons.image, size: 80, color: context.c.inkSoft),
-                        ),
-                      );
+                // Venue tanpa foto dulu menampilkan ikon gambar rusak
+                // setinggi 280px, yang terbaca seperti galat. Sekarang
+                // bidang warna berinisial, sama seperti di web.
+                return SampulVenue(
+                  nama: _venue?.name ?? '',
+                  urlGambar: images[index],
+                  olahraga: _selectedField?.type,
+                  ukuranInisial: 56,
+                );
               },
             ),
             // Image indicators
@@ -640,7 +646,7 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
-                _formatFacility(facility),
+                formatFasilitas(facility),
                 style: TextStyle(color: context.c.accent, fontSize: 12, fontWeight: FontWeight.w500),
               ),
             )
@@ -1307,6 +1313,8 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                         venueName: _venue?.name ?? '',
                         venueAddress: _venue?.address ?? '',
                         fieldName: _selectedField!.name,
+                        venueImageUrl: _venue?.coverImageUrl,
+                        fieldType: _selectedField!.type,
                         selectedDate: _selectedDate.toString().split(' ')[0],
                         selectedTimeSlots: _selectedTimeSlots,
                         price: price,
@@ -1346,13 +1354,6 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
     );
   }
 
-  String _formatFacility(String facility) {
-    return facility
-        .replaceAll('_', ' ')
-        .split(' ')
-        .map((word) => word.isNotEmpty ? '${word[0].toUpperCase()}${word.substring(1)}' : '')
-        .join(' ');
-  }
 }
 
 // Map Grid Painter for location placeholder
