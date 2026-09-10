@@ -135,6 +135,13 @@ class DashboardContent extends StatefulWidget {
 
 class _DashboardContentState extends State<DashboardContent> {
   String _address = "Mencari lokasi…";
+
+  /// Kota yang dipilih lewat chip lokasi; null berarti semua kota.
+  String? _kotaTerpilih;
+
+  List<model.Venue> get _venueTampil => _kotaTerpilih == null
+      ? _venues
+      : _venues.where((v) => v.city == _kotaTerpilih).toList();
   List<model.Venue> _venues = [];
   List<FieldType> _fieldTypes = [];
   bool _loadingVenues = true;
@@ -166,6 +173,103 @@ class _DashboardContentState extends State<DashboardContent> {
   Future<void> _loadFieldTypes() async {
     final types = await FieldTypeService.getFieldTypes();
     if (mounted) setState(() => _fieldTypes = types);
+  }
+
+  /// Lembar pemilih lokasi.
+  ///
+  /// Chip lokasi punya tanda panah ke bawah, yang menjanjikan pilihan,
+  /// tapi ketukannya dulu hanya memanggil _getLocation. Kalau izin lokasi
+  /// sudah pernah diberikan, GPS mengembalikan tempat yang sama dan
+  /// layarnya tidak berubah sama sekali, sehingga terasa seperti tombol
+  /// mati. Dan tidak pernah ada cara memilih kota lain.
+  Future<void> _bukaPemilihLokasi() async {
+    final kota = <String>{
+      for (final v in _venues)
+        if (v.city.trim().isNotEmpty) v.city,
+    }.toList()
+      ..sort();
+
+    if (!mounted) return;
+    await showModalBottomSheet(
+      context: context,
+      backgroundColor: context.c.raised,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 12),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: context.c.line,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Pilih Lokasi',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: context.c.ink,
+                  ),
+                ),
+              ),
+            ),
+            ListTile(
+              leading: Icon(Icons.my_location_rounded, color: context.c.accent),
+              title: const Text('Gunakan lokasi saya'),
+              subtitle: const Text('Venue terdekat diurutkan dari titik Anda'),
+              onTap: () {
+                Navigator.pop(sheetContext);
+                _getLocation();
+              },
+            ),
+            if (_kotaTerpilih != null)
+              ListTile(
+                leading: Icon(Icons.public_rounded, color: context.c.inkSoft),
+                title: const Text('Semua kota'),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  setState(() {
+                    _kotaTerpilih = null;
+                    _address = 'Semua kota';
+                  });
+                },
+              ),
+            if (kota.isNotEmpty) Divider(height: 1, color: context.c.line),
+            Flexible(
+              child: ListView(
+                shrinkWrap: true,
+                children: [
+                  for (final k in kota)
+                    ListTile(
+                      leading: Icon(Icons.location_city_rounded,
+                          color: context.c.inkSoft),
+                      title: Text(formatKota(k)),
+                      onTap: () {
+                        Navigator.pop(sheetContext);
+                        setState(() {
+                          _kotaTerpilih = k;
+                          _address = formatKota(k);
+                        });
+                      },
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
   }
 
   Future<void> _getLocation() async {
@@ -213,9 +317,9 @@ class _DashboardContentState extends State<DashboardContent> {
                 const SizedBox(height: 20),
                 _categories(),
                 const SizedBox(height: 24),
-                _venueSection("Nearby from you", _venues),
+                _venueSection("Nearby from you", _venueTampil),
                 const SizedBox(height: 24),
-                _venueSection("Popular", _venues.reversed.toList()),
+                _venueSection("Popular", _venueTampil.reversed.toList()),
                 const SizedBox(height: 12),
               ],
             ),
@@ -241,7 +345,7 @@ class _DashboardContentState extends State<DashboardContent> {
         children: [
           Expanded(
             child: GestureDetector(
-              onTap: _getLocation,
+              onTap: _bukaPemilihLokasi,
               child: Row(
                 children: [
                   Icon(Icons.location_on_rounded,

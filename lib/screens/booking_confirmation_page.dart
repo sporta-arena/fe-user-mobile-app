@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import '../theme/app_tokens.dart';
 import 'package:flutter/services.dart';
+import '../services/payment_method_service.dart';
 import '../services/booking_service.dart';
 import '../services/auth_service.dart';
 import '../models/booking.dart';
@@ -55,112 +56,58 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
   static const int _platformFeeCap = 20000;
 
   // Payment method data with fees
-  static final List<Map<String, dynamic>> _paymentMethods = [
-    {
-      'id': 'QRIS',
-      'title': 'QRIS',
-      'subtitle': 'Scan QR via e-wallet atau m-banking',
-      'feeType': 'percent',
-      'feeValue': 0.007, // 0.7% (MDR regulated by BI)
-      'icon': Icons.qr_code_2,
-    },
-    {
-      'id': 'VA_BCA',
-      'title': 'BCA Virtual Account',
-      'subtitle': 'Transfer via ATM/m-Banking BCA',
-      'feeType': 'flat',
-      'feeValue': 4000,
-      'icon': Icons.account_balance,
-    },
-    {
-      'id': 'VA_BNI',
-      'title': 'BNI Virtual Account',
-      'subtitle': 'Transfer via ATM/m-Banking BNI',
-      'feeType': 'flat',
-      'feeValue': 4000,
-      'icon': Icons.account_balance,
-    },
-    {
-      'id': 'VA_BRI',
-      'title': 'BRI Virtual Account',
-      'subtitle': 'Transfer via ATM/m-Banking BRI',
-      'feeType': 'flat',
-      'feeValue': 4000,
-      'icon': Icons.account_balance,
-    },
-    {
-      'id': 'VA_MANDIRI',
-      'title': 'Mandiri Virtual Account',
-      'subtitle': 'Transfer via ATM/m-Banking Mandiri',
-      'feeType': 'flat',
-      'feeValue': 4000,
-      'icon': Icons.account_balance,
-    },
-    {
-      'id': 'VA_PERMATA',
-      'title': 'Permata Virtual Account',
-      'subtitle': 'Transfer via ATM/m-Banking Permata',
-      'feeType': 'flat',
-      'feeValue': 4000,
-      'icon': Icons.account_balance,
-    },
-    {
-      'id': 'DANA',
-      'title': 'DANA',
-      'subtitle': 'Bayar langsung dari aplikasi DANA',
-      'feeType': 'percent',
-      'feeValue': 0.015, // 1.5%
-      'icon': Icons.account_balance_wallet,
-    },
-    {
-      'id': 'OVO',
-      'title': 'OVO',
-      'subtitle': 'Bayar langsung dari aplikasi OVO',
-      'feeType': 'percent',
-      'feeValue': 0.015, // 1.5%
-      'icon': Icons.account_balance_wallet,
-    },
-    {
-      'id': 'GOPAY',
-      'title': 'GoPay',
-      'subtitle': 'Bayar langsung dari aplikasi Gojek',
-      'feeType': 'percent',
-      'feeValue': 0.02, // 2%
-      'icon': Icons.account_balance_wallet,
-    },
-    {
-      'id': 'SHOPEEPAY',
-      'title': 'ShopeePay',
-      'subtitle': 'Bayar langsung dari aplikasi Shopee',
-      'feeType': 'percent',
-      'feeValue': 0.015, // 1.5%
-      'icon': Icons.account_balance_wallet,
-    },
-    {
-      'id': 'LINKAJA',
-      'title': 'LinkAja',
-      'subtitle': 'Bayar langsung dari aplikasi LinkAja',
-      'feeType': 'percent',
-      'feeValue': 0.015, // 1.5%
-      'icon': Icons.account_balance_wallet,
-    },
-    {
-      'id': 'ALFAMART',
-      'title': 'Alfamart',
-      'subtitle': 'Bayar tunai di gerai Alfamart',
-      'feeType': 'flat',
-      'feeValue': 5000,
-      'icon': Icons.store,
-    },
-    {
-      'id': 'INDOMARET',
-      'title': 'Indomaret',
-      'subtitle': 'Bayar tunai di gerai Indomaret',
-      'feeType': 'flat',
-      'feeValue': 5000,
-      'icon': Icons.store,
-    },
-  ];
+  /// Metode pembayaran, diisi dari server saat layar dibuka.
+  ///
+  /// Dulu daftar ini ditulis keras di sini bersama salinan biayanya.
+  /// Isinya tiga belas metode padahal backend hanya bisa membuat lima:
+  /// lima Virtual Account belum ada kodenya, LinkAja belum punya biaya,
+  /// dan Alfamart serta Indomaret bahkan tidak dikenal backend. Pelanggan
+  /// bisa memilih jalan buntu, dan biaya yang tampil tidak dijamin sama
+  /// dengan yang ditagih.
+  List<Map<String, dynamic>> _paymentMethods = [];
+  bool _memuatMetode = true;
+  String? _galatMetode;
+
+  Future<void> _muatMetodePembayaran() async {
+    setState(() {
+      _memuatMetode = true;
+      _galatMetode = null;
+    });
+    try {
+      final daftar = await PaymentMethodService.ambil(
+        jumlah: _fieldPrice + _platformFee,
+      );
+      if (!mounted) return;
+      setState(() {
+        _paymentMethods = daftar
+            .map((m) => <String, dynamic>{
+                  'id': m.kode.toUpperCase(),
+                  'title': m.label,
+                  'subtitle': m.keterangan,
+                  'kategori': m.kategori,
+                  // Biaya dari server, bukan dihitung ulang di sini.
+                  'serverFee': m.biaya,
+                  'feeType': m.jenisBiaya == 'percentage' ? 'percent' : 'flat',
+                  'feeValue': m.jenisBiaya == 'percentage'
+                      ? m.nilaiBiaya / 100
+                      : m.nilaiBiaya,
+                  'icon': m.ikon,
+                })
+            .toList();
+        if (_paymentMethods.isNotEmpty &&
+            !_paymentMethods.any((m) => m['id'] == _selectedPaymentMethod)) {
+          _selectedPaymentMethod = _paymentMethods.first['id'] as String;
+        }
+        _memuatMetode = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _galatMetode = e.toString().replaceFirst('Exception: ', '');
+        _memuatMetode = false;
+      });
+    }
+  }
 
   // Duration is calculated from selected time slots
   int get _durationHours => widget.selectedTimeSlots.length;
@@ -172,7 +119,14 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
   }
 
   // Get selected payment method data
+  @override
+  void initState() {
+    super.initState();
+    _muatMetodePembayaran();
+  }
+
   Map<String, dynamic> get _selectedPaymentData {
+    if (_paymentMethods.isEmpty) return const <String, dynamic>{};
     return _paymentMethods.firstWhere(
       (m) => m['id'] == _selectedPaymentMethod,
       orElse: () => _paymentMethods.first,
@@ -182,6 +136,10 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
   // Calculate payment gateway fee based on selected method
   int get _paymentGatewayFee {
     final method = _selectedPaymentData;
+    // Angka dari server adalah yang benar-benar akan ditagih; hitungan
+    // di bawah hanya cadangan kalau daftarnya belum sempat termuat.
+    final dariServer = method['serverFee'];
+    if (dariServer is int) return dariServer;
     if (method['feeType'] == 'percent') {
       // Dasarnya (harga lapangan + platform fee), sama seperti
       // BookingService di backend — bukan harga lapangan saja.
@@ -271,33 +229,48 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                   controller: scrollController,
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   children: [
-                    // QRIS Section
-                    _buildSectionHeader("QRIS", Icons.qr_code_2),
-                    _buildPaymentOption(_paymentMethods[0]),
-
-                    const SizedBox(height: 16),
-
-                    // Virtual Account Section
-                    _buildSectionHeader("Virtual Account", Icons.account_balance),
-                    ..._paymentMethods
-                        .where((m) => m['id'].toString().startsWith('VA_'))
-                        .map((m) => _buildPaymentOption(m)),
-
-                    const SizedBox(height: 16),
-
-                    // E-Wallet Section
-                    _buildSectionHeader("E-Wallet", Icons.account_balance_wallet),
-                    ..._paymentMethods
-                        .where((m) => ['DANA', 'OVO', 'GOPAY', 'SHOPEEPAY', 'LINKAJA'].contains(m['id']))
-                        .map((m) => _buildPaymentOption(m)),
-
-                    const SizedBox(height: 16),
-
-                    // Retail Section
-                    _buildSectionHeader("Gerai Retail", Icons.store),
-                    ..._paymentMethods
-                        .where((m) => ['ALFAMART', 'INDOMARET'].contains(m['id']))
-                        .map((m) => _buildPaymentOption(m)),
+                    if (_memuatMetode)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 32),
+                        child: Center(child: CircularProgressIndicator()),
+                      )
+                    else if (_galatMetode != null)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 24),
+                        child: Column(
+                          children: [
+                            Text(
+                              _galatMetode!,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: context.c.inkSoft),
+                            ),
+                            const SizedBox(height: 12),
+                            OutlinedButton.icon(
+                              onPressed: _muatMetodePembayaran,
+                              icon: const Icon(Icons.refresh),
+                              label: const Text('Coba lagi'),
+                            ),
+                          ],
+                        ),
+                      )
+                    else
+                      // Seksi mengikuti kategori yang dikirim server.
+                      // Kategori yang belum punya metode tidak digambar,
+                      // jadi judul kosong tidak pernah muncul.
+                      ...[
+                        for (final k in const [
+                          ('qris', 'QRIS', Icons.qr_code_2),
+                          ('ewallet', 'E-Wallet', Icons.account_balance_wallet),
+                          ('va', 'Virtual Account', Icons.account_balance),
+                        ])
+                          if (_paymentMethods.any((m) => m['kategori'] == k.$1)) ...[
+                            _buildSectionHeader(k.$2, k.$3),
+                            ..._paymentMethods
+                                .where((m) => m['kategori'] == k.$1)
+                                .map(_buildPaymentOption),
+                            const SizedBox(height: 16),
+                          ],
+                      ],
 
                     const SizedBox(height: 20),
                   ],
