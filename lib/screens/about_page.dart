@@ -75,7 +75,7 @@ class AboutPage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      "Version 1.0.0 (Beta)",
+                      "Versi 1.0.0 (Beta)",
                       style: TextStyle(
                         fontSize: 12,
                         color: context.c.inkSoft,
@@ -117,10 +117,13 @@ class AboutPage extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildFeatureItem(context, Icons.calendar_month, "Real-time\nBooking"),
-                  _buildFeatureItem(context, Icons.qr_code_scanner, "Payment\nGateway"),
-                  _buildFeatureItem(context, Icons.stars, "Loyalty\nRewards"),
-                  _buildFeatureItem(context, Icons.support_agent, "24/7\nSupport"),
+                  // "24/7 Support" dicabut: tidak ada layanan 24 jam,
+                  // jadi itu janji yang tidak bisa ditepati. Tiga sisanya
+                  // menunjuk fitur yang benar-benar ada di app ini.
+                  _buildFeatureItem(context, Icons.calendar_month, "Jadwal\nReal-time"),
+                  _buildFeatureItem(context, Icons.qr_code_scanner, "Bayar\nOnline"),
+                  _buildFeatureItem(context, Icons.stars, "Poin\nLoyalitas"),
+                  _buildFeatureItem(context, Icons.assignment_return, "Ajukan\nRefund"),
                 ],
               ),
             ),
@@ -129,33 +132,18 @@ class AboutPage extends StatelessWidget {
             Divider(thickness: 1, color: context.c.line),
 
             // --- 4. MENU KONTAK & LEGAL ---
-            _buildListTile(
-              context,
-              icon: Icons.language,
-              title: "Website Resmi",
-              subtitle: "www.sporta.id",
-              onTap: () {
-                _showComingSoonDialog(context, "Website");
-              },
-            ),
-            
+            // Baris "Website Resmi" (www.sporta.id) dan "Instagram"
+            // (@sporta.app) dicabut: dua-duanya alamat karangan, dan
+            // ketukannya cuma memunculkan dialog "Coming Soon". Email
+            // yang tersisa disamakan dengan yang dipakai di Syarat &
+            // Ketentuan serta Kebijakan Privasi di web.
             _buildListTile(
               context,
               icon: Icons.email_outlined,
               title: "Email Support",
-              subtitle: "support@sporta.id",
+              subtitle: "support@sportago.id",
               onTap: () {
-                _copyToClipboard(context, "support@sporta.id", "Email");
-              },
-            ),
-            
-            _buildListTile(
-              context,
-              icon: Icons.camera_alt_outlined,
-              title: "Instagram",
-              subtitle: "@sporta.app",
-              onTap: () {
-                _showComingSoonDialog(context, "Instagram");
+                _copyToClipboard(context, "support@sportago.id", "Email");
               },
             ),
 
@@ -274,24 +262,6 @@ class AboutPage extends StatelessWidget {
         content: Text("$type berhasil disalin ke clipboard"),
         backgroundColor: context.c.ok,
         behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-
-  void _showComingSoonDialog(BuildContext context, String feature) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: context.c.raised,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text("Coming Soon", style: TextStyle(color: context.c.ink)),
-        content: Text("$feature akan segera tersedia dalam update mendatang.", style: TextStyle(color: context.c.inkSoft)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text("OK", style: TextStyle(color: context.c.accent)),
-          ),
-        ],
       ),
     );
   }

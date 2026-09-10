@@ -138,7 +138,7 @@ class _LoginPageState extends State<LoginPage> {
 
               // Heading
               Text(
-                "Welcome back",
+                "Selamat datang lagi",
                 style: TextStyle(
                   fontSize: 30,
                   fontWeight: FontWeight.w900,

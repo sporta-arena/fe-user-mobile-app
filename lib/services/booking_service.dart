@@ -50,8 +50,8 @@ class BookingService {
           'notes': notes,
           // API memakai kode huruf kecil ('qris', 'va_bca', ...) dan
           // memvalidasinya persis. App menyimpan id metode dengan huruf
-          // besar untuk tampilan, jadi harus diturunkan di sini —
-          // sebelumnya setiap pemesanan dari app ditolak 422
+          // besar untuk tampilan, jadi harus diturunkan di sini.
+          // Sebelumnya setiap pemesanan dari app ditolak 422
           // "Selected payment method is not supported."
           'payment_method': (paymentMethod ?? 'qris').toLowerCase(),
         }),

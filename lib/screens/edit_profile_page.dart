@@ -164,7 +164,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
             const SizedBox(height: 20),
             
             _buildTextField(
-              label: "Email Address",
+              label: "Alamat Email",
               controller: _emailController,
               icon: Icons.email_outlined,
               isReadOnly: true, // Email biasanya tidak boleh ganti sembarangan

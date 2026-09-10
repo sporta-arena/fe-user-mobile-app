@@ -54,15 +54,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
     }
   }
 
-  void _comingSoon(String provider) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Continue with $provider belum tersedia'),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -109,8 +100,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
                   // Tagline
                   const Text(
-                    'Premium sports venue at your fingertips. '
-                    'Book futsal, Badminton, Basketball courts in seconds.',
+                    'Cari lapangan, cek jam kosong, langsung bayar. '
+                    'Futsal, badminton, atau basket, beres dari sini.',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 20,
@@ -120,24 +111,18 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   ),
                   const SizedBox(height: 28),
 
-                  // Continue with Apple
-                  _AuthButton(
-                    label: 'Continue with Apple',
-                    background: const Color(0xFF141414),
-                    foreground: Colors.white,
-                    leading: const Icon(Icons.apple,
-                        color: Colors.white, size: 22),
-                    onPressed: () => _comingSoon('Apple'),
-                  ),
-                  const SizedBox(height: 8),
+                  // Tombol "Continue with Apple" dicabut: masuk lewat Apple
+                  // belum digarap sama sekali, jadi tombolnya cuma
+                  // memunculkan snackbar "belum tersedia". Lagi pula app
+                  // ini baru rilis di Android.
 
-                  // Continue with Google — Android only for now
-                  // (iOS Google Sign-In belum dikonfigurasi).
+                  // Masuk lewat Google baru jalan di Android
+                  // (Google Sign-In di iOS belum dikonfigurasi).
                   if (!Platform.isIOS) ...[
                     _AuthButton(
                       label: _isGoogleLoading
                           ? 'Menghubungkan…'
-                          : 'Continue with Google',
+                          : 'Lanjut dengan Google',
                       background: Colors.white,
                       foreground: const Color(0xFF141414),
                       leading: _isGoogleLoading
@@ -154,9 +139,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     const SizedBox(height: 8),
                   ],
 
-                  // Continue with email
+                  // Masuk pakai email
                   _AuthButton(
-                    label: 'Continue with email',
+                    label: 'Lanjut pakai email',
                     background: Colors.white.withValues(alpha: 0.14),
                     foreground: Colors.white,
                     onPressed: _continueWithEmail,
