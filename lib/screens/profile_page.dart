@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_tokens.dart';
 import 'package:flutter/services.dart';
+import 'favorite_venues_page.dart';
 import 'loyalty_page.dart';
 import 'edit_profile_page.dart';
 import 'notifications_page.dart';
@@ -424,7 +425,7 @@ class _ProfilePageState extends State<ProfilePage> {
               Expanded(
                 child: _buildStatCard(
                   icon: Icons.account_balance_wallet_outlined,
-                  title: "Total Spent",
+                  title: "Total Belanja",
                   value: _formatCurrency(_totalSpent),
                   color: context.c.accent,
                   isSmallText: true,
@@ -512,7 +513,7 @@ class _ProfilePageState extends State<ProfilePage> {
               children: [
                 _buildMenuItem(
                   icon: Icons.person_outline,
-                  title: "Edit Profile",
+                  title: "Ubah Profil",
                   subtitle: "Update informasi personal",
                   onTap: () async {
                     await Navigator.push(
@@ -540,7 +541,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 _buildDivider(),
                 _buildMenuItem(
                   icon: Icons.stars_outlined,
-                  title: "Loyalty Program",
+                  title: "Program Loyalitas",
                   subtitle: "$_loyaltyPoints poin tersedia",
                   onTap: () {
                     Navigator.push(
@@ -565,6 +566,18 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             child: Column(
               children: [
+                _buildMenuItem(
+                  icon: Icons.favorite_border,
+                  title: "Venue Favorit",
+                  subtitle: "Venue yang kamu tandai hati",
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const FavoriteVenuesPage()),
+                    );
+                  },
+                ),
+                _buildDivider(),
                 _buildMenuItem(
                   icon: Icons.chat_outlined,
                   title: "Riwayat Pesan",

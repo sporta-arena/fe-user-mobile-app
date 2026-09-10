@@ -5,6 +5,7 @@ import 'screens/onboarding_screen.dart';
 import 'screens/login_page.dart';
 import 'screens/home_page.dart';
 import 'services/auth_service.dart';
+import 'services/favorite_service.dart';
 import 'theme/app_theme.dart';
 import 'theme/app_tokens.dart';
 import 'widgets/sportago_mark.dart';
@@ -16,6 +17,10 @@ void main() async {
   // Tema dibaca sebelum frame pertama supaya layar tidak berkedip
   // terang lalu gelap waktu aplikasi dibuka.
   await ThemeController.instance.muat();
+  // Favorit dibaca sebelum frame pertama supaya ikon hati di detail
+  // venue langsung tampil dengan keadaan yang benar, bukan kosong dulu
+  // lalu berubah sendiri.
+  await FavoriteService().muat();
   runApp(const MyApp());
 }
 
