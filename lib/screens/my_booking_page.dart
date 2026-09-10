@@ -1103,7 +1103,7 @@ class _PaymentWaitingPageState extends State<PaymentWaitingPage> {
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
-            builder: (context) => const HomePageWithTab(initialIndex: 2),
+            builder: (context) => const HomePageWithTab(initialIndex: 1),
           ),
           (route) => false,
         );
@@ -1147,7 +1147,7 @@ class _PaymentWaitingPageState extends State<PaymentWaitingPage> {
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
-            builder: (context) => const HomePageWithTab(initialIndex: 2),
+            builder: (context) => const HomePageWithTab(initialIndex: 1),
           ),
           (route) => false,
         );

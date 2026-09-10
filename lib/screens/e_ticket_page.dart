@@ -135,7 +135,7 @@ class _ETicketPageState extends State<ETicketPage> {
             Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(
-                builder: (context) => const HomePageWithTab(initialIndex: 2),
+                builder: (context) => const HomePageWithTab(initialIndex: 1),
               ),
               (route) => false,
             );
