@@ -125,8 +125,29 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
     _muatMetodePembayaran();
   }
 
+  /// Nilai sementara selagi daftar metode dari server belum termuat.
+  ///
+  /// Layar ini membaca 'icon', 'title', 'subtitle', dan 'feeValue' dengan
+  /// cast langsung di enam tempat. Sebelumnya getter di bawah
+  /// mengembalikan map KOSONG saat daftarnya belum ada, sehingga
+  /// `null as IconData` melempar dan layarnya merah selama beberapa saat
+  /// sampai jawaban server datang.
+  ///
+  /// Bukan data karangan: QRIS memang selalu tersedia dan tarifnya sudah
+  /// ditetapkan Bank Indonesia, jadi angkanya benar walau server belum
+  /// menjawab. Begitu daftar aslinya masuk, map ini tidak dipakai lagi.
+  static const Map<String, dynamic> _metodeSementara = {
+    'id': 'QRIS',
+    'title': 'QRIS',
+    'subtitle': 'Scan QR via e-wallet atau m-banking',
+    'kategori': 'qris',
+    'feeType': 'percent',
+    'feeValue': 0.007,
+    'icon': Icons.qr_code_2,
+  };
+
   Map<String, dynamic> get _selectedPaymentData {
-    if (_paymentMethods.isEmpty) return const <String, dynamic>{};
+    if (_paymentMethods.isEmpty) return _metodeSementara;
     return _paymentMethods.firstWhere(
       (m) => m['id'] == _selectedPaymentMethod,
       orElse: () => _paymentMethods.first,
