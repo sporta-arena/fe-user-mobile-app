@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/tampilan_venue.dart';
 import '../theme/app_tokens.dart';
 import 'search_page.dart';
 import 'venue_detail_page.dart';
@@ -429,7 +430,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                       const SizedBox(width: 2),
                       Expanded(
                         child: Text(
-                          venue.city ?? "Jakarta",
+                          formatKota(venue.city),
                           style: TextStyle(fontSize: 11, color: context.c.inkSoft),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -1017,7 +1018,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          venue.city ?? "Jakarta",
+                          formatKota(venue.city),
                           style: TextStyle(fontSize: 12, color: context.c.inkSoft),
                           overflow: TextOverflow.ellipsis,
                         ),

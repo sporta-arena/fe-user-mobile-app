@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/tampilan_venue.dart';
 import '../theme/app_tokens.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
@@ -714,7 +715,7 @@ class _CategoryVenuesPageState extends State<CategoryVenuesPage> {
                       const SizedBox(width: 2),
                       Expanded(
                         child: Text(
-                          venue.city,
+                          formatKota(venue.city),
                           style: TextStyle(color: context.c.inkSoft, fontSize: 12),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,

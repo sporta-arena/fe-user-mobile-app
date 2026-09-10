@@ -595,20 +595,6 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
-                                    Row(
-                                      children: [
-                                        Icon(Icons.star, color: context.c.warn, size: 16),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          "4.8",
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 14,
-                                            color: context.c.ink,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
                                   ],
                                 ),
                                 const SizedBox(height: 4),

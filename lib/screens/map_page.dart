@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/tampilan_venue.dart';
 import '../theme/app_tokens.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -299,7 +300,7 @@ class _MapPageState extends State<MapPage> {
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
-                            v.city,
+                            formatKota(v.city),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
