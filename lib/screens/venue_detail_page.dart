@@ -191,7 +191,7 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
       id: _venue!.id.toString(),
       name: _venue!.name,
       address: _venue!.address,
-      rating: 4.5,
+      rating: _venue!.averageRating,
       pricePerHour: _selectedField?.pricePerHour.toInt() ?? 0,
       category: _selectedField?.type ?? 'Sport',
     );

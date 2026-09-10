@@ -4,7 +4,7 @@ class FavoriteVenue {
   final String id;
   final String name;
   final String address;
-  final double rating;
+  final double? rating;
   final int pricePerHour;
   final String category;
 
@@ -12,7 +12,7 @@ class FavoriteVenue {
     required this.id,
     required this.name,
     required this.address,
-    required this.rating,
+    this.rating,
     required this.pricePerHour,
     required this.category,
   });
