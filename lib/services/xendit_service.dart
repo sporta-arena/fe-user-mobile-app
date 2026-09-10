@@ -39,7 +39,7 @@ class XenditService {
             'email': customerEmail ?? 'customer@example.com',
           },
         }),
-      );
+      ).timeout(const Duration(seconds: 20));
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
@@ -78,7 +78,7 @@ class XenditService {
             'email': customerEmail ?? 'customer@example.com',
           },
         }),
-      );
+      ).timeout(const Duration(seconds: 20));
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
@@ -117,7 +117,7 @@ class XenditService {
             'email': customerEmail ?? 'customer@example.com',
           },
         }),
-      );
+      ).timeout(const Duration(seconds: 20));
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
@@ -156,7 +156,7 @@ class XenditService {
           'success_redirect_url': XenditConfig.successRedirectUrl,
           'failure_redirect_url': XenditConfig.failureRedirectUrl,
         }),
-      );
+      ).timeout(const Duration(seconds: 20));
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
@@ -194,7 +194,7 @@ class XenditService {
       final response = await http.get(
         Uri.parse('${XenditConfig.baseUrl}$endpoint'),
         headers: _headers,
-      );
+      ).timeout(const Duration(seconds: 20));
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);

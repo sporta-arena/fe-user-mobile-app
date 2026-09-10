@@ -34,7 +34,7 @@ class ReviewService {
       final response = await http.get(
         uri,
         headers: ApiConfig.defaultHeaders,
-      );
+      ).timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 
@@ -86,7 +86,7 @@ class ReviewService {
           'rating': rating,
           'comment': comment,
         }),
-      );
+      ).timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 
@@ -128,7 +128,7 @@ class ReviewService {
       final response = await http.get(
         uri,
         headers: ApiConfig.authHeaders(AuthService.token!),
-      );
+      ).timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 
@@ -171,7 +171,7 @@ class ReviewService {
       final response = await http.get(
         Uri.parse(ApiConfig.canReviewBookingUrl(bookingId)),
         headers: ApiConfig.authHeaders(AuthService.token!),
-      );
+      ).timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 

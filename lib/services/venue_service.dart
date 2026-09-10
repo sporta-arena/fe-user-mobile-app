@@ -63,7 +63,7 @@ class VenueService {
       final response = await http.get(
         uri,
         headers: ApiConfig.defaultHeaders,
-      );
+      ).timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 
@@ -101,7 +101,7 @@ class VenueService {
       final response = await http.get(
         Uri.parse(ApiConfig.venueDetailUrl(id)),
         headers: ApiConfig.defaultHeaders,
-      );
+      ).timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 
@@ -132,7 +132,7 @@ class VenueService {
       final response = await http.get(
         Uri.parse(ApiConfig.venueFieldsUrl(venueId)),
         headers: ApiConfig.defaultHeaders,
-      );
+      ).timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 
@@ -167,7 +167,7 @@ class VenueService {
       final response = await http.get(
         Uri.parse(ApiConfig.fieldDetailUrl(venueId, fieldId)),
         headers: ApiConfig.defaultHeaders,
-      );
+      ).timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 
@@ -205,7 +205,7 @@ class VenueService {
       final response = await http.get(
         uri,
         headers: ApiConfig.authHeaders(AuthService.token!),
-      );
+      ).timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 
@@ -249,7 +249,7 @@ class VenueService {
       final response = await http.get(
         Uri.parse(ApiConfig.myVenuesUrl),
         headers: ApiConfig.authHeaders(AuthService.token!),
-      );
+      ).timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 
@@ -368,7 +368,7 @@ class VenueService {
           'description': description,
           'price_per_hour': pricePerHour,
         }),
-      );
+      ).timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 

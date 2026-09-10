@@ -39,7 +39,7 @@ class WithdrawalService {
       final response = await http.get(
         Uri.parse(ApiConfig.withdrawalBalanceUrl),
         headers: ApiConfig.authHeaders(AuthService.token!),
-      );
+      ).timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 
@@ -73,7 +73,7 @@ class WithdrawalService {
       final response = await http.get(
         Uri.parse(ApiConfig.withdrawalEligibleBookingsUrl),
         headers: ApiConfig.authHeaders(AuthService.token!),
-      );
+      ).timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 
@@ -111,7 +111,7 @@ class WithdrawalService {
       final response = await http.get(
         Uri.parse(ApiConfig.withdrawalBanksUrl),
         headers: ApiConfig.authHeaders(AuthService.token!),
-      );
+      ).timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 
@@ -160,7 +160,7 @@ class WithdrawalService {
           'account_number': accountNumber,
           'account_name': accountName,
         }),
-      );
+      ).timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 
@@ -202,7 +202,7 @@ class WithdrawalService {
       final response = await http.get(
         uri,
         headers: ApiConfig.authHeaders(AuthService.token!),
-      );
+      ).timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 
@@ -245,7 +245,7 @@ class WithdrawalService {
       final response = await http.get(
         Uri.parse(ApiConfig.withdrawalDetailUrl(id)),
         headers: ApiConfig.authHeaders(AuthService.token!),
-      );
+      ).timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 
@@ -279,7 +279,7 @@ class WithdrawalService {
       final response = await http.post(
         Uri.parse(ApiConfig.withdrawalSimulateProcessUrl(id)),
         headers: ApiConfig.authHeaders(AuthService.token!),
-      );
+      ).timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 

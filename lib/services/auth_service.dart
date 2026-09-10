@@ -146,7 +146,7 @@ class AuthService {
         Uri.parse(ApiConfig.googleLoginUrl),
         headers: ApiConfig.defaultHeaders,
         body: jsonEncode({'credential': idToken}),
-      );
+      ).timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 
@@ -200,7 +200,7 @@ class AuthService {
           'email': email,
           'password': password,
         }),
-      );
+      ).timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 
@@ -311,7 +311,7 @@ class AuthService {
           'email': email,
           'code': code,
         }),
-      );
+      ).timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 
@@ -360,7 +360,7 @@ class AuthService {
         body: jsonEncode({
           'email': email,
         }),
-      );
+      ).timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 
@@ -397,7 +397,7 @@ class AuthService {
         body: jsonEncode({
           'email': email,
         }),
-      );
+      ).timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 
@@ -441,7 +441,7 @@ class AuthService {
           'email': email,
           'code': code,
         }),
-      );
+      ).timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 
@@ -488,7 +488,7 @@ class AuthService {
           'password': password,
           'password_confirmation': passwordConfirmation,
         }),
-      );
+      ).timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 
@@ -525,7 +525,7 @@ class AuthService {
       final response = await http.get(
         Uri.parse(ApiConfig.userUrl),
         headers: ApiConfig.authHeaders(_token!),
-      );
+      ).timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 
@@ -619,7 +619,7 @@ class AuthService {
       final response = await http.post(
         Uri.parse(ApiConfig.logoutUrl),
         headers: ApiConfig.authHeaders(_token!),
-      );
+      ).timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 
@@ -658,7 +658,7 @@ class AuthService {
       final response = await http.post(
         Uri.parse(ApiConfig.logoutAllUrl),
         headers: ApiConfig.authHeaders(_token!),
-      );
+      ).timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 

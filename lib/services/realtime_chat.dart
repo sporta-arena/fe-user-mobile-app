@@ -134,7 +134,7 @@ class RealtimeChat {
           'Accept': 'application/json',
         },
         body: json.encode({'socket_id': id, 'channel_name': kanal}),
-      );
+      ).timeout(const Duration(seconds: 20));
 
       if (respons.statusCode != 200) {
         _onStatus?.call(false);

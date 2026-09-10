@@ -81,7 +81,7 @@ class PaymentMethodService {
       throw Exception('Perlu masuk dulu untuk melihat metode pembayaran');
     }
 
-    final r = await http.get(url, headers: ApiConfig.authHeaders(token));
+    final r = await http.get(url, headers: ApiConfig.authHeaders(token)).timeout(const Duration(seconds: 20));
 
     if (r.statusCode != 200) {
       throw Exception('Gagal memuat metode pembayaran (${r.statusCode})');

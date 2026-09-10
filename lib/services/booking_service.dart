@@ -55,7 +55,7 @@ class BookingService {
           // "Selected payment method is not supported."
           'payment_method': (paymentMethod ?? 'qris').toLowerCase(),
         }),
-      );
+      ).timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 
@@ -99,7 +99,7 @@ class BookingService {
       final response = await http.get(
         uri,
         headers: ApiConfig.authHeaders(AuthService.token!),
-      );
+      ).timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 
@@ -141,7 +141,7 @@ class BookingService {
       final response = await http.get(
         Uri.parse(ApiConfig.bookingDetailUrl(id)),
         headers: ApiConfig.authHeaders(AuthService.token!),
-      );
+      ).timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 
@@ -176,7 +176,7 @@ class BookingService {
       final response = await http.post(
         Uri.parse(ApiConfig.cancelBookingUrl(id)),
         headers: ApiConfig.authHeaders(AuthService.token!),
-      );
+      ).timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 
@@ -212,7 +212,7 @@ class BookingService {
       final response = await http.post(
         Uri.parse(ApiConfig.simulatePaymentUrl(bookingId)),
         headers: ApiConfig.authHeaders(AuthService.token!),
-      );
+      ).timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 
@@ -253,7 +253,7 @@ class BookingService {
       final response = await http.get(
         uri,
         headers: ApiConfig.authHeaders(AuthService.token!),
-      );
+      ).timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 
@@ -298,7 +298,7 @@ class BookingService {
       final response = await http.get(
         uri,
         headers: ApiConfig.authHeaders(AuthService.token!),
-      );
+      ).timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 
@@ -333,7 +333,7 @@ class BookingService {
       final response = await http.get(
         Uri.parse(ApiConfig.refundPreviewUrl(bookingId)),
         headers: ApiConfig.authHeaders(AuthService.token!),
-      );
+      ).timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 

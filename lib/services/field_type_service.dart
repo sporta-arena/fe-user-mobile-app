@@ -22,7 +22,7 @@ class FieldTypeService {
       final response = await http.get(
         Uri.parse(ApiConfig.fieldTypesUrl),
         headers: ApiConfig.defaultHeaders,
-      );
+      ).timeout(const Duration(seconds: 20));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);

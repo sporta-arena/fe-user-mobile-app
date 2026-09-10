@@ -63,7 +63,7 @@ class RefundService {
       final response = await http.get(
         Uri.parse(ApiConfig.refundPolicyUrl),
         headers: ApiConfig.authHeaders(token),
-      );
+      ).timeout(const Duration(seconds: 20));
 
       if (response.statusCode != 200) return KebijakanRefund.tertutup;
 
@@ -88,7 +88,7 @@ class RefundService {
       final response = await http.get(
         Uri.parse(ApiConfig.refundPreviewUrl(bookingId)),
         headers: ApiConfig.authHeaders(token),
-      );
+      ).timeout(const Duration(seconds: 20));
 
       if (response.statusCode != 200) return null;
 
