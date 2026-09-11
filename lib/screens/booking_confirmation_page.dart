@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import '../theme/app_tokens.dart';
 import '../widgets/sampul_venue.dart';
 import 'package:flutter/services.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../services/payment_method_service.dart';
 import '../services/booking_service.dart';
 import '../services/auth_service.dart';
@@ -2291,6 +2293,344 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
   Booking get booking => _currentBooking ?? widget.booking;
   Map<String, dynamic>? get payment => widget.payment;
 
+  /// Kategori cara bayar yang menentukan instruksi mana yang ditampilkan.
+  ///
+  /// Dulu percabangannya `paymentMethod.startsWith('VA_')`, jadi cuma ada
+  /// dua kemungkinan: Virtual Account, atau QRIS. Setiap e-wallet (OVO,
+  /// GoPay, DANA, ShopeePay, LinkAja) jatuh ke "selain VA" dan disuguhi
+  /// layar QRIS, padahal e-wallet Xendit tidak pernah menghasilkan QR:
+  /// yang dikembalikan tautan checkout dan deeplink ke aplikasinya.
+  String get _kategoriBayar {
+    final kode = (widget.paymentMethod ?? '').toUpperCase();
+    if (kode.startsWith('VA_')) return 'va';
+    if (kode == 'QRIS') return 'qris';
+    // Server mengirim tautan checkout hanya untuk e-wallet, jadi
+    // keberadaannya sekaligus jadi penanda yang paling bisa dipercaya.
+    if (_tautanEwallet != null) return 'ewallet';
+    return 'qris';
+  }
+
+  /// Tautan bayar e-wallet, deeplink ke aplikasinya kalau ada.
+  ///
+  /// Xendit mengembalikan beberapa bentuk sekaligus di `actions`. Deeplink
+  /// didahulukan karena langsung membuka aplikasi e-wallet di HP; checkout
+  /// web dipakai kalau deeplinknya tidak dikirim.
+  String? get _tautanEwallet {
+    final p = payment;
+    if (p == null) return null;
+    final actions = p['actions'];
+    if (actions is Map) {
+      for (final kunci in const [
+        'mobile_deeplink_checkout_url',
+        'mobile_web_checkout_url',
+        'desktop_web_checkout_url',
+      ]) {
+        final nilai = actions[kunci];
+        if (nilai is String && nilai.isNotEmpty) return nilai;
+      }
+    }
+    final checkout = p['checkout_url'];
+    if (checkout is String && checkout.isNotEmpty) return checkout;
+    return null;
+  }
+
+  Future<void> _bukaTautanEwallet() async {
+    final tautan = _tautanEwallet;
+    if (tautan == null) return;
+    final uri = Uri.tryParse(tautan);
+    if (uri == null) return;
+
+    final bisa = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!bisa && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Tidak ada aplikasi yang bisa membuka $tautan'),
+        ),
+      );
+    }
+  }
+
+  /// Instruksi pembayaran sesuai cara bayar yang benar-benar dipilih.
+  Widget _instruksiPembayaran(BuildContext context) {
+    final kategori = _kategoriBayar;
+    final label = widget.paymentMethodLabel ?? 'QRIS';
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: context.c.raised,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: context.c.line),
+      ),
+      child: Column(
+        children: [
+          _lencanaCaraBayar(context, kategori, label),
+          const SizedBox(height: 16),
+          if (kategori == 'va')
+            _blokVirtualAccount(context)
+          else if (kategori == 'ewallet')
+            _blokEwallet(context, label)
+          else
+            _blokQris(context),
+          if (kDebugMode) ...[
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: _simulatePaymentSuccess,
+                icon: const Icon(Icons.bug_report, color: Colors.white, size: 18),
+                label: const Text(
+                  'TEST: Simulasi Pembayaran Berhasil',
+                  style: TextStyle(color: Colors.white, fontSize: 12),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.purple,
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _lencanaCaraBayar(BuildContext context, String kategori, String label) {
+    final (ikon, warna, warnaLembut) = switch (kategori) {
+      'va' => (Icons.account_balance, context.c.kategori(3), context.c.kategori(3).withValues(alpha: 0.12)),
+      'ewallet' => (Icons.account_balance_wallet, context.c.kategori(0), context.c.kategori(0).withValues(alpha: 0.12)),
+      _ => (Icons.qr_code_2, context.c.info, context.c.infoSoft),
+    };
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: warnaLembut,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: warna),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(ikon, size: 16, color: warna),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: warna,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _blokQris(BuildContext context) {
+    final qr = payment?['qr_string'];
+
+    // QR yang tidak ada tidak boleh disamarkan jadi kotak hitam. Dulu di
+    // sini selalu digambar Icon(Icons.qr_code_2) setinggi 120px, ikon
+    // Material biasa, lalu stringnya dicetak sebagai teks di bawahnya.
+    // Hasilnya mustahil dipindai, bahkan waktu Xendit mengirim QR asli.
+    if (qr is! String || qr.isEmpty) {
+      return _pesanGagal(
+        context,
+        'Kode QR belum diterima dari server. Coba tekan "Cek Status '
+        'Pembayaran", atau buat ulang pemesanan.',
+      );
+    }
+
+    return Column(
+      children: [
+        Text(
+          'Scan QR untuk bayar:',
+          style: TextStyle(fontSize: 12, color: context.c.inkSoft),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            // QR wajib gelap di atas terang apa pun temanya, jadi warnanya
+            // dipatok, bukan diambil dari token.
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: context.c.line),
+          ),
+          child: QrImageView(
+            data: qr,
+            version: QrVersions.auto,
+            size: 220,
+            backgroundColor: Colors.white,
+            eyeStyle: const QrEyeStyle(
+              eyeShape: QrEyeShape.square,
+              color: Colors.black,
+            ),
+            dataModuleStyle: const QrDataModuleStyle(
+              dataModuleShape: QrDataModuleShape.square,
+              color: Colors.black,
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          'Scan dengan aplikasi e-wallet atau m-banking',
+          style: TextStyle(fontSize: 11, color: context.c.inkSoft),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+
+  Widget _blokEwallet(BuildContext context, String label) {
+    if (_tautanEwallet == null) {
+      return _pesanGagal(
+        context,
+        'Tautan pembayaran $label belum diterima dari server. Coba tekan '
+        '"Cek Status Pembayaran", atau buat ulang pemesanan.',
+      );
+    }
+
+    return Column(
+      children: [
+        Text(
+          'Selesaikan pembayaran di aplikasi $label:',
+          style: TextStyle(fontSize: 12, color: context.c.inkSoft),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          width: double.infinity,
+          height: 48,
+          child: ElevatedButton.icon(
+            onPressed: _bukaTautanEwallet,
+            icon: Icon(Icons.open_in_new, size: 18, color: context.c.onAccent),
+            label: Text(
+              'Bayar dengan $label',
+              style: TextStyle(
+                color: context.c.onAccent,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: context.c.accent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          'Setelah membayar, kembali ke sini lalu tekan "Cek Status '
+          'Pembayaran".',
+          style: TextStyle(fontSize: 11, color: context.c.inkSoft),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+
+  Widget _blokVirtualAccount(BuildContext context) {
+    final nomor = payment?['virtual_account_no'] ?? payment?['va_number'];
+
+    // Nomor VA contoh tidak boleh ditampilkan. Baris lama memakai
+    // `?? "8800 1234 5678 9012"`, nomor karangan yang kalau ditransfer
+    // beneran uangnya entah ke mana.
+    if (nomor is! String || nomor.isEmpty) {
+      return _pesanGagal(
+        context,
+        'Nomor Virtual Account belum diterima dari server. Coba tekan '
+        '"Cek Status Pembayaran", atau buat ulang pemesanan.',
+      );
+    }
+
+    final bank = payment?['bank'];
+
+    return Column(
+      children: [
+        Text(
+          bank is String && bank.isNotEmpty
+              ? 'Nomor Virtual Account $bank:'
+              : 'Nomor Virtual Account:',
+          style: TextStyle(fontSize: 12, color: context.c.inkSoft),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: context.c.sunken,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: context.c.line),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(
+                child: SelectableText(
+                  nomor,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.2,
+                    color: context.c.ink,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              InkWell(
+                onTap: () async {
+                  await Clipboard.setData(ClipboardData(text: nomor));
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Nomor VA disalin!')),
+                  );
+                },
+                child: Icon(Icons.copy, size: 20, color: context.c.accent),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          'Transfer sesuai nominal ke nomor VA di atas',
+          style: TextStyle(fontSize: 11, color: context.c.inkSoft),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+
+  Widget _pesanGagal(BuildContext context, String pesan) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: context.c.warnSoft,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: context.c.warn),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.error_outline, size: 18, color: context.c.warn),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              pesan,
+              style: TextStyle(fontSize: 12, color: context.c.warn, height: 1.4),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // Use passed values or fallback to booking data
@@ -2298,8 +2638,6 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
     final displayBasePrice = widget.basePrice ?? booking.totalPrice.toInt();
     final displayPlatformFee = widget.platformFee ?? 0;
     final displayAdminFee = widget.adminFee ?? 0;
-    final displayPaymentMethod = widget.paymentMethodLabel ?? "QRIS";
-    final isVirtualAccount = widget.paymentMethod?.startsWith('VA_') ?? false;
 
     return Scaffold(
       backgroundColor: context.c.surface,
@@ -2587,183 +2925,7 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
                   
                   // Payment Method Info
                   const SizedBox(height: 16),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: context.c.raised,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: context.c.line),
-                    ),
-                    child: Column(
-                      children: [
-                        // Payment Method Badge
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: isVirtualAccount ? Colors.purple.shade50 : context.c.infoSoft,
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: isVirtualAccount ? Colors.purple.shade200 : context.c.info,
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                isVirtualAccount ? Icons.account_balance : Icons.qr_code_2,
-                                size: 16,
-                                color: isVirtualAccount ? Colors.purple.shade700 : context.c.info,
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                displayPaymentMethod,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: isVirtualAccount ? Colors.purple.shade700 : context.c.info,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        
-                        // Show VA Number or QR Code based on payment method
-                        if (isVirtualAccount) ...[
-                          Text(
-                            "Nomor Virtual Account:",
-                            style: TextStyle(fontSize: 12, color: context.c.inkSoft),
-                          ),
-                          const SizedBox(height: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                            decoration: BoxDecoration(
-                              color: context.c.surface,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: context.c.line),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  payment?['va_number'] ?? "8800 1234 5678 9012",
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 1.5,
-                                    color: context.c.ink,
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                InkWell(
-                                  onTap: () {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text("Nomor VA disalin!")),
-                                    );
-                                  },
-                                  child: Icon(Icons.copy, size: 20, color: context.c.accent),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            "Transfer sesuai nominal ke nomor VA di atas",
-                            style: TextStyle(fontSize: 11, color: context.c.inkSoft),
-                            textAlign: TextAlign.center,
-                          ),
-                          // Tombol uji: hanya ada di build debug.
-                          // Komentar lama menulis "remove in production"
-                          // tapi tidak ada yang menegakkannya, jadi
-                          // tombolnya ikut ke rilis.
-                          if (kDebugMode) ...[
-                            const SizedBox(height: 16),
-                            SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton.icon(
-                                onPressed: _simulatePaymentSuccess,
-                                icon: const Icon(Icons.bug_report,
-                                    color: Colors.white, size: 18),
-                                label: const Text(
-                                  "TEST: Simulasi Pembayaran Berhasil",
-                                  style: TextStyle(color: Colors.white, fontSize: 12),
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.purple,
-                                  padding: const EdgeInsets.symmetric(vertical: 10),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ] else ...[
-                          // QRIS
-                          Text(
-                            "Scan QR untuk bayar:",
-                            style: TextStyle(fontSize: 12, color: context.c.inkSoft),
-                          ),
-                          const SizedBox(height: 8),
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.grey.shade200),
-                            ),
-                            child: Column(
-                              children: [
-                                const Icon(Icons.qr_code_2, size: 120, color: Colors.black),
-                                const SizedBox(height: 8),
-                                Text(
-                                  payment?['qr_string'] ?? "sporta-qr-payment",
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    color: Colors.grey[600],
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            "Scan dengan aplikasi e-wallet atau m-banking",
-                            style: TextStyle(fontSize: 11, color: context.c.inkSoft),
-                            textAlign: TextAlign.center,
-                          ),
-                          // Tombol uji: hanya ada di build debug.
-                          // Komentar lama menulis "remove in production"
-                          // tapi tidak ada yang menegakkannya, jadi
-                          // tombolnya ikut ke rilis.
-                          if (kDebugMode) ...[
-                            const SizedBox(height: 16),
-                            SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton.icon(
-                                onPressed: _simulatePaymentSuccess,
-                                icon: const Icon(Icons.bug_report,
-                                    color: Colors.white, size: 18),
-                                label: const Text(
-                                  "TEST: Simulasi Pembayaran Berhasil",
-                                  style: TextStyle(color: Colors.white, fontSize: 12),
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.purple,
-                                  padding: const EdgeInsets.symmetric(vertical: 10),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ],
-                      ],
-                    ),
-                  ),
+                  _instruksiPembayaran(context),
                 ],
               ),
             ),
