@@ -32,24 +32,16 @@ class AuthService {
   static const String _userKey = 'auth_user';
   static const String _onboardingKey = 'has_seen_onboarding';
 
-  // DEMO/OFFLINE BYPASS: hardcoded local account, dipakai saat server mati.
-  // Hapus block ini begitu server stabil.
-  static const String _demoEmail = 'demo';
-  static const String _demoPassword = 'password';
-  static const String _demoToken = 'demo_offline_token';
-  static Map<String, dynamic> _demoUserJson() => {
-        'id': 999999,
-        'name': 'Demo User',
-        'email': 'demo@sporta.local',
-        'phone': '08000000000',
-        'avatar': null,
-        'avatar_url': null,
-        'roles': [
-          {'id': 1, 'name': 'user', 'guard_name': 'web'}
-        ],
-        'permissions': [],
-      };
-  static bool _isDemoSession() => _token == _demoToken;
+  // Pintu belakang "demo"/"password" dicabut 11 Sep 2026.
+  //
+  // Blok lama menerima email `demo` dengan kata sandi `password` dan
+  // membuat sesi lokal lengkap tanpa menyentuh server, TANPA pagar
+  // kDebugMode sama sekali, jadi ia ikut ke setiap build rilis. Diperiksa
+  // ke isi APK: string `demo_offline_token` memang ada di dalamnya.
+  //
+  // Tokennya palsu sehingga server menolaknya, tapi app tetap terlihat
+  // masuk, dan kombinasi itu terlalu mudah ditemukan siapa pun yang
+  // membuka aplikasinya.
 
   static String? get token => _token;
   static User? get currentUser => _currentUser;
@@ -74,10 +66,6 @@ class AuthService {
 
     // If we have a token, verify it's still valid
     if (_token != null) {
-      // Demo offline session: skip server verification
-      if (_isDemoSession()) {
-        return true;
-      }
       final result = await getUser();
       if (!result.success) {
         // Token expired or invalid, clear session
@@ -179,19 +167,6 @@ class AuthService {
     required String email,
     required String password,
   }) async {
-    // DEMO/OFFLINE BYPASS: login lokal tanpa server
-    if (email.trim().toLowerCase() == _demoEmail && password == _demoPassword) {
-      _token = _demoToken;
-      _currentUser = User.fromJson(_demoUserJson());
-      await _saveAuthData();
-      return AuthResult(
-        success: true,
-        message: 'Login demo berhasil (offline mode)',
-        user: _currentUser,
-        token: _token,
-      );
-    }
-
     try {
       final response = await http.post(
         Uri.parse(ApiConfig.loginUrl),
