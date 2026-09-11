@@ -13,6 +13,19 @@ class BookingResult {
   final Map<String, dynamic>? pagination;
   final Map<String, List<String>>? errors;
 
+  /// Apakah simulasi benar-benar dijalankan lewat API Xendit.
+  ///
+  /// Backend mencoba `/qr_codes/{id}/payments/simulate` dulu supaya webhook
+  /// aslinya ikut terpicu. Kalau itu tidak bisa, ia menandai lunas langsung
+  /// di basis data dan mengaku lewat `simulated_by_gateway: false` berikut
+  /// alasannya. App dulu membuang dua nilai itu, jadi tombol ujinya selalu
+  /// terlihat berhasil dan tidak ada cara membedakan "gateway benar-benar
+  /// dipakai" dari "dilewati".
+  final bool? simulatedByGateway;
+
+  /// Alasan gateway dilewati, dari `fallback_reason`.
+  final String? alasanGatewayDilewati;
+
   BookingResult({
     required this.success,
     this.message,
@@ -21,6 +34,8 @@ class BookingResult {
     this.payment,
     this.pagination,
     this.errors,
+    this.simulatedByGateway,
+    this.alasanGatewayDilewati,
   });
 }
 
@@ -223,6 +238,8 @@ class BookingService {
           success: true,
           message: data['message'],
           booking: Booking.fromJson(bookingData),
+          simulatedByGateway: data['simulated_by_gateway'] == true,
+          alasanGatewayDilewati: data['fallback_reason'] as String?,
         );
       } else {
         return BookingResult(

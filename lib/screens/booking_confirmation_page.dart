@@ -2084,15 +2084,80 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
 
     if (!mounted) return;
 
-    if (hasil.success) {
-      _onPaymentSuccess();
+    if (!hasil.success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(hasil.message ?? 'Simulasi pembayaran gagal'),
+          backgroundColor: context.c.danger,
+        ),
+      );
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(hasil.message ?? 'Simulasi pembayaran gagal'),
-        backgroundColor: context.c.danger,
+    // Backend mencoba API simulate Xendit dulu supaya webhook aslinya ikut
+    // terpicu; kalau tidak bisa, ia menandai lunas langsung di basis data.
+    // Dua hal itu membuktikan hal yang sangat berbeda, jadi bedanya harus
+    // sampai ke layar. Dulu dua-duanya sama-sama berakhir "berhasil", dan
+    // penguji tidak punya cara tahu gateway-nya benar-benar dipakai atau
+    // dilewati.
+    if (hasil.simulatedByGateway == false) {
+      // Peringatannya harus dibaca dulu, bukan lewat snackbar yang langsung
+      // tertimbun dialog "Pembayaran Berhasil". Yang penting justru bahwa
+      // keberhasilan ini TIDAK membuktikan apa pun soal gateway.
+      await _dialogGatewayDilewati(hasil.alasanGatewayDilewati);
+      if (!mounted) return;
+    }
+
+    _onPaymentSuccess();
+  }
+
+  Future<void> _dialogGatewayDilewati(String? alasan) {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: context.c.raised,
+        icon: Icon(Icons.warning_amber_rounded, color: context.c.warn, size: 40),
+        title: Text(
+          'Xendit tidak dipakai',
+          style: TextStyle(color: context.c.ink, fontSize: 18),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Booking ini ditandai lunas langsung di basis data. Payment '
+              'gateway tidak ikut diuji sama sekali.',
+              style: TextStyle(color: context.c.inkSoft, height: 1.45),
+            ),
+            if (alasan != null) ...[
+              const SizedBox(height: 12),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: context.c.sunken,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  alasan,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: context.c.inkSoft,
+                    height: 1.4,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text('Mengerti', style: TextStyle(color: context.c.accent)),
+          ),
+        ],
       ),
     );
   }
@@ -2381,7 +2446,7 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
                 onPressed: _simulatePaymentSuccess,
                 icon: const Icon(Icons.bug_report, color: Colors.white, size: 18),
                 label: const Text(
-                  'TEST: Simulasi Pembayaran Berhasil',
+                  'TEST: Tandai Lunas (coba lewat Xendit dulu)',
                   style: TextStyle(color: Colors.white, fontSize: 12),
                 ),
                 style: ElevatedButton.styleFrom(
