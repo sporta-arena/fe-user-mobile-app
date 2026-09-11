@@ -191,7 +191,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
       // BookingService di backend: bukan harga lapangan saja.
       return ((_fieldPrice + _platformFee) * _nilaiBiaya(method)).round();
     } else {
-      // Metode biaya flat (Virtual Account) baru ada sejak VA Xendit
+      // Metode biaya flat (Virtual Account) baru ada sejak VA
       // terpasang, jadi cabang ini tidak pernah tereksekusi sebelumnya
       // dan `as int`-nya lolos begitu saja. `fee_value` dibaca sebagai
       // double di PaymentMethodService, jadi cast itu langsung meledak
@@ -1800,12 +1800,20 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildTermItem('1', 'Pembayaran harus dilakukan dalam waktu 15 menit setelah booking dibuat.'),
-              _buildTermItem('2', 'Booking yang tidak dibayar akan otomatis dibatalkan.'),
-              _buildTermItem('3', 'Pembatalan booking dapat dilakukan maksimal 2 jam sebelum waktu main.'),
-              _buildTermItem('4', 'Refund akan diproses dalam 3-5 hari kerja.'),
-              _buildTermItem('5', 'Biaya platform (5%) dan biaya admin Xendit tidak dapat di-refund.'),
-              _buildTermItem('6', 'Harap datang 10 menit sebelum jadwal booking.'),
+              // Angka di bawah ini dicocokkan dengan kode backend pada
+              // 11 Sep 2026, bukan disalin dari draf lama. Empat dari
+              // enam butir sebelumnya keliru: batas bayar ditulis 15
+              // menit padahal 10, ada aturan "batal 2 jam sebelum main"
+              // yang tidak pernah ada, tenggat refund 3-5 hari kerja
+              // tanpa dasar, dan biaya platform ditulis 5% padahal 8%.
+              // Syarat yang salah lebih buruk daripada tidak ada syarat:
+              // pelanggan mengambil keputusan berdasarkan angka itu.
+              _buildTermItem('1', 'Pembayaran harus diselesaikan dalam 10 menit setelah pemesanan dibuat.'),
+              _buildTermItem('2', 'Pemesanan yang belum dibayar otomatis dibatalkan setelah batas waktu itu lewat.'),
+              _buildTermItem('3', 'Selama belum dibayar, pemesanan bisa kamu batalkan sendiri.'),
+              _buildTermItem('4', 'Setelah dibayar, pembatalan dan pengembalian dana diajukan ke pemilik venue.'),
+              _buildTermItem('5', 'Biaya platform (8%, maksimal Rp 20.000) dan biaya pembayaran tidak dikembalikan.'),
+              _buildTermItem('6', 'Harap datang 10 menit sebelum jadwal bermain.'),
             ],
           ),
         ),
@@ -2134,7 +2142,7 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
         backgroundColor: context.c.raised,
         icon: Icon(Icons.warning_amber_rounded, color: context.c.warn, size: 40),
         title: Text(
-          'Xendit tidak dipakai',
+          'Payment gateway dilewati',
           style: TextStyle(color: context.c.ink, fontSize: 18),
         ),
         content: Column(
@@ -2466,7 +2474,7 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
                 onPressed: _simulatePaymentSuccess,
                 icon: const Icon(Icons.bug_report, color: Colors.white, size: 18),
                 label: const Text(
-                  'TEST: Tandai Lunas (coba lewat Xendit dulu)',
+                  'TEST: Tandai Lunas (coba lewat gateway dulu)',
                   style: TextStyle(color: Colors.white, fontSize: 12),
                 ),
                 style: ElevatedButton.styleFrom(
