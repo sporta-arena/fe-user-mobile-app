@@ -693,7 +693,7 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                 // Peta asli, sama seperti di fe-web.
                 //
                 // Sebelumnya di sini dipakai gambar dari
-                // staticmap.openstreetmap.de — layanan peta statis yang
+                // staticmap.openstreetmap.de, layanan peta statis yang
                 // sudah tidak andal, jadi hampir selalu jatuh ke
                 // penggambar grid dan yang tampil cuma kotak-kotak.
                 //
@@ -1100,7 +1100,7 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
   ///
   /// [slotTime] adalah nilai mentah dari API, yaitu waktu UTC. Jam di HP
   /// adalah waktu lokal (WIB). Membandingkan keduanya langsung membuat
-  /// slot dianggap lewat **tujuh jam lebih awal** — sore hari, seluruh
+  /// slot dianggap lewat **tujuh jam lebih awal**: sore hari, seluruh
   /// jadwal malam sudah tercoret padahal masih bisa dipesan. Jadi
   /// slotnya digeser dulu ke WIB, baru dibandingkan.
   bool _isSlotPassed(String slotTime) {
@@ -1331,7 +1331,7 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                   // disabledBackgroundColor sengaja TIDAK disetel di sini:
                   // nilai dari tema (bidang redup + teks redup) sudah benar.
                   // Sebelumnya di sini dipaksa putih sementara labelnya juga
-                  // putih — tombolnya jadi kotak kosong waktu belum ada jam
+                  // putih, tombolnya jadi kotak kosong waktu belum ada jam
                   // yang dipilih.
                   elevation: 0,
                 ),

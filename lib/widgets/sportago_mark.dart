@@ -5,7 +5,7 @@ import '../theme/app_tokens.dart';
 /// Lambang Sportago yang ikut warna aksen tema.
 ///
 /// Asetnya (`assets/sportago_mark.png`) adalah topeng satu warna di atas
-/// transparan, jadi bisa diwarnai ulang saat render — tidak perlu aset
+/// transparan, jadi bisa diwarnai ulang saat render, tidak perlu aset
 /// terpisah per tema. Berkasnya sama persis dengan yang dipakai aplikasi
 /// mitra, supaya kedua aplikasi benar-benar satu merek.
 class SportagoMark extends StatelessWidget {
@@ -14,7 +14,7 @@ class SportagoMark extends StatelessWidget {
   final double height;
 
   /// Setel true kalau lambangnya duduk di atas foto atau bidang
-  /// berwarna. Warnanya diambil dari palet "di atas media" — cukup
+  /// berwarna. Warnanya diambil dari palet "di atas media", cukup
   /// terang untuk terbaca, tapi tetap sekeluarga dengan aksen halaman.
   final bool onMedia;
 
@@ -38,7 +38,7 @@ class SportagoMark extends StatelessWidget {
 
 /// Lambang + tulisan "SPORTAGO", disusun mendatar.
 ///
-/// Tulisannya dirender sebagai teks, bukan gambar — sama seperti di
+/// Tulisannya dirender sebagai teks, bukan gambar, sama seperti di
 /// fe-web, supaya warnanya ikut tema dan tidak ada aset yang harus
 /// dibuat ulang tiap kali warnanya berubah.
 class SportagoWordmark extends StatelessWidget {

@@ -58,10 +58,10 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
   String _selectedPaymentMethod = "QRIS";
   bool _refundPolicyAccepted = false; // State untuk acknowledgment refund policy
 
-  // Tarif biaya — HARUS sama dengan backend (BookingService::PLATFORM_FEE_RATE
+  // Tarif biaya: HARUS sama dengan backend (BookingService::PLATFORM_FEE_RATE
   // dan PLATFORM_FEE_CAP di be-main). Sebelumnya di sini 5% tanpa batas,
   // sementara server memakai 8% dengan batas Rp 20.000: layar ini
-  // menampilkan total yang berbeda dari yang benar-benar ditagihkan —
+  // menampilkan total yang berbeda dari yang benar-benar ditagihkan,
   // kurang Rp 3.056 pada booking Rp 100.000, dan lebih Rp 17.360 pada
   // booking Rp 750.000.
   static const double _platformFeePercent = 0.08;
@@ -175,7 +175,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
     if (dariServer is int) return dariServer;
     if (method['feeType'] == 'percent') {
       // Dasarnya (harga lapangan + platform fee), sama seperti
-      // BookingService di backend — bukan harga lapangan saja.
+      // BookingService di backend: bukan harga lapangan saja.
       return ((_fieldPrice + _platformFee) * (method['feeValue'] as double))
           .round();
     } else {
@@ -197,7 +197,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
 
   /// Label biaya platform, mengikuti tarif yang benar-benar dipakai.
   ///
-  /// Dulu tertulis mati "(5%)" — dua kali salah: tarifnya 8%, dan pada
+  /// Dulu tertulis mati "(5%)", dua kali salah: tarifnya 8%, dan pada
   /// booking besar biayanya kena batas Rp 20.000 sehingga persentase apa
   /// pun jadi menyesatkan. Contoh: 2 jam x Rp 180.000 menampilkan
   /// "(5%)" di sebelah angka Rp 20.000, padahal 5% dari 360.000 adalah
@@ -2072,7 +2072,7 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
   /// Tombol uji: menandai pembayaran berhasil lewat server.
   ///
   /// Dulu fungsi ini langsung memanggil `_onPaymentSuccess()` tanpa
-  /// menyentuh API — layar menyatakan "Pembayaran Berhasil, booking
+  /// menyentuh API, layar menyatakan "Pembayaran Berhasil, booking
   /// dikonfirmasi" padahal di server booking-nya masih `pending` dan
   /// akan kedaluwarsa sepuluh menit kemudian. Sekarang ia memakai
   /// endpoint simulasi yang sama dengan yang dipakai web, jadi tampilan
@@ -2491,7 +2491,7 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
                   _buildPriceRow("Harga Lapangan (${booking.field?.name ?? 'Lapangan'})", displayBasePrice),
                   const SizedBox(height: 8),
                   // Halaman ini menampilkan angka yang sudah dihitung
-                  // server, jadi tidak perlu menyebut persentase —
+                  // server, jadi tidak perlu menyebut persentase,
                   // menyebutnya justru berisiko salah saat kena batas.
                   _buildPriceRow("Biaya Platform", displayPlatformFee),
                   const SizedBox(height: 8),
@@ -2673,7 +2673,7 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
                             style: TextStyle(fontSize: 11, color: context.c.inkSoft),
                             textAlign: TextAlign.center,
                           ),
-                          // Tombol uji — hanya ada di build debug.
+                          // Tombol uji: hanya ada di build debug.
                           // Komentar lama menulis "remove in production"
                           // tapi tidak ada yang menegakkannya, jadi
                           // tombolnya ikut ke rilis.
@@ -2734,7 +2734,7 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
                             style: TextStyle(fontSize: 11, color: context.c.inkSoft),
                             textAlign: TextAlign.center,
                           ),
-                          // Tombol uji — hanya ada di build debug.
+                          // Tombol uji: hanya ada di build debug.
                           // Komentar lama menulis "remove in production"
                           // tapi tidak ada yang menegakkannya, jadi
                           // tombolnya ikut ke rilis.

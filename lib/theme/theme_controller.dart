@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 ///
 /// Semantiknya disamakan dengan fe-web: selama pengguna belum pernah
 /// memilih, aplikasi ikut setelan sistem ([ThemeMode.system]). Begitu
-/// tombolnya ditekan, pilihannya jadi eksplisit dan disimpan — sistem
+/// tombolnya ditekan, pilihannya jadi eksplisit dan disimpan, sistem
 /// tidak lagi menimpanya.
 ///
 /// Sengaja pakai [ValueNotifier], bukan paket state management: yang
@@ -24,7 +24,7 @@ class ThemeController extends ValueNotifier<ThemeMode> {
   bool get sudahDimuat => _sudahDimuat;
 
   /// Dipanggil sekali sebelum runApp. Kalau gagal dibaca, aplikasi
-  /// tetap jalan dengan mengikuti setelan sistem — preferensi tampilan
+  /// tetap jalan dengan mengikuti setelan sistem, preferensi tampilan
   /// tidak pernah boleh jadi alasan aplikasi gagal start.
   Future<void> muat() async {
     try {
@@ -64,7 +64,7 @@ class ThemeController extends ValueNotifier<ThemeMode> {
     }
   }
 
-  /// Apakah tampilan yang SEDANG terlihat gelap — termasuk waktu
+  /// Apakah tampilan yang SEDANG terlihat gelap, termasuk waktu
   /// modenya masih mengikuti sistem.
   bool gelapEfektif(BuildContext context) {
     switch (value) {
@@ -78,7 +78,7 @@ class ThemeController extends ValueNotifier<ThemeMode> {
   }
 
   /// Bolak-balik terang ↔ gelap. Dari mode sistem, lompatannya ke
-  /// kebalikan dari yang sedang terlihat, bukan ke nilai tetap —
+  /// kebalikan dari yang sedang terlihat, bukan ke nilai tetap:
   /// supaya sekali tekan selalu terasa mengubah sesuatu.
   Future<void> ganti(BuildContext context) =>
       setel(gelapEfektif(context) ? ThemeMode.light : ThemeMode.dark);

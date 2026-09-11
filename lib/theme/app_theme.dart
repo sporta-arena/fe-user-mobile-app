@@ -5,17 +5,17 @@ import 'package:google_fonts/google_fonts.dart';
 import 'app_tokens.dart';
 
 /// ═══════════════════════════════════════════════════════════════════
-/// SPORTAGO — ThemeData terang & gelap
+/// SPORTAGO: ThemeData terang & gelap
 /// ───────────────────────────────────────────────────────────────────
 /// Semuanya dirakit dari [SportagoColors]. Tidak ada satu pun warna
-/// literal di berkas ini — kalau ada nilai yang perlu berubah, ubahnya
+/// literal di berkas ini, kalau ada nilai yang perlu berubah, ubahnya
 /// di app_tokens.dart, sekali, dan seluruh aplikasi ikut.
 /// ═══════════════════════════════════════════════════════════════════
 class AppTheme {
   const AppTheme._();
 
   /// Satu keluarga huruf untuk seluruh aplikasi. Plus Jakarta Sans
-  /// dibuat Tokotype untuk identitas kota Jakarta — sama seperti di
+  /// dibuat Tokotype untuk identitas kota Jakarta, sama seperti di
   /// fe-web. Hierarki dibawa bobot, bukan ganti-ganti keluarga huruf.
   static TextTheme _teks(TextTheme dasar, SportagoColors c) {
     final t = GoogleFonts.plusJakartaSansTextTheme(dasar);
@@ -170,7 +170,7 @@ class AppTheme {
           foregroundColor: c.onAccent,
           // Tombol nonaktif harus tetap TERBACA. Sebelumnya teksnya
           // disetel ke warna permukaan (putih di tema terang) di atas
-          // garis pucat — labelnya jadi hilang sama sekali.
+          // garis pucat, labelnya jadi hilang sama sekali.
           disabledBackgroundColor: c.sunken,
           disabledForegroundColor: c.inkDim,
           elevation: 0,

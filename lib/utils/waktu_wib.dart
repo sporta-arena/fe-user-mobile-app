@@ -5,7 +5,7 @@
 /// setiap permukaan menambahkan +7 saat menampilkannya.
 ///
 /// App mobile sebelumnya menampilkan nilai mentah, jadi venue yang di web
-/// tertulis buka 08.00–22.00 muncul sebagai 01.00–15.00 di HP — dan slot
+/// tertulis buka 08.00–22.00 muncul sebagai 01.00–15.00 di HP, dan slot
 /// booking pun ikut meleset tujuh jam.
 ///
 /// PENTING: ini hanya untuk tampilan. Nilai yang dikirim balik ke API

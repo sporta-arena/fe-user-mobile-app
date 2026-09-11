@@ -28,7 +28,7 @@ class _ChatPageState extends State<ChatPage> {
   bool _isLoading = true;
   bool _isSending = false;
 
-  // Pesan baru datang lewat WebSocket, bukan dari polling — layar ini
+  // Pesan baru datang lewat WebSocket, bukan dari polling: layar ini
   // tidak pernah menanyakan ulang ke server selama terbuka.
   RealtimeChat? _realtime;
   bool _terhubung = false;
@@ -267,7 +267,7 @@ class _ChatPageState extends State<ChatPage> {
                     ),
                     // Baris kedua biasanya nama venue. Kalau sambungan
                     // realtime sedang putus, tempat yang sama dipakai
-                    // memberi tahu bahwa pesan baru mungkin tertunda —
+                    // memberi tahu bahwa pesan baru mungkin tertunda,
                     // lebih jujur daripada diam-diam berhenti menerima.
                     Text(
                       (_realtime != null && !_terhubung)

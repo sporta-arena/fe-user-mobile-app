@@ -32,7 +32,7 @@ class AuthService {
   static const String _userKey = 'auth_user';
   static const String _onboardingKey = 'has_seen_onboarding';
 
-  // DEMO/OFFLINE BYPASS — hardcoded local account, dipakai saat server mati.
+  // DEMO/OFFLINE BYPASS: hardcoded local account, dipakai saat server mati.
   // Hapus block ini begitu server stabil.
   static const String _demoEmail = 'demo';
   static const String _demoPassword = 'password';
@@ -74,7 +74,7 @@ class AuthService {
 
     // If we have a token, verify it's still valid
     if (_token != null) {
-      // Demo offline session — skip server verification
+      // Demo offline session: skip server verification
       if (_isDemoSession()) {
         return true;
       }
@@ -179,7 +179,7 @@ class AuthService {
     required String email,
     required String password,
   }) async {
-    // DEMO/OFFLINE BYPASS — login lokal tanpa server
+    // DEMO/OFFLINE BYPASS: login lokal tanpa server
     if (email.trim().toLowerCase() == _demoEmail && password == _demoPassword) {
       _token = _demoToken;
       _currentUser = User.fromJson(_demoUserJson());

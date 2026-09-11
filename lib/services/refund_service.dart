@@ -6,14 +6,14 @@ import 'auth_service.dart';
 /// Kebijakan refund yang berlaku, dibaca dari server.
 ///
 /// Sengaja tidak menyimpan tier persentase apa pun: **tidak ada jalur
-/// refund dari sisi pemesan**, dan itu memang desainnya — backend
+/// refund dari sisi pemesan**, dan itu memang desainnya, backend
 /// menyatakannya lewat `customer_can_request: false` di
 /// `GET /refund-policy`.
 ///
 /// Sebelumnya app ini menghitung sendiri tier 100% / 50% berdasarkan
 /// jarak waktu ke jadwal, lalu memanggil `POST /bookings/{id}/refund`.
 /// Rute itu tidak pernah ada di backend, jadi tombolnya selalu berakhir
-/// 404 — dan tier-nya pun fiksi.
+/// 404, dan tier-nya pun fiksi.
 class KebijakanRefund {
   const KebijakanRefund({
     required this.pemesanBisaMengajukan,
@@ -78,7 +78,7 @@ class RefundService {
   /// Perkiraan nominal refund untuk satu booking.
   ///
   /// Ini satu-satunya endpoint refund sisi pemesan yang benar-benar ada
-  /// (`GET /bookings/{id}/refund-preview`). Sifatnya informasi saja —
+  /// (`GET /bookings/{id}/refund-preview`). Sifatnya informasi saja,
   /// tidak mengajukan apa pun.
   static Future<Map<String, dynamic>?> ambilPerkiraan(int bookingId) async {
     final token = AuthService.token;

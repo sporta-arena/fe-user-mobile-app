@@ -111,7 +111,7 @@ class _LoginPageState extends State<LoginPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Back button — pop if possible, otherwise go back to onboarding
+              // Back button: pop if possible, otherwise go back to onboarding
               // (so returning users can still reach Apple/Google options)
               IconButton(
                 onPressed: () {

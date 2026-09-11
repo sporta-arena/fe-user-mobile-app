@@ -12,7 +12,7 @@ import '../theme/app_tokens.dart';
 /// Efeknya: biru bawaan hilang dari seluruh aplikasi tanpa menyunting
 /// satu pun layar.
 ///
-/// Untuk kode baru, JANGAN pakai kelas ini — pakai `context.c`, yang
+/// Untuk kode baru, JANGAN pakai kelas ini, pakai `context.c`, yang
 /// nilainya ikut tema aktif:
 ///
 ///   Text('...', style: TextStyle(color: context.c.inkSoft))
@@ -29,7 +29,7 @@ class AppColors {
 
   /// Warna aksi merek di permukaan gelap.
   ///
-  /// Dulu kuning murni `#FFFF21`. Sekarang volt `#C5F400` — nilai yang
+  /// Dulu kuning murni `#FFFF21`. Sekarang volt `#C5F400`, nilai yang
   /// sama dengan aksen gelap di fe-web, supaya tombol di app dan di web
   /// benar-benar sewarna. Dipakai di 329 tempat, jadi satu baris ini
   /// menyelaraskan seluruh aplikasi sekaligus.
@@ -38,12 +38,12 @@ class AppColors {
   /// perlu disunting. Untuk kode baru pakai `context.c.accent`.
   static const Color brandYellow = SportagoColors.volt;
 
-  /// Kuning splash — TETAP `#FFFF21`. Logo mobile hitam di atas kuning
+  /// Kuning splash: TETAP `#FFFF21`. Logo mobile hitam di atas kuning
   /// ini; menggantinya ke volt membuat logonya sedikit meleset dari
   /// asetnya sendiri. Momen splash memang tidak ikut tema.
   static const Color splashYellow = Color(0xFFFFFF21);
 
-  /// Volt — aksen merek waktu tema gelap.
+  /// Volt: aksen merek waktu tema gelap.
   static const Color accentGreen = SportagoColors.volt;
 
   static const Color black = Color(0xFF000000);

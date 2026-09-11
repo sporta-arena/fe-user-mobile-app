@@ -31,7 +31,7 @@ class _ETicketPageState extends State<ETicketPage> {
   bool _isDownloading = false;
 
   /// Kebijakan refund yang berlaku, dibaca dari server saat layar dibuka.
-  /// Null selama belum termuat — kotak keterangannya belum ditampilkan.
+  /// Null selama belum termuat: kotak keterangannya belum ditampilkan.
   KebijakanRefund? _kebijakanRefund;
 
   @override

@@ -30,8 +30,8 @@ class ChatService {
   // Send a message
   //
   // [socketId] adalah socket_id sambungan WebSocket yang sedang aktif.
-  // Server memakainya untuk TIDAK menyiarkan balik pesan ini ke pengirim
-  // — tanpa itu, pesan yang baru dikirim muncul dua kali: sekali dari
+  // Server memakainya untuk TIDAK menyiarkan balik pesan ini ke
+  // pengirim. Tanpa itu, pesan yang baru dikirim muncul dua kali: sekali dari
   // balasan REST, sekali lagi dari kanal WebSocket.
   static Future<Message?> sendMessage(
     int bookingId,

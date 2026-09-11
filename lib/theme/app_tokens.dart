@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 /// ═══════════════════════════════════════════════════════════════════
-/// SPORTAGO — token warna
+/// SPORTAGO: token warna
 /// ───────────────────────────────────────────────────────────────────
 /// Satu set token semantik, dua set nilai (terang & gelap). Nilainya
 /// disamakan dengan `globals.css` di fe-web supaya kedua permukaan
 /// benar-benar satu merek, bukan cuma mirip.
 ///
 /// Aturannya sama seperti di web: widget TIDAK menyebut warna literal.
-/// Widget menyebut PERAN — permukaan, teks, garis, aksen — dan lapisan
+/// Widget menyebut PERAN (permukaan, teks, garis, aksen) dan lapisan
 /// ini yang menentukan nilainya menurut tema aktif.
 ///
 /// Dipakai lewat `context.c`, contoh:
@@ -46,7 +46,7 @@ class SportagoColors extends ThemeExtension<SportagoColors> {
     required this.infoSoft,
   });
 
-  /// Permukaan — dari yang paling belakang ke paling depan.
+  /// Permukaan: dari yang paling belakang ke paling depan.
   final Color surface; // latar layar
   final Color raised; // kartu, panel, sheet
   final Color sunken; // bidang masuk ke dalam
@@ -64,7 +64,7 @@ class SportagoColors extends ThemeExtension<SportagoColors> {
   final Color line;
   final Color lineStrong;
 
-  /// Aksen merek. Hijau lapangan waktu terang, volt waktu gelap —
+  /// Aksen merek. Hijau lapangan waktu terang, volt waktu gelap:
   /// satu warna aksi per tema, bukan dua yang berebut.
   final Color accent;
   final Color accentHover;
@@ -84,18 +84,18 @@ class SportagoColors extends ThemeExtension<SportagoColors> {
   // ── Nilai yang TIDAK pernah ikut tema ────────────────────────────
 
   /// Tirai di atas foto. Foto tidak berganti tema, jadi tirainya juga
-  /// tidak. Di web ini sempat salah — tirai ditulis pakai token yang
+  /// tidak. Di web ini sempat salah, tirai ditulis pakai token yang
   /// ikut tema, dan gambarnya kebelah separuh terang separuh gelap.
   static const Color scrim = Color(0xFF080C0A);
 
-  /// Benar-benar putih — untuk teks/ikon di atas foto.
+  /// Benar-benar putih, untuk teks/ikon di atas foto.
   static const Color pure = Color(0xFFFFFFFF);
 
   /// Volt asli. Dipakai HANYA di tempat yang memang selalu gelap
   /// (splash, konten di atas foto), bukan sebagai warna aksi umum.
   static const Color volt = Color(0xFFC5F400);
 
-  /// Palet KONTEN — untuk membedakan kategori, bukan untuk menyatakan
+  /// Palet KONTEN: untuk membedakan kategori, bukan untuk menyatakan
   /// keadaan. Kartu komunitas, kartu event, dan ikon judul bagian pakai
   /// ini.
   ///
@@ -309,7 +309,7 @@ class SportagoColors extends ThemeExtension<SportagoColors> {
 
 /// Gaya ikon bilah status yang ikut tema.
 ///
-/// Penamaan bawaan Flutter terbalik dari dugaan — `SystemUiOverlayStyle.light`
+/// Penamaan bawaan Flutter terbalik dari dugaan: `SystemUiOverlayStyle.light`
 /// berarti ikonnya GELAP (gaya untuk latar terang). Layar-layar di app ini
 /// dulu memasang `.light` apa adanya karena semuanya gelap; begitu tema
 /// terang menyala, jam dan baterai jadi putih di atas latar putih.

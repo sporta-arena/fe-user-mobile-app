@@ -47,7 +47,7 @@ class ThemeToggle extends StatelessWidget {
 
 /// Baris pengaturan dengan tiga pilihan tegas: Sistem / Terang / Gelap.
 /// Di halaman pengaturan, pilihan "ikut sistem" perlu bisa dipilih
-/// kembali — itu tidak mungkin lewat tombol dua keadaan.
+/// kembali, itu tidak mungkin lewat tombol dua keadaan.
 class ThemeToggleTile extends StatelessWidget {
   const ThemeToggleTile({super.key});
 

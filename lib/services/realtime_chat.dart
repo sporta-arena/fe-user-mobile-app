@@ -11,8 +11,8 @@ import 'auth_service.dart';
 ///
 /// Chat di Sportago tidak memakai polling: pesan baru didorong server
 /// lewat kanal privat `private-booking.{id}`. Reverb berbicara protokol
-/// Pusher, dan yang dipakai di sini hanya bagian kecilnya — sambung,
-/// otorisasi kanal, berlangganan, dengarkan satu event — jadi cukup
+/// Pusher, dan yang dipakai di sini hanya bagian kecilnya (sambung,
+/// otorisasi kanal, berlangganan, dengarkan satu event), jadi cukup
 /// ditulis langsung di atas `web_socket_channel` tanpa SDK tambahan.
 ///
 /// Alurnya:
@@ -41,7 +41,7 @@ class RealtimeChat {
   /// socket_id sambungan aktif.
   ///
   /// Dikirim sebagai header `X-Socket-ID` saat mengirim pesan lewat REST
-  /// supaya server tidak menyiarkan balik pesan kita sendiri — kalau
+  /// supaya server tidak menyiarkan balik pesan kita sendiri. Kalau
   /// tidak, pesan yang baru saja kita kirim akan muncul dua kali.
   String? socketId;
 

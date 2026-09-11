@@ -5,7 +5,7 @@ class ApiConfig {
   // Production URL
   // SEMENTARA: menunjuk IP VPS langsung karena domainnya belum diarahkan.
   // Begitu DNS siap dan sertifikat terbit, kembalikan ke
-  // 'https://api.sportago.id' — satu baris ini saja.
+  // 'https://api.sportago.id'. Satu baris ini saja.
   //
   // Selama masih IP, lalu lintasnya HTTP polos: Android butuh izin
   // cleartext untuk host ini (lihat network_security_config.xml).
@@ -67,11 +67,11 @@ class ApiConfig {
   static String get apiUrl => '$hostUrl/api/v1';
 
   // ============================================================
-  // REVERB (WEBSOCKET) — chat realtime
+  // REVERB (WEBSOCKET): chat realtime
   // ============================================================
   // Chat tidak memakai polling; pesan didorong server lewat Laravel
   // Reverb. Kunci aplikasi Reverb bukan rahasia (klien memang harus
-  // mengirimnya saat menyambung) — yang menjaga kanal privat adalah
+  // mengirimnya saat menyambung), yang menjaga kanal privat adalah
   // token Sanctum di /broadcasting/auth.
   static const String reverbAppKey =
       String.fromEnvironment('REVERB_APP_KEY', defaultValue: '51440cd26b729010253f');
@@ -196,7 +196,7 @@ class ApiConfig {
   static String cancelBookingUrl(int id) => '$apiUrl/bookings/$id/cancel';
   static String simulatePaymentUrl(int id) => '$apiUrl/bookings/$id/simulate-payment';
   static String refundPreviewUrl(int id) => '$apiUrl/bookings/$id/refund-preview';
-  // Kebijakan refund berlaku global, bukan per booking — backend
+  // Kebijakan refund berlaku global, bukan per booking: backend
   // menyediakannya di /refund-policy tanpa id.
   static String get refundPolicyUrl => '$apiUrl/refund-policy';
   static String canReviewBookingUrl(int id) => '$apiUrl/bookings/$id/can-review';
@@ -276,7 +276,7 @@ class ApiConfig {
   // ditangani manual oleh admin Sportago.
   //
   // Sebelumnya di sini ada refundsUrl, refundDetailUrl, dan
-  // requestRefundUrl — ketiganya menunjuk rute yang tidak pernah ada di
+  // requestRefundUrl. Ketiganya menunjuk rute yang tidak pernah ada di
   // backend, jadi setiap pemanggilannya berujung 404.
 
   // ============================================================
@@ -287,8 +287,8 @@ class ApiConfig {
   /// Membetulkan URL media yang dibentuk backend dari APP_URL-nya sendiri.
   ///
   /// Backend lokal menghasilkan `http://localhost:8088/storage/...`.
-  /// Di emulator Android, `localhost` menunjuk ke emulator itu sendiri —
-  /// bukan ke Mac tempat backend jalan — jadi gambarnya tidak pernah muat.
+  /// Di emulator Android, `localhost` menunjuk ke emulator itu sendiri,
+  /// bukan ke Mac tempat backend jalan, jadi gambarnya tidak pernah muat.
   /// Host-nya ditukar ke host API yang sedang dipakai.
   ///
   /// Tidak berpengaruh di staging/produksi: di sana backend memakai

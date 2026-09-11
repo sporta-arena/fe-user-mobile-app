@@ -37,10 +37,10 @@ class MyApp extends StatelessWidget {
           theme: AppTheme.light,
           darkTheme: AppTheme.dark,
           // ThemeMode.system dipakai selama pengguna belum pernah
-          // memilih sendiri — sama seperti di fe-web.
+          // memilih sendiri, sama seperti di fe-web.
           themeMode: mode,
           // Ikon bilah status (jam, sinyal, baterai) ikut tema. Tanpa
-          // ini, layar tanpa AppBar — seperti halaman masuk — tetap
+          // ini, layar tanpa AppBar, seperti halaman masuk, tetap
           // memakai ikon terang, dan jamnya hilang di latar putih.
           builder: (context, child) {
             final gelap = Theme.of(context).brightness == Brightness.dark;
@@ -130,7 +130,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
     // Dulu: logo utuh di atas latar kuning #FFFF21. Logonya bergaris
     // hitam dengan isian kuning, jadi isiannya lenyap ke latar dan yang
-    // kebaca cuma garis hitamnya — logonya jadi nyaru.
+    // kebaca cuma garis hitamnya, logonya jadi nyaru.
     //
     // Sekarang: lambang satu warna yang diwarnai ke aksen tema, plus
     // wordmark sebagai teks. Kontrasnya benar di terang maupun gelap,
