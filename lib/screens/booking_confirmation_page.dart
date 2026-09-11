@@ -168,6 +168,17 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
     );
   }
 
+  /// Nilai biaya apa adanya, tanpa memaksakan tipe.
+  ///
+  /// Server mengirim `fee_value` sebagai angka biasa: 0.7 untuk
+  /// persentase, 4000 untuk flat. JSON tidak membedakan int dan double,
+  /// jadi membacanya lewat `num` adalah satu-satunya cara yang tidak
+  /// bergantung pada kebetulan.
+  static double _nilaiBiaya(Map<String, dynamic> method) {
+    final nilai = method['feeValue'];
+    return nilai is num ? nilai.toDouble() : 0;
+  }
+
   // Calculate payment gateway fee based on selected method
   int get _paymentGatewayFee {
     final method = _selectedPaymentData;
@@ -178,10 +189,14 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
     if (method['feeType'] == 'percent') {
       // Dasarnya (harga lapangan + platform fee), sama seperti
       // BookingService di backend: bukan harga lapangan saja.
-      return ((_fieldPrice + _platformFee) * (method['feeValue'] as double))
-          .round();
+      return ((_fieldPrice + _platformFee) * _nilaiBiaya(method)).round();
     } else {
-      return method['feeValue'] as int;
+      // Metode biaya flat (Virtual Account) baru ada sejak VA Xendit
+      // terpasang, jadi cabang ini tidak pernah tereksekusi sebelumnya
+      // dan `as int`-nya lolos begitu saja. `fee_value` dibaca sebagai
+      // double di PaymentMethodService, jadi cast itu langsung meledak
+      // "type 'double' is not a subtype of type 'int'".
+      return _nilaiBiaya(method).round();
     }
   }
 
@@ -189,7 +204,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
   String get _paymentGatewayFeeLabel {
     final method = _selectedPaymentData;
     if (method['feeType'] == 'percent') {
-      final percent = ((method['feeValue'] as double) * 100).toStringAsFixed(1);
+      final percent = (_nilaiBiaya(method) * 100).toStringAsFixed(1);
       return "Biaya Admin ($percent%)";
     } else {
       return "Biaya Admin";
@@ -423,10 +438,10 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
 
   String _getFeeText(Map<String, dynamic> method) {
     if (method['feeType'] == 'percent') {
-      final percent = ((method['feeValue'] as double) * 100).toStringAsFixed(1);
+      final percent = (_nilaiBiaya(method) * 100).toStringAsFixed(1);
       return "Biaya $percent%";
     } else {
-      return "Biaya ${_formatCurrency(method['feeValue'] as int)}";
+      return "Biaya ${_formatCurrency(_nilaiBiaya(method).round())}";
     }
   }
 
@@ -853,7 +868,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                                     ),
                                     TextSpan(
                                       text: _selectedPaymentData['feeType'] == 'percent'
-                                          ? ' (${((_selectedPaymentData['feeValue'] as double) * 100).toStringAsFixed(1)}% dari harga lapangan)'
+                                          ? ' (${(_nilaiBiaya(_selectedPaymentData) * 100).toStringAsFixed(1)}% dari harga lapangan)'
                                           : ' (biaya tetap)',
                                     ),
                                   ],
