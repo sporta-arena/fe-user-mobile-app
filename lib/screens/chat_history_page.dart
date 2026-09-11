@@ -223,17 +223,19 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
   }
 
   Widget _buildChatItem(Booking booking) {
-    final bool isActive = booking.status == 'confirmed';
+    // Penanda visual di daftar saja. Yang menentukan boleh-tidaknya
+    // menulis adalah `can_send` dari server, bukan tebakan di sini:
+    // baris ini dulu memakai `status == 'confirmed'` saja, sehingga
+    // pemesan yang sedang main (checked_in) ikut terkunci.
+    final bool isActive =
+        booking.status == 'confirmed' || booking.status == 'checked_in';
 
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ChatPage(
-              booking: booking,
-              isReadOnly: !isActive,
-            ),
+            builder: (context) => ChatPage(booking: booking),
           ),
         );
       },

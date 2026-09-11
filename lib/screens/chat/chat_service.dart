@@ -4,9 +4,27 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'chat_models.dart';
 
+/// Isi satu percakapan berikut keadaannya.
+///
+/// Riwayat saja tidak cukup: chat terkunci begitu booking selesai atau
+/// dibatalkan, dan layar perlu tahu itu sebelum pemakai mengetik. Aturan
+/// penguncinya ditentukan server lewat `can_send`, tidak disalin ke sini,
+/// supaya tidak ada dua versi aturan yang bisa melenceng.
+class IsiPercakapan {
+  const IsiPercakapan({required this.pesan, required this.bolehKirim});
+
+  final List<Message> pesan;
+  final bool bolehKirim;
+
+  /// Dipakai waktu pemuatan gagal: tidak ada pesan, dan kolom ketik
+  /// ditutup sampai keadaannya benar-benar diketahui.
+  static const IsiPercakapan kosong =
+      IsiPercakapan(pesan: <Message>[], bolehKirim: false);
+}
+
 class ChatService {
   // Get messages for a specific booking
-  static Future<List<Message>> getMessages(int bookingId) async {
+  static Future<IsiPercakapan> getMessages(int bookingId) async {
     try {
       final response = await http.get(
         Uri.parse('${ApiConfig.baseUrl}/bookings/$bookingId/messages'),
@@ -14,16 +32,19 @@ class ChatService {
           'Authorization': 'Bearer ${AuthService.token}',
           'Content-Type': 'application/json',
         },
-      );
+      ).timeout(const Duration(seconds: 20));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         final List<dynamic> messages = data['data'] ?? [];
-        return messages.map((m) => Message.fromJson(m)).toList();
+        return IsiPercakapan(
+          pesan: messages.map((m) => Message.fromJson(m)).toList(),
+          bolehKirim: data['can_send'] == true,
+        );
       }
-      return [];
+      return IsiPercakapan.kosong;
     } catch (e) {
-      return [];
+      return IsiPercakapan.kosong;
     }
   }
 

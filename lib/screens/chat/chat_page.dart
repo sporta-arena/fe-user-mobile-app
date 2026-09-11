@@ -12,9 +12,8 @@ import 'chat_service.dart';
 
 class ChatPage extends StatefulWidget {
   final Booking booking;
-  final bool isReadOnly;
 
-  const ChatPage({super.key, required this.booking, this.isReadOnly = false});
+  const ChatPage({super.key, required this.booking});
 
   @override
   State<ChatPage> createState() => _ChatPageState();
@@ -28,6 +27,17 @@ class _ChatPageState extends State<ChatPage> {
   bool _isLoading = true;
   bool _isSending = false;
 
+  /// Apakah percakapan ini masih boleh ditulis, menurut server.
+  ///
+  /// null berarti belum diketahui (masih memuat). Sengaja TIDAK dihitung
+  /// dari `booking.status` di sini: chat_history_page dulu melakukan itu
+  /// dengan `status == 'confirmed'` saja, sehingga pemesan yang sedang
+  /// main (checked_in) ikut terkunci. Tiga pemanggil lain malah tidak
+  /// mengisi apa-apa, jadi kolom ketik tetap terbuka di booking yang
+  /// sudah selesai dan penolakannya baru muncul setelah tombol kirim
+  /// ditekan. Satu-satunya sumber sekarang penanda `can_send` dari server.
+  bool? _bolehKirim;
+
   // Pesan baru datang lewat WebSocket, bukan dari polling: layar ini
   // tidak pernah menanyakan ulang ke server selama terbuka.
   RealtimeChat? _realtime;
@@ -37,15 +47,16 @@ class _ChatPageState extends State<ChatPage> {
   void initState() {
     super.initState();
     _loadData();
-    if (!widget.isReadOnly) {
-      _realtime = RealtimeChat.dengarkan(
-        widget.booking.id,
-        onPesan: _terimaPesan,
-        onStatus: (tersambung) {
-          if (mounted) setState(() => _terhubung = tersambung);
-        },
-      );
-    }
+    // Percakapan yang terkunci tetap mendengarkan: riwayatnya boleh
+    // dibaca, dan lawan bicara bisa saja masih menutup percakapan dari
+    // sisinya. Yang dikunci cuma kolom ketiknya.
+    _realtime = RealtimeChat.dengarkan(
+      widget.booking.id,
+      onPesan: _terimaPesan,
+      onStatus: (tersambung) {
+        if (mounted) setState(() => _terhubung = tersambung);
+      },
+    );
   }
 
   @override
@@ -76,11 +87,12 @@ class _ChatPageState extends State<ChatPage> {
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
 
-    final messages = await ChatService.getMessages(widget.booking.id);
+    final isi = await ChatService.getMessages(widget.booking.id);
     final partner = await ChatService.getPartnerContact(widget.booking.id);
 
     setState(() {
-      _messages = messages;
+      _messages = isi.pesan;
+      _bolehKirim = isi.bolehKirim;
       _partnerContact = partner;
       _isLoading = false;
     });
@@ -353,7 +365,7 @@ class _ChatPageState extends State<ChatPage> {
                   ),
           ),
           // Message input or read-only banner
-          if (widget.isReadOnly)
+          if (_bolehKirim == false)
             Container(
               padding: EdgeInsets.only(
                 left: 16,
@@ -371,7 +383,7 @@ class _ChatPageState extends State<ChatPage> {
                   Icon(Icons.lock_outline, size: 16, color: context.c.inkSoft),
                   const SizedBox(width: 8),
                   Text(
-                    "Chat sudah ditutup karena booking selesai",
+                    "Pemesanan sudah selesai, chat ditutup",
                     style: TextStyle(color: context.c.inkSoft, fontSize: 13),
                   ),
                 ],
