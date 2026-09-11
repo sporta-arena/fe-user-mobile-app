@@ -111,7 +111,7 @@ class ApiConfig {
   // Passed as serverClientId to google_sign_in so the ID token's audience
   // matches GOOGLE_CLIENT_ID on the server.
   static const String googleServerClientId =
-      '999060732996-h4r5rm4u810uonmuojcitik52j2812in.apps.googleusercontent.com';
+      '107656768022-fug02f2vtqieb5uh5psufpj6f5nhe6eb.apps.googleusercontent.com';
   static String get partnerRegisterUrl => '$apiUrl/partner/register';
   static String get managementLoginUrl => '$apiUrl/management/login';
   static String get verifyOtpUrl => '$apiUrl/verify-otp';
