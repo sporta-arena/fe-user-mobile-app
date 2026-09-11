@@ -2395,6 +2395,11 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
   /// Xendit mengembalikan beberapa bentuk sekaligus di `actions`. Deeplink
   /// didahulukan karena langsung membuka aplikasi e-wallet di HP; checkout
   /// web dipakai kalau deeplinknya tidak dikirim.
+  ///
+  /// DOKU hanya mengirim satu alamat web (webRedirectUrl) dan backend
+  /// menaruhnya di ketiga kunci, jadi urutan ini tetap benar: yang
+  /// terambil adalah alamat yang sama, dan halaman DOKU sendiri yang
+  /// meneruskan pelanggan ke aplikasi dompetnya.
   String? get _tautanEwallet {
     final p = payment;
     if (p == null) return null;
