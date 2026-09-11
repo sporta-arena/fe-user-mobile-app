@@ -3,13 +3,12 @@ class ApiConfig {
   static const String stagingUrl = 'https://api.staging.sportago.id';
 
   // Production URL
-  // SEMENTARA: menunjuk IP VPS langsung karena domainnya belum diarahkan.
-  // Begitu DNS siap dan sertifikat terbit, kembalikan ke
-  // 'https://api.sportago.id'. Satu baris ini saja.
   //
-  // Selama masih IP, lalu lintasnya HTTP polos: Android butuh izin
-  // cleartext untuk host ini (lihat network_security_config.xml).
-  static const String productionUrl = 'http://43.156.46.189';
+  // Sejak 11 Sep 2026 menunjuk domain, bukan IP mentah lagi: DNS sudah
+  // diarahkan dan sertifikat Let's Encrypt terbit, jadi lalu lintasnya
+  // terenkripsi. Izin cleartext untuk 43.156.46.189 ikut dicabut dari
+  // network_security_config.xml.
+  static const String productionUrl = 'https://api.sportago.id';
 
   // Local development URL
   static const String localUrl = 'http://localhost:8088';
