@@ -721,7 +721,7 @@ class _BookingCardState extends State<_BookingCard> {
             "date": _formatDate(booking.bookingDate),
             "time": booking.formattedTime,
             "price": booking.totalPrice.toInt(),
-            "selectedMethod": paymentMethod == "QRIS" ? "QRIS (Gopay/OVO/Dana)" : "$paymentMethod Virtual Account",
+            "selectedMethod": _getPaymentMethodDisplay(paymentMethod),
             "paymentMethod": paymentMethod,
             "totalWithFee": booking.payment?.amount.toInt() ?? booking.totalPrice.toInt(),
             "qrString": booking.payment?.qrString,
@@ -873,22 +873,6 @@ class _TransactionBookingCardState extends State<TransactionBookingCard> {
     );
   }
 
-  String _getPaymentMethodDisplay(String method) {
-    switch (method.toUpperCase()) {
-      case 'QRIS':
-        return "QRIS (Gopay/OVO/Dana)";
-      case 'BCA':
-        return "BCA Virtual Account";
-      case 'MANDIRI':
-        return "Mandiri Virtual Account";
-      case 'BRI':
-        return "BRI Virtual Account";
-      case 'BNI':
-        return "BNI Virtual Account";
-      default:
-        return method;
-    }
-  }
 
   void _goToPaymentSelector(BuildContext context) {
     final navigator = Navigator.of(context);
@@ -1693,6 +1677,13 @@ class _TransactionPaymentWaitingPageState extends State<TransactionPaymentWaitin
     )}";
 
     String? qrString = widget.booking.payment?.qrString;
+    // Nomor VA yang sebenarnya, dari server. Sebelum ini halaman ini
+    // memakai qrString sebagai nomor VA, dan kalau kosong (dan untuk VA
+    // memang selalu kosong) ia jatuh ke "8800 1234 5678 9012" yang
+    // ditulis langsung di kode. Nomor itu karangan; pelanggan yang
+    // mentransfer ke sana kehilangan uangnya dan pemesanannya tetap
+    // tidak terbayar.
+    final String? nomorVa = widget.booking.payment?.virtualAccountNo;
 
     return Scaffold(
       backgroundColor: context.c.surface,
@@ -1911,14 +1902,29 @@ class _TransactionPaymentWaitingPageState extends State<TransactionPaymentWaitin
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  qrString ?? "8800 1234 5678 9012",
+                                  nomorVa ?? 'Belum tersedia',
                                   style: TextStyle(
-                                    fontSize: 24,
+                                    fontSize: nomorVa == null ? 15 : 24,
                                     fontWeight: FontWeight.bold,
-                                    letterSpacing: 2,
-                                    color: context.c.ink,
+                                    letterSpacing: nomorVa == null ? 0 : 2,
+                                    color: nomorVa == null
+                                        ? context.c.danger
+                                        : context.c.ink,
                                   ),
                                 ),
+                                if (nomorVa == null) ...[
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    'Hubungi tim Sportago sebelum mentransfer. '
+                                    'Jangan menebak nomor rekening.',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: context.c.inkSoft,
+                                      height: 1.4,
+                                    ),
+                                  ),
+                                ],
                                 const SizedBox(height: 12),
                                 OutlinedButton.icon(
                                   onPressed: () {
@@ -2102,4 +2108,47 @@ class _TransactionPaymentWaitingPageState extends State<TransactionPaymentWaitin
       ),
     );
   }
+}
+
+/// Nama metode pembayaran yang layak dibaca pelanggan.
+///
+/// Dulu daftarnya cuma lima dan sisanya jatuh ke `return method`,
+/// sementara pemanggilnya menempelkan " Virtual Account" di belakang.
+/// Hasilnya kode mentah muncul di layar: "va_bca Virtual Account".
+/// Sejak gateway pindah ke Duitku ada sepuluh bank Virtual Account,
+/// jadi hampir semuanya kena.
+///
+/// Nama bank ditulis di sini, bukan disusun dari potongan kode, supaya
+/// "Bank Neo Commerce" tidak berubah jadi "Bnc".
+String _getPaymentMethodDisplay(String method) {
+  const nama = {
+    'qris': 'QRIS',
+    'ovo': 'OVO',
+    'dana': 'DANA',
+    'gopay': 'GoPay',
+    'shopeepay': 'ShopeePay',
+    'linkaja': 'LinkAja',
+    'va_bca': 'BCA Virtual Account',
+    'va_bni': 'BNI Virtual Account',
+    'va_bri': 'BRI Virtual Account',
+    'va_mandiri': 'Mandiri Virtual Account',
+    'va_permata': 'Permata Virtual Account',
+    'va_cimb': 'CIMB Niaga Virtual Account',
+    'va_bsi': 'BSI Virtual Account',
+    'va_bnc': 'Bank Neo Commerce Virtual Account',
+    'va_maybank': 'Maybank Virtual Account',
+    'va_artha_graha': 'Bank Artha Graha Virtual Account',
+    'va_sampoerna': 'Bank Sahabat Sampoerna Virtual Account',
+    'card': 'Kartu Kredit / Debit',
+  };
+
+  final kunci = method.toLowerCase();
+  if (nama.containsKey(kunci)) return nama[kunci]!;
+
+  // Sebagian layar lama mengirim nama bank saja ("BCA"), bukan kode.
+  if (nama.containsKey('va_$kunci')) return nama['va_$kunci']!;
+
+  // Kode yang belum dikenal ditampilkan apa adanya, tanpa ditempeli
+  // kata "Virtual Account" yang belum tentu benar.
+  return method;
 }

@@ -1176,7 +1176,11 @@ class _PaymentWaitingPageState extends State<PaymentWaitingPage> {
 
     // Get QR string from payment if available
     String? qrString = widget.booking.payment?.qrString;
-    String paymentCode = qrString ?? "8800 1234 5678 9012";
+    // Untuk QRIS yang dipakai adalah qrString; untuk Virtual Account,
+    // nomor rekeningnya. Baris lama menyamakan keduanya lalu jatuh ke
+    // "8800 1234 5678 9012" kalau kosong, nomor karangan yang kalau
+    // ditransfer sungguhan membuat uang pelanggan hilang.
+    String? paymentCode = qrString ?? widget.booking.payment?.virtualAccountNo;
 
     return Scaffold(
       backgroundColor: context.c.surface,
@@ -1337,12 +1341,14 @@ class _PaymentWaitingPageState extends State<PaymentWaitingPage> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    paymentCode,
+                                    paymentCode ?? 'Belum tersedia',
                                     style: TextStyle(
-                                      fontSize: 18,
+                                      fontSize: paymentCode == null ? 14 : 18,
                                       fontWeight: FontWeight.bold,
-                                      letterSpacing: 1,
-                                      color: context.c.ink,
+                                      letterSpacing: paymentCode == null ? 0 : 1,
+                                      color: paymentCode == null
+                                          ? context.c.danger
+                                          : context.c.ink,
                                     ),
                                   ),
                                   const SizedBox(width: 8),

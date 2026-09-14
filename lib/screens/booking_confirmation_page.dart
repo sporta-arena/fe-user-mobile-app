@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:ui' show FontFeature;
 import 'dart:async';
 import '../utils/waktu_wib.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
@@ -2445,6 +2446,249 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
   }
 
   /// Instruksi pembayaran sesuai cara bayar yang benar-benar dipilih.
+  /// Keadaan pemesanan, nominal, dan sisa waktu dalam satu tarikan baca.
+  ///
+  /// Dulu bagian ini berupa lingkaran ikon 64px dengan bayangan sebar
+  /// 30px dan gradien dari satu warna ke warna yang sama persis. Tidak
+  /// ada satu pun informasi di dalamnya; ia cuma memakan layar di posisi
+  /// paling berharga. Sekarang tempat itu diisi yang benar-benar dicari
+  /// pelanggan: statusnya, jumlah yang harus dibayar, dan sisa waktunya.
+  Widget _kepalaStatus(BuildContext context, int total) {
+    final Color warna = _isPaid
+        ? context.c.ok
+        : (_isExpired ? context.c.danger : context.c.warn);
+    final String judul = _isPaid
+        ? 'Pembayaran diterima'
+        : (_isExpired ? 'Waktu pembayaran habis' : 'Menunggu pembayaran');
+    final IconData ikon = _isPaid
+        ? Icons.check_circle_rounded
+        : (_isExpired ? Icons.cancel_rounded : Icons.schedule_rounded);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(ikon, size: 20, color: warna),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                judul,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: warna,
+                ),
+              ),
+            ),
+            // Sisa waktu duduk sebaris dengan statusnya karena keduanya
+            // satu pikiran: "bayar sebelum sekian". Dulu ia berupa angka
+            // 32px di dalam kotak berwarna warnSoft di atas latar
+            // warnSoft juga, jadi kotaknya tak terlihat sama sekali.
+            if (!_isPaid && !_isExpired)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: context.c.warnSoft,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  _countdown,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                    color: context.c.warn,
+                  ),
+                ),
+              ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Text(
+          _formatCurrencyInt(total),
+          style: TextStyle(
+            fontSize: 32,
+            fontWeight: FontWeight.w800,
+            height: 1.1,
+            color: context.c.ink,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          _isPaid
+              ? 'Lapangan sudah diamankan untuk kamu.'
+              : (_isExpired
+                  ? 'Slotnya sudah dilepas. Silakan pesan ulang.'
+                  : 'Transfer dengan nominal yang sama persis.'),
+          style: TextStyle(fontSize: 13, color: context.c.inkSoft),
+        ),
+        if (_isCheckingStatus && !_isPaid) ...[
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              SizedBox(
+                width: 13,
+                height: 13,
+                child: CircularProgressIndicator(strokeWidth: 2, color: context.c.info),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Mengecek status pembayaran...',
+                style: TextStyle(fontSize: 12, color: context.c.info),
+              ),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+
+  /// Satu-satunya blok yang ditinggikan di halaman ini.
+  ///
+  /// Kartu di sini bukan hiasan: ia menandai bagian yang harus
+  /// dikerjakan pelanggan sekarang. Karena hanya blok ini yang punya
+  /// latar terangkat, matanya langsung jatuh ke sini.
+  Widget _blokCaraBayar(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: context.c.raised,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: context.c.line),
+      ),
+      child: _instruksiPembayaran(context),
+    );
+  }
+
+  /// Ringkasan pemesanan sebagai daftar biasa, tanpa kartu.
+  ///
+  /// Isinya bukan sesuatu yang perlu dikerjakan, cuma dicocokkan sekilas,
+  /// jadi ia sengaja rata dengan halaman. Kalau semua blok diberi kartu
+  /// dan garis yang sama seperti sebelumnya, tidak ada yang menonjol dan
+  /// pelanggan harus membaca semuanya untuk tahu mana yang penting.
+  Widget _ringkasanPemesanan(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Detail pemesanan',
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.2,
+            color: context.c.inkDim,
+          ),
+        ),
+        const SizedBox(height: 12),
+        // Kode pemesanan dinaikkan: inilah yang ditanyakan petugas
+        // lapangan, dan dulu ia cuma satu baris di antara lima baris
+        // lain yang bentuknya sama persis.
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Text(
+                booking.bookingCode,
+                style: TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w700,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                  color: context.c.ink,
+                ),
+              ),
+            ),
+            IconButton(
+              onPressed: () {
+                Clipboard.setData(ClipboardData(text: booking.bookingCode));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: const Text('Kode pemesanan disalin'),
+                    backgroundColor: context.c.ok,
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+              },
+              visualDensity: VisualDensity.compact,
+              icon: Icon(Icons.copy_rounded, size: 18, color: context.c.inkSoft),
+              tooltip: 'Salin kode pemesanan',
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        _barisRingkas(context, booking.field?.venue?.name ?? '-'),
+        _barisRingkas(context, booking.field?.name ?? '-'),
+        _barisRingkas(
+          context,
+          '${booking.bookingDate} - ${booking.formattedTime} (${booking.durationHours} jam)',
+        ),
+      ],
+    );
+  }
+
+  Widget _barisRingkas(BuildContext context, String teks) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Text(
+        teks,
+        style: TextStyle(fontSize: 13, color: context.c.inkSoft, height: 1.4),
+      ),
+    );
+  }
+
+  /// Rincian biaya yang bisa dibuka, bukan yang selalu terbentang.
+  ///
+  /// Pelanggan sudah menyetujui angka ini di layar sebelumnya. Dibentang
+  /// lagi di sini, empat baris itu cuma menambah panjang halaman dan
+  /// menyaingi bagian yang benar-benar perlu dikerjakan. Tetap bisa
+  /// dibuka karena rincian biaya adalah hak pelanggan untuk diperiksa,
+  /// bukan sesuatu yang boleh disembunyikan.
+  Widget _rincianBiaya(
+    BuildContext context, {
+    required int total,
+    required int lapangan,
+    required int platform,
+    required int admin,
+  }) {
+    return Theme(
+      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+      child: ExpansionTile(
+        tilePadding: EdgeInsets.zero,
+        childrenPadding: const EdgeInsets.only(bottom: 8),
+        expandedCrossAxisAlignment: CrossAxisAlignment.start,
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Total pembayaran',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: context.c.ink,
+              ),
+            ),
+            Text(
+              _formatCurrencyInt(total),
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: context.c.ink,
+              ),
+            ),
+          ],
+        ),
+        children: [
+          _buildPriceRow('Harga lapangan', lapangan),
+          const SizedBox(height: 8),
+          _buildPriceRow('Biaya platform', platform),
+          const SizedBox(height: 8),
+          _buildPriceRow('Biaya admin', admin),
+        ],
+      ),
+    );
+  }
+
   Widget _instruksiPembayaran(BuildContext context) {
     final kategori = _kategoriBayar;
     final label = widget.paymentMethodLabel ?? 'QRIS';
@@ -2738,7 +2982,11 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
       appBar: AppBar(
         systemOverlayStyle: gayaOverlay(context),
         title: Text(
-          "Booking Berhasil",
+          // Dulu judulnya selalu "Booking Berhasil" sementara badan
+          // halaman berbunyi "Menunggu Pembayaran". Dua kalimat yang
+          // saling membantah di satu layar membuat pelanggan ragu
+          // apakah uangnya sudah masuk atau belum.
+          _isPaid ? 'Pemesanan Selesai' : 'Selesaikan Pembayaran',
           style: TextStyle(color: context.c.ink, fontWeight: FontWeight.bold),
         ),
         backgroundColor: context.c.surface,
@@ -2749,280 +2997,37 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            // Status Icon - changes based on payment status
-            if (_showSuccessAnimation) ...[
-              // Animated success icon
-              AnimatedBuilder(
-                animation: _animationController,
-                builder: (context, child) {
-                  return Transform.scale(
-                    scale: _scaleAnimation.value,
-                    child: Opacity(
-                      opacity: _opacityAnimation.value,
-                      child: Container(
-                        padding: const EdgeInsets.all(24),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [context.c.ok, context.c.ok],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: context.c.ok.withValues(alpha: 0.4),
-                              blurRadius: 30,
-                              offset: const Offset(0, 10),
-                            ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.check_rounded,
-                          size: 64,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
+            // Halaman ini punya SATU tugas selagi belum dibayar:
+            // memberi tahu ke mana uangnya ditransfer dan berapa lama
+            // waktunya. Sebelum ini urutannya kebalik: lingkaran ikon
+            // 64px tanpa informasi, lalu dua kartu detail, dan nomor
+            // Virtual Account justru terkubur paling bawah di dalam
+            // kotak peringatan. Yang paling dicari pelanggan jadi yang
+            // paling susah ditemukan.
+            //
+            // Sekarang urutannya: keadaan + sisa waktu, lalu cara bayar,
+            // baru rincian. Kartu juga tidak lagi seragam; hanya blok
+            // pembayaran yang ditinggikan, sisanya rata dengan halaman
+            // supaya perbedaannya berarti.
+            _kepalaStatus(context, displayTotalPrice),
+
+            if (!_isPaid) ...[
               const SizedBox(height: 20),
-              Text(
-                "Pembayaran Berhasil!",
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: context.c.ok,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                "Booking kamu sudah dikonfirmasi",
-                style: TextStyle(
-                  color: context.c.inkSoft,
-                  fontSize: 14,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ] else ...[
-              // Waiting payment icon
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: _isExpired ? context.c.dangerSoft : context.c.warnSoft,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  _isExpired ? Icons.cancel_outlined : Icons.hourglass_top_rounded,
-                  size: 64,
-                  color: _isExpired ? context.c.danger : context.c.warn,
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                _isExpired ? "Waktu Pembayaran Habis" : "Menunggu Pembayaran",
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: _isExpired ? context.c.danger : context.c.ink,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                _isExpired
-                    ? "Silakan buat booking baru"
-                    : "Silakan selesaikan pembayaran sebelum batas waktu",
-                style: TextStyle(
-                  color: context.c.inkSoft,
-                  fontSize: 14,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              // Checking status indicator
-              if (_isCheckingStatus) ...[
-                const SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      width: 14,
-                      height: 14,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: context.c.info,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      "Mengecek status pembayaran...",
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: context.c.info,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+              _blokCaraBayar(context),
             ],
-            const SizedBox(height: 24),
 
-            // Booking Details Card
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: context.c.raised,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: context.c.line),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Detail Booking",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: context.c.ink,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildInfoRow("Kode Booking", booking.bookingCode),
-                  _buildInfoRow("Venue", booking.field?.venue?.name ?? "-"),
-                  _buildInfoRow("Lapangan", booking.field?.name ?? "-"),
-                  _buildInfoRow("Tanggal", booking.bookingDate),
-                  _buildInfoRow("Waktu", booking.formattedTime),
-                  _buildInfoRow("Durasi", "${booking.durationHours} jam"),
-                ],
-              ),
+            const SizedBox(height: 28),
+            _ringkasanPemesanan(context),
+
+            const SizedBox(height: 20),
+            _rincianBiaya(
+              context,
+              total: displayTotalPrice,
+              lapangan: displayBasePrice,
+              platform: displayPlatformFee,
+              admin: displayAdminFee,
             ),
 
-            const SizedBox(height: 16),
-
-            // Price Breakdown Card
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: context.c.raised,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: context.c.ok),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Rincian Biaya",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: context.c.ink,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildPriceRow("Harga Lapangan (${booking.field?.name ?? 'Lapangan'})", displayBasePrice),
-                  const SizedBox(height: 8),
-                  // Halaman ini menampilkan angka yang sudah dihitung
-                  // server, jadi tidak perlu menyebut persentase,
-                  // menyebutnya justru berisiko salah saat kena batas.
-                  _buildPriceRow("Biaya Platform", displayPlatformFee),
-                  const SizedBox(height: 8),
-                  _buildPriceRow("Biaya Admin", displayAdminFee),
-                  Divider(height: 24, color: context.c.line),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Total Pembayaran",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          color: context.c.ink,
-                        ),
-                      ),
-                      Text(
-                        _formatCurrencyInt(displayTotalPrice),
-                        style: TextStyle(
-                          fontWeight: FontWeight.w900,
-                          fontSize: 20,
-                          color: context.c.accent,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // Payment Info Card with Countdown - Hide when paid
-            if (!_isPaid)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: _isExpired ? context.c.dangerSoft : context.c.warnSoft,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: _isExpired ? context.c.danger : context.c.warn,
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        _isExpired ? Icons.timer_off : Icons.timer_outlined,
-                        color: _isExpired ? context.c.danger : context.c.warn,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        _isExpired ? "Waktu Habis" : "Batas Pembayaran",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: _isExpired ? context.c.danger : context.c.warn,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  // Countdown Timer
-                  Center(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      decoration: BoxDecoration(
-                        color: _isExpired ? context.c.dangerSoft : context.c.warnSoft,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        _countdown,
-                        style: TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'monospace',
-                          color: _isExpired ? context.c.danger : context.c.warn,
-                        ),
-                      ),
-                    ),
-                  ),
-                  if (_isExpired) ...[
-                    const SizedBox(height: 12),
-                    Center(
-                      child: Text(
-                        "Silakan buat booking baru",
-                        style: TextStyle(color: context.c.danger),
-                      ),
-                    ),
-                  ],
-                  
-                  // Payment Method Info
-                  const SizedBox(height: 16),
-                  _instruksiPembayaran(context),
-                ],
-              ),
-            ),
 
             const SizedBox(height: 24),
 
@@ -3243,34 +3248,6 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              color: context.c.inkSoft,
-              fontSize: 14,
-            ),
-          ),
-          Flexible(
-            child: Text(
-              value,
-              style: TextStyle(
-                fontWeight: FontWeight.w500,
-                fontSize: 14,
-                color: context.c.ink,
-              ),
-              textAlign: TextAlign.right,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildPriceRow(String label, int amount) {
     return Row(

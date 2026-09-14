@@ -134,6 +134,13 @@ class Payment {
   final String status; // pending, paid, expired, failed
   final String paymentMethod;
   final String? qrString;
+
+  /// Nomor Virtual Account dari gateway, apa adanya dari server.
+  ///
+  /// Null untuk metode yang memang tidak punya nomor rekening (QRIS,
+  /// e-wallet). Jangan pernah diisi nilai cadangan: nomor VA karangan
+  /// yang ditransfer sungguhan membuat uang pelanggan hilang.
+  final String? virtualAccountNo;
   final DateTime? paidAt;
   final DateTime? expiresAt;
   final DateTime createdAt;
@@ -147,6 +154,7 @@ class Payment {
     required this.status,
     required this.paymentMethod,
     this.qrString,
+    this.virtualAccountNo,
     this.paidAt,
     this.expiresAt,
     required this.createdAt,
@@ -162,6 +170,7 @@ class Payment {
       status: json['status'] ?? 'pending',
       paymentMethod: json['payment_method'] ?? 'qris',
       qrString: json['qr_string'],
+      virtualAccountNo: json['virtual_account_no'],
       // Parse UTC datetime from server
       paidAt: json['paid_at'] != null
           ? TimezoneUtils.parseUtcToLocal(json['paid_at'])
