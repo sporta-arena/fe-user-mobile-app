@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart' show kDebugMode;
 import 'dart:ui' show FontFeature;
 import '../utils/waktu_wib.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../theme/app_tokens.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -1972,22 +1973,43 @@ class _TransactionPaymentWaitingPageState extends State<TransactionPaymentWaitin
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(color: context.c.line),
                             ),
+                            // stretch, bukan center: tanpa ini Column
+                            // mengikuti lebar anak terlebar, dan nomor VA
+                            // 16 digit lebih lebar dari kartunya. Akibatnya
+                            // label dan tombol tampak rata tengah terhadap
+                            // NOMOR yang meluber, bukan terhadap kartu, jadi
+                            // semuanya terlihat bergeser ke kiri.
                             child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
                                 Text(
                                   "Nomor Virtual Account",
+                                  textAlign: TextAlign.center,
                                   style: TextStyle(color: context.c.inkSoft, fontSize: 12),
                                 ),
                                 const SizedBox(height: 8),
-                                Text(
-                                  nomorVa ?? 'Belum tersedia',
-                                  style: TextStyle(
-                                    fontSize: nomorVa == null ? 15 : 24,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: nomorVa == null ? 0 : 2,
-                                    color: nomorVa == null
-                                        ? context.c.danger
-                                        : context.c.ink,
+                                // Nomor terpanjang yang kita temui 17 digit
+                                // (BNC). Dikecilkan kalau tidak muat, bukan
+                                // dipotong: satu digit hilang berarti uang
+                                // pelanggan nyasar.
+                                FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(
+                                    nomorVa ?? 'Belum tersedia',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: nomorVa == null ? 15 : 24,
+                                      fontWeight: FontWeight.bold,
+                                      // Jarak antarhuruf dikurangi supaya
+                                      // nomornya muat utuh tanpa mengecil
+                                      // berlebihan, tapi tetap terbaca
+                                      // per digit saat disalin manual.
+                                      letterSpacing: nomorVa == null ? 0 : 1,
+                                      fontFeatures: const [FontFeature.tabularFigures()],
+                                      color: nomorVa == null
+                                          ? context.c.danger
+                                          : context.c.ink,
+                                    ),
                                   ),
                                 ),
                                 if (nomorVa == null) ...[
@@ -2004,20 +2026,37 @@ class _TransactionPaymentWaitingPageState extends State<TransactionPaymentWaitin
                                   ),
                                 ],
                                 const SizedBox(height: 12),
-                                OutlinedButton.icon(
-                                  onPressed: () {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text("Nomor VA berhasil disalin!"),
-                                        backgroundColor: context.c.raised,
-                                      ),
-                                    );
-                                  },
-                                  icon: const Icon(Icons.copy, size: 16),
-                                  label: const Text("Salin"),
-                                  style: OutlinedButton.styleFrom(
-                                    foregroundColor: context.c.accent,
-                                    side: BorderSide(color: context.c.accent),
+                                // Center supaya tombol tidak ikut melebar
+                                // penuh oleh crossAxisAlignment.stretch di
+                                // atas, tapi tetap rata tengah terhadap kartu.
+                                Center(
+                                  child: OutlinedButton.icon(
+                                    // Tombol ini SEBELUMNYA tidak menyalin
+                                    // apa pun. Ia hanya memunculkan pesan
+                                    // "Nomor VA berhasil disalin!", lalu
+                                    // pelanggan menempel di m-banking dan
+                                    // mendapat isi papan klip sebelumnya.
+                                    // Pesan yang mengaku berhasil padahal
+                                    // tidak terjadi apa-apa lebih berbahaya
+                                    // daripada tombol yang diam saja.
+                                    onPressed: nomorVa == null
+                                        ? null
+                                        : () {
+                                            Clipboard.setData(ClipboardData(text: nomorVa));
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(
+                                                content: const Text('Nomor VA disalin'),
+                                                backgroundColor: context.c.ok,
+                                                duration: const Duration(seconds: 2),
+                                              ),
+                                            );
+                                          },
+                                    icon: const Icon(Icons.copy, size: 16),
+                                    label: const Text("Salin"),
+                                    style: OutlinedButton.styleFrom(
+                                      foregroundColor: context.c.accent,
+                                      side: BorderSide(color: context.c.accent),
+                                    ),
                                   ),
                                 ),
                               ],
