@@ -259,7 +259,7 @@ class ApiConfig {
   // ============================================================
   // WEBHOOKS (Not versioned)
   // ============================================================
-  static String get xenditWebhookUrl => '$hostUrl/api/webhooks/xendit';
+  static String get duitkuCallbackUrl => '$hostUrl/api/webhooks/duitku/callback';
 
   // ============================================================
   // FIELD TYPES

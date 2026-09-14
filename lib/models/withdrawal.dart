@@ -11,6 +11,10 @@ class Withdrawal {
   final String accountName;
   final String status; // pending, processing, completed, failed, rejected
   final String? adminNotes;
+  /// Nomor pencairan dari gateway. Namanya masih xendit_disbursement_id
+  /// karena itu nama kolom dan kunci JSON-nya sejak awal, dan penarikan
+  /// lama memang tersimpan di sana. Mengganti namanya berarti memutus
+  /// riwayat yang sudah ada, bukan merapikannya.
   final String? xenditDisbursementId;
   final DateTime? processedAt;
   final DateTime createdAt;

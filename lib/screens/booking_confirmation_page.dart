@@ -2119,7 +2119,7 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
       return;
     }
 
-    // Backend mencoba API simulate Xendit dulu supaya webhook aslinya ikut
+    // Backend mencoba API simulasi gateway dulu supaya webhook aslinya ikut
     // terpicu; kalau tidak bisa, ia menandai lunas langsung di basis data.
     // Dua hal itu membuktikan hal yang sangat berbeda, jadi bedanya harus
     // sampai ke layar. Dulu dua-duanya sama-sama berakhir "berhasil", dan
@@ -2388,8 +2388,8 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
   /// Dulu percabangannya `paymentMethod.startsWith('VA_')`, jadi cuma ada
   /// dua kemungkinan: Virtual Account, atau QRIS. Setiap e-wallet (OVO,
   /// GoPay, DANA, ShopeePay, LinkAja) jatuh ke "selain VA" dan disuguhi
-  /// layar QRIS, padahal e-wallet Xendit tidak pernah menghasilkan QR:
-  /// yang dikembalikan tautan checkout dan deeplink ke aplikasinya.
+  /// layar QRIS, padahal e-wallet tidak pernah menghasilkan QR: yang
+  /// dikembalikan adalah tautan checkout ke aplikasi dompetnya.
   String get _kategoriBayar {
     final kode = (widget.paymentMethod ?? '').toUpperCase();
     if (kode.startsWith('VA_')) return 'va';
@@ -2402,14 +2402,14 @@ class _BookingCreatedPageState extends State<BookingCreatedPage> with SingleTick
 
   /// Tautan bayar e-wallet, deeplink ke aplikasinya kalau ada.
   ///
-  /// Xendit mengembalikan beberapa bentuk sekaligus di `actions`. Deeplink
-  /// didahulukan karena langsung membuka aplikasi e-wallet di HP; checkout
-  /// web dipakai kalau deeplinknya tidak dikirim.
+  /// Server mengisi tiga kunci di `actions`. Deeplink didahulukan karena
+  /// langsung membuka aplikasi dompet di HP; checkout web dipakai kalau
+  /// deeplinknya tidak dikirim.
   ///
-  /// DOKU hanya mengirim satu alamat web (webRedirectUrl) dan backend
-  /// menaruhnya di ketiga kunci, jadi urutan ini tetap benar: yang
-  /// terambil adalah alamat yang sama, dan halaman DOKU sendiri yang
-  /// meneruskan pelanggan ke aplikasi dompetnya.
+  /// Duitku mengembalikan satu tautan pembayaran, dan backend menaruhnya
+  /// di ketiga kunci itu. Urutan ini tetap benar: yang terambil alamat
+  /// yang sama, dan halaman Duitku sendiri yang meneruskan pelanggan ke
+  /// aplikasi dompetnya.
   String? get _tautanEwallet {
     final p = payment;
     if (p == null) return null;
