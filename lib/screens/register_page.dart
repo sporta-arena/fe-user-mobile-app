@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import 'naskah_hukum_page.dart';
 import '../utils/tanpa_spasi.dart';
 import '../widgets/sportago_mark.dart';
 import '../theme/app_tokens.dart';
@@ -160,6 +162,60 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
+  /// Buka naskah hukum. Dua naskah, jadi mitra diminta memilih dulu
+  /// supaya satu sentuhan tidak memaksakan salah satu.
+  void _bukaSyarat() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: context.c.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 12),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: ctx.c.line,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 8),
+            ListTile(
+              leading: const Icon(Icons.gavel_rounded),
+              title: const Text('Syarat & Ketentuan'),
+              onTap: () {
+                Navigator.pop(ctx);
+                _bukaNaskah('partner-terms', 'Syarat & Ketentuan');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.privacy_tip_rounded),
+              title: const Text('Kebijakan Privasi'),
+              onTap: () {
+                Navigator.pop(ctx);
+                _bukaNaskah('privacy', 'Kebijakan Privasi');
+              },
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _bukaNaskah(String slug, String judul) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => NaskahHukumPage(slug: slug, judul: judul),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -293,9 +349,13 @@ class _RegisterPageState extends State<RegisterPage> {
                   const SizedBox(width: 10),
                   Expanded(
                     child: GestureDetector(
-                      onTap: () {
-                        // TODO: Navigate to Terms & Conditions
-                      },
+                      // Sebelumnya tidak melakukan apa pun, padahal di
+                      // sebelahnya tertulis "Saya menyetujui". Meminta
+                      // orang menyetujui naskah yang tidak bisa
+                      // dibukanya adalah persetujuan yang tidak berarti
+                      // apa-apa, dan tidak akan berdiri sebagai bukti
+                      // kalau suatu saat dipersoalkan.
+                      onTap: _bukaSyarat,
                       child: RichText(
                         text: TextSpan(
                           text: 'Saya menyetujui ',

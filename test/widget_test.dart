@@ -1,30 +1,35 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sporta_app/main.dart';
 
+/// Uji asap: aplikasi bisa dibangun.
+///
+/// Sebelumnya berkas ini masih berisi uji template bawaan Flutter yang
+/// menghitung angka pada tombol tambah. Aplikasi ini tidak pernah punya
+/// keduanya, jadi ujinya merah sejak hari pertama. Dibiarkan merah,
+/// tidak ada lagi yang menjaga bahwa aplikasi masih bisa dibangun sama
+/// sekali: kegagalan sungguhan akan tenggelam di antara kegagalan yang
+/// sudah biasa dilihat orang.
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
+  setUp(() {
+    // Aplikasi membaca preferensi sebelum frame pertama (tema, favorit,
+    // sesi). Tanpa nilai tiruan, pembacaannya menggantung di lingkungan
+    // uji.
+    SharedPreferences.setMockInitialValues({});
+  });
+
+  testWidgets('aplikasi terbangun tanpa galat', (tester) async {
     await tester.pumpWidget(const MyApp());
-
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
     await tester.pump();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(find.byType(MaterialApp), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    // Jeda dan permintaan jaringan yang dimulai saat pembukaan tidak
+    // bisa dibatalkan, jadi waktunya dilewati sampai habis supaya uji
+    // tidak gagal karena timer yang masih menggantung.
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump(const Duration(seconds: 60));
   });
 }
