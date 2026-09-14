@@ -74,8 +74,20 @@ class MetodePembayaran {
 /// dikenal backend. Pelanggan bisa memilih jalan buntu, dan biaya yang
 /// ditampilkan tidak dijamin sama dengan yang ditagih.
 class PaymentMethodService {
-  static Future<List<MetodePembayaran>> ambil({required int jumlah}) async {
-    final url = Uri.parse('${ApiConfig.apiUrl}/payment-methods?amount=$jumlah');
+  /// [idLapangan] menentukan venue mana yang dipesan, dan itu menentukan
+  /// gateway mana yang menagih. Kanal dan biayanya berbeda antar gateway,
+  /// jadi tanpa ini pelanggan melihat daftar dan angka milik gateway
+  /// bawaan, lalu ditagih angka lain di layar berikutnya.
+  static Future<List<MetodePembayaran>> ambil({
+    required int jumlah,
+    int? idLapangan,
+  }) async {
+    final kueri = <String, String>{
+      'amount': '$jumlah',
+      if (idLapangan != null && idLapangan > 0) 'field_id': '$idLapangan',
+    };
+    final url = Uri.parse('${ApiConfig.apiUrl}/payment-methods')
+        .replace(queryParameters: kueri);
     final token = AuthService.token;
     if (token == null) {
       throw Exception('Perlu masuk dulu untuk melihat metode pembayaran');

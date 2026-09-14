@@ -90,6 +90,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
     try {
       final daftar = await PaymentMethodService.ambil(
         jumlah: _fieldPrice + _platformFee,
+        idLapangan: widget.fieldId,
       );
       if (!mounted) return;
       setState(() {
