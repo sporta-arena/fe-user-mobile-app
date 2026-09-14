@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/tanpa_spasi.dart';
 import '../widgets/sportago_mark.dart';
 import '../theme/app_tokens.dart';
 import 'package:flutter/services.dart';
@@ -360,6 +361,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     return TextField(
       controller: controller,
       obscureText: isPassword && !isVisible,
+      inputFormatters: isPassword ? const [TanpaSpasi()] : null,
       style: TextStyle(color: context.c.ink),
       decoration: InputDecoration(
         hintText: hint,

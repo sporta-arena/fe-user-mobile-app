@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/tanpa_spasi.dart';
 import '../theme/app_tokens.dart';
 
 class ChangePasswordPage extends StatefulWidget {
@@ -578,6 +579,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
           child: TextField(
             controller: controller,
             obscureText: isObscure,
+            inputFormatters: const [TanpaSpasi()],
             onChanged: (value) => setState(() {}), // Trigger rebuild for requirements
             style: TextStyle(color: context.c.ink),
             decoration: InputDecoration(

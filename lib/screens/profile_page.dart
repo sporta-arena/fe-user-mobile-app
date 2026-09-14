@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/tanpa_spasi.dart';
 import '../theme/app_tokens.dart';
 import 'package:flutter/services.dart';
 import 'favorite_venues_page.dart';
@@ -1026,6 +1027,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       TextField(
                         controller: passwordController,
                         obscureText: obscurePassword,
+                        inputFormatters: const [TanpaSpasi()],
                         style: TextStyle(color: context.c.ink),
                         decoration: InputDecoration(
                           hintText: "Masukkan password",

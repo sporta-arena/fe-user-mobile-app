@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/tanpa_spasi.dart';
 import '../widgets/sportago_mark.dart';
 import '../theme/app_tokens.dart';
 import 'package:flutter/services.dart';
@@ -432,8 +433,9 @@ class _RegisterPageState extends State<RegisterPage> {
       obscureText: isPassword && !isVisible,
       keyboardType: inputType,
       style: TextStyle(color: context.c.ink),
-      inputFormatters:
-          isNumberOnly ? [FilteringTextInputFormatter.digitsOnly] : [],
+      inputFormatters: isNumberOnly
+          ? [FilteringTextInputFormatter.digitsOnly]
+          : (isPassword ? const [TanpaSpasi()] : const []),
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: TextStyle(color: context.c.inkSoft),

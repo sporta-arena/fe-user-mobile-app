@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/tanpa_spasi.dart';
 import '../widgets/sportago_mark.dart';
 import '../theme/app_tokens.dart';
 import 'package:flutter/services.dart';
@@ -174,6 +175,7 @@ class _LoginPageState extends State<LoginPage> {
               TextField(
                 controller: _passwordController,
                 obscureText: !_isPasswordVisible,
+                inputFormatters: const [TanpaSpasi()],
                 style: TextStyle(color: context.c.ink),
                 decoration: _fieldDecoration(
                   hint: "Masukkan password",
