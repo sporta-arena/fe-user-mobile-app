@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../services/auth_service.dart';
+import '../services/push_notifikasi.dart';
+import '../services/realtime_chat.dart';
 import '../utils/tampilan_venue.dart';
 import '../theme/app_tokens.dart';
 import '../widgets/sampul_venue.dart';
@@ -132,6 +135,9 @@ class DashboardContent extends StatefulWidget {
 }
 
 class _DashboardContentState extends State<DashboardContent> {
+  /// Langganan notifikasi realtime milik pemesan yang sedang masuk.
+  RealtimeChat? _notifRealtime;
+
   String _address = "Mencari lokasi…";
 
   /// Titik pemakai, dipakai untuk mengurutkan daftar terdekat.
@@ -198,6 +204,47 @@ class _DashboardContentState extends State<DashboardContent> {
     _loadVenues();
     _loadFieldTypes();
     _getLocation();
+    _sambungkanNotifikasi();
+    // Push disiapkan sesudah pemesan masuk: sebelum itu tidak ada
+    // pengguna yang bisa dikaitkan dengan tokennya, dan token tanpa
+    // pemilik hanya jadi baris yatim di server.
+    if (AuthService.isLoggedIn) PushNotifikasi.siapkan();
+  }
+
+  /// Sambungkan ke kanal notifikasi milik pemesan yang sedang masuk.
+  ///
+  /// Sebelumnya notifikasi hanya dimuat saat halaman notifikasi dibuka.
+  /// Pembayaran yang lunas atau jadwal yang dibatalkan mitra baru
+  /// diketahui kalau pemesan kebetulan membukanya.
+  void _sambungkanNotifikasi() {
+    final id = AuthService.currentUser?.id;
+    if (id == null) return;
+
+    _notifRealtime = RealtimeChat.dengarkanKanal(
+      namaKanal: namaKanalPengguna(id),
+      namaEvent: namaEventNotifikasi,
+      onPesan: (muatan) {
+        if (!mounted) return;
+        final judul = muatan['title']?.toString() ?? 'Pemberitahuan baru';
+        final isi = muatan['body']?.toString() ?? '';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('$judul\n$isi'.trim()),
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    // WebSocket yang tidak ditutup tetap hidup di latar, memegang
+    // sambungan dan menyambung ulang selamanya walau layarnya sudah
+    // tidak ada.
+    _notifRealtime?.tutup();
+    super.dispose();
   }
 
   Future<void> _loadVenues() async {

@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -21,6 +22,13 @@ void main() async {
   // venue langsung tampil dengan keadaan yang benar, bukan kosong dulu
   // lalu berubah sendiri.
   await FavoriteService().muat();
+  // Firebase disiapkan di sini supaya pesan yang datang saat aplikasi
+  // tertutup tetap ditangani. Kegagalannya ditelan: push adalah
+  // pelengkap, dan aplikasi harus tetap bisa dibuka di perangkat yang
+  // tidak punya Google Play Services sama sekali.
+  try {
+    await Firebase.initializeApp();
+  } catch (_) {}
   runApp(const MyApp());
 }
 

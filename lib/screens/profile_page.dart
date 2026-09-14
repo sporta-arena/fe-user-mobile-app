@@ -11,6 +11,7 @@ import 'login_page.dart';
 import 'chat_history_page.dart';
 import 'change_password_page.dart';
 import '../services/auth_service.dart';
+import '../services/push_notifikasi.dart';
 import '../services/booking_service.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -900,6 +901,11 @@ class _ProfilePageState extends State<ProfilePage> {
     );
 
     // Panggil API logout
+    // Dilepas sebelum token auth hilang, karena endpoint pelepasannya
+    // membutuhkan token itu. Tanpa ini HP yang sudah logout terus
+    // menerima notifikasi pemilik akun sebelumnya, termasuk kode
+    // pemesanan dan nominal uang.
+    await PushNotifikasi.lepaskan();
     await AuthService.logout();
 
     if (mounted) {

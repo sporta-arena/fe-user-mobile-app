@@ -25,10 +25,18 @@ import 'auth_service.dart';
 ///
 /// Kalau sambungan putus, ia menyambung ulang sendiri dengan jeda yang
 /// membesar bertahap.
+/// Nama kanal dan event dijadikan parameter, bukan dipatok.
+///
+/// Kelas ini ditulis untuk chat, tapi alurnya (sambung, otorisasi,
+/// berlangganan, dengarkan) sama persis untuk kanal apa pun. Menyalin
+/// seluruh berkas hanya untuk mengganti dua string berarti dua salinan
+/// yang harus diperbaiki bersamaan setiap kali ada yang salah di
+/// penyambungan ulang, dan yang terlewat akan diam tanpa pesan galat.
 class RealtimeChat {
-  RealtimeChat._(this._bookingId, this._onPesan, this._onStatus);
+  RealtimeChat._(this._namaKanal, this._namaEvent, this._onPesan, this._onStatus);
 
-  final int _bookingId;
+  final String _namaKanal;
+  final String _namaEvent;
   final void Function(Map<String, dynamic> pesan) _onPesan;
   final void Function(bool tersambung)? _onStatus;
 
@@ -51,7 +59,22 @@ class RealtimeChat {
     required void Function(Map<String, dynamic> pesan) onPesan,
     void Function(bool tersambung)? onStatus,
   }) {
-    final klien = RealtimeChat._(bookingId, onPesan, onStatus);
+    return dengarkanKanal(
+      namaKanal: 'private-booking.\$bookingId',
+      namaEvent: 'message.sent',
+      onPesan: onPesan,
+      onStatus: onStatus,
+    );
+  }
+
+  /// Mulai mendengarkan satu event pada kanal privat apa pun.
+  static RealtimeChat dengarkanKanal({
+    required String namaKanal,
+    required String namaEvent,
+    required void Function(Map<String, dynamic> muatan) onPesan,
+    void Function(bool tersambung)? onStatus,
+  }) {
+    final klien = RealtimeChat._(namaKanal, namaEvent, onPesan, onStatus);
     klien._sambung();
     return klien;
   }
@@ -112,8 +135,8 @@ class RealtimeChat {
         _onStatus?.call(true);
         break;
 
-      case 'message.sent':
-        _onPesan(muatan());
+      default:
+        if (event == _namaEvent) _onPesan(muatan());
         break;
     }
   }
@@ -123,7 +146,7 @@ class RealtimeChat {
     final token = AuthService.token;
     if (id == null || token == null) return;
 
-    final kanal = 'private-booking.$_bookingId';
+    final kanal = _namaKanal;
 
     try {
       final respons = await http.post(

@@ -31,6 +31,14 @@ dependencies:
   flutter:
     sdk: flutter
 
+  # Push notification. firebase_core wajib karena messaging membaca
+  # konfigurasi project dari sana; flutter_local_notifications dipakai
+  # untuk menampilkan notifikasi saat aplikasi sedang terbuka, karena
+  # Android tidak menampilkan apa pun di keadaan itu.
+  firebase_core: ^3.8.0
+  firebase_messaging: ^15.1.5
+  flutter_local_notifications: ^18.0.1
+
   flutter_launcher_icons: "^0.13.1"
 
   # The following adds the Cupertino Icons font to your application.

@@ -1,0 +1,67 @@
+{
+  "project_info": {
+    "project_number": "969001150287",
+    "project_id": "sportago-c95e1",
+    "storage_bucket": "sportago-c95e1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:969001150287:android:6537651de670577058073a",
+        "android_client_info": {
+          "package_name": "com.sporta.partner_onboarding_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAbKGJoDcqxe-Mr4P6cSK8BZ7cx8Cc8h5Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:969001150287:android:9c94f36552bf474858073a",
+        "android_client_info": {
+          "package_name": "id.sportago.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAbKGJoDcqxe-Mr4P6cSK8BZ7cx8Cc8h5Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:969001150287:android:857e59d9286baa6a58073a",
+        "android_client_info": {
+          "package_name": "id.sportago.partner"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAbKGJoDcqxe-Mr4P6cSK8BZ7cx8Cc8h5Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
