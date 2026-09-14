@@ -14,6 +14,17 @@ class Booking {
   final int durationHours;
   final double pricePerHour;
   final double totalPrice;
+
+  /// Komponen biaya, apa adanya dari server.
+  ///
+  /// Sebelum ini ketiganya tidak ada di model sama sekali, jadi layar
+  /// pembayaran tidak punya bahan untuk merinci dan menambalnya dengan
+  /// satu baris "Subtotal" yang isinya justru total. Pelanggan melihat
+  /// harga lapangan Rp 200.000 lalu subtotal Rp 221.000, dengan selisih
+  /// Rp 21.000 yang tidak pernah dijelaskan.
+  final double platformFee;
+  final double paymentFee;
+  final double subtotal;
   final String status; // pending, confirmed, completed, cancelled, expired
   final DateTime? expiresAt;
   final DateTime? paidAt;
@@ -35,6 +46,9 @@ class Booking {
     required this.durationHours,
     required this.pricePerHour,
     required this.totalPrice,
+    this.platformFee = 0,
+    this.paymentFee = 0,
+    this.subtotal = 0,
     required this.status,
     this.expiresAt,
     this.paidAt,
@@ -58,6 +72,15 @@ class Booking {
       durationHours: json['duration_hours'] ?? 1,
       pricePerHour: json['price_per_hour'] != null
           ? double.parse(json['price_per_hour'].toString())
+          : 0,
+      platformFee: json['platform_fee'] != null
+          ? double.parse(json['platform_fee'].toString())
+          : 0,
+      paymentFee: json['payment_fee'] != null
+          ? double.parse(json['payment_fee'].toString())
+          : 0,
+      subtotal: json['subtotal'] != null
+          ? double.parse(json['subtotal'].toString())
           : 0,
       totalPrice: json['total_price'] != null
           ? double.parse(json['total_price'].toString())

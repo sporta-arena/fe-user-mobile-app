@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart' show kDebugMode;
+import 'dart:ui' show FontFeature;
 import '../utils/waktu_wib.dart';
 import 'package:flutter/material.dart';
 import '../theme/app_tokens.dart';
@@ -1589,6 +1591,65 @@ class TransactionPaymentWaitingPage extends StatefulWidget {
 class _TransactionPaymentWaitingPageState extends State<TransactionPaymentWaitingPage> {
   bool _isProcessing = false;
 
+  /// Sisa waktu pembayaran, dihitung sendiri di halaman ini.
+  ///
+  /// Sebelumnya angka ini diambil dari `bookingData['countdown']`, yaitu
+  /// string yang disalin sekali saat halaman dibuka lalu tidak pernah
+  /// berubah. Kalau kunci itu kosong, yang tampil adalah "00:15:00" yang
+  /// ditulis langsung di kode. Akibatnya pemesanan yang SUDAH lewat pun
+  /// terlihat masih punya sisa 15 menit, dan angkanya diam di tempat.
+  Timer? _pewaktu;
+  String _sisaWaktu = '';
+  bool _sudahLewat = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _hitungSisaWaktu();
+    // Satu detik sekali, dan hanya selama masih ada yang dihitung.
+    _pewaktu = Timer.periodic(const Duration(seconds: 1), (_) => _hitungSisaWaktu());
+  }
+
+  @override
+  void dispose() {
+    _pewaktu?.cancel();
+    super.dispose();
+  }
+
+  void _hitungSisaWaktu() {
+    if (!mounted) return;
+
+    final batas = widget.booking.expiresAt;
+    if (batas == null) {
+      // Tanpa batas waktu dari server, tidak ada yang bisa dihitung.
+      // Menampilkan angka apa pun di sini berarti mengarang.
+      _pewaktu?.cancel();
+      setState(() {
+        _sisaWaktu = '';
+        _sudahLewat = false;
+      });
+      return;
+    }
+
+    final sisa = batas.difference(DateTime.now());
+    if (sisa.isNegative) {
+      _pewaktu?.cancel();
+      setState(() {
+        _sisaWaktu = '00:00:00';
+        _sudahLewat = true;
+      });
+      return;
+    }
+
+    String duaDigit(int n) => n.toString().padLeft(2, '0');
+    setState(() {
+      _sisaWaktu = '${duaDigit(sisa.inHours)}:'
+          '${duaDigit(sisa.inMinutes % 60)}:'
+          '${duaDigit(sisa.inSeconds % 60)}';
+      _sudahLewat = false;
+    });
+  }
+
   Future<void> _simulatePayment() async {
     setState(() => _isProcessing = true);
 
@@ -1668,8 +1729,16 @@ class _TransactionPaymentWaitingPageState extends State<TransactionPaymentWaitin
     bool isQRIS = paymentMethod == "QRIS";
 
     // Use actual booking data
-    int subtotal = widget.booking.totalPrice.toInt();
-    int total = widget.booking.payment?.amount.toInt() ?? subtotal;
+    // Komponen biaya diambil dari server, bukan disusun ulang di sini.
+    // `subtotal` dari server sudah bersih dari biaya platform dan biaya
+    // admin, jadi ia yang mewakili harga lapangannya.
+    final int biayaPlatform = widget.booking.platformFee.toInt();
+    final int biayaAdmin = widget.booking.paymentFee.toInt();
+    final int hargaLapangan = widget.booking.subtotal > 0
+        ? widget.booking.subtotal.toInt()
+        : (widget.booking.totalPrice.toInt() - biayaPlatform - biayaAdmin);
+    final int total = widget.booking.payment?.amount.toInt() ??
+        widget.booking.totalPrice.toInt();
 
     String formatCurrency(int amount) => "Rp ${amount.toString().replaceAllMapped(
       RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
@@ -1738,18 +1807,27 @@ class _TransactionPaymentWaitingPageState extends State<TransactionPaymentWaitin
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "Selesaikan pembayaran dalam",
+                                _sudahLewat
+                                    ? 'Batas waktu pembayaran terlampaui'
+                                    : (_sisaWaktu.isEmpty
+                                        ? 'Menunggu pembayaran'
+                                        : 'Selesaikan pembayaran dalam'),
                                 style: TextStyle(fontSize: 12, color: context.c.inkSoft),
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                widget.bookingData['countdown'] ?? "00:15:00",
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: context.c.danger,
+                              if (_sisaWaktu.isNotEmpty) ...[
+                                const SizedBox(height: 4),
+                                Text(
+                                  _sisaWaktu,
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    fontFeatures: const [FontFeature.tabularFigures()],
+                                    color: _sudahLewat
+                                        ? context.c.inkSoft
+                                        : context.c.danger,
+                                  ),
                                 ),
-                              ),
+                              ],
                             ],
                           ),
                         ),
@@ -1954,26 +2032,37 @@ class _TransactionPaymentWaitingPageState extends State<TransactionPaymentWaitin
                           ),
                         ],
 
-                        // TEST BUTTON - Remove in production
-                        const SizedBox(height: 20),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton.icon(
-                            onPressed: _simulatePayment,
-                            icon: const Icon(Icons.bug_report, color: Colors.white, size: 18),
-                            label: const Text(
-                              "TEST: Simulasi Pembayaran Berhasil",
-                              style: TextStyle(color: Colors.white, fontSize: 12),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.purple,
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
+                        // Pintasan pengembang: menandai pemesanan lunas
+                        // tanpa uang berpindah. Backend menolaknya di
+                        // produksi (403), jadi di tangan pelanggan tombol
+                        // ini tidak melakukan apa-apa; ia cuma tombol mati
+                        // berwarna ungu bertuliskan "TEST" di layar tempat
+                        // orang menyerahkan uang.
+                        //
+                        // Komentar lamanya berbunyi "Remove in production"
+                        // tapi tidak pernah ada yang menghapusnya, dan tanpa
+                        // pagar kDebugMode ia ikut ke setiap build rilis.
+                        if (kDebugMode) ...[
+                          const SizedBox(height: 20),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton.icon(
+                              onPressed: _simulatePayment,
+                              icon: const Icon(Icons.bug_report, color: Colors.white, size: 18),
+                              label: const Text(
+                                "TEST: Simulasi Pembayaran Berhasil",
+                                style: TextStyle(color: Colors.white, fontSize: 12),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.purple,
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
                               ),
                             ),
                           ),
-                        ),
+                        ],
                       ],
                     ),
                   ),
@@ -2002,9 +2091,19 @@ class _TransactionPaymentWaitingPageState extends State<TransactionPaymentWaitin
                           ],
                         ),
                         Divider(height: 20, color: context.c.line),
-                        _buildPriceRow("Harga Lapangan", formatCurrency(widget.booking.pricePerHour.toInt())),
-                        _buildPriceRow("Durasi", "${widget.booking.durationHours} jam"),
-                        _buildPriceRow("Subtotal", formatCurrency(subtotal)),
+                        // Baris lama: harga per jam, durasi, lalu
+                        // "Subtotal" yang isinya justru TOTAL. Pelanggan
+                        // membaca Rp 200.000 lalu Rp 221.000 dengan
+                        // selisih Rp 21.000 yang tidak pernah dijelaskan.
+                        // Biaya platform dan biaya admin memang tidak
+                        // pernah ditampilkan, padahal keduanya yang
+                        // membentuk selisih itu.
+                        _buildPriceRow(
+                          "Harga lapangan (${widget.booking.durationHours} jam)",
+                          formatCurrency(hargaLapangan),
+                        ),
+                        _buildPriceRow("Biaya platform", formatCurrency(biayaPlatform)),
+                        _buildPriceRow("Biaya admin", formatCurrency(biayaAdmin)),
                         Divider(height: 20, color: context.c.line),
                         _buildPriceRow(
                           "Total Bayar",
