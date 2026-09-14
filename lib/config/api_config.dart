@@ -37,11 +37,23 @@ class ApiConfig {
   static bool get isReleaseBuild =>
       const bool.fromEnvironment('dart.vm.product');
 
-  // Environment aktif. DEV_MODE eksplisit SELALU menang; kalau tidak diisi,
-  // release default ke production dan debug default ke staging.
+  // Environment aktif. DEV_MODE eksplisit SELALU menang; kalau tidak
+  // diisi, semuanya jatuh ke production.
+  //
+  // Dulu debug jatuh ke staging, dan itu menyesatkan: staging tidak
+  // pernah dideploy (lihat komentar di deploy.yml, VPS 2 GB tidak muat
+  // dua tumpukan), jadi api.staging.sportago.id tidak ada yang
+  // menjawab. Gejalanya tidak kelihatan seperti salah alamat: app
+  // terpasang, terbuka, tampilannya normal, cuma semua permintaan
+  // gagal diam-diam. Selama staging belum benar-benar hidup, jangan
+  // kembalikan ini ke 'staging'.
+  //
+  // Backend lokal tetap sekali flag: --dart-define=DEV_MODE=android
+  // untuk emulator, DEV_MODE=ios untuk simulator.
   static String get environment {
     if (_envOverride.isNotEmpty) return _envOverride;
-    return isReleaseBuild ? 'production' : 'staging';
+
+    return 'production';
   }
 
   static bool get isProduction => environment == 'production';
