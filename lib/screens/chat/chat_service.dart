@@ -2,6 +2,7 @@ import '../../services/auth_service.dart';
 import '../../config/api_config.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'alasan_laporan.dart';
 import 'chat_models.dart';
 
 /// Isi satu percakapan berikut keadaannya.
@@ -101,6 +102,45 @@ class ChatService {
       return null;
     } catch (e) {
       return null;
+    }
+  }
+
+  /// Melaporkan percakapan ini.
+  ///
+  /// Wajib ada menurut kebijakan Konten Buatan Pengguna Google Play
+  /// untuk aplikasi yang punya komunikasi antar-pengguna.
+  static Future<HasilLaporan> laporkan(
+    int bookingId, {
+    required String alasan,
+    String? catatan,
+  }) async {
+    try {
+      final response = await http
+          .post(
+            Uri.parse('${ApiConfig.baseUrl}/bookings/$bookingId/chat/report'),
+            headers: {
+              'Authorization': 'Bearer ${AuthService.token}',
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode({
+              'alasan': alasan,
+              if (catatan != null && catatan.trim().isNotEmpty)
+                'catatan': catatan.trim(),
+            }),
+          )
+          .timeout(const Duration(seconds: 20));
+
+      Map<String, dynamic> badan = {};
+      if (response.body.isNotEmpty) {
+        final terurai = jsonDecode(response.body);
+        if (terurai is Map<String, dynamic>) badan = terurai;
+      }
+      return bacaHasilLaporan(response.statusCode, badan);
+    } catch (e) {
+      return const HasilLaporan(
+        berhasil: false,
+        pesan: 'Gagal terhubung ke server. Periksa koneksi lalu coba lagi.',
+      );
     }
   }
 

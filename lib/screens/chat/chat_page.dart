@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../models/booking.dart';
 import '../../services/realtime_chat.dart';
+import 'alasan_laporan.dart';
 import 'chat_models.dart';
 import 'chat_service.dart';
 
@@ -148,6 +149,134 @@ class _ChatPageState extends State<ChatPage> {
         await launchUrl(uri);
       }
     }
+  }
+
+  /// Melaporkan percakapan ini.
+  ///
+  /// Ditaruh sebagai tombol tetap di app bar, bukan disembunyikan di
+  /// menu tiga titik: kebijakan Google menuntut jalur pelaporan yang
+  /// mudah ditemukan, dan orang yang sedang dilecehkan tidak sedang
+  /// dalam keadaan mau menjelajahi menu.
+  ///
+  /// Sengaja tidak ada tombol "blokir". Chat di Sportago selalu terikat
+  /// pada satu pemesanan antara pemesan dan pengelola lapangannya;
+  /// memblokir lawan bicara berarti memutus koordinasi pemesanan yang
+  /// sedang berjalan, dan tidak ada pesan dari orang asing yang perlu
+  /// dicegah. Yang dibutuhkan di sini pelaporan, bukan pemblokiran.
+  void _laporkan() {
+    AlasanLaporan? terpilih;
+    final catatan = TextEditingController();
+    bool sedangKirim = false;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: context.c.raised,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetContext) => StatefulBuilder(
+        builder: (sheetContext, aturSheet) => Padding(
+          padding: EdgeInsets.only(
+            left: 20,
+            right: 20,
+            top: 20,
+            bottom: MediaQuery.of(sheetContext).viewInsets.bottom + 20,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Laporkan percakapan',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: context.c.ink,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Tim kami meninjau laporan ini beserta isi percakapannya.',
+                style: TextStyle(fontSize: 13, color: context.c.inkSoft),
+              ),
+              const SizedBox(height: 16),
+              ...AlasanLaporan.semua.map(
+                (a) => RadioListTile<AlasanLaporan>(
+                  value: a,
+                  groupValue: terpilih,
+                  onChanged: sedangKirim
+                      ? null
+                      : (v) => aturSheet(() => terpilih = v),
+                  title: Text(a.label,
+                      style: TextStyle(fontSize: 14, color: context.c.ink)),
+                  contentPadding: EdgeInsets.zero,
+                  dense: true,
+                  activeColor: context.c.accent,
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: catatan,
+                enabled: !sedangKirim,
+                maxLines: 3,
+                maxLength: 1000,
+                style: TextStyle(color: context.c.ink),
+                decoration: InputDecoration(
+                  hintText: 'Ceritakan singkat (opsional)',
+                  hintStyle: TextStyle(color: context.c.inkDim),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: (terpilih == null || sedangKirim)
+                      ? null
+                      : () async {
+                          aturSheet(() => sedangKirim = true);
+                          final hasil = await ChatService.laporkan(
+                            widget.booking.id,
+                            alasan: terpilih!.kode,
+                            catatan: catatan.text,
+                          );
+                          if (!sheetContext.mounted) return;
+                          Navigator.pop(sheetContext);
+                          if (!mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(hasil.pesan),
+                              backgroundColor: hasil.berhasil
+                                  ? context.c.ok
+                                  : context.c.danger,
+                            ),
+                          );
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: context.c.danger,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: sedangKirim
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2, color: Colors.white))
+                      : const Text('Kirim Laporan',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   void _showPartnerInfo() {
@@ -302,6 +431,11 @@ class _ChatPageState extends State<ChatPage> {
           IconButton(
             icon: Icon(Icons.phone, color: context.c.ink),
             onPressed: _callPartner,
+          ),
+          IconButton(
+            icon: Icon(Icons.flag_outlined, color: context.c.ink),
+            tooltip: 'Laporkan percakapan',
+            onPressed: _laporkan,
           ),
           IconButton(
             icon: Icon(Icons.more_vert, color: context.c.ink),
