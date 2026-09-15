@@ -215,12 +215,6 @@ class ApiConfig {
   // ============================================================
   // WITHDRAWALS (CUSTOMER)
   // ============================================================
-  static String get withdrawalBalanceUrl => '$apiUrl/withdrawals/balance';
-  static String get withdrawalEligibleBookingsUrl => '$apiUrl/withdrawals/eligible-bookings';
-  static String get withdrawalBanksUrl => '$apiUrl/withdrawals/banks';
-  static String get withdrawalsUrl => '$apiUrl/withdrawals';
-  static String withdrawalDetailUrl(int id) => '$apiUrl/withdrawals/$id';
-  static String withdrawalSimulateProcessUrl(int id) => '$apiUrl/withdrawals/$id/simulate-process';
 
   // ============================================================
   // BOOKINGS (PARTNER)
