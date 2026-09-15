@@ -3,6 +3,7 @@ import '../theme/app_tokens.dart';
 import '../services/venue_service.dart';
 import '../models/venue.dart';
 import 'venue_detail_page.dart';
+import '../utils/tampilan_venue.dart';
 
 class SearchPage extends StatefulWidget {
   final String keyword;
@@ -198,7 +199,7 @@ class _SearchPageState extends State<SearchPage> {
                         const SizedBox(width: 8),
                       ],
                       Text(
-                        venue.city,
+                        formatKota(venue.city),
                         style: TextStyle(color: context.c.inkSoft, fontSize: 12),
                       ),
                     ],

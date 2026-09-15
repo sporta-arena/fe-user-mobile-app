@@ -850,7 +850,7 @@ class _CategoryVenuesPageState extends State<CategoryVenuesPage> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      venue.city,
+                      formatKota(venue.city),
                       style: TextStyle(color: context.c.inkSoft, fontSize: 11),
                       maxLines: 1,
                     ),
@@ -1030,7 +1030,7 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
                       children: widget.availableCities.map((city) {
                         final isSelected = _cities.contains(city);
                         return _buildChip(
-                          label: city.toUpperCase(),
+                          label: formatKota(city).toUpperCase(),
                           isSelected: isSelected,
                           onTap: () {
                             setState(() {

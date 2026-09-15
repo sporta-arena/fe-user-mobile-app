@@ -824,7 +824,9 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      '${_venue?.address ?? ''}, ${_venue?.city ?? ''}',
+                      [_venue?.address, formatKota(_venue?.city)]
+                          .where((b) => b != null && b.trim().isNotEmpty)
+                          .join(', '),
                       style: TextStyle(
                         color: context.c.inkSoft,
                         fontSize: 11,
