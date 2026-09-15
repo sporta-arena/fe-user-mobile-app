@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../services/auth_service.dart';
+import 'validasi_ganti_password.dart';
 import '../utils/tanpa_spasi.dart';
 import '../theme/app_tokens.dart';
 
@@ -317,68 +320,33 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
 
   // --- FUNGSI GANTI PASSWORD ---
   void _changePassword() async {
-    // 1. Validasi Input Kosong
-    if (_currentPassController.text.isEmpty || 
-        _newPassController.text.isEmpty || 
-        _confirmPassController.text.isEmpty) {
+    final galat = periksaGantiPassword(
+      lama: _currentPassController.text,
+      baru: _newPassController.text,
+      ulangi: _confirmPassController.text,
+    );
+    if (galat != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Semua kolom wajib diisi!"), 
-          backgroundColor: context.c.danger
-        ),
+        SnackBar(content: Text(galat), backgroundColor: context.c.danger),
       );
       return;
     }
 
-    // 2. Validasi Kesamaan Password Baru
-    if (_newPassController.text != _confirmPassController.text) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Password baru tidak cocok!"), 
-          backgroundColor: context.c.danger
-        ),
-      );
-      return;
-    }
-
-    // 3. Validasi Panjang Password (Opsional)
-    if (_newPassController.text.length < 6) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Password minimal 6 karakter"), 
-          backgroundColor: context.c.danger
-        ),
-      );
-      return;
-    }
-
-    // 4. Validasi Password Lama vs Baru (tidak boleh sama)
-    if (_currentPassController.text == _newPassController.text) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Password baru harus berbeda dari password lama!"), 
-          backgroundColor: context.c.danger
-        ),
-      );
-      return;
-    }
-
-    // 5. Proses Simpan (Simulasi)
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(seconds: 2)); // Simulasi API
-    
-    if (mounted) {
-      setState(() => _isLoading = false);
-      
-      // Sukses
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Password berhasil diubah!"), 
-          backgroundColor: context.c.ok
-        ),
-      );
-      Navigator.pop(context); // Kembali ke Edit Profile
-    }
+    final hasil = await AuthService.gantiPassword(
+      passwordLama: _currentPassController.text,
+      passwordBaru: _newPassController.text,
+    );
+    if (!mounted) return;
+    setState(() => _isLoading = false);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(hasil.pesan),
+        backgroundColor: hasil.berhasil ? context.c.ok : context.c.danger,
+      ),
+    );
+    if (hasil.berhasil) Navigator.pop(context);
   }
 
   @override
@@ -490,7 +458,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  _buildRequirement("Minimal 6 karakter", _newPassController.text.length >= 6),
+                  _buildRequirement("Minimal $panjangMinimalPassword karakter", _newPassController.text.length >= panjangMinimalPassword),
                   _buildRequirement("Berbeda dari password lama", _currentPassController.text != _newPassController.text && _newPassController.text.isNotEmpty),
                   _buildRequirement("Konfirmasi password cocok", _newPassController.text == _confirmPassController.text && _confirmPassController.text.isNotEmpty),
                 ],

@@ -132,6 +132,8 @@ class ApiConfig {
   static String get verifyResetOtpUrl => '$apiUrl/verify-reset-otp';
   static String get resetPasswordUrl => '$apiUrl/reset-password';
   static String get userUrl => '$apiUrl/user';
+  static String get changePasswordUrl => '$apiUrl/change-password';
+  static String get notificationsUrl => '$apiUrl/notifications';
   static String get logoutUrl => '$apiUrl/logout';
   static String get logoutAllUrl => '$apiUrl/logout-all';
 

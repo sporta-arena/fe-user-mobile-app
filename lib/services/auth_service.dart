@@ -5,6 +5,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../config/api_config.dart';
 import '../models/user.dart';
+import 'hasil_hapus_akun.dart';
 
 class AuthResult {
   final bool success;
@@ -667,6 +668,151 @@ class AuthService {
   }
 
   /// Clear session from memory and storage
+  /// Mengganti kata sandi pengguna yang sedang masuk.
+  ///
+  /// Layar ini dulu memanggil `Future.delayed(2 detik)` lalu menampilkan
+  /// "Password berhasil diubah!", dengan komentar "Simulasi API" di
+  /// sebelahnya. Endpoint-nya sudah ada sejak lama; yang hilang cuma
+  /// sambungannya, jadi pengguna mengira sandinya berganti padahal
+  /// sandinya yang lama masih yang berlaku.
+  static Future<HasilHapusAkun> gantiPassword({
+    required String passwordLama,
+    required String passwordBaru,
+  }) async {
+    if (_token == null) {
+      return const HasilHapusAkun(
+        berhasil: false,
+        tertahan: false,
+        pesan: 'Sesi sudah berakhir. Masuk lagi lalu ulangi.',
+      );
+    }
+
+    try {
+      final response = await http
+          .post(
+            Uri.parse(ApiConfig.changePasswordUrl),
+            headers: ApiConfig.authHeaders(_token!),
+            body: jsonEncode({
+              'current_password': passwordLama,
+              'new_password': passwordBaru,
+              // Server memakai aturan `confirmed`; tanpa kolom ini
+              // permintaannya ditolak walau kedua isian sudah sama.
+              'new_password_confirmation': passwordBaru,
+            }),
+          )
+          .timeout(const Duration(seconds: 30));
+
+      Map<String, dynamic> badan = {};
+      if (response.body.isNotEmpty) {
+        final terurai = jsonDecode(response.body);
+        if (terurai is Map<String, dynamic>) badan = terurai;
+      }
+
+      final hasil = bacaHasilHapusAkun(response.statusCode, badan);
+      if (hasil.berhasil) {
+        return const HasilHapusAkun(
+          berhasil: true,
+          tertahan: false,
+          pesan: 'Password berhasil diubah. Perangkat lain ikut dikeluarkan.',
+        );
+      }
+      return hasil;
+    } catch (e) {
+      return const HasilHapusAkun(
+        berhasil: false,
+        tertahan: false,
+        pesan: 'Gagal terhubung ke server. Periksa koneksi lalu coba lagi.',
+      );
+    }
+  }
+
+  /// Menghapus akun pengguna yang sedang masuk.
+  ///
+  /// Sesi lokal hanya dibersihkan kalau server benar-benar menghapusnya.
+  /// Membersihkan sesi lebih dulu, seperti yang dilakukan logout, akan
+  /// mengeluarkan orang dari aplikasi setiap kali penghapusan ditolak
+  /// karena kata sandinya salah atau bookingnya belum selesai, dan
+  /// mereka tidak akan tahu akunnya masih ada.
+  static Future<HasilHapusAkun> hapusAkun({
+    String? password,
+    String? otpToken,
+    String? otpCode,
+  }) async {
+    if (_token == null) {
+      return const HasilHapusAkun(
+        berhasil: false,
+        tertahan: false,
+        pesan: 'Sesi sudah berakhir. Masuk lagi lalu ulangi.',
+      );
+    }
+
+    try {
+      final response = await http
+          .delete(
+            Uri.parse(ApiConfig.userUrl),
+            headers: ApiConfig.authHeaders(_token!),
+            body: jsonEncode({
+              'konfirmasi': 'HAPUS',
+              if (password != null) 'password': password,
+              if (otpToken != null) 'otp_token': otpToken,
+              if (otpCode != null) 'otp_code': otpCode,
+            }),
+          )
+          .timeout(const Duration(seconds: 30));
+
+      Map<String, dynamic> badan = {};
+      if (response.body.isNotEmpty) {
+        final terurai = jsonDecode(response.body);
+        if (terurai is Map<String, dynamic>) badan = terurai;
+      }
+
+      final hasil = bacaHasilHapusAkun(response.statusCode, badan);
+      if (hasil.berhasil) {
+        await clearSession();
+      }
+      return hasil;
+    } catch (e) {
+      return const HasilHapusAkun(
+        berhasil: false,
+        tertahan: false,
+        pesan: 'Gagal terhubung ke server. Periksa koneksi lalu coba lagi.',
+      );
+    }
+  }
+
+  /// Meminta OTP penghapusan akun untuk pengguna yang masuk lewat Google.
+  static Future<AuthResult> mintaOtpHapusAkun() async {
+    if (_token == null) {
+      return AuthResult(success: false, message: 'Sesi sudah berakhir.');
+    }
+
+    try {
+      final response = await http
+          .post(
+            Uri.parse('${ApiConfig.userUrl}/otp/request'),
+            headers: ApiConfig.authHeaders(_token!),
+            body: jsonEncode({
+              'type': 'account_deletion',
+              'channel': 'email',
+            }),
+          )
+          .timeout(const Duration(seconds: 30));
+
+      final data = response.body.isNotEmpty ? jsonDecode(response.body) : {};
+
+      return AuthResult(
+        success: response.statusCode == 200,
+        message: data is Map ? data['message'] as String? : null,
+        data: data is Map<String, dynamic> ? data : null,
+      );
+    } catch (e) {
+      return AuthResult(
+        success: false,
+        message: 'Gagal terhubung ke server.',
+      );
+    }
+  }
+
   static Future<void> clearSession() async {
     _token = null;
     _currentUser = null;

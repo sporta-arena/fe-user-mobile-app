@@ -8,6 +8,14 @@ class User {
   final String? phone;
   final String? avatar;
   final String? avatarUrl;
+
+  /// Penanda bahwa akun ini tertaut ke Google.
+  ///
+  /// Dipakai layar hapus akun untuk memilih cara pembuktian diri.
+  /// Akun yang lahir dari login Google diberi kata sandi acak 64
+  /// karakter yang tidak pernah dilihat pemiliknya, jadi meminta kata
+  /// sandi di sana sama saja menutup fiturnya.
+  final String? googleId;
   final DateTime? emailVerifiedAt;
   final DateTime? createdAt; // Nullable untuk partial data
   final DateTime? updatedAt; // Nullable untuk partial data
@@ -21,6 +29,7 @@ class User {
     this.phone,
     this.avatar,
     this.avatarUrl,
+    this.googleId,
     this.emailVerifiedAt,
     this.createdAt,
     this.updatedAt,
@@ -36,6 +45,7 @@ class User {
       phone: json['phone'],
       avatar: json['avatar'],
       avatarUrl: ApiConfig.perbaikiUrlMedia(json['avatar_url']),
+      googleId: json['google_id']?.toString(),
       emailVerifiedAt: json['email_verified_at'] != null
           ? TimezoneUtils.parseUtcToLocal(json['email_verified_at'])
           : null,
@@ -61,6 +71,7 @@ class User {
     'phone': phone,
     'avatar': avatar,
     'avatar_url': avatarUrl,
+    'google_id': googleId,
   };
 
   bool hasRole(String roleName) {
@@ -70,6 +81,8 @@ class User {
   bool hasPermission(String permissionName) {
     return permissions.any((perm) => perm.name == permissionName);
   }
+
+  bool get masukLewatGoogle => (googleId ?? '').isNotEmpty;
 
   bool get isAdmin => hasRole('admin');
   bool get isPartner => hasRole('partner');

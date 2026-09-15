@@ -4,6 +4,8 @@ import 'dart:async';
 import '../utils/waktu_wib.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
+
+import 'keterangan_biaya.dart';
 import '../theme/app_tokens.dart';
 import '../widgets/sampul_venue.dart';
 import 'package:flutter/services.dart';
@@ -869,9 +871,11 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                                       style: const TextStyle(fontWeight: FontWeight.bold),
                                     ),
                                     TextSpan(
-                                      text: _selectedPaymentData['feeType'] == 'percent'
-                                          ? ' (${(_nilaiBiaya(_selectedPaymentData) * 100).toStringAsFixed(1)}% dari harga lapangan)'
-                                          : ' (biaya tetap)',
+                                      text: keteranganBiayaGateway(
+                                        tipeBiaya: _selectedPaymentData['feeType']
+                                            as String?,
+                                        nilai: _nilaiBiaya(_selectedPaymentData),
+                                      ),
                                     ),
                                   ],
                                 ),

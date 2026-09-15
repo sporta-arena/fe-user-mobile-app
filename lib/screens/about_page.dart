@@ -122,7 +122,6 @@ class AboutPage extends StatelessWidget {
                   // menunjuk fitur yang benar-benar ada di app ini.
                   _buildFeatureItem(context, Icons.calendar_month, "Jadwal\nReal-time"),
                   _buildFeatureItem(context, Icons.qr_code_scanner, "Bayar\nOnline"),
-                  _buildFeatureItem(context, Icons.stars, "Poin\nLoyalitas"),
                   _buildFeatureItem(context, Icons.assignment_return, "Ajukan\nRefund"),
                 ],
               ),

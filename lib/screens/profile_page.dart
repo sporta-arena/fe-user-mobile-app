@@ -3,7 +3,6 @@ import '../utils/tanpa_spasi.dart';
 import '../theme/app_tokens.dart';
 import 'package:flutter/services.dart';
 import 'favorite_venues_page.dart';
-import 'loyalty_page.dart';
 import 'edit_profile_page.dart';
 import 'notifications_page.dart';
 import 'about_page.dart';
@@ -46,7 +45,6 @@ class _ProfilePageState extends State<ProfilePage> {
   // Data statistik dari database
   int _totalBookings = 0;
   int _completedBookings = 0;
-  int _loyaltyPoints = 0;
   String _memberLevel = "Member";
   int _totalSpent = 0;
   bool _isLoadingStats = true;
@@ -86,7 +84,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
         // Calculate member level based on total spent
         String level = "Member";
-        int points = (spent / 10000).floor(); // 1 point per 10k spent
         if (spent >= 5000000) {
           level = "Platinum";
         } else if (spent >= 2000000) {
@@ -100,7 +97,6 @@ class _ProfilePageState extends State<ProfilePage> {
             _totalBookings = total;
             _completedBookings = completed;
             _totalSpent = spent.toInt();
-            _loyaltyPoints = points;
             _memberLevel = level;
             _isLoadingStats = false;
           });
@@ -433,15 +429,6 @@ class _ProfilePageState extends State<ProfilePage> {
                   isSmallText: true,
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _buildStatCard(
-                  icon: Icons.stars_outlined,
-                  title: "Poin",
-                  value: "$_loyaltyPoints",
-                  color: context.c.warn,
-                ),
-              ),
             ],
           ),
         ],
@@ -537,18 +524,6 @@ class _ProfilePageState extends State<ProfilePage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => const ChangePasswordPage()),
-                    );
-                  },
-                ),
-                _buildDivider(),
-                _buildMenuItem(
-                  icon: Icons.stars_outlined,
-                  title: "Program Loyalitas",
-                  subtitle: "$_loyaltyPoints poin tersedia",
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const LoyaltyPage()),
                     );
                   },
                 ),
@@ -941,8 +916,14 @@ class _ProfilePageState extends State<ProfilePage> {
 
   void _showDeleteAccountDialog() {
     final TextEditingController passwordController = TextEditingController();
+    final TextEditingController otpController = TextEditingController();
     bool isLoading = false;
     bool obscurePassword = true;
+    // Akun Google tidak pernah memilih kata sandinya sendiri, jadi
+    // pembuktiannya lewat kode yang dikirim ke surel akun itu.
+    final bool pakaiGoogle = AuthService.currentUser?.masukLewatGoogle ?? false;
+    String? otpToken;
+    String? pesanGalat;
 
     showDialog(
       context: context,
@@ -1017,6 +998,116 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   const SizedBox(height: 20),
 
+                  if (pesanGalat != null) ...[
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: context.c.dangerSoft,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: context.c.danger),
+                      ),
+                      child: Text(
+                        pesanGalat!,
+                        style: TextStyle(
+                          color: context.c.danger,
+                          fontSize: 12,
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+
+                  if (pakaiGoogle)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Kode Verifikasi",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                            color: context.c.ink,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          otpToken == null
+                              ? "Akun kamu masuk lewat Google. Kami kirim kode ke emailmu."
+                              : "Kode sudah dikirim ke emailmu.",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: context.c.inkSoft,
+                            height: 1.4,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        if (otpToken == null)
+                          SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton.icon(
+                              onPressed: isLoading
+                                  ? null
+                                  : () async {
+                                      setDialogState(() {
+                                        isLoading = true;
+                                        pesanGalat = null;
+                                      });
+                                      final hasil =
+                                          await AuthService.mintaOtpHapusAkun();
+                                      if (!context.mounted) return;
+                                      setDialogState(() {
+                                        isLoading = false;
+                                        if (hasil.success) {
+                                          otpToken =
+                                              hasil.data?['token'] as String?;
+                                        } else {
+                                          pesanGalat = hasil.message ??
+                                              'Gagal mengirim kode. Coba lagi.';
+                                        }
+                                      });
+                                    },
+                              icon: const Icon(Icons.mail_outline, size: 18),
+                              label: const Text("Kirim kode ke email"),
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                side: BorderSide(color: context.c.line),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                            ),
+                          )
+                        else
+                          TextField(
+                            controller: otpController,
+                            keyboardType: TextInputType.number,
+                            style: TextStyle(color: context.c.ink),
+                            decoration: InputDecoration(
+                              hintText: "6 digit kode",
+                              hintStyle: TextStyle(color: context.c.inkSoft),
+                              prefixIcon: Icon(Icons.pin_outlined,
+                                  color: context.c.inkSoft),
+                              filled: true,
+                              fillColor: context.c.surface,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(color: context.c.line),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(color: context.c.line),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(color: context.c.danger),
+                              ),
+                            ),
+                          ),
+                      ],
+                    )
+                  else
                   // Password confirmation
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1096,23 +1187,52 @@ class _ProfilePageState extends State<ProfilePage> {
                           onPressed: isLoading
                               ? null
                               : () async {
-                                  if (passwordController.text.isEmpty) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text("Password harus diisi"),
-                                        backgroundColor: context.c.danger,
-                                      ),
-                                    );
+                                  if (pakaiGoogle) {
+                                    if (otpToken == null) {
+                                      setDialogState(() => pesanGalat =
+                                          'Kirim kode ke email dulu.');
+                                      return;
+                                    }
+                                    if (otpController.text.trim().isEmpty) {
+                                      setDialogState(() =>
+                                          pesanGalat = 'Kode harus diisi.');
+                                      return;
+                                    }
+                                  } else if (passwordController.text.isEmpty) {
+                                    setDialogState(() =>
+                                        pesanGalat = 'Password harus diisi.');
                                     return;
                                   }
 
-                                  setDialogState(() => isLoading = true);
-                                  await Future.delayed(const Duration(seconds: 2));
+                                  setDialogState(() {
+                                    isLoading = true;
+                                    pesanGalat = null;
+                                  });
 
-                                  if (context.mounted) {
+                                  final hasil = await AuthService.hapusAkun(
+                                    password: pakaiGoogle
+                                        ? null
+                                        : passwordController.text,
+                                    otpToken: pakaiGoogle ? otpToken : null,
+                                    otpCode: pakaiGoogle
+                                        ? otpController.text.trim()
+                                        : null,
+                                  );
+
+                                  if (!context.mounted) return;
+                                  setDialogState(() => isLoading = false);
+
+                                  if (hasil.berhasil) {
                                     Navigator.pop(context);
-                                    _showDeleteSuccessAndLogout();
+                                    _showDeleteSuccessAndLogout(hasil.pesan);
+                                    return;
                                   }
+
+                                  // Termasuk keadaan "tertahan": dialognya
+                                  // sengaja tetap terbuka supaya alasannya
+                                  // terbaca, bukan berkelebat sebagai
+                                  // snackbar lalu hilang.
+                                  setDialogState(() => pesanGalat = hasil.pesan);
                                 },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: context.c.danger,
@@ -1151,7 +1271,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  void _showDeleteSuccessAndLogout() {
+  void _showDeleteSuccessAndLogout(String pesan) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -1194,7 +1314,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
               // Description
               Text(
-                "Akun kamu telah berhasil dihapus. Terima kasih telah menggunakan Sportago.",
+                pesan,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: context.c.inkSoft,
