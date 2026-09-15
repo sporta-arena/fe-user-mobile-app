@@ -60,7 +60,7 @@ class RealtimeChat {
     void Function(bool tersambung)? onStatus,
   }) {
     return dengarkanKanal(
-      namaKanal: 'private-booking.\$bookingId',
+      namaKanal: namaKanalBooking(bookingId),
       namaEvent: 'message.sent',
       onPesan: onPesan,
       onStatus: onStatus,
@@ -213,3 +213,14 @@ class RealtimeChat {
     _kanal = null;
   }
 }
+
+/// Kanal privat tempat pesan satu booking disiarkan.
+///
+/// Dipisah jadi fungsi sendiri supaya bisa diuji tanpa membuka soket.
+/// Pernah tertulis dengan garis miring terbalik di depan tanda dolar,
+/// yang di Dart berarti dolar HARFIAH: aplikasi berlangganan ke kanal
+/// bernama persis "private-booking.$bookingId" dan tidak pernah
+/// menerima apa pun. Tidak ada yang meledak, karena pesannya tetap
+/// muncul dari sekali tarik saat layar dibuka; satu-satunya tanda
+/// adalah "Menyambungkan…" yang tak pernah hilang.
+String namaKanalBooking(int bookingId) => 'private-booking.$bookingId';
