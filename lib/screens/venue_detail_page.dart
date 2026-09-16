@@ -138,13 +138,15 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
           _venue = venueResult.venue;
           _isFavorite = _favoriteService.isFavorite(_venue!.id.toString());
 
-          // Setup images - use cover image + generate gallery placeholders
-          _venueImages = [];
-          if (_venue!.coverImageUrl != null) {
+          // Galeri diambil dari `gallery_images` milik server: sampul
+          // diikuti foto tiap lapangan. Sebelumnya di sini cuma sampul,
+          // dengan catatan bahwa sisanya "menyusul dari API" -- padahal
+          // API-nya sudah lama mengirimkannya. Venue dengan lima
+          // lapangan berfoto tetap tampil satu gambar.
+          _venueImages = _venue!.galeri.map((f) => f.url).toList();
+          if (_venueImages.isEmpty && _venue!.coverImageUrl != null) {
             _venueImages.add(_venue!.coverImageUrl!);
           }
-          // Add placeholder images for demo (in production, these would come from API)
-          // You can add more images from venue.galleryImages when available
         });
         _calculateDistance();
 
@@ -845,8 +847,6 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
   }
 
   Widget _buildGallerySection() {
-    // For demo, we'll show the cover image and generate placeholders
-    // In production, this would come from venue.galleryImages
     final images = _venueImages;
     if (images.isEmpty) return const SizedBox.shrink();
 

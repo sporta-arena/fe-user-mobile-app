@@ -4,6 +4,17 @@ import '../config/api_config.dart';
 import 'field.dart';
 import '../utils/timezone_utils.dart';
 
+/// Satu foto di galeri venue.
+///
+/// Server mengirimnya lewat `gallery_images`: foto sampul diikuti foto
+/// tiap lapangan, sudah diurutkan dan dibatasi jumlahnya di sana.
+class FotoVenue {
+  final String url;
+  final String keterangan;
+
+  const FotoVenue({required this.url, required this.keterangan});
+}
+
 class Venue {
   final int id;
   final int partnerId;
@@ -27,6 +38,14 @@ class Venue {
   final double? averageRating;
   final int? reviewCount;
 
+  /// Isi `gallery_images` dari server.
+  ///
+  /// Dulu layar detail cuma memakai `coverImageUrl`, dengan catatan di
+  /// kodenya bahwa foto lain "menyusul dari API". Padahal API-nya sudah
+  /// mengirimkannya sejak lama; yang kurang pembacanya. Akibatnya venue
+  /// dengan lima lapangan berfoto tetap tampil satu gambar.
+  final List<FotoVenue> galeri;
+
   Venue({
     required this.id,
     required this.partnerId,
@@ -49,6 +68,7 @@ class Venue {
     this.fields,
     this.averageRating,
     this.reviewCount,
+    this.galeri = const [],
   });
 
   factory Venue.fromJson(Map<String, dynamic> json) {
@@ -88,6 +108,7 @@ class Venue {
           ? double.tryParse(json['average_rating'].toString())
           : null,
       reviewCount: json['review_count'],
+      galeri: _bacaGaleri(json),
     );
   }
 
@@ -117,4 +138,34 @@ class Venue {
 
 
   String get facilitiesText => facilities.join(', ');
+
+  /// Membaca `gallery_images`, dengan sampul sebagai cadangan.
+  ///
+  /// Baris tanpa url dilewati: satu slide kosong di tengah galeri lebih
+  /// membingungkan daripada galeri yang lebih pendek.
+  static List<FotoVenue> _bacaGaleri(Map<String, dynamic> json) {
+    final mentah = json['gallery_images'];
+
+    if (mentah is List) {
+      final hasil = <FotoVenue>[];
+      for (final baris in mentah) {
+        if (baris is! Map) continue;
+        final url = ApiConfig.perbaikiUrlMedia(baris['url']?.toString());
+        if (url == null || url.isEmpty) continue;
+        hasil.add(FotoVenue(
+          url: url,
+          keterangan: baris['caption']?.toString() ?? '',
+        ));
+      }
+      return hasil;
+    }
+
+    final sampul = ApiConfig.perbaikiUrlMedia(json['cover_image_url']);
+    if (sampul != null && sampul.isNotEmpty) {
+      return [FotoVenue(url: sampul, keterangan: '')];
+    }
+
+    return const [];
+  }
+
 }
