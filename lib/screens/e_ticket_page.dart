@@ -8,17 +8,13 @@ import 'package:share_plus/share_plus.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../models/booking.dart';
 import '../services/auth_service.dart';
-import '../services/refund_service.dart';
 import 'home_page.dart';
 import 'chat/chat_page.dart';
 
 class ETicketPage extends StatefulWidget {
   final Booking booking;
 
-  const ETicketPage({
-    super.key,
-    required this.booking,
-  });
+  const ETicketPage({super.key, required this.booking});
 
   @override
   State<ETicketPage> createState() => _ETicketPageState();
@@ -30,20 +26,10 @@ class _ETicketPageState extends State<ETicketPage> {
   String _userPhone = "";
   bool _isDownloading = false;
 
-  /// Kebijakan refund yang berlaku, dibaca dari server saat layar dibuka.
-  /// Null selama belum termuat: kotak keterangannya belum ditampilkan.
-  KebijakanRefund? _kebijakanRefund;
-
   @override
   void initState() {
     super.initState();
     _loadUserData();
-    _muatKebijakanRefund();
-  }
-
-  Future<void> _muatKebijakanRefund() async {
-    final kebijakan = await RefundService.ambilKebijakan();
-    if (mounted) setState(() => _kebijakanRefund = kebijakan);
   }
 
   Future<void> _loadUserData() async {
@@ -63,7 +49,8 @@ class _ETicketPageState extends State<ETicketPage> {
   }
 
   bool get _isChatEnabled {
-    return widget.booking.status == 'confirmed' || widget.booking.status == 'checked_in';
+    return widget.booking.status == 'confirmed' ||
+        widget.booking.status == 'checked_in';
   }
 
   void _openChat() {
@@ -75,7 +62,6 @@ class _ETicketPageState extends State<ETicketPage> {
     );
   }
 
-
   Future<void> _downloadTicket() async {
     if (_isDownloading) return;
 
@@ -83,7 +69,9 @@ class _ETicketPageState extends State<ETicketPage> {
 
     try {
       // Find the RenderRepaintBoundary
-      RenderRepaintBoundary boundary = _ticketKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      RenderRepaintBoundary boundary =
+          _ticketKey.currentContext!.findRenderObject()
+              as RenderRepaintBoundary;
 
       // Capture as image
       ui.Image image = await boundary.toImage(pixelRatio: 3.0);
@@ -94,7 +82,8 @@ class _ETicketPageState extends State<ETicketPage> {
 
       // Save to temp file
       final tempDir = await getTemporaryDirectory();
-      final fileName = 'tiket_${widget.booking.bookingCode}_${DateTime.now().millisecondsSinceEpoch}.png';
+      final fileName =
+          'tiket_${widget.booking.bookingCode}_${DateTime.now().millisecondsSinceEpoch}.png';
       final file = File('${tempDir.path}/$fileName');
       await file.writeAsBytes(bytes);
 
@@ -102,7 +91,8 @@ class _ETicketPageState extends State<ETicketPage> {
       if (mounted) {
         await Share.shareXFiles(
           [XFile(file.path)],
-          text: 'E-Tiket Sportago\n${widget.booking.field?.venue?.name ?? "Venue"}\n${widget.booking.bookingCode}',
+          text:
+              'E-Tiket Sportago\n${widget.booking.field?.venue?.name ?? "Venue"}\n${widget.booking.bookingCode}',
         );
       }
     } catch (e) {
@@ -193,7 +183,8 @@ class _ETicketPageState extends State<ETicketPage> {
                                 children: [
                                   // Venue Name
                                   Text(
-                                    widget.booking.field?.venue?.name ?? "Venue",
+                                    widget.booking.field?.venue?.name ??
+                                        "Venue",
                                     style: TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
@@ -211,14 +202,17 @@ class _ETicketPageState extends State<ETicketPage> {
                                     decoration: BoxDecoration(
                                       color: Colors.white,
                                       borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(color: Colors.grey.shade200),
+                                      border: Border.all(
+                                        color: Colors.grey.shade200,
+                                      ),
                                     ),
                                     child: QrImageView(
                                       data: widget.booking.bookingCode,
                                       version: QrVersions.auto,
                                       size: 164,
                                       backgroundColor: Colors.white,
-                                      errorCorrectionLevel: QrErrorCorrectLevel.M,
+                                      errorCorrectionLevel:
+                                          QrErrorCorrectLevel.M,
                                     ),
                                   ),
                                 ],
@@ -264,13 +258,36 @@ class _ETicketPageState extends State<ETicketPage> {
                               padding: const EdgeInsets.all(24),
                               child: Column(
                                 children: [
-                                  _buildInfoRow("Nama", _userName.isNotEmpty ? _userName : "-", "No. Telepon", _userPhone),
+                                  _buildInfoRow(
+                                    "Nama",
+                                    _userName.isNotEmpty ? _userName : "-",
+                                    "No. Telepon",
+                                    _userPhone,
+                                  ),
                                   const SizedBox(height: 16),
-                                  _buildInfoRow("Tanggal", _formatDate(widget.booking.bookingDate), "Waktu", widget.booking.formattedTime),
+                                  _buildInfoRow(
+                                    "Tanggal",
+                                    _formatDate(widget.booking.bookingDate),
+                                    "Waktu",
+                                    widget.booking.formattedTime,
+                                  ),
                                   const SizedBox(height: 16),
-                                  _buildInfoRow("Lapangan", widget.booking.field?.name ?? "-", "Durasi", "${widget.booking.durationHours} Jam"),
+                                  _buildInfoRow(
+                                    "Lapangan",
+                                    widget.booking.field?.name ?? "-",
+                                    "Durasi",
+                                    "${widget.booking.durationHours} Jam",
+                                  ),
                                   const SizedBox(height: 16),
-                                  _buildInfoRow("Kode Booking", widget.booking.bookingCode, "Total", _formatCurrency(widget.booking.totalPrice.toInt()), valueColor: context.c.accent),
+                                  _buildInfoRow(
+                                    "Kode Booking",
+                                    widget.booking.bookingCode,
+                                    "Total",
+                                    _formatCurrency(
+                                      widget.booking.totalPrice.toInt(),
+                                    ),
+                                    valueColor: context.c.accent,
+                                  ),
                                 ],
                               ),
                             ),
@@ -289,14 +306,24 @@ class _ETicketPageState extends State<ETicketPage> {
                           Expanded(
                             child: OutlinedButton.icon(
                               onPressed: _openChat,
-                              icon: Icon(Icons.chat_outlined, color: context.c.ok, size: 18),
+                              icon: Icon(
+                                Icons.chat_outlined,
+                                color: context.c.ok,
+                                size: 18,
+                              ),
                               label: Text(
                                 "Chat Venue",
-                                style: TextStyle(color: context.c.ok, fontWeight: FontWeight.w600, fontSize: 13),
+                                style: TextStyle(
+                                  color: context.c.ok,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 13,
+                                ),
                               ),
                               style: OutlinedButton.styleFrom(
                                 side: BorderSide(color: context.c.ok),
-                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
@@ -320,31 +347,35 @@ class _ETicketPageState extends State<ETicketPage> {
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.info_outline, color: context.c.inkSoft, size: 20),
+                          Icon(
+                            Icons.info_outline,
+                            color: context.c.inkSoft,
+                            size: 20,
+                          ),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
                               "Harap datang 10 menit sebelum jadwal",
-                              style: TextStyle(color: context.c.inkSoft, fontSize: 13),
+                              style: TextStyle(
+                                color: context.c.inkSoft,
+                                fontSize: 13,
+                              ),
                             ),
                           ),
                         ],
                       ),
                     ),
 
-                    // Keterangan refund.
+                    // Keterangan pembatalan.
                     //
                     // Dulu di sini ada tier "100% jika >24 jam, 50% jika
-                    // 12-24 jam" yang dihitung sendiri oleh app, plus
-                    // tombol Ajukan Refund. Keduanya tidak berdasar:
-                    // backend menyatakan tidak ada jalur refund dari sisi
-                    // pemesan (`customer_can_request: false`), dan rute
-                    // yang dipanggil tombol itu memang tidak pernah ada.
-                    //
-                    // Sekarang yang ditampilkan adalah cara refund yang
-                    // sebenarnya berlaku, dibaca dari server.
-                    if (widget.booking.status == 'confirmed' &&
-                        _kebijakanRefund != null) ...[
+                    // 12-24 jam" yang dihitung sendiri oleh app, lalu
+                    // diganti kebijakan yang dibaca dari server. Keduanya
+                    // sudah tidak berlaku: kebijakannya sekarang tidak ada
+                    // pengembalian dana sama sekali, jadi tidak ada yang
+                    // perlu ditanyakan ke server dan tidak ada angka yang
+                    // bisa berubah di belakang layar.
+                    if (widget.booking.status == 'confirmed') ...[
                       const SizedBox(height: 12),
                       Container(
                         width: double.infinity,
@@ -357,15 +388,18 @@ class _ETicketPageState extends State<ETicketPage> {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Icon(Icons.receipt_long_outlined,
-                                color: context.c.inkSoft, size: 20),
+                            Icon(
+                              Icons.receipt_long_outlined,
+                              color: context.c.inkSoft,
+                              size: 20,
+                            ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Pembatalan & refund',
+                                    'Pembatalan',
                                     style: TextStyle(
                                       color: context.c.ink,
                                       fontSize: 13,
@@ -374,7 +408,9 @@ class _ETicketPageState extends State<ETicketPage> {
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    _kebijakanRefund!.pesan,
+                                    'Pemesanan yang sudah dibayar tidak dapat '
+                                    'dibatalkan, dan pembayarannya tidak '
+                                    'dikembalikan.',
                                     style: TextStyle(
                                       color: context.c.inkSoft,
                                       fontSize: 12,
@@ -411,12 +447,18 @@ class _ETicketPageState extends State<ETicketPage> {
                     : Icon(Icons.download, color: context.c.onAccent),
                 label: Text(
                   _isDownloading ? "Menyimpan..." : "Download Ticket",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: context.c.onAccent),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: context.c.onAccent,
+                  ),
                 ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: context.c.accent,
                   foregroundColor: context.c.onAccent,
-                  disabledBackgroundColor: context.c.accent.withValues(alpha: 0.7),
+                  disabledBackgroundColor: context.c.accent.withValues(
+                    alpha: 0.7,
+                  ),
                   elevation: 0,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
@@ -431,16 +473,32 @@ class _ETicketPageState extends State<ETicketPage> {
     );
   }
 
-  Widget _buildInfoRow(String leftLabel, String leftValue, String rightLabel, String rightValue, {Color? valueColor}) {
+  Widget _buildInfoRow(
+    String leftLabel,
+    String leftValue,
+    String rightLabel,
+    String rightValue, {
+    Color? valueColor,
+  }) {
     return Row(
       children: [
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(leftLabel, style: TextStyle(color: context.c.inkSoft, fontSize: 12)),
+              Text(
+                leftLabel,
+                style: TextStyle(color: context.c.inkSoft, fontSize: 12),
+              ),
               const SizedBox(height: 4),
-              Text(leftValue, style: TextStyle(color: valueColor ?? context.c.ink, fontSize: 14, fontWeight: FontWeight.w600)),
+              Text(
+                leftValue,
+                style: TextStyle(
+                  color: valueColor ?? context.c.ink,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ],
           ),
         ),
@@ -448,9 +506,20 @@ class _ETicketPageState extends State<ETicketPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(rightLabel, style: TextStyle(color: context.c.inkSoft, fontSize: 12)),
+              Text(
+                rightLabel,
+                style: TextStyle(color: context.c.inkSoft, fontSize: 12),
+              ),
               const SizedBox(height: 4),
-              Text(rightValue, style: TextStyle(color: valueColor ?? context.c.ink, fontSize: 14, fontWeight: FontWeight.w600), textAlign: TextAlign.end),
+              Text(
+                rightValue,
+                style: TextStyle(
+                  color: valueColor ?? context.c.ink,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.end,
+              ),
             ],
           ),
         ),
@@ -461,7 +530,21 @@ class _ETicketPageState extends State<ETicketPage> {
   String _formatDate(String date) {
     try {
       final parts = date.split('-');
-      final months = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+      final months = [
+        '',
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'Mei',
+        'Jun',
+        'Jul',
+        'Ags',
+        'Sep',
+        'Okt',
+        'Nov',
+        'Des',
+      ];
       return "${parts[2]} ${months[int.parse(parts[1])]} ${parts[0]}";
     } catch (e) {
       return date;

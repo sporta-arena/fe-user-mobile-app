@@ -136,9 +136,9 @@ class _ChatPageState extends State<ChatPage> {
     } else {
       setState(() => _isSending = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Gagal mengirim pesan')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Gagal mengirim pesan')));
       }
     }
   }
@@ -209,8 +209,10 @@ class _ChatPageState extends State<ChatPage> {
                   onChanged: sedangKirim
                       ? null
                       : (v) => aturSheet(() => terpilih = v),
-                  title: Text(a.label,
-                      style: TextStyle(fontSize: 14, color: context.c.ink)),
+                  title: Text(
+                    a.label,
+                    style: TextStyle(fontSize: 14, color: context.c.ink),
+                  ),
                   contentPadding: EdgeInsets.zero,
                   dense: true,
                   activeColor: context.c.accent,
@@ -227,7 +229,8 @@ class _ChatPageState extends State<ChatPage> {
                   hintText: 'Ceritakan singkat (opsional)',
                   hintStyle: TextStyle(color: context.c.inkDim),
                   border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12)),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
               ),
               const SizedBox(height: 8),
@@ -259,18 +262,25 @@ class _ChatPageState extends State<ChatPage> {
                     backgroundColor: context.c.danger,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                   child: sedangKirim
                       ? const SizedBox(
                           width: 18,
                           height: 18,
                           child: CircularProgressIndicator(
-                              strokeWidth: 2, color: Colors.white))
-                      : const Text('Kirim Laporan',
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          'Kirim Laporan',
                           style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600)),
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                 ),
               ),
             ],
@@ -318,10 +328,7 @@ class _ChatPageState extends State<ChatPage> {
             const SizedBox(height: 4),
             Text(
               _partnerContact?.venueName ?? '',
-              style: TextStyle(
-                fontSize: 14,
-                color: context.c.inkSoft,
-              ),
+              style: TextStyle(fontSize: 14, color: context.c.inkSoft),
             ),
             const SizedBox(height: 8),
             Row(
@@ -332,10 +339,7 @@ class _ChatPageState extends State<ChatPage> {
                 Flexible(
                   child: Text(
                     _partnerContact?.address ?? '',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: context.c.inkSoft,
-                    ),
+                    style: TextStyle(fontSize: 12, color: context.c.inkSoft),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -347,7 +351,10 @@ class _ChatPageState extends State<ChatPage> {
               child: OutlinedButton.icon(
                 onPressed: _callPartner,
                 icon: Icon(Icons.phone, color: context.c.accent),
-                label: Text('Telepon', style: TextStyle(color: context.c.accent)),
+                label: Text(
+                  'Telepon',
+                  style: TextStyle(color: context.c.accent),
+                ),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   side: BorderSide(color: context.c.accent),
@@ -444,149 +451,167 @@ class _ChatPageState extends State<ChatPage> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          // Booking info banner
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            color: context.c.raised,
-            child: Row(
-              children: [
-                Icon(Icons.confirmation_number, size: 16, color: context.c.accent),
-                const SizedBox(width: 8),
-                Text(
-                  'Booking: ${widget.booking.bookingCode}',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: context.c.accent,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const Spacer(),
-                Text(
-                  widget.booking.formattedTime,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: context.c.inkSoft,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Messages list
-          Expanded(
-            child: _isLoading
-                ? Center(child: CircularProgressIndicator(color: context.c.accent))
-                : ListView.builder(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    itemCount: _messages.length,
-                    itemBuilder: (context, index) {
-                      final message = _messages[index];
-                      final isUser = message.senderType == 'user';
-                      final showDate = index == 0 ||
-                          !_isSameDay(
-                            _messages[index - 1].timestamp,
-                            message.timestamp,
-                          );
-
-                      return Column(
-                        children: [
-                          if (showDate) _buildDateSeparator(message.timestamp),
-                          _buildMessageBubble(message, isUser),
-                        ],
-                      );
-                    },
-                  ),
-          ),
-          // Message input or read-only banner
-          if (_bolehKirim == false)
+      body: SafeArea(
+        // Bilah navigasi menumpuk di atas isi layar sejak
+        // targetSdk 35. top:false karena AppBar sudah
+        // menyisihkan bagian atasnya sendiri.
+        top: false,
+        child: Column(
+          children: [
+            // Booking info banner
             Container(
-              padding: EdgeInsets.only(
-                left: 16,
-                right: 16,
-                top: 12,
-                bottom: MediaQuery.of(context).padding.bottom + 12,
-              ),
-              decoration: BoxDecoration(
-                color: context.c.raised,
-                border: Border(top: BorderSide(color: context.c.line)),
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              color: context.c.raised,
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.lock_outline, size: 16, color: context.c.inkSoft),
+                  Icon(
+                    Icons.confirmation_number,
+                    size: 16,
+                    color: context.c.accent,
+                  ),
                   const SizedBox(width: 8),
                   Text(
-                    "Pemesanan sudah selesai, chat ditutup",
-                    style: TextStyle(color: context.c.inkSoft, fontSize: 13),
+                    'Booking: ${widget.booking.bookingCode}',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: context.c.accent,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const Spacer(),
+                  Text(
+                    widget.booking.formattedTime,
+                    style: TextStyle(fontSize: 12, color: context.c.inkSoft),
                   ),
                 ],
               ),
-            )
-          else
-          Container(
-            padding: EdgeInsets.only(
-              left: 16,
-              right: 16,
-              top: 12,
-              bottom: MediaQuery.of(context).padding.bottom + 12,
             ),
-            decoration: BoxDecoration(
-              color: context.c.surface,
-              border: Border(top: BorderSide(color: context.c.line)),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: context.c.raised,
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(color: context.c.line),
+            // Messages list
+            Expanded(
+              child: _isLoading
+                  ? Center(
+                      child: CircularProgressIndicator(color: context.c.accent),
+                    )
+                  : ListView.builder(
+                      controller: _scrollController,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      itemCount: _messages.length,
+                      itemBuilder: (context, index) {
+                        final message = _messages[index];
+                        final isUser = message.senderType == 'user';
+                        final showDate =
+                            index == 0 ||
+                            !_isSameDay(
+                              _messages[index - 1].timestamp,
+                              message.timestamp,
+                            );
+
+                        return Column(
+                          children: [
+                            if (showDate)
+                              _buildDateSeparator(message.timestamp),
+                            _buildMessageBubble(message, isUser),
+                          ],
+                        );
+                      },
                     ),
-                    child: TextField(
-                      controller: _messageController,
-                      style: TextStyle(color: context.c.ink),
-                      decoration: InputDecoration(
-                        hintText: 'Ketik pesan...',
-                        hintStyle: TextStyle(color: context.c.inkSoft),
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 12,
+            ),
+            // Message input or read-only banner
+            if (_bolehKirim == false)
+              Container(
+                padding: EdgeInsets.only(
+                  left: 16,
+                  right: 16,
+                  top: 12,
+                  bottom: MediaQuery.of(context).padding.bottom + 12,
+                ),
+                decoration: BoxDecoration(
+                  color: context.c.raised,
+                  border: Border(top: BorderSide(color: context.c.line)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.lock_outline,
+                      size: 16,
+                      color: context.c.inkSoft,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      "Pemesanan sudah selesai, chat ditutup",
+                      style: TextStyle(color: context.c.inkSoft, fontSize: 13),
+                    ),
+                  ],
+                ),
+              )
+            else
+              Container(
+                padding: EdgeInsets.only(
+                  left: 16,
+                  right: 16,
+                  top: 12,
+                  bottom: MediaQuery.of(context).padding.bottom + 12,
+                ),
+                decoration: BoxDecoration(
+                  color: context.c.surface,
+                  border: Border(top: BorderSide(color: context.c.line)),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: context.c.raised,
+                          borderRadius: BorderRadius.circular(24),
+                          border: Border.all(color: context.c.line),
+                        ),
+                        child: TextField(
+                          controller: _messageController,
+                          style: TextStyle(color: context.c.ink),
+                          decoration: InputDecoration(
+                            hintText: 'Ketik pesan...',
+                            hintStyle: TextStyle(color: context.c.inkSoft),
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 12,
+                            ),
+                          ),
+                          textCapitalization: TextCapitalization.sentences,
+                          maxLines: null,
+                          onSubmitted: (_) => _sendMessage(),
                         ),
                       ),
-                      textCapitalization: TextCapitalization.sentences,
-                      maxLines: null,
-                      onSubmitted: (_) => _sendMessage(),
                     ),
-                  ),
+                    const SizedBox(width: 8),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: context.c.accent,
+                        shape: BoxShape.circle,
+                      ),
+                      child: IconButton(
+                        onPressed: _isSending ? null : _sendMessage,
+                        icon: _isSending
+                            ? SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: context.c.onAccent,
+                                ),
+                              )
+                            : Icon(Icons.send, color: context.c.onAccent),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                Container(
-                  decoration: BoxDecoration(
-                    color: context.c.accent,
-                    shape: BoxShape.circle,
-                  ),
-                  child: IconButton(
-                    onPressed: _isSending ? null : _sendMessage,
-                    icon: _isSending
-                        ? SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: context.c.onAccent,
-                            ),
-                          )
-                        : Icon(Icons.send, color: context.c.onAccent),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -616,10 +641,7 @@ class _ChatPageState extends State<ChatPage> {
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Text(
               dateText,
-              style: TextStyle(
-                fontSize: 12,
-                color: context.c.inkSoft,
-              ),
+              style: TextStyle(fontSize: 12, color: context.c.inkSoft),
             ),
           ),
           Expanded(child: Divider(color: context.c.line)),
@@ -678,8 +700,8 @@ class _ChatPageState extends State<ChatPage> {
                     message.status == MessageStatus.read
                         ? Icons.done_all
                         : message.status == MessageStatus.delivered
-                            ? Icons.done_all
-                            : Icons.done,
+                        ? Icons.done_all
+                        : Icons.done,
                     size: 14,
                     color: message.status == MessageStatus.read
                         ? context.c.onAccent

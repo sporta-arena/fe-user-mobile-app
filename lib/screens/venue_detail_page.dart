@@ -13,16 +13,13 @@ import '../services/favorite_service.dart';
 import '../services/venue_service.dart';
 import '../models/venue.dart' as model;
 import '../models/field.dart' as field_model;
+import '../utils/sisipan_bawah.dart';
 
 class VenueDetailPage extends StatefulWidget {
   final int venueId;
   final String? venueName;
 
-  const VenueDetailPage({
-    super.key,
-    required this.venueId,
-    this.venueName,
-  });
+  const VenueDetailPage({super.key, required this.venueId, this.venueName});
 
   @override
   State<VenueDetailPage> createState() => _VenueDetailPageState();
@@ -116,7 +113,8 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
       if (distance < 1000) {
         _distanceText = '${distance.round()} m dari lokasi Anda';
       } else if (distance < _batasJarakMasukAkal) {
-        _distanceText = '${(distance / 1000).toStringAsFixed(1)} km dari lokasi Anda';
+        _distanceText =
+            '${(distance / 1000).toStringAsFixed(1)} km dari lokasi Anda';
       } else {
         // Di luar batas, angkanya tidak dipercaya, jadi tidak ditampilkan.
         _distanceText = '';
@@ -185,7 +183,10 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
     setState(() => _isLoadingSlots = true);
 
     final dateStr = _selectedDate.toString().split(' ')[0];
-    final result = await VenueService.getAvailableSlots(_selectedField!.id, dateStr);
+    final result = await VenueService.getAvailableSlots(
+      _selectedField!.id,
+      dateStr,
+    );
 
     if (mounted) {
       setState(() {
@@ -221,7 +222,7 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          _isFavorite ? "Ditambahkan ke favorit" : "Dihapus dari favorit"
+          _isFavorite ? "Ditambahkan ke favorit" : "Dihapus dari favorit",
         ),
         duration: const Duration(seconds: 2),
         backgroundColor: _isFavorite ? context.c.ok : Colors.grey,
@@ -243,7 +244,8 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
     final label = Uri.encodeComponent(_venue!.name);
 
     // Try Google Maps first, then Apple Maps
-    final googleMapsUrl = 'https://www.google.com/maps/dir/?api=1&destination=$lat,$lng&destination_place_id=$label';
+    final googleMapsUrl =
+        'https://www.google.com/maps/dir/?api=1&destination=$lat,$lng&destination_place_id=$label';
     final appleMapsUrl = 'https://maps.apple.com/?daddr=$lat,$lng&dirflg=d';
 
     if (Platform.isIOS) {
@@ -252,7 +254,10 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
     } else {
       // On Android, use Google Maps
       if (await canLaunchUrl(Uri.parse(googleMapsUrl))) {
-        await launchUrl(Uri.parse(googleMapsUrl), mode: LaunchMode.externalApplication);
+        await launchUrl(
+          Uri.parse(googleMapsUrl),
+          mode: LaunchMode.externalApplication,
+        );
       }
     }
   }
@@ -265,13 +270,17 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => Container(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.fromLTRB(20, 20, 20, 20 + context.sisipanBawah),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               'Buka dengan',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: context.c.ink),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: context.c.ink,
+              ),
             ),
             const SizedBox(height: 20),
             ListTile(
@@ -293,7 +302,11 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
-                      Icon(Icons.location_on, color: context.c.danger, size: 28),
+                      Icon(
+                        Icons.location_on,
+                        color: context.c.danger,
+                        size: 28,
+                      ),
                       Positioned(
                         top: 8,
                         child: Container(
@@ -309,12 +322,21 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                   ),
                 ),
               ),
-              title: Text('Google Maps', style: TextStyle(color: context.c.ink)),
-              subtitle: Text('Buka di aplikasi Google Maps', style: TextStyle(fontSize: 12, color: context.c.inkSoft)),
+              title: Text(
+                'Google Maps',
+                style: TextStyle(color: context.c.ink),
+              ),
+              subtitle: Text(
+                'Buka di aplikasi Google Maps',
+                style: TextStyle(fontSize: 12, color: context.c.inkSoft),
+              ),
               onTap: () async {
                 Navigator.pop(context);
                 if (await canLaunchUrl(Uri.parse(googleUrl))) {
-                  await launchUrl(Uri.parse(googleUrl), mode: LaunchMode.externalApplication);
+                  await launchUrl(
+                    Uri.parse(googleUrl),
+                    mode: LaunchMode.externalApplication,
+                  );
                 }
               },
             ),
@@ -327,10 +349,7 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: [
-                      context.c.ok!,
-                      context.c.ok!,
-                    ],
+                    colors: [context.c.ok!, context.c.ok!],
                   ),
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -339,11 +358,17 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                 ),
               ),
               title: Text('Apple Maps', style: TextStyle(color: context.c.ink)),
-              subtitle: Text('Buka di aplikasi Apple Maps', style: TextStyle(fontSize: 12, color: context.c.inkSoft)),
+              subtitle: Text(
+                'Buka di aplikasi Apple Maps',
+                style: TextStyle(fontSize: 12, color: context.c.inkSoft),
+              ),
               onTap: () async {
                 Navigator.pop(context);
                 if (await canLaunchUrl(Uri.parse(appleUrl))) {
-                  await launchUrl(Uri.parse(appleUrl), mode: LaunchMode.externalApplication);
+                  await launchUrl(
+                    Uri.parse(appleUrl),
+                    mode: LaunchMode.externalApplication,
+                  );
                 }
               },
             ),
@@ -367,12 +392,12 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
             icon: Icon(Icons.arrow_back_ios_new, color: context.c.ink),
             onPressed: () => Navigator.pop(context),
           ),
-          title: Text(widget.venueName ?? 'Detail Venue',
-              style: TextStyle(color: context.c.ink)),
+          title: Text(
+            widget.venueName ?? 'Detail Venue',
+            style: TextStyle(color: context.c.ink),
+          ),
         ),
-        body: Center(
-          child: CircularProgressIndicator(color: context.c.accent),
-        ),
+        body: Center(child: CircularProgressIndicator(color: context.c.accent)),
       );
     }
 
@@ -437,21 +462,47 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                     const SizedBox(height: 20),
 
                     if (_fields.length > 1) ...[
-                      Text("Pilih Lapangan", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: context.c.ink)),
+                      Text(
+                        "Pilih Lapangan",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: context.c.ink,
+                        ),
+                      ),
                       const SizedBox(height: 12),
                       _buildFieldSelector(),
                       const SizedBox(height: 24),
                     ],
 
-                    Text("Pilih Jadwal Main", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: context.c.ink)),
+                    Text(
+                      "Pilih Jadwal Main",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: context.c.ink,
+                      ),
+                    ),
                     const SizedBox(height: 20),
 
-                    Text("Tanggal", style: TextStyle(fontWeight: FontWeight.bold, color: context.c.inkSoft)),
+                    Text(
+                      "Tanggal",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: context.c.inkSoft,
+                      ),
+                    ),
                     const SizedBox(height: 12),
                     _buildDatePicker(),
                     const SizedBox(height: 24),
 
-                    Text("Jam Tersedia", style: TextStyle(fontWeight: FontWeight.bold, color: context.c.inkSoft)),
+                    Text(
+                      "Jam Tersedia",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: context.c.inkSoft,
+                      ),
+                    ),
                     const SizedBox(height: 12),
                     _buildTimeSlotGrid(),
                     const SizedBox(height: 100),
@@ -555,7 +606,10 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
               bottom: 16,
               right: 16,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.black.withValues(alpha: 0.6),
                   borderRadius: BorderRadius.circular(12),
@@ -578,12 +632,20 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
       children: [
         Text(
           _venue?.name ?? 'Venue',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: context.c.ink),
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.w900,
+            color: context.c.ink,
+          ),
         ),
         const SizedBox(height: 8),
         Row(
           children: [
-            Icon(Icons.location_on_outlined, color: context.c.inkSoft, size: 16),
+            Icon(
+              Icons.location_on_outlined,
+              color: context.c.inkSoft,
+              size: 16,
+            ),
             const SizedBox(width: 4),
             Expanded(
               child: Text(
@@ -628,31 +690,54 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Tentang Arena", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: context.c.ink)),
+        Text(
+          "Tentang Arena",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+            color: context.c.ink,
+          ),
+        ),
         const SizedBox(height: 8),
         Text(
           _venue?.description ?? 'Tidak ada deskripsi',
           style: TextStyle(color: context.c.inkSoft, height: 1.5),
         ),
         const SizedBox(height: 20),
-        Text("Fasilitas", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: context.c.ink)),
+        Text(
+          "Fasilitas",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+            color: context.c.ink,
+          ),
+        ),
         const SizedBox(height: 12),
         Wrap(
           spacing: 10,
           runSpacing: 10,
-          children: (_venue?.facilities ?? []).map((facility) =>
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: context.c.accent.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                formatFasilitas(facility),
-                style: TextStyle(color: context.c.accent, fontSize: 12, fontWeight: FontWeight.w500),
-              ),
-            )
-          ).toList(),
+          children: (_venue?.facilities ?? [])
+              .map(
+                (facility) => Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: context.c.accent.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    formatFasilitas(facility),
+                    style: TextStyle(
+                      color: context.c.accent,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              )
+              .toList(),
         ),
       ],
     );
@@ -667,15 +752,20 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text("Lokasi Venue", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: context.c.ink)),
+            Text(
+              "Lokasi Venue",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+                color: context.c.ink,
+              ),
+            ),
             if (hasLocation)
               TextButton.icon(
                 onPressed: _openMapsNavigation,
                 icon: const Icon(Icons.directions, size: 18),
                 label: const Text('Petunjuk Arah'),
-                style: TextButton.styleFrom(
-                  foregroundColor: context.c.accent,
-                ),
+                style: TextButton.styleFrom(foregroundColor: context.c.accent),
               ),
           ],
         ),
@@ -723,14 +813,13 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                               TileLayer(
                                 urlTemplate:
                                     'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                                retinaMode:
-                                    RetinaMode.isHighDensity(context),
+                                retinaMode: RetinaMode.isHighDensity(context),
                                 userAgentPackageName: 'id.sportago.app',
                                 tileBuilder:
                                     Theme.of(context).brightness ==
-                                            Brightness.dark
-                                        ? darkModeTileBuilder
-                                        : null,
+                                        Brightness.dark
+                                    ? darkModeTileBuilder
+                                    : null,
                               ),
                             ],
                           )
@@ -750,7 +839,10 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
                           decoration: BoxDecoration(
                             color: context.c.accent,
                             borderRadius: BorderRadius.circular(8),
@@ -792,7 +884,10 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                   bottom: 12,
                   right: 12,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
                       color: context.c.accent,
                       borderRadius: BorderRadius.circular(8),
@@ -800,7 +895,11 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.map_outlined, color: context.c.onAccent, size: 16),
+                        Icon(
+                          Icons.map_outlined,
+                          color: context.c.onAccent,
+                          size: 16,
+                        ),
                         SizedBox(width: 6),
                         Text(
                           'Buka Maps',
@@ -820,7 +919,10 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                   left: 12,
                   right: 100,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: context.c.raised.withValues(alpha: 0.95),
                       borderRadius: BorderRadius.circular(8),
@@ -829,10 +931,7 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                       [_venue?.address, formatKota(_venue?.city)]
                           .where((b) => b != null && b.trim().isNotEmpty)
                           .join(', '),
-                      style: TextStyle(
-                        color: context.c.inkSoft,
-                        fontSize: 11,
-                      ),
+                      style: TextStyle(color: context.c.inkSoft, fontSize: 11),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -856,7 +955,14 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text("Galeri Foto", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: context.c.ink)),
+            Text(
+              "Galeri Foto",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+                color: context.c.ink,
+              ),
+            ),
             TextButton(
               onPressed: () => _showFullGallery(),
               child: Text(
@@ -908,6 +1014,7 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
+        padding: EdgeInsets.only(bottom: context.sisipanBawah),
         height: MediaQuery.of(context).size.height * 0.8,
         decoration: BoxDecoration(
           color: context.c.raised,
@@ -931,7 +1038,11 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                 children: [
                   Text(
                     'Galeri Foto',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: context.c.ink),
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: context.c.ink,
+                    ),
                   ),
                   IconButton(
                     icon: Icon(Icons.close, color: context.c.ink),
@@ -962,7 +1073,11 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                         fit: BoxFit.cover,
                         errorBuilder: (_, __, ___) => Container(
                           color: context.c.raised,
-                          child: Icon(Icons.image, color: context.c.inkSoft, size: 40),
+                          child: Icon(
+                            Icons.image,
+                            color: context.c.inkSoft,
+                            size: 40,
+                          ),
                         ),
                       ),
                     ),
@@ -1043,7 +1158,9 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
         itemCount: 7,
         itemBuilder: (context, index) {
           DateTime date = DateTime.now().add(Duration(days: index));
-          bool isSelected = date.day == _selectedDate.day && date.month == _selectedDate.month;
+          bool isSelected =
+              date.day == _selectedDate.day &&
+              date.month == _selectedDate.month;
 
           return GestureDetector(
             onTap: () {
@@ -1062,13 +1179,15 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                 border: Border.all(
                   color: isSelected ? context.c.accent : context.c.line,
                 ),
-                boxShadow: isSelected ? [
-                  BoxShadow(
-                    color: context.c.accent.withValues(alpha: 0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  )
-                ] : [],
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color: context.c.accent.withValues(alpha: 0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ]
+                    : [],
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -1077,7 +1196,9 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                     dayNames[date.weekday - 1],
                     style: TextStyle(
                       fontSize: 14,
-                      color: isSelected ? context.c.onAccent : context.c.inkSoft,
+                      color: isSelected
+                          ? context.c.onAccent
+                          : context.c.inkSoft,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -1108,8 +1229,11 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
   bool _isSlotPassed(String slotTime) {
     final now = DateTime.now();
     final todayDate = DateTime(now.year, now.month, now.day);
-    final selectedDate =
-        DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
+    final selectedDate = DateTime(
+      _selectedDate.year,
+      _selectedDate.month,
+      _selectedDate.day,
+    );
 
     if (selectedDate.isAfter(todayDate)) return false;
     if (selectedDate.isBefore(todayDate)) return true;
@@ -1229,16 +1353,18 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
             }
 
             return GestureDetector(
-              onTap: isAvailable ? () {
-                setState(() {
-                  if (_selectedTimeSlots.contains(slotTime)) {
-                    _selectedTimeSlots.remove(slotTime);
-                  } else {
-                    _selectedTimeSlots.add(slotTime);
-                    _selectedTimeSlots.sort();
-                  }
-                });
-              } : null,
+              onTap: isAvailable
+                  ? () {
+                      setState(() {
+                        if (_selectedTimeSlots.contains(slotTime)) {
+                          _selectedTimeSlots.remove(slotTime);
+                        } else {
+                          _selectedTimeSlots.add(slotTime);
+                          _selectedTimeSlots.sort();
+                        }
+                      });
+                    }
+                  : null,
               child: Container(
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
@@ -1253,8 +1379,12 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                   WaktuWib.tampil(slotTime),
                   style: TextStyle(
                     color: textColor,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                    decoration: (!slot.available || isPassed) ? TextDecoration.lineThrough : null,
+                    fontWeight: isSelected
+                        ? FontWeight.bold
+                        : FontWeight.normal,
+                    decoration: (!slot.available || isPassed)
+                        ? TextDecoration.lineThrough
+                        : null,
                   ),
                 ),
               ),
@@ -1306,24 +1436,28 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
             SizedBox(
               height: 50,
               child: ElevatedButton(
-                onPressed: _selectedTimeSlots.isEmpty || _selectedField == null ? null : () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => BookingConfirmationPage(
-                        fieldId: _selectedField!.id,
-                        venueName: _venue?.name ?? '',
-                        venueAddress: _venue?.address ?? '',
-                        fieldName: _selectedField!.name,
-                        venueImageUrl: _venue?.coverImageUrl,
-                        fieldType: _selectedField!.type,
-                        selectedDate: _selectedDate.toString().split(' ')[0],
-                        selectedTimeSlots: _selectedTimeSlots,
-                        price: price,
-                      ),
-                    ),
-                  );
-                },
+                onPressed: _selectedTimeSlots.isEmpty || _selectedField == null
+                    ? null
+                    : () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => BookingConfirmationPage(
+                              fieldId: _selectedField!.id,
+                              venueName: _venue?.name ?? '',
+                              venueAddress: _venue?.address ?? '',
+                              fieldName: _selectedField!.name,
+                              venueImageUrl: _venue?.coverImageUrl,
+                              fieldType: _selectedField!.type,
+                              selectedDate: _selectedDate.toString().split(
+                                ' ',
+                              )[0],
+                              selectedTimeSlots: _selectedTimeSlots,
+                              price: price,
+                            ),
+                          ),
+                        );
+                      },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: context.c.accent,
                   shape: RoundedRectangleBorder(
@@ -1350,12 +1484,13 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
   }
 
   String _formatPrice(double price) {
-    return price.toStringAsFixed(0).replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (Match m) => '${m[1]}.',
-    );
+    return price
+        .toStringAsFixed(0)
+        .replaceAllMapped(
+          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+          (Match m) => '${m[1]}.',
+        );
   }
-
 }
 
 // Map Grid Painter for location placeholder
@@ -1450,11 +1585,8 @@ class _ImageViewerPageState extends State<_ImageViewerPage> {
               child: Image.network(
                 widget.images[index],
                 fit: BoxFit.contain,
-                errorBuilder: (_, __, ___) => const Icon(
-                  Icons.image,
-                  color: Colors.white54,
-                  size: 100,
-                ),
+                errorBuilder: (_, __, ___) =>
+                    const Icon(Icons.image, color: Colors.white54, size: 100),
               ),
             ),
           );

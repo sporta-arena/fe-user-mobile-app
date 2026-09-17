@@ -224,6 +224,7 @@ class _RegisterPageState extends State<RegisterPage> {
         value: gayaOverlay(context),
         child: SafeArea(
         child: SingleChildScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

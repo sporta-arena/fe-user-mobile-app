@@ -42,10 +42,7 @@ class _AllCategoriesPageState extends State<AllCategoriesPage> {
         systemOverlayStyle: gayaOverlay(context),
         title: Text(
           'Semua Kategori',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: context.c.ink,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold, color: context.c.ink),
         ),
         backgroundColor: context.c.surface,
         elevation: 0,
@@ -54,9 +51,10 @@ class _AllCategoriesPageState extends State<AllCategoriesPage> {
       ),
       body: SafeArea(
         child: RefreshIndicator(
-          onRefresh: () => FieldTypeService.getFieldTypes(forceRefresh: true).then((types) {
-            setState(() => _categories = types);
-          }),
+          onRefresh: () =>
+              FieldTypeService.getFieldTypes(forceRefresh: true).then((types) {
+                setState(() => _categories = types);
+              }),
           color: context.c.accent,
           backgroundColor: context.c.raised,
           child: Padding(
@@ -105,40 +103,42 @@ class _AllCategoriesPageState extends State<AllCategoriesPage> {
                           ),
                         )
                       : _categories.isEmpty
-                          ? Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.category_outlined,
-                                    size: 64,
-                                    color: context.c.inkSoft,
-                                  ),
-                                  const SizedBox(height: 16),
-                                  Text(
-                                    'Tidak ada kategori tersedia',
-                                    style: TextStyle(
-                                      color: context.c.inkSoft,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                ],
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.category_outlined,
+                                size: 64,
+                                color: context.c.inkSoft,
                               ),
-                            )
-                          : GridView.builder(
-                              gridDelegate:
-                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                              const SizedBox(height: 16),
+                              Text(
+                                'Tidak ada kategori tersedia',
+                                style: TextStyle(
+                                  color: context.c.inkSoft,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : GridView.builder(
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
                                 crossAxisCount: 2,
                                 crossAxisSpacing: 16,
                                 mainAxisSpacing: 16,
-                                childAspectRatio: 1.1,
+                                // Turun dari 1.1: nama dua baris butuh
+                                // tinggi sedikit lebih.
+                                childAspectRatio: 0.98,
                               ),
-                              itemCount: _categories.length,
-                              itemBuilder: (context, index) {
-                                final category = _categories[index];
-                                return _buildCategoryCard(context, category);
-                              },
-                            ),
+                          itemCount: _categories.length,
+                          itemBuilder: (context, index) {
+                            final category = _categories[index];
+                            return _buildCategoryCard(context, category);
+                          },
+                        ),
                 ),
               ],
             ),
@@ -166,36 +166,57 @@ class _AllCategoriesPageState extends State<AllCategoriesPage> {
       child: Container(
         decoration: BoxDecoration(
           color: context.c.raised,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(color: context.c.line),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
+            ),
+          ],
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Icon dengan background warna
+            // Lingkaran berwarna per cabang, sama dengan baris kategori
+            // di beranda. Sebelumnya semuanya kotak hijau aksen yang
+            // sama persis, jadi satu-satunya pembeda antar kartu cuma
+            // ikonnya — dan dengan dua puluh empat cabang, deretan yang
+            // seragam begitu makin sulit dipindai.
             Container(
-              width: 60,
-              height: 60,
+              width: 62,
+              height: 62,
               decoration: BoxDecoration(
-                color: context.c.accent.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(16),
+                color: context.c
+                    .kategori(category.indeksWarna)
+                    .withValues(alpha: 0.12),
+                shape: BoxShape.circle,
               ),
               child: Icon(
                 category.icon,
                 size: 30,
-                color: context.c.accent,
+                color: context.c.kategori(category.indeksWarna),
               ),
             ),
 
             const SizedBox(height: 12),
 
             // Nama kategori
-            Text(
-              category.label,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: context.c.ink,
+            // Nama panjang seperti "Yoga & Pilates" atau "Panjat
+            // Tebing" tidak muat satu baris di lebar setengah layar.
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Text(
+                category.label,
+                maxLines: 2,
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: context.c.ink,
+                ),
               ),
             ),
 
@@ -205,10 +226,7 @@ class _AllCategoriesPageState extends State<AllCategoriesPage> {
                 padding: const EdgeInsets.only(top: 4),
                 child: Text(
                   '${category.venueCount} venue',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: context.c.inkSoft,
-                  ),
+                  style: TextStyle(fontSize: 12, color: context.c.inkSoft),
                 ),
               ),
           ],

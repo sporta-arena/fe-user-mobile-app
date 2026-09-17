@@ -75,7 +75,10 @@ class _SearchPageState extends State<SearchPage> {
               hintText: "Cari venue...",
               hintStyle: TextStyle(color: context.c.inkSoft),
               border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 10,
+              ),
               suffixIcon: IconButton(
                 icon: Icon(Icons.search, color: context.c.inkSoft),
                 onPressed: () => _searchVenues(_searchController.text),
@@ -84,31 +87,37 @@ class _SearchPageState extends State<SearchPage> {
           ),
         ),
       ),
-      body: _isLoading
-          ? Center(child: CircularProgressIndicator(color: context.c.accent))
-          : _venues.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.search_off, size: 64, color: context.c.inkSoft),
-                      const SizedBox(height: 16),
-                      Text(
-                        _searchController.text.isEmpty
-                            ? "Ketik untuk mencari venue"
-                            : "Tidak ada venue ditemukan",
-                        style: TextStyle(color: context.c.inkSoft),
-                      ),
-                    ],
-                  ),
-                )
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: _venues.length,
-                  itemBuilder: (context, index) {
-                    return _buildVenueCard(_venues[index]);
-                  },
+      body: SafeArea(
+        // Bilah navigasi menumpuk di atas isi layar sejak
+        // targetSdk 35. top:false karena AppBar sudah
+        // menyisihkan bagian atasnya sendiri.
+        top: false,
+        child: _isLoading
+            ? Center(child: CircularProgressIndicator(color: context.c.accent))
+            : _venues.isEmpty
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.search_off, size: 64, color: context.c.inkSoft),
+                    const SizedBox(height: 16),
+                    Text(
+                      _searchController.text.isEmpty
+                          ? "Ketik untuk mencari venue"
+                          : "Tidak ada venue ditemukan",
+                      style: TextStyle(color: context.c.inkSoft),
+                    ),
+                  ],
                 ),
+              )
+            : ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: _venues.length,
+                itemBuilder: (context, index) {
+                  return _buildVenueCard(_venues[index]);
+                },
+              ),
+      ),
     );
   }
 
@@ -174,12 +183,19 @@ class _SearchPageState extends State<SearchPage> {
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      Icon(Icons.location_on, size: 14, color: context.c.inkSoft),
+                      Icon(
+                        Icons.location_on,
+                        size: 14,
+                        color: context.c.inkSoft,
+                      ),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
                           venue.address,
-                          style: TextStyle(color: context.c.inkSoft, fontSize: 12),
+                          style: TextStyle(
+                            color: context.c.inkSoft,
+                            fontSize: 12,
+                          ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -194,13 +210,20 @@ class _SearchPageState extends State<SearchPage> {
                         const SizedBox(width: 2),
                         Text(
                           venue.averageRating!.toStringAsFixed(1),
-                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: context.c.ink),
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: context.c.ink,
+                          ),
                         ),
                         const SizedBox(width: 8),
                       ],
                       Text(
                         formatKota(venue.city),
-                        style: TextStyle(color: context.c.inkSoft, fontSize: 12),
+                        style: TextStyle(
+                          color: context.c.inkSoft,
+                          fontSize: 12,
+                        ),
                       ),
                     ],
                   ),

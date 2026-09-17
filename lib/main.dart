@@ -11,6 +11,7 @@ import 'theme/app_theme.dart';
 import 'theme/app_tokens.dart';
 import 'widgets/sportago_mark.dart';
 import 'theme/theme_controller.dart';
+import 'utils/tutup_papan_ketik.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -66,16 +67,18 @@ class MyApp extends StatelessWidget {
               // penamaan terbalik itu gampang bikin salah.
               value: SystemUiOverlayStyle(
                 statusBarColor: Colors.transparent,
-                statusBarIconBrightness:
-                    gelap ? Brightness.light : Brightness.dark,
-                statusBarBrightness:
-                    gelap ? Brightness.dark : Brightness.light,
-                systemNavigationBarColor:
-                    Theme.of(context).scaffoldBackgroundColor,
-                systemNavigationBarIconBrightness:
-                    gelap ? Brightness.light : Brightness.dark,
+                statusBarIconBrightness: gelap
+                    ? Brightness.light
+                    : Brightness.dark,
+                statusBarBrightness: gelap ? Brightness.dark : Brightness.light,
+                systemNavigationBarColor: Theme.of(
+                  context,
+                ).scaffoldBackgroundColor,
+                systemNavigationBarIconBrightness: gelap
+                    ? Brightness.light
+                    : Brightness.dark,
               ),
-              child: child ?? const SizedBox.shrink(),
+              child: TutupPapanKetik(child: child ?? const SizedBox.shrink()),
             );
           },
           home: const SplashScreen(),

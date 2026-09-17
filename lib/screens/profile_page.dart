@@ -36,8 +36,18 @@ class _ProfilePageState extends State<ProfilePage> {
   // Helper format bulan Indonesia
   String _formatMonth(DateTime date) {
     const months = [
-      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+      'Januari',
+      'Februari',
+      'Maret',
+      'April',
+      'Mei',
+      'Juni',
+      'Juli',
+      'Agustus',
+      'September',
+      'Oktober',
+      'November',
+      'Desember',
     ];
     return '${months[date.month - 1]} ${date.year}';
   }
@@ -72,7 +82,8 @@ class _ProfilePageState extends State<ProfilePage> {
           if (booking.status == 'completed') {
             completed++;
             spent += booking.totalPrice;
-          } else if (booking.status == 'confirmed' || booking.status == 'checked_in') {
+          } else if (booking.status == 'confirmed' ||
+              booking.status == 'checked_in') {
             spent += booking.totalPrice;
           }
         }
@@ -117,49 +128,54 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: context.c.surface,
-      body: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: gayaOverlay(context),
-        child: RefreshIndicator(
-        onRefresh: _loadUserStats,
-        color: context.c.accent,
-        backgroundColor: context.c.raised,
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: Column(
-            children: [
-              // Header Profile
-              _buildProfileHeader(),
+      body: SafeArea(
+        // Bilah navigasi menumpuk di atas isi layar sejak
+        // targetSdk 35. top:false karena AppBar sudah
+        // menyisihkan bagian atasnya sendiri.
+        top: false,
+        child: AnnotatedRegion<SystemUiOverlayStyle>(
+          value: gayaOverlay(context),
+          child: RefreshIndicator(
+            onRefresh: _loadUserStats,
+            color: context.c.accent,
+            backgroundColor: context.c.raised,
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Column(
+                children: [
+                  // Header Profile
+                  _buildProfileHeader(),
 
-              const SizedBox(height: 40), // Extra space for translated card
+                  const SizedBox(height: 40), // Extra space for translated card
+                  // Stats Cards
+                  _buildStatsSection(),
 
-              // Stats Cards
-              _buildStatsSection(),
+                  const SizedBox(height: 16),
 
-              const SizedBox(height: 16),
+                  // Divider
+                  _buildSectionDivider(),
 
-              // Divider
-              _buildSectionDivider(),
+                  const SizedBox(height: 16),
 
-              const SizedBox(height: 16),
+                  // Menu Options
+                  _buildMenuSection(),
 
-              // Menu Options
-              _buildMenuSection(),
+                  const SizedBox(height: 16),
 
-              const SizedBox(height: 16),
+                  // Divider
+                  _buildSectionDivider(),
 
-              // Divider
-              _buildSectionDivider(),
+                  const SizedBox(height: 16),
 
-              const SizedBox(height: 16),
+                  // Logout Button
+                  _buildLogoutSection(),
 
-              // Logout Button
-              _buildLogoutSection(),
-
-              const SizedBox(height: 32),
-            ],
+                  const SizedBox(height: 32),
+                ],
+              ),
+            ),
           ),
         ),
-      ),
       ),
     );
   }
@@ -172,9 +188,7 @@ class _ProfilePageState extends State<ProfilePage> {
         Container(
           width: double.infinity,
           height: 280,
-          decoration: BoxDecoration(
-            color: context.c.surface,
-          ),
+          decoration: BoxDecoration(color: context.c.surface),
         ),
         // Content
         SafeArea(
@@ -269,7 +283,10 @@ class _ProfilePageState extends State<ProfilePage> {
                       const SizedBox(height: 16),
                       // Member info row
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
                         decoration: BoxDecoration(
                           color: context.c.surface,
                           borderRadius: BorderRadius.circular(12),
@@ -281,14 +298,21 @@ class _ProfilePageState extends State<ProfilePage> {
                             // Member Since
                             Row(
                               children: [
-                                Icon(Icons.calendar_today_outlined, size: 16, color: context.c.inkSoft),
+                                Icon(
+                                  Icons.calendar_today_outlined,
+                                  size: 16,
+                                  color: context.c.inkSoft,
+                                ),
                                 const SizedBox(width: 8),
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       "Member sejak",
-                                      style: TextStyle(fontSize: 10, color: context.c.inkSoft),
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        color: context.c.inkSoft,
+                                      ),
                                     ),
                                     Text(
                                       _memberSince,
@@ -314,7 +338,9 @@ class _ProfilePageState extends State<ProfilePage> {
                                 Container(
                                   padding: const EdgeInsets.all(6),
                                   decoration: BoxDecoration(
-                                    color: _getMemberLevelColor().withValues(alpha: 0.1),
+                                    color: _getMemberLevelColor().withValues(
+                                      alpha: 0.1,
+                                    ),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Icon(
@@ -329,7 +355,10 @@ class _ProfilePageState extends State<ProfilePage> {
                                   children: [
                                     Text(
                                       "Level",
-                                      style: TextStyle(fontSize: 10, color: context.c.inkSoft),
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        color: context.c.inkSoft,
+                                      ),
                                     ),
                                     Text(
                                       _memberLevel,
@@ -472,10 +501,7 @@ class _ProfilePageState extends State<ProfilePage> {
           const SizedBox(height: 4),
           Text(
             title,
-            style: TextStyle(
-              fontSize: 11,
-              color: context.c.inkSoft,
-            ),
+            style: TextStyle(fontSize: 11, color: context.c.inkSoft),
             textAlign: TextAlign.center,
           ),
         ],
@@ -507,7 +533,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   onTap: () async {
                     await Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const EditProfilePage()),
+                      MaterialPageRoute(
+                        builder: (context) => const EditProfilePage(),
+                      ),
                     );
                     if (mounted) {
                       setState(() {});
@@ -523,7 +551,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const ChangePasswordPage()),
+                      MaterialPageRoute(
+                        builder: (context) => const ChangePasswordPage(),
+                      ),
                     );
                   },
                 ),
@@ -550,7 +580,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const FavoriteVenuesPage()),
+                      MaterialPageRoute(
+                        builder: (context) => const FavoriteVenuesPage(),
+                      ),
                     );
                   },
                 ),
@@ -562,7 +594,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const ChatHistoryPage()),
+                      MaterialPageRoute(
+                        builder: (context) => const ChatHistoryPage(),
+                      ),
                     );
                   },
                 ),
@@ -574,7 +608,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const NotificationsPage()),
+                      MaterialPageRoute(
+                        builder: (context) => const NotificationsPage(),
+                      ),
                     );
                   },
                 ),
@@ -601,7 +637,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const AboutPage()),
+                      MaterialPageRoute(
+                        builder: (context) => const AboutPage(),
+                      ),
                     );
                   },
                 ),
@@ -664,10 +702,7 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
       subtitle: Text(
         subtitle,
-        style: TextStyle(
-          color: context.c.inkSoft,
-          fontSize: 12,
-        ),
+        style: TextStyle(color: context.c.inkSoft, fontSize: 12),
       ),
       trailing: Icon(
         Icons.arrow_forward_ios,
@@ -679,20 +714,11 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget _buildDivider() {
-    return Divider(
-      height: 1,
-      color: context.c.line,
-      indent: 60,
-      endIndent: 20,
-    );
+    return Divider(height: 1, color: context.c.line, indent: 60, endIndent: 20);
   }
 
   Widget _buildSectionDivider() {
-    return Container(
-      width: double.infinity,
-      height: 8,
-      color: context.c.line,
-    );
+    return Container(width: double.infinity, height: 8, color: context.c.line);
   }
 
   // Logout Section
@@ -730,9 +756,7 @@ class _ProfilePageState extends State<ProfilePage> {
       context: context,
       barrierDismissible: false, // User harus pilih salah satu tombol
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         contentPadding: EdgeInsets.zero,
         content: Container(
           padding: const EdgeInsets.all(24),
@@ -758,9 +782,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   color: context.c.danger,
                 ),
               ),
-              
+
               const SizedBox(height: 20),
-              
+
               // Title
               Text(
                 "Keluar dari Akun?",
@@ -784,9 +808,9 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 textAlign: TextAlign.center,
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               // Buttons
               Row(
                 children: [
@@ -810,9 +834,9 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     ),
                   ),
-                  
+
                   const SizedBox(width: 12),
-                  
+
                   // Tombol Logout
                   Expanded(
                     child: ElevatedButton(
@@ -853,22 +877,15 @@ class _ProfilePageState extends State<ProfilePage> {
       barrierDismissible: false,
       builder: (context) => AlertDialog(
         backgroundColor: context.c.raised,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            CircularProgressIndicator(
-              color: context.c.accent,
-            ),
+            CircularProgressIndicator(color: context.c.accent),
             SizedBox(height: 16),
             Text(
               "Sedang keluar...",
-              style: TextStyle(
-                color: context.c.inkSoft,
-                fontSize: 14,
-              ),
+              style: TextStyle(color: context.c.inkSoft, fontSize: 14),
             ),
           ],
         ),
@@ -1063,7 +1080,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                           otpToken =
                                               hasil.data?['token'] as String?;
                                         } else {
-                                          pesanGalat = hasil.message ??
+                                          pesanGalat =
+                                              hasil.message ??
                                               'Gagal mengirim kode. Coba lagi.';
                                         }
                                       });
@@ -1071,7 +1089,9 @@ class _ProfilePageState extends State<ProfilePage> {
                               icon: const Icon(Icons.mail_outline, size: 18),
                               label: const Text("Kirim kode ke email"),
                               style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
                                 side: BorderSide(color: context.c.line),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
@@ -1087,8 +1107,10 @@ class _ProfilePageState extends State<ProfilePage> {
                             decoration: InputDecoration(
                               hintText: "6 digit kode",
                               hintStyle: TextStyle(color: context.c.inkSoft),
-                              prefixIcon: Icon(Icons.pin_outlined,
-                                  color: context.c.inkSoft),
+                              prefixIcon: Icon(
+                                Icons.pin_outlined,
+                                color: context.c.inkSoft,
+                              ),
                               filled: true,
                               fillColor: context.c.surface,
                               border: OutlineInputBorder(
@@ -1108,55 +1130,62 @@ class _ProfilePageState extends State<ProfilePage> {
                       ],
                     )
                   else
-                  // Password confirmation
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Konfirmasi Password",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
-                          color: context.c.ink,
+                    // Password confirmation
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Konfirmasi Password",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                            color: context.c.ink,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      TextField(
-                        controller: passwordController,
-                        obscureText: obscurePassword,
-                        inputFormatters: const [TanpaSpasi()],
-                        style: TextStyle(color: context.c.ink),
-                        decoration: InputDecoration(
-                          hintText: "Masukkan password",
-                          hintStyle: TextStyle(color: context.c.inkSoft),
-                          prefixIcon: Icon(Icons.lock_outline, color: context.c.inkSoft),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              obscurePassword ? Icons.visibility_off : Icons.visibility,
+                        const SizedBox(height: 8),
+                        TextField(
+                          controller: passwordController,
+                          obscureText: obscurePassword,
+                          inputFormatters: const [TanpaSpasi()],
+                          style: TextStyle(color: context.c.ink),
+                          decoration: InputDecoration(
+                            hintText: "Masukkan password",
+                            hintStyle: TextStyle(color: context.c.inkSoft),
+                            prefixIcon: Icon(
+                              Icons.lock_outline,
                               color: context.c.inkSoft,
                             ),
-                            onPressed: () {
-                              setDialogState(() => obscurePassword = !obscurePassword);
-                            },
-                          ),
-                          filled: true,
-                          fillColor: context.c.surface,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: context.c.line),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: context.c.line),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: context.c.danger),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                obscurePassword
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                                color: context.c.inkSoft,
+                              ),
+                              onPressed: () {
+                                setDialogState(
+                                  () => obscurePassword = !obscurePassword,
+                                );
+                              },
+                            ),
+                            filled: true,
+                            fillColor: context.c.surface,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: context.c.line),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: context.c.line),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: context.c.danger),
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
                   const SizedBox(height: 24),
 
                   // Buttons
@@ -1164,7 +1193,9 @@ class _ProfilePageState extends State<ProfilePage> {
                     children: [
                       Expanded(
                         child: OutlinedButton(
-                          onPressed: isLoading ? null : () => Navigator.pop(context),
+                          onPressed: isLoading
+                              ? null
+                              : () => Navigator.pop(context),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             side: BorderSide(color: Colors.grey.shade300),
@@ -1189,18 +1220,23 @@ class _ProfilePageState extends State<ProfilePage> {
                               : () async {
                                   if (pakaiGoogle) {
                                     if (otpToken == null) {
-                                      setDialogState(() => pesanGalat =
-                                          'Kirim kode ke email dulu.');
+                                      setDialogState(
+                                        () => pesanGalat =
+                                            'Kirim kode ke email dulu.',
+                                      );
                                       return;
                                     }
                                     if (otpController.text.trim().isEmpty) {
-                                      setDialogState(() =>
-                                          pesanGalat = 'Kode harus diisi.');
+                                      setDialogState(
+                                        () => pesanGalat = 'Kode harus diisi.',
+                                      );
                                       return;
                                     }
                                   } else if (passwordController.text.isEmpty) {
-                                    setDialogState(() =>
-                                        pesanGalat = 'Password harus diisi.');
+                                    setDialogState(
+                                      () =>
+                                          pesanGalat = 'Password harus diisi.',
+                                    );
                                     return;
                                   }
 
@@ -1232,7 +1268,9 @@ class _ProfilePageState extends State<ProfilePage> {
                                   // sengaja tetap terbuka supaya alasannya
                                   // terbaca, bukan berkelebat sebagai
                                   // snackbar lalu hilang.
-                                  setDialogState(() => pesanGalat = hasil.pesan);
+                                  setDialogState(
+                                    () => pesanGalat = hasil.pesan,
+                                  );
                                 },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: context.c.danger,
@@ -1333,7 +1371,9 @@ class _ProfilePageState extends State<ProfilePage> {
                     Navigator.pop(context);
                     Navigator.pushAndRemoveUntil(
                       context,
-                      MaterialPageRoute(builder: (context) => const LoginPage()),
+                      MaterialPageRoute(
+                        builder: (context) => const LoginPage(),
+                      ),
                       (route) => false,
                     );
                   },
@@ -1362,9 +1402,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
   // Helper function untuk format currency
   String _formatCurrency(int amount) {
-    return "Rp ${amount.toString().replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (Match m) => '${m[1]}.'
-    )}";
+    return "Rp ${amount.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}";
   }
 }

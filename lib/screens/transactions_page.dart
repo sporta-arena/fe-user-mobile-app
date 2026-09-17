@@ -14,6 +14,7 @@ import 'login_page.dart';
 import 'venue_detail_page.dart';
 import 'e_ticket_page.dart';
 import 'chat/chat_page.dart';
+import '../utils/sisipan_bawah.dart';
 
 class TransactionsPage extends StatefulWidget {
   const TransactionsPage({super.key});
@@ -22,7 +23,8 @@ class TransactionsPage extends StatefulWidget {
   State<TransactionsPage> createState() => _TransactionsPageState();
 }
 
-class _TransactionsPageState extends State<TransactionsPage> with SingleTickerProviderStateMixin {
+class _TransactionsPageState extends State<TransactionsPage>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   List<Booking> _allBookings = [];
   bool _isLoading = true;
@@ -88,7 +90,8 @@ class _TransactionsPageState extends State<TransactionsPage> with SingleTickerPr
             final bookingDate = DateTime.parse(b.bookingDate.split('T')[0]);
             final today = DateTime.now();
             final todayDate = DateTime(today.year, today.month, today.day);
-            return bookingDate.isAfter(todayDate) || bookingDate.isAtSameMomentAs(todayDate);
+            return bookingDate.isAfter(todayDate) ||
+                bookingDate.isAtSameMomentAs(todayDate);
           } catch (e) {
             return true;
           }
@@ -99,7 +102,9 @@ class _TransactionsPageState extends State<TransactionsPage> with SingleTickerPr
       case 'history':
         // Riwayat = completed + cancelled + expired + confirmed/checked_in yang sudah lewat
         return _allBookings.where((b) {
-          if (b.status == 'completed' || b.status == 'cancelled' || b.status == 'expired') {
+          if (b.status == 'completed' ||
+              b.status == 'cancelled' ||
+              b.status == 'expired') {
             return true;
           }
           if (b.status == 'confirmed' || b.status == 'checked_in') {
@@ -132,7 +137,7 @@ class _TransactionsPageState extends State<TransactionsPage> with SingleTickerPr
         appBar: AppBar(
           title: Text(
             "Transaksi",
-            style: TextStyle(color: context.c.ink, fontWeight: FontWeight.bold)
+            style: TextStyle(color: context.c.ink, fontWeight: FontWeight.bold),
           ),
           backgroundColor: context.c.surface,
           elevation: 0,
@@ -158,14 +163,20 @@ class _TransactionsPageState extends State<TransactionsPage> with SingleTickerPr
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: context.c.accent,
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 12,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(999),
                   ),
                 ),
                 child: Text(
                   "Login",
-                  style: TextStyle(color: context.c.onAccent, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    color: context.c.onAccent,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
@@ -182,10 +193,7 @@ class _TransactionsPageState extends State<TransactionsPage> with SingleTickerPr
         systemOverlayStyle: gayaOverlay(context),
         title: Text(
           'Transaksi',
-          style: TextStyle(
-            color: context.c.ink,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(color: context.c.ink, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         bottom: TabBar(
@@ -194,7 +202,10 @@ class _TransactionsPageState extends State<TransactionsPage> with SingleTickerPr
           unselectedLabelColor: context.c.inkSoft,
           indicatorColor: context.c.accent,
           indicatorWeight: 3,
-          labelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+          labelStyle: const TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 13,
+          ),
           tabs: const [
             Tab(text: 'Mendatang'),
             Tab(text: 'Menunggu'),
@@ -209,44 +220,47 @@ class _TransactionsPageState extends State<TransactionsPage> with SingleTickerPr
                 children: [
                   CircularProgressIndicator(color: context.c.accent),
                   SizedBox(height: 16),
-                  Text('Memuat data transaksi...', style: TextStyle(color: context.c.inkSoft)),
+                  Text(
+                    'Memuat data transaksi...',
+                    style: TextStyle(color: context.c.inkSoft),
+                  ),
                 ],
               ),
             )
           : _errorMessage != null
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.error_outline, size: 60, color: context.c.inkSoft),
-                      const SizedBox(height: 16),
-                      Text(
-                        _errorMessage!,
-                        style: TextStyle(color: context.c.inkSoft),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: _loadBookings,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: context.c.accent,
-                        ),
-                        child: Text(
-                          'Coba Lagi',
-                          style: TextStyle(color: context.c.onAccent),
-                        ),
-                      ),
-                    ],
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline, size: 60, color: context.c.inkSoft),
+                  const SizedBox(height: 16),
+                  Text(
+                    _errorMessage!,
+                    style: TextStyle(color: context.c.inkSoft),
+                    textAlign: TextAlign.center,
                   ),
-                )
-              : TabBarView(
-                  controller: _tabController,
-                  children: [
-                    _buildTransactionList('upcoming'),
-                    _buildTransactionList('pending'),
-                    _buildTransactionList('history'),
-                  ],
-                ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: _loadBookings,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: context.c.accent,
+                    ),
+                    child: Text(
+                      'Coba Lagi',
+                      style: TextStyle(color: context.c.onAccent),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          : TabBarView(
+              controller: _tabController,
+              children: [
+                _buildTransactionList('upcoming'),
+                _buildTransactionList('pending'),
+                _buildTransactionList('history'),
+              ],
+            ),
     );
   }
 
@@ -301,10 +315,7 @@ class _TransactionsPageState extends State<TransactionsPage> with SingleTickerPr
       padding: const EdgeInsets.all(16),
       itemCount: bookings.length,
       itemBuilder: (context, index) {
-        return _BookingCard(
-          booking: bookings[index],
-          onRefresh: _loadBookings,
-        );
+        return _BookingCard(booking: bookings[index], onRefresh: _loadBookings);
       },
     );
   }
@@ -315,10 +326,7 @@ class _BookingCard extends StatefulWidget {
   final Booking booking;
   final VoidCallback onRefresh;
 
-  const _BookingCard({
-    required this.booking,
-    required this.onRefresh,
-  });
+  const _BookingCard({required this.booking, required this.onRefresh});
 
   @override
   State<_BookingCard> createState() => _BookingCardState();
@@ -394,11 +402,17 @@ class _BookingCardState extends State<_BookingCard> {
     Uri uri;
     if (venue.latitude != null && venue.longitude != null) {
       // Use coordinates if available
-      uri = Uri.parse('https://www.google.com/maps/dir/?api=1&destination=${venue.latitude},${venue.longitude}');
+      uri = Uri.parse(
+        'https://www.google.com/maps/dir/?api=1&destination=${venue.latitude},${venue.longitude}',
+      );
     } else {
       // Fallback to address search
-      final encodedAddress = Uri.encodeComponent('${venue.name}, ${venue.address}, ${venue.city}');
-      uri = Uri.parse('https://www.google.com/maps/search/?api=1&query=$encodedAddress');
+      final encodedAddress = Uri.encodeComponent(
+        '${venue.name}, ${venue.address}, ${venue.city}',
+      );
+      uri = Uri.parse(
+        'https://www.google.com/maps/search/?api=1&query=$encodedAddress',
+      );
     }
 
     if (await canLaunchUrl(uri)) {
@@ -473,7 +487,9 @@ class _BookingCardState extends State<_BookingCard> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
               color: themeColor.withValues(alpha: 0.15),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(16),
+              ),
             ),
             child: Row(
               children: [
@@ -492,7 +508,10 @@ class _BookingCardState extends State<_BookingCard> {
                 // Countdown for upcoming bookings
                 if (_isUpcoming && _countdownText.isNotEmpty)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: context.c.surface,
                       borderRadius: BorderRadius.circular(8),
@@ -537,17 +556,26 @@ class _BookingCardState extends State<_BookingCard> {
                   style: TextStyle(color: context.c.inkSoft, fontSize: 14),
                 ),
                 // Venue Address for upcoming bookings
-                if (_isUpcoming && venueAddress != null && venueAddress.isNotEmpty) ...[
+                if (_isUpcoming &&
+                    venueAddress != null &&
+                    venueAddress.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(Icons.location_on_outlined, size: 14, color: context.c.inkSoft),
+                      Icon(
+                        Icons.location_on_outlined,
+                        size: 14,
+                        color: context.c.inkSoft,
+                      ),
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
                           venueAddress,
-                          style: TextStyle(color: context.c.inkSoft, fontSize: 12),
+                          style: TextStyle(
+                            color: context.c.inkSoft,
+                            fontSize: 12,
+                          ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -558,7 +586,11 @@ class _BookingCardState extends State<_BookingCard> {
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    Icon(Icons.calendar_today, size: 14, color: context.c.inkSoft),
+                    Icon(
+                      Icons.calendar_today,
+                      size: 14,
+                      color: context.c.inkSoft,
+                    ),
                     const SizedBox(width: 6),
                     Text(
                       _formatDate(booking.bookingDate),
@@ -596,7 +628,9 @@ class _BookingCardState extends State<_BookingCard> {
                             foregroundColor: context.c.accent,
                             side: BorderSide(color: context.c.accent),
                             padding: const EdgeInsets.symmetric(vertical: 10),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                           ),
                         ),
                       ),
@@ -610,7 +644,9 @@ class _BookingCardState extends State<_BookingCard> {
                             foregroundColor: context.c.ok,
                             side: BorderSide(color: context.c.ok),
                             padding: const EdgeInsets.symmetric(vertical: 10),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                           ),
                         ),
                       ),
@@ -637,11 +673,19 @@ class _BookingCardState extends State<_BookingCard> {
               child: ElevatedButton.icon(
                 onPressed: () => _goToPayment(context),
                 icon: const Icon(Icons.payment, color: Colors.white, size: 18),
-                label: const Text("BAYAR SEKARANG", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                label: const Text(
+                  "BAYAR SEKARANG",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: context.c.ok,
                   padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
               ),
             ),
@@ -651,11 +695,16 @@ class _BookingCardState extends State<_BookingCard> {
               child: OutlinedButton.icon(
                 onPressed: () => _cancelBooking(context),
                 icon: Icon(Icons.close, color: context.c.danger, size: 18),
-                label: Text("Batalkan", style: TextStyle(color: context.c.danger)),
+                label: Text(
+                  "Batalkan",
+                  style: TextStyle(color: context.c.danger),
+                ),
                 style: OutlinedButton.styleFrom(
                   side: BorderSide(color: context.c.danger),
                   padding: const EdgeInsets.symmetric(vertical: 10),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
               ),
             ),
@@ -669,15 +718,29 @@ class _BookingCardState extends State<_BookingCard> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => ETicketPage(booking: booking)),
+                MaterialPageRoute(
+                  builder: (context) => ETicketPage(booking: booking),
+                ),
               );
             },
-            icon: Icon(Icons.confirmation_number, color: context.c.onAccent, size: 18),
-            label: Text("LIHAT E-TICKET", style: TextStyle(color: context.c.onAccent, fontWeight: FontWeight.bold)),
+            icon: Icon(
+              Icons.confirmation_number,
+              color: context.c.onAccent,
+              size: 18,
+            ),
+            label: Text(
+              "LIHAT E-TICKET",
+              style: TextStyle(
+                color: context.c.onAccent,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             style: ElevatedButton.styleFrom(
               backgroundColor: context.c.accent,
               padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
           ),
         );
@@ -687,12 +750,17 @@ class _BookingCardState extends State<_BookingCard> {
           child: OutlinedButton.icon(
             onPressed: () => _rebook(context),
             icon: Icon(Icons.replay, size: 18, color: context.c.accent),
-            label: Text("BOOKING LAGI", style: TextStyle(color: context.c.accent)),
+            label: Text(
+              "BOOKING LAGI",
+              style: TextStyle(color: context.c.accent),
+            ),
             style: OutlinedButton.styleFrom(
               foregroundColor: context.c.accent,
               side: BorderSide(color: context.c.accent),
               padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
           ),
         );
@@ -726,7 +794,8 @@ class _BookingCardState extends State<_BookingCard> {
             "price": booking.totalPrice.toInt(),
             "selectedMethod": _getPaymentMethodDisplay(paymentMethod),
             "paymentMethod": paymentMethod,
-            "totalWithFee": booking.payment?.amount.toInt() ?? booking.totalPrice.toInt(),
+            "totalWithFee":
+                booking.payment?.amount.toInt() ?? booking.totalPrice.toInt(),
             "qrString": booking.payment?.qrString,
           },
           onPaymentComplete: widget.onRefresh,
@@ -756,8 +825,14 @@ class _BookingCardState extends State<_BookingCard> {
       builder: (context) => AlertDialog(
         backgroundColor: context.c.raised,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text("Batalkan Pesanan?", style: TextStyle(color: context.c.ink)),
-        content: Text("Apakah Anda yakin ingin membatalkan pesanan ini?", style: TextStyle(color: context.c.inkSoft)),
+        title: Text(
+          "Batalkan Pesanan?",
+          style: TextStyle(color: context.c.ink),
+        ),
+        content: Text(
+          "Apakah Anda yakin ingin membatalkan pesanan ini?",
+          style: TextStyle(color: context.c.inkSoft),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -766,7 +841,10 @@ class _BookingCardState extends State<_BookingCard> {
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(backgroundColor: context.c.danger),
-            child: const Text("Ya, Batalkan", style: TextStyle(color: Colors.white)),
+            child: const Text(
+              "Ya, Batalkan",
+              style: TextStyle(color: Colors.white),
+            ),
           ),
         ],
       ),
@@ -777,7 +855,11 @@ class _BookingCardState extends State<_BookingCard> {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(result.success ? "Pesanan dibatalkan" : (result.message ?? "Gagal membatalkan")),
+            content: Text(
+              result.success
+                  ? "Pesanan dibatalkan"
+                  : (result.message ?? "Gagal membatalkan"),
+            ),
             backgroundColor: result.success ? context.c.ok : context.c.danger,
           ),
         );
@@ -847,7 +929,11 @@ class _TransactionBookingCardState extends State<TransactionBookingCard> {
         if (mounted) setState(() => _countdown = "$hours:$minutes:$seconds");
       }
     } else {
-      if (mounted) setState(() => _countdown = "00:15:00");
+      // 10 menit, bukan 15: config/payment.php menahan slot 10 menit
+      // untuk semua metode. Angka cadangan ini cuma terpakai kalau
+      // expires_at tidak ikut terkirim, dan kalau salah ia menjanjikan
+      // waktu yang tidak ada.
+      if (mounted) setState(() => _countdown = "00:10:00");
     }
   }
 
@@ -861,7 +947,8 @@ class _TransactionBookingCardState extends State<TransactionBookingCard> {
     paymentData["selectedMethod"] = displayMethod;
     paymentData["paymentMethod"] = paymentMethod;
     paymentData["adminFee"] = 0; // Already included in total
-    paymentData["totalWithFee"] = booking.payment?.amount.toInt() ?? booking.totalPrice.toInt();
+    paymentData["totalWithFee"] =
+        booking.payment?.amount.toInt() ?? booking.totalPrice.toInt();
     paymentData["qrString"] = booking.payment?.qrString;
 
     Navigator.push(
@@ -876,7 +963,6 @@ class _TransactionBookingCardState extends State<TransactionBookingCard> {
     );
   }
 
-
   void _goToPaymentSelector(BuildContext context) {
     final navigator = Navigator.of(context);
     showModalBottomSheet(
@@ -885,7 +971,9 @@ class _TransactionBookingCardState extends State<TransactionBookingCard> {
       backgroundColor: Colors.transparent,
       builder: (context) => FractionallySizedBox(
         heightFactor: 0.85,
-        child: TransactionPaymentSelectorSheet(totalPrice: booking.totalPrice.toInt()),
+        child: TransactionPaymentSelectorSheet(
+          totalPrice: booking.totalPrice.toInt(),
+        ),
       ),
     ).then((result) {
       if (result != null) {
@@ -938,9 +1026,7 @@ class _TransactionBookingCardState extends State<TransactionBookingCard> {
   void _goToTicket(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => ETicketPage(booking: booking),
-      ),
+      MaterialPageRoute(builder: (context) => ETicketPage(booking: booking)),
     );
   }
 
@@ -966,8 +1052,14 @@ class _TransactionBookingCardState extends State<TransactionBookingCard> {
       builder: (context) => AlertDialog(
         backgroundColor: context.c.raised,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text("Batalkan Pesanan?", style: TextStyle(color: context.c.ink)),
-        content: Text("Apakah Anda yakin ingin membatalkan pesanan ini?", style: TextStyle(color: context.c.inkSoft)),
+        title: Text(
+          "Batalkan Pesanan?",
+          style: TextStyle(color: context.c.ink),
+        ),
+        content: Text(
+          "Apakah Anda yakin ingin membatalkan pesanan ini?",
+          style: TextStyle(color: context.c.inkSoft),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -976,7 +1068,10 @@ class _TransactionBookingCardState extends State<TransactionBookingCard> {
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(backgroundColor: context.c.danger),
-            child: const Text("Ya, Batalkan", style: TextStyle(color: Colors.white)),
+            child: const Text(
+              "Ya, Batalkan",
+              style: TextStyle(color: Colors.white),
+            ),
           ),
         ],
       ),
@@ -997,7 +1092,9 @@ class _TransactionBookingCardState extends State<TransactionBookingCard> {
               ),
               backgroundColor: context.c.danger,
               behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
           );
           onRefresh();
@@ -1092,7 +1189,9 @@ class _TransactionBookingCardState extends State<TransactionBookingCard> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               color: themeColor.withValues(alpha: 0.15),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
+              ),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1113,7 +1212,10 @@ class _TransactionBookingCardState extends State<TransactionBookingCard> {
                 ),
                 if (status == 'pending')
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: context.c.surface,
                       borderRadius: BorderRadius.circular(10),
@@ -1170,7 +1272,10 @@ class _TransactionBookingCardState extends State<TransactionBookingCard> {
                       const SizedBox(height: 4),
                       Text(
                         booking.field?.name ?? "Unknown Field",
-                        style: TextStyle(color: context.c.inkSoft, fontSize: 13),
+                        style: TextStyle(
+                          color: context.c.inkSoft,
+                          fontSize: 13,
+                        ),
                       ),
                       const SizedBox(height: 8),
                       Wrap(
@@ -1180,7 +1285,11 @@ class _TransactionBookingCardState extends State<TransactionBookingCard> {
                           Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.calendar_today_outlined, size: 12, color: context.c.inkSoft),
+                              Icon(
+                                Icons.calendar_today_outlined,
+                                size: 12,
+                                color: context.c.inkSoft,
+                              ),
                               const SizedBox(width: 4),
                               Text(
                                 _formatDate(booking.bookingDate),
@@ -1195,10 +1304,17 @@ class _TransactionBookingCardState extends State<TransactionBookingCard> {
                           Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.schedule, size: 12, color: context.c.inkSoft),
+                              Icon(
+                                Icons.schedule,
+                                size: 12,
+                                color: context.c.inkSoft,
+                              ),
                               const SizedBox(width: 4),
                               Text(
-                                _formatTimeRange(booking.startTime, booking.endTime),
+                                _formatTimeRange(
+                                  booking.startTime,
+                                  booking.endTime,
+                                ),
                                 style: TextStyle(
                                   color: context.c.inkSoft,
                                   fontSize: 12,
@@ -1231,7 +1347,10 @@ class _TransactionBookingCardState extends State<TransactionBookingCard> {
                       children: [
                         Text(
                           "Total Harga",
-                          style: TextStyle(fontSize: 11, color: context.c.inkSoft),
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: context.c.inkSoft,
+                          ),
                         ),
                         const SizedBox(height: 2),
                         Text(
@@ -1246,15 +1365,24 @@ class _TransactionBookingCardState extends State<TransactionBookingCard> {
                     ),
                     if (status == 'pending')
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: context.c.infoSoft,
                           borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: context.c.info.withValues(alpha: 0.3)),
+                          border: Border.all(
+                            color: context.c.info.withValues(alpha: 0.3),
+                          ),
                         ),
                         child: Row(
                           children: [
-                            Icon(Icons.qr_code, size: 14, color: context.c.info),
+                            Icon(
+                              Icons.qr_code,
+                              size: 14,
+                              color: context.c.info,
+                            ),
                             SizedBox(width: 4),
                             Text(
                               "QRIS",
@@ -1277,22 +1405,30 @@ class _TransactionBookingCardState extends State<TransactionBookingCard> {
                   child: ElevatedButton.icon(
                     onPressed: onMainAction,
                     icon: Icon(
-                      status == 'pending' ? Icons.payment :
-                      status == 'confirmed' || status == 'checked_in' ? Icons.confirmation_number :
-                      Icons.replay,
-                      color: status == 'pending' ? Colors.white : context.c.onAccent,
+                      status == 'pending'
+                          ? Icons.payment
+                          : status == 'confirmed' || status == 'checked_in'
+                          ? Icons.confirmation_number
+                          : Icons.replay,
+                      color: status == 'pending'
+                          ? Colors.white
+                          : context.c.onAccent,
                       size: 20,
                     ),
                     label: Text(
                       mainBtnText,
                       style: TextStyle(
-                        color: status == 'pending' ? Colors.white : context.c.onAccent,
+                        color: status == 'pending'
+                            ? Colors.white
+                            : context.c.onAccent,
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: status == 'pending' ? context.c.ok : btnColor,
+                      backgroundColor: status == 'pending'
+                          ? context.c.ok
+                          : btnColor,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -1307,7 +1443,11 @@ class _TransactionBookingCardState extends State<TransactionBookingCard> {
                     height: 48,
                     child: OutlinedButton.icon(
                       onPressed: () => _cancelBooking(context),
-                      icon: Icon(Icons.close, color: context.c.danger, size: 20),
+                      icon: Icon(
+                        Icons.close,
+                        color: context.c.danger,
+                        size: 20,
+                      ),
                       label: Text(
                         "Batalkan Pesanan",
                         style: TextStyle(
@@ -1345,14 +1485,11 @@ class TransactionPaymentSelectorSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     String formatCurrency(int amount) {
-      return "Rp ${amount.toString().replaceAllMapped(
-        RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-        (Match m) => '${m[1]}.'
-      )}";
+      return "Rp ${amount.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}";
     }
 
     return Container(
-      padding: const EdgeInsets.only(top: 10),
+      padding: EdgeInsets.only(top: 10, bottom: context.sisipanBawah),
       decoration: BoxDecoration(
         color: context.c.raised,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -1374,7 +1511,11 @@ class TransactionPaymentSelectorSheet extends StatelessWidget {
             padding: EdgeInsets.symmetric(horizontal: 24),
             child: Text(
               "Pilih Pembayaran",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: context.c.ink),
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: context.c.ink,
+              ),
             ),
           ),
           Divider(height: 24, color: context.c.line),
@@ -1387,7 +1528,10 @@ class TransactionPaymentSelectorSheet extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text("Total Tagihan", style: TextStyle(color: context.c.inkSoft)),
+                Text(
+                  "Total Tagihan",
+                  style: TextStyle(color: context.c.inkSoft),
+                ),
                 Text(
                   formatCurrency(totalPrice),
                   style: TextStyle(
@@ -1479,10 +1623,8 @@ class TransactionPaymentSelectorSheet extends StatelessWidget {
   }) {
     int finalPrice = totalPrice + fee;
 
-    String formatCurrency(int amount) => "Rp ${amount.toString().replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (Match m) => '${m[1]}.'
-    )}";
+    String formatCurrency(int amount) =>
+        "Rp ${amount.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}";
 
     return InkWell(
       onTap: () {
@@ -1534,7 +1676,10 @@ class TransactionPaymentSelectorSheet extends StatelessWidget {
                       if (isRecommended) ...[
                         const SizedBox(width: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: context.c.accent,
                             borderRadius: BorderRadius.circular(4),
@@ -1547,13 +1692,15 @@ class TransactionPaymentSelectorSheet extends StatelessWidget {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                        )
-                      ]
+                        ),
+                      ],
                     ],
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    fee == 0 ? "Bebas Biaya Admin" : "Biaya Admin: ${formatCurrency(fee)}",
+                    fee == 0
+                        ? "Bebas Biaya Admin"
+                        : "Biaya Admin: ${formatCurrency(fee)}",
                     style: TextStyle(
                       fontSize: 12,
                       color: fee == 0 ? context.c.ok : context.c.inkSoft,
@@ -1586,10 +1733,12 @@ class TransactionPaymentWaitingPage extends StatefulWidget {
   });
 
   @override
-  State<TransactionPaymentWaitingPage> createState() => _TransactionPaymentWaitingPageState();
+  State<TransactionPaymentWaitingPage> createState() =>
+      _TransactionPaymentWaitingPageState();
 }
 
-class _TransactionPaymentWaitingPageState extends State<TransactionPaymentWaitingPage> {
+class _TransactionPaymentWaitingPageState
+    extends State<TransactionPaymentWaitingPage> {
   bool _isProcessing = false;
 
   /// Sisa waktu pembayaran, dihitung sendiri di halaman ini.
@@ -1608,7 +1757,10 @@ class _TransactionPaymentWaitingPageState extends State<TransactionPaymentWaitin
     super.initState();
     _hitungSisaWaktu();
     // Satu detik sekali, dan hanya selama masih ada yang dihitung.
-    _pewaktu = Timer.periodic(const Duration(seconds: 1), (_) => _hitungSisaWaktu());
+    _pewaktu = Timer.periodic(
+      const Duration(seconds: 1),
+      (_) => _hitungSisaWaktu(),
+    );
   }
 
   @override
@@ -1644,7 +1796,8 @@ class _TransactionPaymentWaitingPageState extends State<TransactionPaymentWaitin
 
     String duaDigit(int n) => n.toString().padLeft(2, '0');
     setState(() {
-      _sisaWaktu = '${duaDigit(sisa.inHours)}:'
+      _sisaWaktu =
+          '${duaDigit(sisa.inHours)}:'
           '${duaDigit(sisa.inMinutes % 60)}:'
           '${duaDigit(sisa.inSeconds % 60)}';
       _sudahLewat = false;
@@ -1671,7 +1824,9 @@ class _TransactionPaymentWaitingPageState extends State<TransactionPaymentWaitin
             ),
             backgroundColor: context.c.ok,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
           ),
         );
         widget.onPaymentComplete();
@@ -1707,7 +1862,9 @@ class _TransactionPaymentWaitingPageState extends State<TransactionPaymentWaitin
             ),
             backgroundColor: context.c.danger,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
           ),
         );
         widget.onPaymentComplete();
@@ -1726,7 +1883,9 @@ class _TransactionPaymentWaitingPageState extends State<TransactionPaymentWaitin
   @override
   Widget build(BuildContext context) {
     String method = widget.bookingData['selectedMethod'] ?? "Metode Pembayaran";
-    String paymentMethod = (widget.bookingData['paymentMethod'] ?? "QRIS").toString().toUpperCase();
+    String paymentMethod = (widget.bookingData['paymentMethod'] ?? "QRIS")
+        .toString()
+        .toUpperCase();
     bool isQRIS = paymentMethod == "QRIS";
 
     // Use actual booking data
@@ -1738,13 +1897,12 @@ class _TransactionPaymentWaitingPageState extends State<TransactionPaymentWaitin
     final int hargaLapangan = widget.booking.subtotal > 0
         ? widget.booking.subtotal.toInt()
         : (widget.booking.totalPrice.toInt() - biayaPlatform - biayaAdmin);
-    final int total = widget.booking.payment?.amount.toInt() ??
+    final int total =
+        widget.booking.payment?.amount.toInt() ??
         widget.booking.totalPrice.toInt();
 
-    String formatCurrency(int amount) => "Rp ${amount.toString().replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (Match m) => '${m[1]}.'
-    )}";
+    String formatCurrency(int amount) =>
+        "Rp ${amount.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}";
 
     String? qrString = widget.booking.payment?.qrString;
     // Nomor VA yang sebenarnya, dari server. Sebelum ini halaman ini
@@ -1767,444 +1925,559 @@ class _TransactionPaymentWaitingPageState extends State<TransactionPaymentWaitin
         systemOverlayStyle: gayaOverlay(context),
         iconTheme: IconThemeData(color: context.c.ink),
       ),
-      body: _isProcessing
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(color: context.c.accent),
-                  SizedBox(height: 16),
-                  Text('Memproses...', style: TextStyle(color: context.c.inkSoft)),
-                ],
-              ),
-            )
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Countdown Timer Card
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: context.c.raised,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: context.c.warn.withValues(alpha: 0.4)),
+      body: SafeArea(
+        // Bilah navigasi menumpuk di atas isi layar sejak
+        // targetSdk 35. top:false karena AppBar sudah
+        // menyisihkan bagian atasnya sendiri.
+        top: false,
+        child: _isProcessing
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(color: context.c.accent),
+                    SizedBox(height: 16),
+                    Text(
+                      'Memproses...',
+                      style: TextStyle(color: context.c.inkSoft),
                     ),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: context.c.warn.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Icon(Icons.timer_outlined, color: context.c.warn, size: 24),
+                  ],
+                ),
+              )
+            : SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Countdown Timer Card
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: context.c.raised,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: context.c.warn.withValues(alpha: 0.4),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                _sudahLewat
-                                    ? 'Batas waktu pembayaran terlampaui'
-                                    : (_sisaWaktu.isEmpty
-                                        ? 'Menunggu pembayaran'
-                                        : 'Selesaikan pembayaran dalam'),
-                                style: TextStyle(fontSize: 12, color: context.c.inkSoft),
-                              ),
-                              if (_sisaWaktu.isNotEmpty) ...[
-                                const SizedBox(height: 4),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: context.c.warn.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Icon(
+                              Icons.timer_outlined,
+                              color: context.c.warn,
+                              size: 24,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
                                 Text(
-                                  _sisaWaktu,
+                                  _sudahLewat
+                                      ? 'Batas waktu pembayaran terlampaui'
+                                      : (_sisaWaktu.isEmpty
+                                            ? 'Menunggu pembayaran'
+                                            : 'Selesaikan pembayaran dalam'),
                                   style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    fontFeatures: const [FontFeature.tabularFigures()],
-                                    color: _sudahLewat
-                                        ? context.c.inkSoft
-                                        : context.c.danger,
+                                    fontSize: 12,
+                                    color: context.c.inkSoft,
                                   ),
                                 ),
-                              ],
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Detail Booking Card
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: context.c.raised,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: context.c.line),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(Icons.receipt_long, color: context.c.inkSoft, size: 18),
-                            const SizedBox(width: 8),
-                            Text(
-                              "Detail Booking",
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: context.c.ink),
-                            ),
-                          ],
-                        ),
-                        Divider(height: 20, color: context.c.line),
-                        _buildDetailRow("Kode Booking", widget.booking.bookingCode),
-                        _buildDetailRow("Venue", widget.booking.field?.venue?.name ?? "-"),
-                        _buildDetailRow("Lapangan", widget.booking.field?.name ?? "-"),
-                        _buildDetailRow("Tanggal", widget.bookingData['date'] ?? "-"),
-                        _buildDetailRow("Waktu", widget.booking.formattedTime),
-                        _buildDetailRow("Durasi", "${widget.booking.durationHours} jam"),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Metode Pembayaran Card
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: context.c.raised,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: context.c.line),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(Icons.payment, color: context.c.inkSoft, size: 18),
-                            const SizedBox(width: 8),
-                            Text(
-                              "Metode Pembayaran",
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: context.c.ink),
-                            ),
-                          ],
-                        ),
-                        Divider(height: 20, color: context.c.line),
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: context.c.accent.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                isQRIS ? Icons.qr_code_scanner : Icons.account_balance,
-                                color: context.c.accent,
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Text(
-                                  method,
-                                  style: TextStyle(fontWeight: FontWeight.bold, color: context.c.ink),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-
-                        // Payment Display - QRIS or VA
-                        if (isQRIS) ...[
-                          // QRIS - Show QR Code
-                          Center(
-                            child: Container(
-                              width: 200,
-                              height: 200,
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: Colors.grey.shade300),
-                              ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.qr_code_2, size: 120, color: Colors.grey[800]),
-                                  const SizedBox(height: 8),
+                                if (_sisaWaktu.isNotEmpty) ...[
+                                  const SizedBox(height: 4),
                                   Text(
-                                    "SCAN ME",
+                                    _sisaWaktu,
                                     style: TextStyle(
+                                      fontSize: 20,
                                       fontWeight: FontWeight.bold,
-                                      color: context.c.onAccent,
+                                      fontFeatures: const [
+                                        FontFeature.tabularFigures(),
+                                      ],
+                                      color: _sudahLewat
+                                          ? context.c.inkSoft
+                                          : context.c.danger,
                                     ),
                                   ),
                                 ],
-                              ),
+                              ],
                             ),
                           ),
-                          if (qrString != null) ...[
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Detail Booking Card
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: context.c.raised,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: context.c.line),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.receipt_long,
+                                color: context.c.inkSoft,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                "Detail Booking",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                  color: context.c.ink,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Divider(height: 20, color: context.c.line),
+                          _buildDetailRow(
+                            "Kode Booking",
+                            widget.booking.bookingCode,
+                          ),
+                          _buildDetailRow(
+                            "Venue",
+                            widget.booking.field?.venue?.name ?? "-",
+                          ),
+                          _buildDetailRow(
+                            "Lapangan",
+                            widget.booking.field?.name ?? "-",
+                          ),
+                          _buildDetailRow(
+                            "Tanggal",
+                            widget.bookingData['date'] ?? "-",
+                          ),
+                          _buildDetailRow(
+                            "Waktu",
+                            widget.booking.formattedTime,
+                          ),
+                          _buildDetailRow(
+                            "Durasi",
+                            "${widget.booking.durationHours} jam",
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Metode Pembayaran Card
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: context.c.raised,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: context.c.line),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.payment,
+                                color: context.c.inkSoft,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                "Metode Pembayaran",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                  color: context.c.ink,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Divider(height: 20, color: context.c.line),
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: context.c.accent.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  isQRIS
+                                      ? Icons.qr_code_scanner
+                                      : Icons.account_balance,
+                                  color: context.c.accent,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    method,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: context.c.ink,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+
+                          // Payment Display - QRIS or VA
+                          if (isQRIS) ...[
+                            // QRIS - Show QR Code
+                            Center(
+                              child: Container(
+                                width: 200,
+                                height: 200,
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: Colors.grey.shade300,
+                                  ),
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.qr_code_2,
+                                      size: 120,
+                                      color: Colors.grey[800],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      "SCAN ME",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: context.c.onAccent,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            if (qrString != null) ...[
+                              const SizedBox(height: 12),
+                              Center(
+                                child: Text(
+                                  "Kode: $qrString",
+                                  style: TextStyle(
+                                    color: context.c.inkSoft,
+                                    fontSize: 11,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ],
                             const SizedBox(height: 12),
                             Center(
                               child: Text(
-                                "Kode: $qrString",
-                                style: TextStyle(color: context.c.inkSoft, fontSize: 11),
-                                textAlign: TextAlign.center,
+                                "Scan dengan aplikasi e-wallet atau m-banking",
+                                style: TextStyle(
+                                  color: context.c.inkSoft,
+                                  fontSize: 12,
+                                ),
                               ),
                             ),
-                          ],
-                          const SizedBox(height: 12),
-                          Center(
-                            child: Text(
-                              "Scan dengan aplikasi e-wallet atau m-banking",
-                              style: TextStyle(color: context.c.inkSoft, fontSize: 12),
-                            ),
-                          ),
-                        ] else ...[
-                          // Virtual Account - Show VA Number
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: context.c.surface,
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(color: context.c.line),
-                            ),
-                            // stretch, bukan center: tanpa ini Column
-                            // mengikuti lebar anak terlebar, dan nomor VA
-                            // 16 digit lebih lebar dari kartunya. Akibatnya
-                            // label dan tombol tampak rata tengah terhadap
-                            // NOMOR yang meluber, bukan terhadap kartu, jadi
-                            // semuanya terlihat bergeser ke kiri.
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                Text(
-                                  "Nomor Virtual Account",
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(color: context.c.inkSoft, fontSize: 12),
-                                ),
-                                const SizedBox(height: 8),
-                                // Nomor terpanjang yang kita temui 17 digit
-                                // (BNC). Dikecilkan kalau tidak muat, bukan
-                                // dipotong: satu digit hilang berarti uang
-                                // pelanggan nyasar.
-                                FittedBox(
-                                  fit: BoxFit.scaleDown,
-                                  child: Text(
-                                    nomorVa ?? 'Belum tersedia',
+                          ] else ...[
+                            // Virtual Account - Show VA Number
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: context.c.surface,
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(color: context.c.line),
+                              ),
+                              // stretch, bukan center: tanpa ini Column
+                              // mengikuti lebar anak terlebar, dan nomor VA
+                              // 16 digit lebih lebar dari kartunya. Akibatnya
+                              // label dan tombol tampak rata tengah terhadap
+                              // NOMOR yang meluber, bukan terhadap kartu, jadi
+                              // semuanya terlihat bergeser ke kiri.
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Text(
+                                    "Nomor Virtual Account",
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
-                                      fontSize: nomorVa == null ? 15 : 24,
-                                      fontWeight: FontWeight.bold,
-                                      // Jarak antarhuruf dikurangi supaya
-                                      // nomornya muat utuh tanpa mengecil
-                                      // berlebihan, tapi tetap terbaca
-                                      // per digit saat disalin manual.
-                                      letterSpacing: nomorVa == null ? 0 : 1,
-                                      fontFeatures: const [FontFeature.tabularFigures()],
-                                      color: nomorVa == null
-                                          ? context.c.danger
-                                          : context.c.ink,
+                                      color: context.c.inkSoft,
+                                      fontSize: 12,
                                     ),
                                   ),
-                                ),
-                                if (nomorVa == null) ...[
-                                  const SizedBox(height: 6),
-                                  Text(
-                                    'Hubungi tim Sportago sebelum mentransfer. '
-                                    'Jangan menebak nomor rekening.',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: context.c.inkSoft,
-                                      height: 1.4,
+                                  const SizedBox(height: 8),
+                                  // Nomor terpanjang yang kita temui 17 digit
+                                  // (BNC). Dikecilkan kalau tidak muat, bukan
+                                  // dipotong: satu digit hilang berarti uang
+                                  // pelanggan nyasar.
+                                  FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Text(
+                                      nomorVa ?? 'Belum tersedia',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: nomorVa == null ? 15 : 24,
+                                        fontWeight: FontWeight.bold,
+                                        // Jarak antarhuruf dikurangi supaya
+                                        // nomornya muat utuh tanpa mengecil
+                                        // berlebihan, tapi tetap terbaca
+                                        // per digit saat disalin manual.
+                                        letterSpacing: nomorVa == null ? 0 : 1,
+                                        fontFeatures: const [
+                                          FontFeature.tabularFigures(),
+                                        ],
+                                        color: nomorVa == null
+                                            ? context.c.danger
+                                            : context.c.ink,
+                                      ),
+                                    ),
+                                  ),
+                                  if (nomorVa == null) ...[
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      'Hubungi tim Sportago sebelum mentransfer. '
+                                      'Jangan menebak nomor rekening.',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: context.c.inkSoft,
+                                        height: 1.4,
+                                      ),
+                                    ),
+                                  ],
+                                  const SizedBox(height: 12),
+                                  // Center supaya tombol tidak ikut melebar
+                                  // penuh oleh crossAxisAlignment.stretch di
+                                  // atas, tapi tetap rata tengah terhadap kartu.
+                                  Center(
+                                    child: OutlinedButton.icon(
+                                      // Tombol ini SEBELUMNYA tidak menyalin
+                                      // apa pun. Ia hanya memunculkan pesan
+                                      // "Nomor VA berhasil disalin!", lalu
+                                      // pelanggan menempel di m-banking dan
+                                      // mendapat isi papan klip sebelumnya.
+                                      // Pesan yang mengaku berhasil padahal
+                                      // tidak terjadi apa-apa lebih berbahaya
+                                      // daripada tombol yang diam saja.
+                                      onPressed: nomorVa == null
+                                          ? null
+                                          : () {
+                                              Clipboard.setData(
+                                                ClipboardData(text: nomorVa),
+                                              );
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                SnackBar(
+                                                  content: const Text(
+                                                    'Nomor VA disalin',
+                                                  ),
+                                                  backgroundColor: context.c.ok,
+                                                  duration: const Duration(
+                                                    seconds: 2,
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                      icon: const Icon(Icons.copy, size: 16),
+                                      label: const Text("Salin"),
+                                      style: OutlinedButton.styleFrom(
+                                        foregroundColor: context.c.accent,
+                                        side: BorderSide(
+                                          color: context.c.accent,
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ],
-                                const SizedBox(height: 12),
-                                // Center supaya tombol tidak ikut melebar
-                                // penuh oleh crossAxisAlignment.stretch di
-                                // atas, tapi tetap rata tengah terhadap kartu.
-                                Center(
-                                  child: OutlinedButton.icon(
-                                    // Tombol ini SEBELUMNYA tidak menyalin
-                                    // apa pun. Ia hanya memunculkan pesan
-                                    // "Nomor VA berhasil disalin!", lalu
-                                    // pelanggan menempel di m-banking dan
-                                    // mendapat isi papan klip sebelumnya.
-                                    // Pesan yang mengaku berhasil padahal
-                                    // tidak terjadi apa-apa lebih berbahaya
-                                    // daripada tombol yang diam saja.
-                                    onPressed: nomorVa == null
-                                        ? null
-                                        : () {
-                                            Clipboard.setData(ClipboardData(text: nomorVa));
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              SnackBar(
-                                                content: const Text('Nomor VA disalin'),
-                                                backgroundColor: context.c.ok,
-                                                duration: const Duration(seconds: 2),
-                                              ),
-                                            );
-                                          },
-                                    icon: const Icon(Icons.copy, size: 16),
-                                    label: const Text("Salin"),
-                                    style: OutlinedButton.styleFrom(
-                                      foregroundColor: context.c.accent,
-                                      side: BorderSide(color: context.c.accent),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Center(
-                            child: Text(
-                              "Transfer sesuai nominal ke nomor VA di atas",
-                              style: TextStyle(color: context.c.inkSoft, fontSize: 12),
-                            ),
-                          ),
-                        ],
-
-                        // Pintasan pengembang: menandai pemesanan lunas
-                        // tanpa uang berpindah. Backend menolaknya di
-                        // produksi (403), jadi di tangan pelanggan tombol
-                        // ini tidak melakukan apa-apa; ia cuma tombol mati
-                        // berwarna ungu bertuliskan "TEST" di layar tempat
-                        // orang menyerahkan uang.
-                        //
-                        // Komentar lamanya berbunyi "Remove in production"
-                        // tapi tidak pernah ada yang menghapusnya, dan tanpa
-                        // pagar kDebugMode ia ikut ke setiap build rilis.
-                        if (kDebugMode) ...[
-                          const SizedBox(height: 20),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton.icon(
-                              onPressed: _simulatePayment,
-                              icon: const Icon(Icons.bug_report, color: Colors.white, size: 18),
-                              label: const Text(
-                                "TEST: Simulasi Pembayaran Berhasil",
-                                style: TextStyle(color: Colors.white, fontSize: 12),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.purple,
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
                               ),
                             ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Rincian Pembayaran Card
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: context.c.raised,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: context.c.line),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(Icons.receipt, color: context.c.inkSoft, size: 18),
-                            const SizedBox(width: 8),
-                            Text(
-                              "Rincian Pembayaran",
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: context.c.ink),
+                            const SizedBox(height: 12),
+                            Center(
+                              child: Text(
+                                "Transfer sesuai nominal ke nomor VA di atas",
+                                style: TextStyle(
+                                  color: context.c.inkSoft,
+                                  fontSize: 12,
+                                ),
+                              ),
                             ),
                           ],
-                        ),
-                        Divider(height: 20, color: context.c.line),
-                        // Baris lama: harga per jam, durasi, lalu
-                        // "Subtotal" yang isinya justru TOTAL. Pelanggan
-                        // membaca Rp 200.000 lalu Rp 221.000 dengan
-                        // selisih Rp 21.000 yang tidak pernah dijelaskan.
-                        // Biaya platform dan biaya admin memang tidak
-                        // pernah ditampilkan, padahal keduanya yang
-                        // membentuk selisih itu.
-                        _buildPriceRow(
-                          "Harga lapangan (${widget.booking.durationHours} jam)",
-                          formatCurrency(hargaLapangan),
-                        ),
-                        _buildPriceRow("Biaya platform", formatCurrency(biayaPlatform)),
-                        _buildPriceRow("Biaya admin", formatCurrency(biayaAdmin)),
-                        Divider(height: 20, color: context.c.line),
-                        _buildPriceRow(
-                          "Total Bayar",
-                          formatCurrency(total),
-                          isBold: true,
-                          isBlue: true,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
 
-                  // Action Buttons
-                  SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: ElevatedButton.icon(
-                      onPressed: _simulatePayment,
-                      icon: Icon(Icons.check_circle_outline, color: context.c.onAccent),
-                      label: Text(
-                        "CEK STATUS PEMBAYARAN",
-                        style: TextStyle(
+                          // Pintasan pengembang: menandai pemesanan lunas
+                          // tanpa uang berpindah. Backend menolaknya di
+                          // produksi (403), jadi di tangan pelanggan tombol
+                          // ini tidak melakukan apa-apa; ia cuma tombol mati
+                          // berwarna ungu bertuliskan "TEST" di layar tempat
+                          // orang menyerahkan uang.
+                          //
+                          // Komentar lamanya berbunyi "Remove in production"
+                          // tapi tidak pernah ada yang menghapusnya, dan tanpa
+                          // pagar kDebugMode ia ikut ke setiap build rilis.
+                          if (kDebugMode) ...[
+                            const SizedBox(height: 20),
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton.icon(
+                                onPressed: _simulatePayment,
+                                icon: const Icon(
+                                  Icons.bug_report,
+                                  color: Colors.white,
+                                  size: 18,
+                                ),
+                                label: const Text(
+                                  "TEST: Simulasi Pembayaran Berhasil",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.purple,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 12,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Rincian Pembayaran Card
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: context.c.raised,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: context.c.line),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.receipt,
+                                color: context.c.inkSoft,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                "Rincian Pembayaran",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                  color: context.c.ink,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Divider(height: 20, color: context.c.line),
+                          // Baris lama: harga per jam, durasi, lalu
+                          // "Subtotal" yang isinya justru TOTAL. Pelanggan
+                          // membaca Rp 200.000 lalu Rp 221.000 dengan
+                          // selisih Rp 21.000 yang tidak pernah dijelaskan.
+                          // Biaya platform dan biaya admin memang tidak
+                          // pernah ditampilkan, padahal keduanya yang
+                          // membentuk selisih itu.
+                          _buildPriceRow(
+                            "Harga lapangan (${widget.booking.durationHours} jam)",
+                            formatCurrency(hargaLapangan),
+                          ),
+                          _buildPriceRow(
+                            "Biaya platform",
+                            formatCurrency(biayaPlatform),
+                          ),
+                          _buildPriceRow(
+                            "Biaya admin",
+                            formatCurrency(biayaAdmin),
+                          ),
+                          Divider(height: 20, color: context.c.line),
+                          _buildPriceRow(
+                            "Total Bayar",
+                            formatCurrency(total),
+                            isBold: true,
+                            isBlue: true,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Action Buttons
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: ElevatedButton.icon(
+                        onPressed: _simulatePayment,
+                        icon: Icon(
+                          Icons.check_circle_outline,
                           color: context.c.onAccent,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
                         ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: context.c.accent,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
+                        label: Text(
+                          "CEK STATUS PEMBAYARAN",
+                          style: TextStyle(
+                            color: context.c.onAccent,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
                         ),
-                        elevation: 0,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: OutlinedButton.icon(
-                      onPressed: _cancelBooking,
-                      icon: Icon(Icons.close, color: context.c.danger),
-                      label: Text(
-                        "BATALKAN PESANAN",
-                        style: TextStyle(
-                          color: context.c.danger,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: context.c.danger),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: context.c.accent,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          elevation: 0,
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 24),
-                ],
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: OutlinedButton.icon(
+                        onPressed: _cancelBooking,
+                        icon: Icon(Icons.close, color: context.c.danger),
+                        label: Text(
+                          "BATALKAN PESANAN",
+                          style: TextStyle(
+                            color: context.c.danger,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: context.c.danger),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+                ),
               ),
-            ),
+      ),
     );
   }
 
@@ -2215,13 +2488,25 @@ class _TransactionPaymentWaitingPageState extends State<TransactionPaymentWaitin
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label, style: TextStyle(color: context.c.inkSoft, fontSize: 13)),
-          Text(value, style: TextStyle(fontWeight: FontWeight.w500, fontSize: 13, color: context.c.ink)),
+          Text(
+            value,
+            style: TextStyle(
+              fontWeight: FontWeight.w500,
+              fontSize: 13,
+              color: context.c.ink,
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildPriceRow(String label, String value, {bool isBold = false, bool isBlue = false}) {
+  Widget _buildPriceRow(
+    String label,
+    String value, {
+    bool isBold = false,
+    bool isBlue = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
@@ -2229,10 +2514,9 @@ class _TransactionPaymentWaitingPageState extends State<TransactionPaymentWaitin
         children: [
           Text(
             label,
-            style: TextStyle(
-              color: context.c.inkSoft,
-              fontSize: 13,
-            ).copyWith(fontWeight: isBold ? FontWeight.bold : FontWeight.normal),
+            style: TextStyle(color: context.c.inkSoft, fontSize: 13).copyWith(
+              fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+            ),
           ),
           Text(
             value,

@@ -5,11 +5,7 @@ class FieldType {
   final String label; // e.g., 'Futsal', 'Badminton'
   final int venueCount;
 
-  FieldType({
-    required this.value,
-    required this.label,
-    this.venueCount = 0,
-  });
+  FieldType({required this.value, required this.label, this.venueCount = 0});
 
   factory FieldType.fromJson(Map<String, dynamic> json) {
     return FieldType(
@@ -39,16 +35,39 @@ class FieldType {
       case 'gym':
         return Icons.fitness_center;
       case 'padel':
-        return Icons.sports_tennis;
-      case 'billiard':
-        return Icons.circle;
-      case 'bowling':
-        return Icons.sports_cricket;
-      case 'golf':
-        return Icons.golf_course;
+      case 'squash':
       case 'table_tennis':
         return Icons.sports_tennis;
+      case 'football':
+        return Icons.sports_soccer;
+      case 'sepak_takraw':
+        return Icons.sports_volleyball;
+      case 'billiard':
+        return Icons.sports_bar_outlined;
+      case 'bowling':
+        return Icons.sports_score;
+      case 'golf':
+        return Icons.golf_course;
+      case 'archery':
+        return Icons.my_location;
+      case 'climbing':
+        return Icons.terrain;
+      case 'martial_arts':
+        return Icons.sports_martial_arts;
+      case 'yoga':
+        return Icons.self_improvement;
+      case 'dance':
+        return Icons.music_note;
+      case 'athletics':
+        return Icons.directions_run;
+      case 'skateboard':
+        return Icons.skateboarding;
+      case 'ice_skating':
+        return Icons.ice_skating;
       default:
+        // Cabang yang belum punya ikonnya sendiri tetap tampil, bukan
+        // hilang: daftarnya datang dari server, jadi backend bisa
+        // menambah cabang tanpa aplikasi ini dirilis ulang.
         return Icons.sports;
     }
   }

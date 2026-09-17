@@ -35,7 +35,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
 
   // --- FUNGSI LUPA PASSWORD ---
   void _showForgotPasswordSheet() {
-    final TextEditingController emailController = TextEditingController(text: "okta@test.com");
+    final TextEditingController emailController = TextEditingController(
+      text: "okta@test.com",
+    );
     bool isLoading = false;
 
     showModalBottomSheet(
@@ -45,9 +47,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       builder: (context) => StatefulBuilder(
         builder: (context, setSheetState) {
           return Container(
-            padding: EdgeInsets.only(
-              bottom: context.sisipanBawah,
-            ),
+            padding: EdgeInsets.only(bottom: context.sisipanBawah),
             decoration: BoxDecoration(
               color: context.c.raised,
               borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -106,10 +106,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                     child: Text(
                       "Kami akan mengirimkan link reset password ke email terdaftar",
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: context.c.inkSoft,
-                        fontSize: 14,
-                      ),
+                      style: TextStyle(color: context.c.inkSoft, fontSize: 14),
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -221,9 +218,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       barrierDismissible: false,
       builder: (context) => Dialog(
         backgroundColor: context.c.raised,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Column(
@@ -259,14 +254,14 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               Text(
                 "Link reset password telah dikirim ke:",
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: context.c.inkSoft,
-                  fontSize: 14,
-                ),
+                style: TextStyle(color: context.c.inkSoft, fontSize: 14),
               ),
               const SizedBox(height: 8),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: context.c.accent.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(8),
@@ -283,10 +278,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               Text(
                 "Silakan cek inbox atau folder spam email kamu.",
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: context.c.inkSoft,
-                  fontSize: 13,
-                ),
+                style: TextStyle(color: context.c.inkSoft, fontSize: 13),
               ),
               const SizedBox(height: 24),
 
@@ -358,7 +350,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
         systemOverlayStyle: gayaOverlay(context),
         title: Text(
           "Ganti Password",
-          style: TextStyle(color: context.c.ink, fontWeight: FontWeight.bold)
+          style: TextStyle(color: context.c.ink, fontWeight: FontWeight.bold),
         ),
         backgroundColor: context.c.surface,
         elevation: 0,
@@ -367,155 +359,168 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Info Text
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: context.c.raised,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: context.c.line,
+      body: SafeArea(
+        // Bilah navigasi menumpuk di atas isi layar sejak
+        // targetSdk 35. top:false karena AppBar sudah
+        // menyisihkan bagian atasnya sendiri.
+        top: false,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Info Text
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: context.c.raised,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: context.c.line),
                 ),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.info_outline,
-                    color: context.c.accent,
-                    size: 20,
-                  ),
-                  SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      "Buat password baru yang kuat dan sulit ditebak agar akunmu tetap aman.",
-                      style: TextStyle(
-                        color: context.c.ink,
-                        fontSize: 13,
-                        height: 1.4,
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline, color: context.c.accent, size: 20),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        "Buat password baru yang kuat dan sulit ditebak agar akunmu tetap aman.",
+                        style: TextStyle(
+                          color: context.c.ink,
+                          fontSize: 13,
+                          height: 1.4,
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-            
-            const SizedBox(height: 30),
-
-            // 1. Password Lama
-            _buildPasswordField(
-              label: "Password Lama",
-              controller: _currentPassController,
-              isObscure: _obscureCurrent,
-              onToggle: () => setState(() => _obscureCurrent = !_obscureCurrent),
-              icon: Icons.lock_outline,
-            ),
-            
-            const SizedBox(height: 20),
-
-            // 2. Password Baru
-            _buildPasswordField(
-              label: "Password Baru",
-              controller: _newPassController,
-              isObscure: _obscureNew,
-              onToggle: () => setState(() => _obscureNew = !_obscureNew),
-              icon: Icons.lock,
-            ),
-            
-            const SizedBox(height: 20),
-
-            // 3. Konfirmasi Password Baru
-            _buildPasswordField(
-              label: "Konfirmasi Password Baru",
-              controller: _confirmPassController,
-              isObscure: _obscureConfirm,
-              onToggle: () => setState(() => _obscureConfirm = !_obscureConfirm),
-              icon: Icons.lock_reset,
-            ),
-
-            const SizedBox(height: 30),
-
-            // Password Requirements
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: context.c.raised,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: context.c.line),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Syarat Password:",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                      color: context.c.ink,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  _buildRequirement("Minimal $panjangMinimalPassword karakter", _newPassController.text.length >= panjangMinimalPassword),
-                  _buildRequirement("Berbeda dari password lama", _currentPassController.text != _newPassController.text && _newPassController.text.isNotEmpty),
-                  _buildRequirement("Konfirmasi password cocok", _newPassController.text == _confirmPassController.text && _confirmPassController.text.isNotEmpty),
-                ],
-              ),
-            ),
-            
-            const SizedBox(height: 40),
-
-            // Tombol Simpan
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: _isLoading ? null : _changePassword,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: context.c.accent,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(999)
-                  ),
-                  elevation: 0,
+                  ],
                 ),
-                child: _isLoading
-                  ? SizedBox(
-                      height: 24,
-                      width: 24,
-                      child: CircularProgressIndicator(
-                        color: context.c.onAccent,
-                        strokeWidth: 2
-                      )
-                    )
-                  : Text(
-                      "UBAH PASSWORD",
+              ),
+
+              const SizedBox(height: 30),
+
+              // 1. Password Lama
+              _buildPasswordField(
+                label: "Password Lama",
+                controller: _currentPassController,
+                isObscure: _obscureCurrent,
+                onToggle: () =>
+                    setState(() => _obscureCurrent = !_obscureCurrent),
+                icon: Icons.lock_outline,
+              ),
+
+              const SizedBox(height: 20),
+
+              // 2. Password Baru
+              _buildPasswordField(
+                label: "Password Baru",
+                controller: _newPassController,
+                isObscure: _obscureNew,
+                onToggle: () => setState(() => _obscureNew = !_obscureNew),
+                icon: Icons.lock,
+              ),
+
+              const SizedBox(height: 20),
+
+              // 3. Konfirmasi Password Baru
+              _buildPasswordField(
+                label: "Konfirmasi Password Baru",
+                controller: _confirmPassController,
+                isObscure: _obscureConfirm,
+                onToggle: () =>
+                    setState(() => _obscureConfirm = !_obscureConfirm),
+                icon: Icons.lock_reset,
+              ),
+
+              const SizedBox(height: 30),
+
+              // Password Requirements
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: context.c.raised,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: context.c.line),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Syarat Password:",
                       style: TextStyle(
-                        color: context.c.onAccent,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 16
-                      )
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: context.c.ink,
+                      ),
                     ),
+                    const SizedBox(height: 8),
+                    _buildRequirement(
+                      "Minimal $panjangMinimalPassword karakter",
+                      _newPassController.text.length >= panjangMinimalPassword,
+                    ),
+                    _buildRequirement(
+                      "Berbeda dari password lama",
+                      _currentPassController.text != _newPassController.text &&
+                          _newPassController.text.isNotEmpty,
+                    ),
+                    _buildRequirement(
+                      "Konfirmasi password cocok",
+                      _newPassController.text == _confirmPassController.text &&
+                          _confirmPassController.text.isNotEmpty,
+                    ),
+                  ],
+                ),
               ),
-            ),
-            
-            const SizedBox(height: 20),
-            
-            Center(
-              child: TextButton(
-                onPressed: () => _showForgotPasswordSheet(),
-                child: Text(
-                  "Lupa Password Lama?",
-                  style: TextStyle(
-                    color: context.c.accent,
-                    fontWeight: FontWeight.w600,
+
+              const SizedBox(height: 40),
+
+              // Tombol Simpan
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: _isLoading ? null : _changePassword,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: context.c.accent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: _isLoading
+                      ? SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(
+                            color: context.c.onAccent,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : Text(
+                          "UBAH PASSWORD",
+                          style: TextStyle(
+                            color: context.c.onAccent,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 16,
+                          ),
+                        ),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              Center(
+                child: TextButton(
+                  onPressed: () => _showForgotPasswordSheet(),
+                  child: Text(
+                    "Lupa Password Lama?",
+                    style: TextStyle(
+                      color: context.c.accent,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ),
-            )
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -534,10 +539,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       children: [
         Text(
           label,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: context.c.ink
-          )
+          style: TextStyle(fontWeight: FontWeight.bold, color: context.c.ink),
         ),
         const SizedBox(height: 8),
         Container(
@@ -549,7 +551,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
             controller: controller,
             obscureText: isObscure,
             inputFormatters: const [TanpaSpasi()],
-            onChanged: (value) => setState(() {}), // Trigger rebuild for requirements
+            onChanged: (value) =>
+                setState(() {}), // Trigger rebuild for requirements
             style: TextStyle(color: context.c.ink),
             decoration: InputDecoration(
               prefixIcon: Icon(icon, color: context.c.accent),
@@ -561,7 +564,11 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 onPressed: onToggle,
               ),
               hintText: "••••••••",
-              hintStyle: TextStyle(fontSize: 12, letterSpacing: 2, color: context.c.inkSoft),
+              hintStyle: TextStyle(
+                fontSize: 12,
+                letterSpacing: 2,
+                color: context.c.inkSoft,
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,

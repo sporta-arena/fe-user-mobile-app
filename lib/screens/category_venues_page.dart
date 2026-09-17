@@ -6,6 +6,7 @@ import 'package:geolocator/geolocator.dart';
 import '../services/venue_service.dart';
 import '../models/venue.dart' as model;
 import 'venue_detail_page.dart';
+import '../utils/sisipan_bawah.dart';
 
 class CategoryVenuesPage extends StatefulWidget {
   final String categoryName;
@@ -975,6 +976,7 @@ class _FilterBottomSheetState extends State<_FilterBottomSheet> {
   Widget build(BuildContext context) {
     return Container(
       height: MediaQuery.of(context).size.height * 0.75,
+      padding: EdgeInsets.only(bottom: context.sisipanBawah),
       decoration: BoxDecoration(
         color: context.c.raised,
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),

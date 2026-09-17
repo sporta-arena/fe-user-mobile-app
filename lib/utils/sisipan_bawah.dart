@@ -27,7 +27,7 @@ extension SisipanBawah on BuildContext {
   /// Nol di perangkat yang tidak punya bilah menumpuk, jadi aman
   /// dipakai tanpa syarat.
   double get sisipanBawah => math.max(
-        MediaQuery.viewInsetsOf(this).bottom,
-        MediaQuery.viewPaddingOf(this).bottom,
-      );
+    MediaQuery.viewInsetsOf(this).bottom,
+    MediaQuery.viewPaddingOf(this).bottom,
+  );
 }

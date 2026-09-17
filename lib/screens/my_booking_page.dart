@@ -11,6 +11,7 @@ import 'login_page.dart';
 import 'home_page.dart';
 import 'chat/chat_page.dart';
 import 'e_ticket_page.dart';
+import '../utils/sisipan_bawah.dart';
 
 class MyBookingPage extends StatefulWidget {
   final bool showBackButton;
@@ -21,7 +22,8 @@ class MyBookingPage extends StatefulWidget {
   State<MyBookingPage> createState() => _MyBookingPageState();
 }
 
-class _MyBookingPageState extends State<MyBookingPage> with SingleTickerProviderStateMixin {
+class _MyBookingPageState extends State<MyBookingPage>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   // API data
@@ -91,19 +93,21 @@ class _MyBookingPageState extends State<MyBookingPage> with SingleTickerProvider
         appBar: AppBar(
           title: Text(
             "Pesanan Saya",
-            style: TextStyle(color: context.c.ink, fontWeight: FontWeight.bold)
+            style: TextStyle(color: context.c.ink, fontWeight: FontWeight.bold),
           ),
           backgroundColor: context.c.surface,
           systemOverlayStyle: gayaOverlay(context),
           elevation: 0,
-          leading: widget.showBackButton ? IconButton(
-            icon: Icon(Icons.arrow_back_ios, color: context.c.ink),
-            onPressed: () {
-              if (Navigator.canPop(context)) {
-                Navigator.pop(context);
-              }
-            },
-          ) : null,
+          leading: widget.showBackButton
+              ? IconButton(
+                  icon: Icon(Icons.arrow_back_ios, color: context.c.ink),
+                  onPressed: () {
+                    if (Navigator.canPop(context)) {
+                      Navigator.pop(context);
+                    }
+                  },
+                )
+              : null,
           automaticallyImplyLeading: widget.showBackButton,
         ),
         body: Center(
@@ -126,14 +130,20 @@ class _MyBookingPageState extends State<MyBookingPage> with SingleTickerProvider
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: context.c.accent,
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 12,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(999),
                   ),
                 ),
                 child: Text(
                   "Login",
-                  style: TextStyle(color: context.c.onAccent, fontWeight: FontWeight.w700),
+                  style: TextStyle(
+                    color: context.c.onAccent,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ],
@@ -153,20 +163,20 @@ class _MyBookingPageState extends State<MyBookingPage> with SingleTickerProvider
               pinned: true,
               backgroundColor: context.c.surface,
               systemOverlayStyle: gayaOverlay(context),
-              leading: widget.showBackButton ? IconButton(
-                icon: Icon(Icons.arrow_back_ios, color: context.c.ink),
-                onPressed: () {
-                  if (Navigator.canPop(context)) {
-                    Navigator.pop(context);
-                  }
-                },
-              ) : null,
+              leading: widget.showBackButton
+                  ? IconButton(
+                      icon: Icon(Icons.arrow_back_ios, color: context.c.ink),
+                      onPressed: () {
+                        if (Navigator.canPop(context)) {
+                          Navigator.pop(context);
+                        }
+                      },
+                    )
+                  : null,
               automaticallyImplyLeading: widget.showBackButton,
               flexibleSpace: FlexibleSpaceBar(
                 background: Container(
-                  decoration: BoxDecoration(
-                    color: context.c.surface,
-                  ),
+                  decoration: BoxDecoration(color: context.c.surface),
                   child: SafeArea(
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
@@ -200,7 +210,9 @@ class _MyBookingPageState extends State<MyBookingPage> with SingleTickerProvider
                 child: Container(
                   decoration: BoxDecoration(
                     color: context.c.surface,
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(20),
+                    ),
                   ),
                   child: TabBar(
                     controller: _tabController,
@@ -209,7 +221,10 @@ class _MyBookingPageState extends State<MyBookingPage> with SingleTickerProvider
                     indicatorColor: context.c.accent,
                     indicatorWeight: 3,
                     indicatorSize: TabBarIndicatorSize.label,
-                    labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    labelStyle: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
                     tabs: const [
                       Tab(text: "Menunggu"),
                       Tab(text: "Aktif"),
@@ -221,55 +236,65 @@ class _MyBookingPageState extends State<MyBookingPage> with SingleTickerProvider
             ),
           ];
         },
-      body: _isLoading
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(color: context.c.accent),
-                  SizedBox(height: 16),
-                  Text('Memuat data booking...', style: TextStyle(color: context.c.inkSoft)),
-                ],
-              ),
-            )
-          : _errorMessage != null
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.error_outline, size: 60, color: context.c.inkSoft),
-                      const SizedBox(height: 16),
-                      Text(
-                        _errorMessage!,
-                        style: TextStyle(color: context.c.inkSoft),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: _loadBookings,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: context.c.accent,
-                        ),
-                        child: Text(
-                          'Coba Lagi',
-                          style: TextStyle(color: context.c.onAccent, fontWeight: FontWeight.w700),
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              : RefreshIndicator(
-                  onRefresh: _loadBookings,
-                  color: context.c.accent,
-                  child: TabBarView(
-                    controller: _tabController,
-                    children: [
-                      _buildBookingList("pending"),
-                      _buildBookingList("active"),
-                      _buildBookingList("history"),
-                    ],
-                  ),
+        body: _isLoading
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(color: context.c.accent),
+                    SizedBox(height: 16),
+                    Text(
+                      'Memuat data booking...',
+                      style: TextStyle(color: context.c.inkSoft),
+                    ),
+                  ],
                 ),
+              )
+            : _errorMessage != null
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.error_outline,
+                      size: 60,
+                      color: context.c.inkSoft,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      _errorMessage!,
+                      style: TextStyle(color: context.c.inkSoft),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: _loadBookings,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: context.c.accent,
+                      ),
+                      child: Text(
+                        'Coba Lagi',
+                        style: TextStyle(
+                          color: context.c.onAccent,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            : RefreshIndicator(
+                onRefresh: _loadBookings,
+                color: context.c.accent,
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    _buildBookingList("pending"),
+                    _buildBookingList("active"),
+                    _buildBookingList("history"),
+                  ],
+                ),
+              ),
       ),
     );
   }
@@ -279,21 +304,24 @@ class _MyBookingPageState extends State<MyBookingPage> with SingleTickerProvider
 
     if (filterStatus == "pending") {
       // Menunggu = pending (belum bayar)
-      filteredData = _allBookings.where((item) =>
-        item.status == 'pending'
-      ).toList();
+      filteredData = _allBookings
+          .where((item) => item.status == 'pending')
+          .toList();
     } else if (filterStatus == "active") {
       // Aktif = confirmed (sudah bayar, belum selesai)
-      filteredData = _allBookings.where((item) =>
-        item.status == 'confirmed'
-      ).toList();
+      filteredData = _allBookings
+          .where((item) => item.status == 'confirmed')
+          .toList();
     } else {
       // History = completed, cancelled, expired
-      filteredData = _allBookings.where((item) =>
-        item.status == 'completed' ||
-        item.status == 'cancelled' ||
-        item.status == 'expired'
-      ).toList();
+      filteredData = _allBookings
+          .where(
+            (item) =>
+                item.status == 'completed' ||
+                item.status == 'cancelled' ||
+                item.status == 'expired',
+          )
+          .toList();
     }
 
     if (filteredData.isEmpty) {
@@ -305,7 +333,7 @@ class _MyBookingPageState extends State<MyBookingPage> with SingleTickerProvider
             const SizedBox(height: 16),
             Text(
               "Belum ada booking di sini",
-              style: TextStyle(color: context.c.inkSoft)
+              style: TextStyle(color: context.c.inkSoft),
             ),
           ],
         ),
@@ -336,7 +364,11 @@ class BookingCard extends StatelessWidget {
   final Booking booking;
   final VoidCallback onRefresh;
 
-  const BookingCard({super.key, required this.booking, required this.onRefresh});
+  const BookingCard({
+    super.key,
+    required this.booking,
+    required this.onRefresh,
+  });
 
   // --- LOGIC NAVIGASI ---
   void _goToPaymentDirect(BuildContext context) {
@@ -348,10 +380,8 @@ class BookingCard extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => PaymentWaitingPage(
-          booking: booking,
-          bookingData: paymentData,
-        ),
+        builder: (context) =>
+            PaymentWaitingPage(booking: booking, bookingData: paymentData),
       ),
     );
   }
@@ -375,10 +405,8 @@ class BookingCard extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => PaymentWaitingPage(
-              booking: booking,
-              bookingData: paymentData,
-            ),
+            builder: (context) =>
+                PaymentWaitingPage(booking: booking, bookingData: paymentData),
           ),
         );
       }
@@ -430,9 +458,7 @@ class BookingCard extends StatelessWidget {
   void _goToTicket(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => ETicketPage(booking: booking),
-      ),
+      MaterialPageRoute(builder: (context) => ETicketPage(booking: booking)),
     );
   }
 
@@ -566,8 +592,8 @@ class BookingCard extends StatelessWidget {
             color: Colors.black.withValues(alpha: 0.2),
             spreadRadius: 1,
             blurRadius: 10,
-            offset: const Offset(0, 4)
-          )
+            offset: const Offset(0, 4),
+          ),
         ],
         border: Border.all(color: context.c.line),
       ),
@@ -578,7 +604,9 @@ class BookingCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               color: themeColor.withValues(alpha: 0.15),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(20))
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
+              ),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -592,17 +620,20 @@ class BookingCard extends StatelessWidget {
                       style: TextStyle(
                         color: themeColor,
                         fontWeight: FontWeight.bold,
-                        fontSize: 13
-                      )
+                        fontSize: 13,
+                      ),
                     ),
                   ],
                 ),
                 if (status == 'pending')
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: context.c.surface,
-                      borderRadius: BorderRadius.circular(10)
+                      borderRadius: BorderRadius.circular(10),
                     ),
                     child: Row(
                       children: [
@@ -613,8 +644,8 @@ class BookingCard extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
-                            color: context.c.danger
-                          )
+                            color: context.c.danger,
+                          ),
                         ),
                       ],
                     ),
@@ -634,7 +665,7 @@ class BookingCard extends StatelessWidget {
                   width: 64,
                   decoration: BoxDecoration(
                     color: context.c.surface,
-                    borderRadius: BorderRadius.circular(16)
+                    borderRadius: BorderRadius.circular(16),
                   ),
                   child: Icon(Icons.sports_soccer, color: context.c.inkSoft),
                 ),
@@ -648,15 +679,18 @@ class BookingCard extends StatelessWidget {
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
-                          color: context.c.ink
+                          color: context.c.ink,
                         ),
                         maxLines: 1,
-                        overflow: TextOverflow.ellipsis
+                        overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 4),
                       Text(
                         booking.field?.name ?? "Unknown Field",
-                        style: TextStyle(color: context.c.inkSoft, fontSize: 13)
+                        style: TextStyle(
+                          color: context.c.inkSoft,
+                          fontSize: 13,
+                        ),
                       ),
                       const SizedBox(height: 8),
                       Wrap(
@@ -666,30 +700,41 @@ class BookingCard extends StatelessWidget {
                           Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.calendar_today_outlined, size: 12, color: context.c.inkSoft),
+                              Icon(
+                                Icons.calendar_today_outlined,
+                                size: 12,
+                                color: context.c.inkSoft,
+                              ),
                               const SizedBox(width: 4),
                               Text(
                                 _formatDate(booking.bookingDate),
                                 style: TextStyle(
                                   color: context.c.inkSoft,
                                   fontSize: 12,
-                                  fontWeight: FontWeight.w500
-                                )
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
                             ],
                           ),
                           Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.schedule, size: 12, color: context.c.inkSoft),
+                              Icon(
+                                Icons.schedule,
+                                size: 12,
+                                color: context.c.inkSoft,
+                              ),
                               const SizedBox(width: 4),
                               Text(
-                                _formatTimeRange(booking.startTime, booking.endTime),
+                                _formatTimeRange(
+                                  booking.startTime,
+                                  booking.endTime,
+                                ),
                                 style: TextStyle(
                                   color: context.c.inkSoft,
                                   fontSize: 12,
-                                  fontWeight: FontWeight.w500
-                                )
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
                             ],
                           ),
@@ -717,7 +762,10 @@ class BookingCard extends StatelessWidget {
                       children: [
                         Text(
                           "Total Harga",
-                          style: TextStyle(fontSize: 11, color: context.c.inkSoft)
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: context.c.inkSoft,
+                          ),
                         ),
                         const SizedBox(height: 2),
                         Text(
@@ -725,30 +773,39 @@ class BookingCard extends StatelessWidget {
                           style: TextStyle(
                             fontWeight: FontWeight.w900,
                             fontSize: 18,
-                            color: context.c.ink
-                          )
+                            color: context.c.ink,
+                          ),
                         ),
                       ],
                     ),
                     if (status == 'pending')
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: context.c.info.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: context.c.info.withValues(alpha: 0.4)),
+                          border: Border.all(
+                            color: context.c.info.withValues(alpha: 0.4),
+                          ),
                         ),
                         child: Row(
                           children: [
-                            Icon(Icons.qr_code, size: 14, color: context.c.info),
+                            Icon(
+                              Icons.qr_code,
+                              size: 14,
+                              color: context.c.info,
+                            ),
                             SizedBox(width: 4),
                             Text(
                               "QRIS",
                               style: TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.bold,
-                                color: context.c.info
-                              )
+                                color: context.c.info,
+                              ),
                             ),
                           ],
                         ),
@@ -767,13 +824,16 @@ class BookingCard extends StatelessWidget {
                             foregroundColor: context.c.ink,
                             side: BorderSide(color: context.c.line),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)
+                              borderRadius: BorderRadius.circular(12),
                             ),
                             padding: const EdgeInsets.symmetric(vertical: 12),
                           ),
                           child: Text(
                             "Ganti",
-                            style: TextStyle(fontWeight: FontWeight.bold, color: context.c.ink)
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: context.c.ink,
+                            ),
                           ),
                         ),
                       ),
@@ -786,7 +846,7 @@ class BookingCard extends StatelessWidget {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: btnColor,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(999)
+                            borderRadius: BorderRadius.circular(999),
                           ),
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           elevation: 0,
@@ -795,13 +855,13 @@ class BookingCard extends StatelessWidget {
                           mainBtnText,
                           style: TextStyle(
                             color: context.c.onAccent,
-                            fontWeight: FontWeight.w700
-                          )
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
                     ),
                   ],
-                )
+                ),
               ],
             ),
           ),
@@ -822,14 +882,11 @@ class PaymentSelectorSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     String formatCurrency(int amount) {
-      return "Rp ${amount.toString().replaceAllMapped(
-        RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-        (Match m) => '${m[1]}.'
-      )}";
+      return "Rp ${amount.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}";
     }
 
     return Container(
-      padding: const EdgeInsets.only(top: 10),
+      padding: EdgeInsets.only(top: 10, bottom: context.sisipanBawah),
       decoration: BoxDecoration(
         color: context.c.raised,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -844,14 +901,18 @@ class PaymentSelectorSheet extends StatelessWidget {
             margin: const EdgeInsets.only(bottom: 20),
             decoration: BoxDecoration(
               color: context.c.line,
-              borderRadius: BorderRadius.circular(10)
+              borderRadius: BorderRadius.circular(10),
             ),
           ),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 24),
             child: Text(
               "Pilih Pembayaran",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: context.c.ink)
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: context.c.ink,
+              ),
             ),
           ),
           Divider(height: 1, color: context.c.line),
@@ -864,14 +925,17 @@ class PaymentSelectorSheet extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text("Total Tagihan", style: TextStyle(color: context.c.inkSoft)),
+                Text(
+                  "Total Tagihan",
+                  style: TextStyle(color: context.c.inkSoft),
+                ),
                 Text(
                   formatCurrency(totalPrice),
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w900,
-                    color: context.c.ink
-                  )
+                    color: context.c.ink,
+                  ),
                 ),
               ],
             ),
@@ -889,7 +953,7 @@ class PaymentSelectorSheet extends StatelessWidget {
                   title: "QRIS (Gopay/OVO/Dana)",
                   fee: 700,
                   color: context.c.info,
-                  isRecommended: true
+                  isRecommended: true,
                 ),
                 const SizedBox(height: 20),
                 _buildSectionTitle(context, "Virtual Account"),
@@ -898,21 +962,21 @@ class PaymentSelectorSheet extends StatelessWidget {
                   icon: Icons.account_balance,
                   title: "BCA Virtual Account",
                   fee: 2500,
-                  color: Colors.purple
+                  color: Colors.purple,
                 ),
                 _buildPaymentOption(
                   context,
                   icon: Icons.account_balance,
                   title: "Mandiri Virtual Account",
                   fee: 2500,
-                  color: context.c.info!
+                  color: context.c.info!,
                 ),
                 _buildPaymentOption(
                   context,
                   icon: Icons.account_balance,
                   title: "BRI Virtual Account",
                   fee: 2500,
-                  color: context.c.warn
+                  color: context.c.warn,
                 ),
                 const SizedBox(height: 20),
                 _buildSectionTitle(context, "Gerai Retail"),
@@ -921,7 +985,7 @@ class PaymentSelectorSheet extends StatelessWidget {
                   icon: Icons.storefront,
                   title: "Alfamart / Indomaret",
                   fee: 5000,
-                  color: context.c.danger
+                  color: context.c.danger,
                 ),
                 const SizedBox(height: 40),
               ],
@@ -940,32 +1004,31 @@ class PaymentSelectorSheet extends StatelessWidget {
         style: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.bold,
-          color: context.c.inkSoft
-        )
+          color: context.c.inkSoft,
+        ),
       ),
     );
   }
 
-  Widget _buildPaymentOption(BuildContext context, {
+  Widget _buildPaymentOption(
+    BuildContext context, {
     required IconData icon,
     required String title,
     required int fee,
     required Color color,
-    bool isRecommended = false
+    bool isRecommended = false,
   }) {
     int finalPrice = totalPrice + fee;
 
-    String formatCurrency(int amount) => "Rp ${amount.toString().replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (Match m) => '${m[1]}.'
-    )}";
+    String formatCurrency(int amount) =>
+        "Rp ${amount.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}";
 
     return InkWell(
       onTap: () {
         Navigator.pop(context, {
           "method": title,
           "fee": fee,
-          "total": finalPrice
+          "total": finalPrice,
         });
       },
       child: Container(
@@ -975,16 +1038,16 @@ class PaymentSelectorSheet extends StatelessWidget {
           color: context.c.raised,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isRecommended ? context.c.accent : context.c.line
+            color: isRecommended ? context.c.accent : context.c.line,
           ),
           boxShadow: [
-            if(isRecommended)
+            if (isRecommended)
               BoxShadow(
                 color: context.c.accent.withValues(alpha: 0.1),
                 blurRadius: 8,
-                offset: const Offset(0, 4)
-              )
-          ]
+                offset: const Offset(0, 4),
+              ),
+          ],
         ),
         child: Row(
           children: [
@@ -993,7 +1056,7 @@ class PaymentSelectorSheet extends StatelessWidget {
               width: 50,
               decoration: BoxDecoration(
                 color: color.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(12)
+                borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(icon, color: color, size: 28),
             ),
@@ -1010,37 +1073,42 @@ class PaymentSelectorSheet extends StatelessWidget {
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
-                            color: context.c.ink
+                            color: context.c.ink,
                           ),
-                          overflow: TextOverflow.ellipsis
-                        )
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                      if(isRecommended) ...[
+                      if (isRecommended) ...[
                         const SizedBox(width: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: context.c.accent,
-                            borderRadius: BorderRadius.circular(4)
+                            borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
                             "PROMO",
                             style: TextStyle(
                               fontSize: 8,
                               color: context.c.onAccent,
-                              fontWeight: FontWeight.bold
-                            )
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        )
-                      ]
+                        ),
+                      ],
                     ],
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    fee == 0 ? "Bebas Biaya Admin" : "Biaya Admin: ${formatCurrency(fee)}",
+                    fee == 0
+                        ? "Bebas Biaya Admin"
+                        : "Biaya Admin: ${formatCurrency(fee)}",
                     style: TextStyle(
                       fontSize: 12,
-                      color: fee == 0 ? context.c.ok : context.c.inkSoft
+                      color: fee == 0 ? context.c.ok : context.c.inkSoft,
                     ),
                   ),
                 ],
@@ -1169,10 +1237,8 @@ class _PaymentWaitingPageState extends State<PaymentWaitingPage> {
     int adminFee = widget.bookingData['adminFee'] ?? 0;
     int total = widget.bookingData['totalWithFee'] ?? subtotal;
 
-    String formatCurrency(int amount) => "Rp ${amount.toString().replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (Match m) => '${m[1]}.'
-    )}";
+    String formatCurrency(int amount) =>
+        "Rp ${amount.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}";
 
     // Get QR string from payment if available
     String? qrString = widget.booking.payment?.qrString;
@@ -1194,374 +1260,461 @@ class _PaymentWaitingPageState extends State<PaymentWaitingPage> {
         elevation: 0,
         iconTheme: IconThemeData(color: context.c.ink),
       ),
-      body: _isProcessing
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(color: context.c.accent),
-                  SizedBox(height: 16),
-                  Text('Memproses...', style: TextStyle(color: context.c.inkSoft)),
-                ],
-              ),
-            )
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Countdown Timer Card
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: context.c.warn.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: context.c.warn.withValues(alpha: 0.4)),
+      body: SafeArea(
+        // Bilah navigasi menumpuk di atas isi layar sejak
+        // targetSdk 35. top:false karena AppBar sudah
+        // menyisihkan bagian atasnya sendiri.
+        top: false,
+        child: _isProcessing
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(color: context.c.accent),
+                    SizedBox(height: 16),
+                    Text(
+                      'Memproses...',
+                      style: TextStyle(color: context.c.inkSoft),
                     ),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: context.c.warn.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Icon(Icons.timer_outlined, color: context.c.warn, size: 24),
+                  ],
+                ),
+              )
+            : SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Countdown Timer Card
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: context.c.warn.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: context.c.warn.withValues(alpha: 0.4),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: context.c.warn.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Icon(
+                              Icons.timer_outlined,
+                              color: context.c.warn,
+                              size: 24,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Selesaikan pembayaran dalam",
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: context.c.inkSoft,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  widget.bookingData['countdown'] ?? "00:15:00",
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: context.c.danger,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Detail Booking Card
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: context.c.raised,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: context.c.line),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Detail Booking",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: context.c.ink,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          _buildDetailRow(
+                            "Kode Booking",
+                            widget.booking.bookingCode,
+                          ),
+                          _buildDetailRow(
+                            "Venue",
+                            widget.bookingData['venue'] ?? "-",
+                          ),
+                          _buildDetailRow(
+                            "Lapangan",
+                            widget.bookingData['field'] ?? "-",
+                          ),
+                          _buildDetailRow(
+                            "Tanggal",
+                            widget.bookingData['date'] ?? "-",
+                          ),
+                          _buildDetailRow(
+                            "Waktu",
+                            widget.bookingData['time'] ?? "-",
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Metode Pembayaran Card
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: context.c.raised,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: context.c.line),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Metode Pembayaran",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: context.c.ink,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
                             children: [
-                              Text(
-                                "Selesaikan pembayaran dalam",
-                                style: TextStyle(fontSize: 12, color: context.c.inkSoft),
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: context.c.accent.withValues(
+                                    alpha: 0.15,
+                                  ),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Icon(
+                                  method.contains("QRIS")
+                                      ? Icons.qr_code_scanner
+                                      : Icons.account_balance,
+                                  color: context.c.accent,
+                                  size: 20,
+                                ),
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                widget.bookingData['countdown'] ?? "00:15:00",
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: context.c.danger,
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  method,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    color: context.c.ink,
+                                  ),
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Detail Booking Card
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: context.c.raised,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: context.c.line),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Detail Booking",
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: context.c.ink),
-                        ),
-                        const SizedBox(height: 12),
-                        _buildDetailRow("Kode Booking", widget.booking.bookingCode),
-                        _buildDetailRow("Venue", widget.bookingData['venue'] ?? "-"),
-                        _buildDetailRow("Lapangan", widget.bookingData['field'] ?? "-"),
-                        _buildDetailRow("Tanggal", widget.bookingData['date'] ?? "-"),
-                        _buildDetailRow("Waktu", widget.bookingData['time'] ?? "-"),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Metode Pembayaran Card
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: context.c.raised,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: context.c.line),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Metode Pembayaran",
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: context.c.ink),
-                        ),
-                        const SizedBox(height: 12),
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: context.c.accent.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Icon(
-                                method.contains("QRIS") ? Icons.qr_code_scanner : Icons.account_balance,
-                                color: context.c.accent,
-                                size: 20,
-                              ),
+                          const SizedBox(height: 16),
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: context.c.surface,
+                              borderRadius: BorderRadius.circular(8),
                             ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                method,
-                                style: TextStyle(fontWeight: FontWeight.w600, color: context.c.ink),
-                              ),
+                            child: Column(
+                              children: [
+                                Text(
+                                  method.contains("QRIS")
+                                      ? "Scan QR Code"
+                                      : "Nomor Virtual Account",
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: context.c.inkSoft,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      paymentCode ?? 'Belum tersedia',
+                                      style: TextStyle(
+                                        fontSize: paymentCode == null ? 14 : 18,
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: paymentCode == null
+                                            ? 0
+                                            : 1,
+                                        color: paymentCode == null
+                                            ? context.c.danger
+                                            : context.c.ink,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    InkWell(
+                                      onTap: () {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          const SnackBar(
+                                            content: Text("Nomor disalin!"),
+                                          ),
+                                        );
+                                      },
+                                      child: Icon(
+                                        Icons.copy,
+                                        size: 18,
+                                        color: context.c.accent,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: context.c.surface,
-                            borderRadius: BorderRadius.circular(8),
                           ),
-                          child: Column(
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Rincian Pembayaran Card
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: context.c.raised,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: context.c.line),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Rincian Pembayaran",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: context.c.ink,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          _buildPriceRow("Subtotal", formatCurrency(subtotal)),
+                          const SizedBox(height: 8),
+                          _buildPriceRow(
+                            "Biaya Admin",
+                            formatCurrency(adminFee),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.symmetric(vertical: 12),
+                            child: Divider(height: 1, color: context.c.line),
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                method.contains("QRIS") ? "Scan QR Code" : "Nomor Virtual Account",
-                                style: TextStyle(fontSize: 11, color: context.c.inkSoft),
+                                "Total Pembayaran",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                  color: context.c.ink,
+                                ),
                               ),
-                              const SizedBox(height: 6),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    paymentCode ?? 'Belum tersedia',
-                                    style: TextStyle(
-                                      fontSize: paymentCode == null ? 14 : 18,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: paymentCode == null ? 0 : 1,
-                                      color: paymentCode == null
-                                          ? context.c.danger
-                                          : context.c.ink,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  InkWell(
-                                    onTap: () {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(content: Text("Nomor disalin!")),
-                                      );
-                                    },
-                                    child: Icon(Icons.copy, size: 18, color: context.c.accent),
-                                  ),
-                                ],
+                              Text(
+                                formatCurrency(total),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                  color: context.c.ink,
+                                ),
                               ),
                             ],
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Rincian Pembayaran Card
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: context.c.raised,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: context.c.line),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Rincian Pembayaran",
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: context.c.ink),
-                        ),
-                        const SizedBox(height: 12),
-                        _buildPriceRow("Subtotal", formatCurrency(subtotal)),
-                        const SizedBox(height: 8),
-                        _buildPriceRow("Biaya Admin", formatCurrency(adminFee)),
-                        Padding(
-                          padding: EdgeInsets.symmetric(vertical: 12),
-                          child: Divider(height: 1, color: context.c.line),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "Total Pembayaran",
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: context.c.ink),
-                            ),
-                            Text(
-                              formatCurrency(total),
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                                color: context.c.ink,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Button Konfirmasi
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
-                      onPressed: _simulatePayment,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: context.c.accent,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                        elevation: 0,
-                      ),
-                      child: Text(
-                        "Saya Sudah Bayar",
-                        style: TextStyle(
-                          color: context.c.onAccent,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 14,
-                        ),
+                        ],
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: OutlinedButton(
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => Dialog(
-                            backgroundColor: context.c.raised,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                              side: BorderSide(color: context.c.line),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(24),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(16),
-                                    decoration: BoxDecoration(
-                                      color: context.c.danger.withValues(alpha: 0.15),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Icon(
-                                      Icons.warning_amber_rounded,
-                                      color: context.c.danger,
-                                      size: 40,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 20),
-                                  Text(
-                                    "Batalkan Pesanan?",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 20,
-                                      color: context.c.ink,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    "Apakah kamu yakin ingin membatalkan pesanan ini? Tindakan ini tidak dapat dibatalkan.",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: context.c.inkSoft,
-                                      fontSize: 14,
-                                      height: 1.4,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 24),
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: OutlinedButton(
-                                          onPressed: () => Navigator.pop(context),
-                                          style: OutlinedButton.styleFrom(
-                                            padding: const EdgeInsets.symmetric(vertical: 14),
-                                            side: BorderSide(color: context.c.line),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(12),
-                                            ),
-                                          ),
-                                          child: Text(
-                                            "Kembali",
-                                            style: TextStyle(
-                                              color: context.c.ink,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: ElevatedButton(
-                                          onPressed: () {
-                                            Navigator.pop(context);
-                                            _cancelBooking();
-                                          },
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: context.c.danger,
-                                            padding: const EdgeInsets.symmetric(vertical: 14),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(12),
-                                            ),
-                                            elevation: 0,
-                                          ),
-                                          child: const Text(
-                                            "Ya, Batalkan",
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
+                    const SizedBox(height: 24),
+
+                    // Button Konfirmasi
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: _simulatePayment,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: context.c.accent,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(999),
                           ),
-                        );
-                      },
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: context.c.line),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          elevation: 0,
                         ),
-                      ),
-                      child: Text(
-                        "Batalkan Pesanan",
-                        style: TextStyle(
-                          color: context.c.danger,
-                          fontWeight: FontWeight.w600,
+                        child: Text(
+                          "Saya Sudah Bayar",
+                          style: TextStyle(
+                            color: context.c.onAccent,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                ],
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: OutlinedButton(
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) => Dialog(
+                              backgroundColor: context.c.raised,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                                side: BorderSide(color: context.c.line),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(24),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(16),
+                                      decoration: BoxDecoration(
+                                        color: context.c.danger.withValues(
+                                          alpha: 0.15,
+                                        ),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        Icons.warning_amber_rounded,
+                                        color: context.c.danger,
+                                        size: 40,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 20),
+                                    Text(
+                                      "Batalkan Pesanan?",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 20,
+                                        color: context.c.ink,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Text(
+                                      "Apakah kamu yakin ingin membatalkan pesanan ini? Tindakan ini tidak dapat dibatalkan.",
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: context.c.inkSoft,
+                                        fontSize: 14,
+                                        height: 1.4,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 24),
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: OutlinedButton(
+                                            onPressed: () =>
+                                                Navigator.pop(context),
+                                            style: OutlinedButton.styleFrom(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    vertical: 14,
+                                                  ),
+                                              side: BorderSide(
+                                                color: context.c.line,
+                                              ),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                              ),
+                                            ),
+                                            child: Text(
+                                              "Kembali",
+                                              style: TextStyle(
+                                                color: context.c.ink,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: ElevatedButton(
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                              _cancelBooking();
+                                            },
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: context.c.danger,
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    vertical: 14,
+                                                  ),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                              ),
+                                              elevation: 0,
+                                            ),
+                                            child: const Text(
+                                              "Ya, Batalkan",
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: context.c.line),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: Text(
+                          "Batalkan Pesanan",
+                          style: TextStyle(
+                            color: context.c.danger,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+                ),
               ),
-            ),
+      ),
     );
   }
 
@@ -1575,7 +1728,11 @@ class _PaymentWaitingPageState extends State<PaymentWaitingPage> {
           Flexible(
             child: Text(
               value,
-              style: TextStyle(fontWeight: FontWeight.w500, fontSize: 13, color: context.c.ink),
+              style: TextStyle(
+                fontWeight: FontWeight.w500,
+                fontSize: 13,
+                color: context.c.ink,
+              ),
               textAlign: TextAlign.right,
             ),
           ),
@@ -1624,7 +1781,8 @@ class TicketDetailPage extends StatelessWidget {
   }
 
   void _shareTicket() {
-    final String shareText = '''
+    final String shareText =
+        '''
 🎫 E-Ticket Sportago
 
 📍 ${booking.field?.venue?.name ?? "Venue"}
@@ -1637,7 +1795,10 @@ class TicketDetailPage extends StatelessWidget {
 Tunjukkan e-ticket ini saat datang ke venue.
 ''';
 
-    Share.share(shareText, subject: 'E-Ticket Sportago - ${booking.field?.venue?.name}');
+    Share.share(
+      shareText,
+      subject: 'E-Ticket Sportago - ${booking.field?.venue?.name}',
+    );
   }
 
   bool get _isChatEnabled {
@@ -1665,7 +1826,11 @@ Tunjukkan e-ticket ini saat datang ke venue.
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(color: context.c.line),
                       ),
-                      child: Icon(Icons.arrow_back_ios_new, color: context.c.ink, size: 20),
+                      child: Icon(
+                        Icons.arrow_back_ios_new,
+                        color: context.c.ink,
+                        size: 20,
+                      ),
                     ),
                   ),
                   Expanded(
@@ -1731,16 +1896,29 @@ Tunjukkan e-ticket ini saat datang ke venue.
                                 children: [
                                   // Status Badge
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 8,
+                                    ),
                                     decoration: BoxDecoration(
-                                      color: context.c.ok.withValues(alpha: 0.15),
+                                      color: context.c.ok.withValues(
+                                        alpha: 0.15,
+                                      ),
                                       borderRadius: BorderRadius.circular(30),
-                                      border: Border.all(color: context.c.ok.withValues(alpha: 0.4)),
+                                      border: Border.all(
+                                        color: context.c.ok.withValues(
+                                          alpha: 0.4,
+                                        ),
+                                      ),
                                     ),
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        Icon(Icons.check_circle, size: 16, color: context.c.ok),
+                                        Icon(
+                                          Icons.check_circle,
+                                          size: 16,
+                                          color: context.c.ok,
+                                        ),
                                         const SizedBox(width: 6),
                                         Text(
                                           "Booking Confirmed",
@@ -1764,13 +1942,19 @@ Tunjukkan e-ticket ini saat datang ke venue.
                                       borderRadius: BorderRadius.circular(20),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: context.c.accent.withValues(alpha: 0.3),
+                                          color: context.c.accent.withValues(
+                                            alpha: 0.3,
+                                          ),
                                           blurRadius: 15,
                                           offset: const Offset(0, 8),
                                         ),
                                       ],
                                     ),
-                                    child: Icon(Icons.sports_soccer, color: context.c.onAccent, size: 40),
+                                    child: Icon(
+                                      Icons.sports_soccer,
+                                      color: context.c.onAccent,
+                                      size: 40,
+                                    ),
                                   ),
                                   const SizedBox(height: 16),
 
@@ -1792,17 +1976,27 @@ Tunjukkan e-ticket ini saat datang ke venue.
                                       fontSize: 15,
                                     ),
                                   ),
-                                  if (booking.field?.venue?.address != null) ...[
+                                  if (booking.field?.venue?.address !=
+                                      null) ...[
                                     const SizedBox(height: 8),
                                     Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
-                                        Icon(Icons.location_on_outlined, size: 14, color: context.c.inkSoft),
+                                        Icon(
+                                          Icons.location_on_outlined,
+                                          size: 14,
+                                          color: context.c.inkSoft,
+                                        ),
                                         const SizedBox(width: 4),
                                         Flexible(
                                           child: Text(
-                                            booking.field?.venue?.address ?? "-",
-                                            style: TextStyle(color: context.c.inkSoft, fontSize: 12),
+                                            booking.field?.venue?.address ??
+                                                "-",
+                                            style: TextStyle(
+                                              color: context.c.inkSoft,
+                                              fontSize: 12,
+                                            ),
                                             textAlign: TextAlign.center,
                                             maxLines: 2,
                                             overflow: TextOverflow.ellipsis,
@@ -1819,7 +2013,9 @@ Tunjukkan e-ticket ini saat datang ke venue.
                             Stack(
                               children: [
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 20,
+                                  ),
                                   child: LayoutBuilder(
                                     builder: (context, constraints) {
                                       return Row(
@@ -1828,10 +2024,13 @@ Tunjukkan e-ticket ini saat datang ke venue.
                                           (index) => Container(
                                             width: 4,
                                             height: 2,
-                                            margin: const EdgeInsets.symmetric(horizontal: 2),
+                                            margin: const EdgeInsets.symmetric(
+                                              horizontal: 2,
+                                            ),
                                             decoration: BoxDecoration(
                                               color: context.c.line,
-                                              borderRadius: BorderRadius.circular(1),
+                                              borderRadius:
+                                                  BorderRadius.circular(1),
                                             ),
                                           ),
                                         ),
@@ -1879,7 +2078,9 @@ Tunjukkan e-ticket ini saat datang ke venue.
                                           context,
                                           icon: Icons.calendar_today_rounded,
                                           label: "TANGGAL",
-                                          value: _formatShortDate(booking.bookingDate),
+                                          value: _formatShortDate(
+                                            booking.bookingDate,
+                                          ),
                                         ),
                                       ),
                                       const SizedBox(width: 12),
@@ -1911,7 +2112,10 @@ Tunjukkan e-ticket ini saat datang ke venue.
                                     decoration: BoxDecoration(
                                       color: Colors.white,
                                       borderRadius: BorderRadius.circular(20),
-                                      border: Border.all(color: Colors.grey.shade200, width: 2),
+                                      border: Border.all(
+                                        color: Colors.grey.shade200,
+                                        width: 2,
+                                      ),
                                     ),
                                     child: Column(
                                       children: [
@@ -1921,7 +2125,9 @@ Tunjukkan e-ticket ini saat datang ke venue.
                                           padding: const EdgeInsets.all(12),
                                           decoration: BoxDecoration(
                                             color: Colors.white,
-                                            borderRadius: BorderRadius.circular(16),
+                                            borderRadius: BorderRadius.circular(
+                                              16,
+                                            ),
                                           ),
                                           child: const Icon(
                                             Icons.qr_code_2_rounded,
@@ -1931,10 +2137,16 @@ Tunjukkan e-ticket ini saat datang ke venue.
                                         ),
                                         const SizedBox(height: 16),
                                         Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 20,
+                                            vertical: 12,
+                                          ),
                                           decoration: BoxDecoration(
-                                            color: context.c.onAccent.withValues(alpha: 0.06),
-                                            borderRadius: BorderRadius.circular(12),
+                                            color: context.c.onAccent
+                                                .withValues(alpha: 0.06),
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
                                           ),
                                           child: Column(
                                             children: [
@@ -1977,7 +2189,9 @@ Tunjukkan e-ticket ini saat datang ke venue.
                         decoration: BoxDecoration(
                           color: context.c.warn.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: context.c.warn.withValues(alpha: 0.4)),
+                          border: Border.all(
+                            color: context.c.warn.withValues(alpha: 0.4),
+                          ),
                         ),
                         child: Row(
                           children: [
@@ -1987,7 +2201,11 @@ Tunjukkan e-ticket ini saat datang ke venue.
                                 color: context.c.warn.withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(10),
                               ),
-                              child: Icon(Icons.info_outline_rounded, color: context.c.warn, size: 20),
+                              child: Icon(
+                                Icons.info_outline_rounded,
+                                color: context.c.warn,
+                                size: 20,
+                              ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
@@ -2015,7 +2233,8 @@ Tunjukkan e-ticket ini saat datang ke venue.
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => ChatPage(booking: booking),
+                                  builder: (context) =>
+                                      ChatPage(booking: booking),
                                 ),
                               );
                             },
@@ -2029,7 +2248,11 @@ Tunjukkan e-ticket ini saat datang ke venue.
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.chat_bubble_outline_rounded, color: context.c.onAccent, size: 20),
+                                Icon(
+                                  Icons.chat_bubble_outline_rounded,
+                                  color: context.c.onAccent,
+                                  size: 20,
+                                ),
                                 SizedBox(width: 10),
                                 Text(
                                   "Chat dengan Partner",
@@ -2054,7 +2277,10 @@ Tunjukkan e-ticket ini saat datang ke venue.
                               child: OutlinedButton(
                                 onPressed: _shareTicket,
                                 style: OutlinedButton.styleFrom(
-                                  side: BorderSide(color: context.c.line, width: 1.5),
+                                  side: BorderSide(
+                                    color: context.c.line,
+                                    width: 1.5,
+                                  ),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(16),
                                   ),
@@ -2062,7 +2288,11 @@ Tunjukkan e-ticket ini saat datang ke venue.
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(Icons.share_outlined, color: context.c.ink, size: 20),
+                                    Icon(
+                                      Icons.share_outlined,
+                                      color: context.c.ink,
+                                      size: 20,
+                                    ),
                                     SizedBox(width: 8),
                                     Text(
                                       "Bagikan",
@@ -2089,13 +2319,17 @@ Tunjukkan e-ticket ini saat datang ke venue.
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => VenueDetailPage(venueId: venueId),
+                                        builder: (context) =>
+                                            VenueDetailPage(venueId: venueId),
                                       ),
                                     );
                                   }
                                 },
                                 style: OutlinedButton.styleFrom(
-                                  side: BorderSide(color: context.c.line, width: 1.5),
+                                  side: BorderSide(
+                                    color: context.c.line,
+                                    width: 1.5,
+                                  ),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(16),
                                   ),
@@ -2103,7 +2337,11 @@ Tunjukkan e-ticket ini saat datang ke venue.
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(Icons.location_on_outlined, color: context.c.ink, size: 20),
+                                    Icon(
+                                      Icons.location_on_outlined,
+                                      color: context.c.ink,
+                                      size: 20,
+                                    ),
                                     SizedBox(width: 8),
                                     Text(
                                       "Lihat Venue",
@@ -2194,7 +2432,11 @@ class RatingDialog extends StatefulWidget {
   final String venueName;
   final int bookingId;
 
-  const RatingDialog({super.key, required this.venueName, required this.bookingId});
+  const RatingDialog({
+    super.key,
+    required this.venueName,
+    required this.bookingId,
+  });
 
   @override
   State<RatingDialog> createState() => _RatingDialogState();
@@ -2206,12 +2448,18 @@ class _RatingDialogState extends State<RatingDialog> {
 
   String _getRatingLabel() {
     switch (_selectedStars) {
-      case 1: return "Sangat Buruk";
-      case 2: return "Buruk";
-      case 3: return "Cukup";
-      case 4: return "Bagus";
-      case 5: return "Sangat Bagus";
-      default: return "Ketuk untuk memberi rating";
+      case 1:
+        return "Sangat Buruk";
+      case 2:
+        return "Buruk";
+      case 3:
+        return "Cukup";
+      case 4:
+        return "Bagus";
+      case 5:
+        return "Sangat Bagus";
+      default:
+        return "Ketuk untuk memberi rating";
     }
   }
 
@@ -2261,10 +2509,7 @@ class _RatingDialogState extends State<RatingDialog> {
             Text(
               "Bagaimana pengalaman main di ${widget.venueName}?",
               textAlign: TextAlign.center,
-              style: TextStyle(
-                color: context.c.inkSoft,
-                fontSize: 14,
-              ),
+              style: TextStyle(color: context.c.inkSoft, fontSize: 14),
             ),
             const SizedBox(height: 24),
 
@@ -2285,8 +2530,12 @@ class _RatingDialogState extends State<RatingDialog> {
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 6),
                           child: Icon(
-                            isSelected ? Icons.star_rounded : Icons.star_outline_rounded,
-                            color: isSelected ? context.c.accent : context.c.inkSoft,
+                            isSelected
+                                ? Icons.star_rounded
+                                : Icons.star_outline_rounded,
+                            color: isSelected
+                                ? context.c.accent
+                                : context.c.inkSoft,
                             size: 36,
                           ),
                         ),
@@ -2297,7 +2546,9 @@ class _RatingDialogState extends State<RatingDialog> {
                   Text(
                     _getRatingLabel(),
                     style: TextStyle(
-                      color: _selectedStars > 0 ? context.c.accent : context.c.inkSoft,
+                      color: _selectedStars > 0
+                          ? context.c.accent
+                          : context.c.inkSoft,
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
                     ),
@@ -2357,25 +2608,31 @@ class _RatingDialogState extends State<RatingDialog> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: _selectedStars > 0 ? () {
-                      Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: const Row(
-                            children: [
-                              Icon(Icons.check_circle, color: Colors.white, size: 20),
-                              SizedBox(width: 12),
-                              Text("Terima kasih atas penilaiannya!"),
-                            ],
-                          ),
-                          backgroundColor: context.c.accent,
-                          behavior: SnackBarBehavior.floating,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                      );
-                    } : null,
+                    onPressed: _selectedStars > 0
+                        ? () {
+                            Navigator.pop(context);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: const Row(
+                                  children: [
+                                    Icon(
+                                      Icons.check_circle,
+                                      color: Colors.white,
+                                      size: 20,
+                                    ),
+                                    SizedBox(width: 12),
+                                    Text("Terima kasih atas penilaiannya!"),
+                                  ],
+                                ),
+                                backgroundColor: context.c.accent,
+                                behavior: SnackBarBehavior.floating,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                            );
+                          }
+                        : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: context.c.accent,
                       disabledBackgroundColor: context.c.line,

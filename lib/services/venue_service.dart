@@ -44,26 +44,49 @@ class FieldResult {
 
 class VenueService {
   /// Get all active venues (public)
+  /// Ambil daftar venue publik.
+  ///
+  /// [olahraga] menyaring venue yang punya minimal satu lapangan aktif
+  /// berjenis itu. Parameternya dikirim sebagai `sport`, bukan `type`:
+  /// backend membaca `$request->filled('sport')`, jadi `type` yang
+  /// dikirim sebelumnya selalu diabaikan diam-diam dan penyaringannya
+  /// tidak pernah benar-benar terjadi. Yang terlihat cuma daftar yang
+  /// tampak "kurang tersaring", tanpa galat apa pun.
+  ///
+  /// [lat] dan [lng] membuat server mengurutkan hasil dari yang
+  /// terdekat DAN mengirim `distance_km` per venue. Tanpa keduanya
+  /// kolom itu tidak ikut dihitung sama sekali, jadi jarak tidak bisa
+  /// ditampilkan — bukan karena servernya tidak bisa, tapi karena tidak
+  /// pernah ditanya.
   static Future<VenueResult> getVenues({
     String? city,
     String? search,
-    String? type, // Filter by field type (e.g., 'futsal', 'badminton')
+    String? olahraga,
+    double? lat,
+    double? lng,
     int page = 1,
   }) async {
     try {
       final queryParams = <String, String>{};
       if (city != null) queryParams['city'] = city;
       if (search != null) queryParams['search'] = search;
-      if (type != null) queryParams['type'] = type;
+      if (olahraga != null) queryParams['sport'] = olahraga;
+      if (lat != null && lng != null) {
+        queryParams['lat'] = lat.toString();
+        queryParams['lng'] = lng.toString();
+      }
       queryParams['page'] = page.toString();
-      queryParams['with'] = 'fields'; // Request fields to be included
+      // `with=fields` dibuang: controllernya tidak pernah membaca
+      // parameter itu. Yang dikirim server untuk daftar adalah
+      // min_price/max_price hasil withMin/withMax, bukan relasi fields.
 
-      final uri = Uri.parse(ApiConfig.venuesUrl).replace(queryParameters: queryParams);
+      final uri = Uri.parse(
+        ApiConfig.venuesUrl,
+      ).replace(queryParameters: queryParams);
 
-      final response = await http.get(
-        uri,
-        headers: ApiConfig.defaultHeaders,
-      ).timeout(const Duration(seconds: 20));
+      final response = await http
+          .get(uri, headers: ApiConfig.defaultHeaders)
+          .timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 
@@ -76,16 +99,14 @@ class VenueService {
           success: true,
           venues: venues,
           pagination: {
-            'current_page': data['meta']?['current_page'] ?? data['current_page'],
+            'current_page':
+                data['meta']?['current_page'] ?? data['current_page'],
             'last_page': data['meta']?['last_page'] ?? data['last_page'],
             'total': data['meta']?['total'] ?? data['total'],
           },
         );
       } else {
-        return VenueResult(
-          success: false,
-          message: data['message'],
-        );
+        return VenueResult(success: false, message: data['message']);
       }
     } catch (e) {
       return VenueResult(
@@ -98,25 +119,21 @@ class VenueService {
   /// Get venue detail (public)
   static Future<VenueResult> getVenueDetail(int id) async {
     try {
-      final response = await http.get(
-        Uri.parse(ApiConfig.venueDetailUrl(id)),
-        headers: ApiConfig.defaultHeaders,
-      ).timeout(const Duration(seconds: 20));
+      final response = await http
+          .get(
+            Uri.parse(ApiConfig.venueDetailUrl(id)),
+            headers: ApiConfig.defaultHeaders,
+          )
+          .timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
         // API returns 'data' not 'venue'
         final venueData = data['data'] ?? data['venue'];
-        return VenueResult(
-          success: true,
-          venue: Venue.fromJson(venueData),
-        );
+        return VenueResult(success: true, venue: Venue.fromJson(venueData));
       } else {
-        return VenueResult(
-          success: false,
-          message: data['message'],
-        );
+        return VenueResult(success: false, message: data['message']);
       }
     } catch (e) {
       return VenueResult(
@@ -129,10 +146,12 @@ class VenueService {
   /// Get venue fields (public)
   static Future<FieldResult> getVenueFields(int venueId) async {
     try {
-      final response = await http.get(
-        Uri.parse(ApiConfig.venueFieldsUrl(venueId)),
-        headers: ApiConfig.defaultHeaders,
-      ).timeout(const Duration(seconds: 20));
+      final response = await http
+          .get(
+            Uri.parse(ApiConfig.venueFieldsUrl(venueId)),
+            headers: ApiConfig.defaultHeaders,
+          )
+          .timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 
@@ -143,15 +162,9 @@ class VenueService {
             .map((f) => Field.fromJson(f))
             .toList();
 
-        return FieldResult(
-          success: true,
-          fields: fields,
-        );
+        return FieldResult(success: true, fields: fields);
       } else {
-        return FieldResult(
-          success: false,
-          message: data['message'],
-        );
+        return FieldResult(success: false, message: data['message']);
       }
     } catch (e) {
       return FieldResult(
@@ -164,25 +177,21 @@ class VenueService {
   /// Get field detail (public)
   static Future<FieldResult> getFieldDetail(int venueId, int fieldId) async {
     try {
-      final response = await http.get(
-        Uri.parse(ApiConfig.fieldDetailUrl(venueId, fieldId)),
-        headers: ApiConfig.defaultHeaders,
-      ).timeout(const Duration(seconds: 20));
+      final response = await http
+          .get(
+            Uri.parse(ApiConfig.fieldDetailUrl(venueId, fieldId)),
+            headers: ApiConfig.defaultHeaders,
+          )
+          .timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
         // API returns 'data' not 'field'
         final fieldData = data['data'] ?? data['field'];
-        return FieldResult(
-          success: true,
-          field: Field.fromJson(fieldData),
-        );
+        return FieldResult(success: true, field: Field.fromJson(fieldData));
       } else {
-        return FieldResult(
-          success: false,
-          message: data['message'],
-        );
+        return FieldResult(success: false, message: data['message']);
       }
     } catch (e) {
       return FieldResult(
@@ -195,17 +204,20 @@ class VenueService {
   /// Get available slots for a field (requires auth)
   static Future<FieldResult> getAvailableSlots(int fieldId, String date) async {
     if (AuthService.token == null) {
-      return FieldResult(success: false, message: 'Silakan login terlebih dahulu');
+      return FieldResult(
+        success: false,
+        message: 'Silakan login terlebih dahulu',
+      );
     }
 
     try {
-      final uri = Uri.parse(ApiConfig.availableSlotsUrl(fieldId))
-          .replace(queryParameters: {'date': date});
+      final uri = Uri.parse(
+        ApiConfig.availableSlotsUrl(fieldId),
+      ).replace(queryParameters: {'date': date});
 
-      final response = await http.get(
-        uri,
-        headers: ApiConfig.authHeaders(AuthService.token!),
-      ).timeout(const Duration(seconds: 20));
+      final response = await http
+          .get(uri, headers: ApiConfig.authHeaders(AuthService.token!))
+          .timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 
@@ -224,10 +236,7 @@ class VenueService {
           slots: slots,
         );
       } else {
-        return FieldResult(
-          success: false,
-          message: data['message'],
-        );
+        return FieldResult(success: false, message: data['message']);
       }
     } catch (e) {
       return FieldResult(
@@ -242,14 +251,19 @@ class VenueService {
   /// Get my venues (partner)
   static Future<VenueResult> getMyVenues() async {
     if (AuthService.token == null) {
-      return VenueResult(success: false, message: 'Silakan login terlebih dahulu');
+      return VenueResult(
+        success: false,
+        message: 'Silakan login terlebih dahulu',
+      );
     }
 
     try {
-      final response = await http.get(
-        Uri.parse(ApiConfig.myVenuesUrl),
-        headers: ApiConfig.authHeaders(AuthService.token!),
-      ).timeout(const Duration(seconds: 20));
+      final response = await http
+          .get(
+            Uri.parse(ApiConfig.myVenuesUrl),
+            headers: ApiConfig.authHeaders(AuthService.token!),
+          )
+          .timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 
@@ -258,15 +272,9 @@ class VenueService {
             .map((v) => Venue.fromJson(v))
             .toList();
 
-        return VenueResult(
-          success: true,
-          venues: venues,
-        );
+        return VenueResult(success: true, venues: venues);
       } else {
-        return VenueResult(
-          success: false,
-          message: data['message'],
-        );
+        return VenueResult(success: false, message: data['message']);
       }
     } catch (e) {
       return VenueResult(
@@ -291,11 +299,17 @@ class VenueService {
     File? coverImage,
   }) async {
     if (AuthService.token == null) {
-      return VenueResult(success: false, message: 'Silakan login terlebih dahulu');
+      return VenueResult(
+        success: false,
+        message: 'Silakan login terlebih dahulu',
+      );
     }
 
     try {
-      var request = http.MultipartRequest('POST', Uri.parse(ApiConfig.venuesUrl));
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse(ApiConfig.venuesUrl),
+      );
       request.headers.addAll(ApiConfig.multipartHeaders(AuthService.token!));
 
       request.fields['name'] = name;
@@ -315,7 +329,9 @@ class VenueService {
       }
 
       if (coverImage != null) {
-        request.files.add(await http.MultipartFile.fromPath('cover_image', coverImage.path));
+        request.files.add(
+          await http.MultipartFile.fromPath('cover_image', coverImage.path),
+        );
       }
 
       final streamedResponse = await request.send();
@@ -334,7 +350,10 @@ class VenueService {
           message: data['message'],
           errors: data['errors'] != null
               ? Map<String, List<String>>.from(
-                  data['errors'].map((key, value) => MapEntry(key, List<String>.from(value))))
+                  data['errors'].map(
+                    (key, value) => MapEntry(key, List<String>.from(value)),
+                  ),
+                )
               : null,
         );
       }
@@ -355,20 +374,25 @@ class VenueService {
     required double pricePerHour,
   }) async {
     if (AuthService.token == null) {
-      return FieldResult(success: false, message: 'Silakan login terlebih dahulu');
+      return FieldResult(
+        success: false,
+        message: 'Silakan login terlebih dahulu',
+      );
     }
 
     try {
-      final response = await http.post(
-        Uri.parse(ApiConfig.venueFieldsUrl(venueId)),
-        headers: ApiConfig.authHeaders(AuthService.token!),
-        body: jsonEncode({
-          'name': name,
-          'type': type,
-          'description': description,
-          'price_per_hour': pricePerHour,
-        }),
-      ).timeout(const Duration(seconds: 20));
+      final response = await http
+          .post(
+            Uri.parse(ApiConfig.venueFieldsUrl(venueId)),
+            headers: ApiConfig.authHeaders(AuthService.token!),
+            body: jsonEncode({
+              'name': name,
+              'type': type,
+              'description': description,
+              'price_per_hour': pricePerHour,
+            }),
+          )
+          .timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 
@@ -379,10 +403,7 @@ class VenueService {
           field: Field.fromJson(data['field']),
         );
       } else {
-        return FieldResult(
-          success: false,
-          message: data['message'],
-        );
+        return FieldResult(success: false, message: data['message']);
       }
     } catch (e) {
       return FieldResult(

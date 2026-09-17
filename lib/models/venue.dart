@@ -38,6 +38,25 @@ class Venue {
   final double? averageRating;
   final int? reviewCount;
 
+  /// Harga per jam termurah dan termahal di antara lapangan yang aktif.
+  ///
+  /// Dihitung server lewat withMin/withMax dan sudah ikut di SETIAP
+  /// respons daftar venue sejak lama — yang kurang pembacanya, sama
+  /// seperti `galeri` di atas. Akibatnya peta cuma bisa menancapkan
+  /// jarum tanpa harga, dan layar kategori sampai menembak satu
+  /// permintaan HTTP per venue hanya untuk mendapat angka yang
+  /// sebenarnya sudah ada di tangan.
+  ///
+  /// Null kalau venuenya belum punya lapangan aktif sama sekali.
+  final double? hargaMin;
+  final double? hargaMaks;
+
+  /// Jarak dari titik yang dikirim saat meminta daftar, dalam km.
+  ///
+  /// Hanya terisi kalau permintaannya menyertakan lat & lng; kalau
+  /// tidak, server tidak menghitungnya sama sekali.
+  final double? jarakKm;
+
   /// Isi `gallery_images` dari server.
   ///
   /// Dulu layar detail cuma memakai `coverImageUrl`, dengan catatan di
@@ -68,6 +87,9 @@ class Venue {
     this.fields,
     this.averageRating,
     this.reviewCount,
+    this.hargaMin,
+    this.hargaMaks,
+    this.jarakKm,
     this.galeri = const [],
   });
 
@@ -108,6 +130,15 @@ class Venue {
           ? double.tryParse(json['average_rating'].toString())
           : null,
       reviewCount: json['review_count'],
+      hargaMin: json['min_price'] != null
+          ? double.tryParse(json['min_price'].toString())
+          : null,
+      hargaMaks: json['max_price'] != null
+          ? double.tryParse(json['max_price'].toString())
+          : null,
+      jarakKm: json['distance_km'] != null
+          ? double.tryParse(json['distance_km'].toString())
+          : null,
       galeri: _bacaGaleri(json),
     );
   }
@@ -136,7 +167,6 @@ class Venue {
   /// sama seperti fe-web.
   String get formattedOpenHours => WaktuWib.rentang(openHour, closeHour);
 
-
   String get facilitiesText => facilities.join(', ');
 
   /// Membaca `gallery_images`, dengan sampul sebagai cadangan.
@@ -152,10 +182,9 @@ class Venue {
         if (baris is! Map) continue;
         final url = ApiConfig.perbaikiUrlMedia(baris['url']?.toString());
         if (url == null || url.isEmpty) continue;
-        hasil.add(FotoVenue(
-          url: url,
-          keterangan: baris['caption']?.toString() ?? '',
-        ));
+        hasil.add(
+          FotoVenue(url: url, keterangan: baris['caption']?.toString() ?? ''),
+        );
       }
       return hasil;
     }
@@ -167,5 +196,4 @@ class Venue {
 
     return const [];
   }
-
 }

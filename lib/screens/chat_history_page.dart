@@ -45,9 +45,9 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
       if (mounted) {
         if (result.success && result.bookings != null) {
           // Filter bookings that had chat (confirmed or completed bookings)
-          final bookingsWithChat = result.bookings!.where((b) =>
-            b.status == 'confirmed' || b.status == 'completed'
-          ).toList();
+          final bookingsWithChat = result.bookings!
+              .where((b) => b.status == 'confirmed' || b.status == 'completed')
+              .toList();
 
           setState(() {
             _bookingsWithChat = bookingsWithChat;
@@ -90,7 +90,7 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
           systemOverlayStyle: gayaOverlay(context),
           title: Text(
             "Riwayat Pesan",
-            style: TextStyle(color: context.c.ink, fontWeight: FontWeight.bold)
+            style: TextStyle(color: context.c.ink, fontWeight: FontWeight.bold),
           ),
           backgroundColor: context.c.surface,
           elevation: 0,
@@ -119,14 +119,20 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: context.c.accent,
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 12,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(999),
                   ),
                 ),
                 child: Text(
                   "Login",
-                  style: TextStyle(color: context.c.onAccent, fontWeight: FontWeight.w700),
+                  style: TextStyle(
+                    color: context.c.onAccent,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ],
@@ -141,7 +147,7 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
         systemOverlayStyle: gayaOverlay(context),
         title: Text(
           "Riwayat Pesan",
-          style: TextStyle(color: context.c.ink, fontWeight: FontWeight.bold)
+          style: TextStyle(color: context.c.ink, fontWeight: FontWeight.bold),
         ),
         backgroundColor: context.c.surface,
         elevation: 0,
@@ -150,75 +156,90 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: _isLoading
-          ? Center(
-              child: CircularProgressIndicator(color: context.c.accent),
-            )
-          : _errorMessage != null
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.error_outline, size: 60, color: context.c.inkSoft),
-                      const SizedBox(height: 16),
-                      Text(
-                        _errorMessage!,
-                        style: TextStyle(color: context.c.inkSoft),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: _loadBookingsWithChat,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: context.c.accent,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(999),
-                          ),
+      body: SafeArea(
+        // Bilah navigasi menumpuk di atas isi layar sejak
+        // targetSdk 35. top:false karena AppBar sudah
+        // menyisihkan bagian atasnya sendiri.
+        top: false,
+        child: _isLoading
+            ? Center(child: CircularProgressIndicator(color: context.c.accent))
+            : _errorMessage != null
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.error_outline,
+                      size: 60,
+                      color: context.c.inkSoft,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      _errorMessage!,
+                      style: TextStyle(color: context.c.inkSoft),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: _loadBookingsWithChat,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: context.c.accent,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(999),
                         ),
-                        child: Text(
-                          'Coba Lagi',
-                          style: TextStyle(color: context.c.onAccent, fontWeight: FontWeight.w700),
+                      ),
+                      child: Text(
+                        'Coba Lagi',
+                        style: TextStyle(
+                          color: context.c.onAccent,
+                          fontWeight: FontWeight.w700,
                         ),
-                      ),
-                    ],
-                  ),
-                )
-              : _bookingsWithChat.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.chat_bubble_outline, size: 80, color: context.c.inkSoft),
-                          const SizedBox(height: 16),
-                          Text(
-                            "Belum ada riwayat pesan",
-                            style: TextStyle(
-                              color: context.c.inkSoft,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            "Riwayat chat akan muncul setelah\nbooking selesai",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(color: context.c.inkSoft, fontSize: 14),
-                          ),
-                        ],
-                      ),
-                    )
-                  : RefreshIndicator(
-                      onRefresh: _loadBookingsWithChat,
-                      color: context.c.accent,
-                      backgroundColor: context.c.raised,
-                      child: ListView.builder(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: _bookingsWithChat.length,
-                        itemBuilder: (context, index) {
-                          return _buildChatItem(_bookingsWithChat[index]);
-                        },
                       ),
                     ),
+                  ],
+                ),
+              )
+            : _bookingsWithChat.isEmpty
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.chat_bubble_outline,
+                      size: 80,
+                      color: context.c.inkSoft,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      "Belum ada riwayat pesan",
+                      style: TextStyle(
+                        color: context.c.inkSoft,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      "Riwayat chat akan muncul setelah\nbooking selesai",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: context.c.inkSoft, fontSize: 14),
+                    ),
+                  ],
+                ),
+              )
+            : RefreshIndicator(
+                onRefresh: _loadBookingsWithChat,
+                color: context.c.accent,
+                backgroundColor: context.c.raised,
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: _bookingsWithChat.length,
+                  itemBuilder: (context, index) {
+                    return _buildChatItem(_bookingsWithChat[index]);
+                  },
+                ),
+              ),
+      ),
     );
   }
 
@@ -234,9 +255,7 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (context) => ChatPage(booking: booking),
-          ),
+          MaterialPageRoute(builder: (context) => ChatPage(booking: booking)),
         );
       },
       child: Container(
@@ -257,8 +276,11 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
                 color: isActive ? context.c.accent : context.c.line,
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: Icon(Icons.sports_soccer,
-                  color: isActive ? context.c.onAccent : context.c.inkSoft, size: 28),
+              child: Icon(
+                Icons.sports_soccer,
+                color: isActive ? context.c.onAccent : context.c.inkSoft,
+                size: 28,
+              ),
             ),
             const SizedBox(width: 14),
 
@@ -283,7 +305,10 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
                       ),
                       if (isActive)
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
                           decoration: BoxDecoration(
                             color: context.c.okSoft,
                             borderRadius: BorderRadius.circular(10),
@@ -299,7 +324,10 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
                         )
                       else
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
                           decoration: BoxDecoration(
                             color: context.c.line,
                             borderRadius: BorderRadius.circular(10),
@@ -323,18 +351,32 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
                   const SizedBox(height: 6),
                   Row(
                     children: [
-                      Icon(Icons.calendar_today_outlined, size: 12, color: context.c.inkSoft),
+                      Icon(
+                        Icons.calendar_today_outlined,
+                        size: 12,
+                        color: context.c.inkSoft,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         _formatDate(booking.bookingDate),
-                        style: TextStyle(color: context.c.inkSoft, fontSize: 12),
+                        style: TextStyle(
+                          color: context.c.inkSoft,
+                          fontSize: 12,
+                        ),
                       ),
                       const SizedBox(width: 12),
-                      Icon(Icons.access_time_outlined, size: 12, color: context.c.inkSoft),
+                      Icon(
+                        Icons.access_time_outlined,
+                        size: 12,
+                        color: context.c.inkSoft,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         booking.formattedTime,
-                        style: TextStyle(color: context.c.inkSoft, fontSize: 12),
+                        style: TextStyle(
+                          color: context.c.inkSoft,
+                          fontSize: 12,
+                        ),
                       ),
                     ],
                   ),
