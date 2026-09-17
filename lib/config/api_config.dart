@@ -30,8 +30,10 @@ class ApiConfig {
   //   flutter run --dart-define=DEV_MODE=ios           (debug  -> BE lokal)
   //   flutter build apk --release --dart-define=DEV_MODE=staging
   //   flutter build apk --release --dart-define=DEV_MODE=production
-  static const String _envOverride =
-      String.fromEnvironment('DEV_MODE', defaultValue: '');
+  static const String _envOverride = String.fromEnvironment(
+    'DEV_MODE',
+    defaultValue: '',
+  );
 
   // True kalau di-compile pakai release mode (flutter build / --release).
   static bool get isReleaseBuild =>
@@ -84,13 +86,17 @@ class ApiConfig {
   // Reverb. Kunci aplikasi Reverb bukan rahasia (klien memang harus
   // mengirimnya saat menyambung), yang menjaga kanal privat adalah
   // token Sanctum di /broadcasting/auth.
-  static const String reverbAppKey =
-      String.fromEnvironment('REVERB_APP_KEY', defaultValue: '51440cd26b729010253f');
+  static const String reverbAppKey = String.fromEnvironment(
+    'REVERB_APP_KEY',
+    defaultValue: '51440cd26b729010253f',
+  );
 
   // Kosong berarti "ikut host API": lokal lewat port 8080, staging dan
   // produksi lewat reverse proxy di port TLS yang sama.
-  static const String _reverbPortOverride =
-      String.fromEnvironment('REVERB_PORT', defaultValue: '');
+  static const String _reverbPortOverride = String.fromEnvironment(
+    'REVERB_PORT',
+    defaultValue: '',
+  );
 
   static String get reverbUrl {
     final host = Uri.parse(hostUrl);
@@ -143,44 +149,57 @@ class ApiConfig {
   static String get venuesUrl => '$apiUrl/venues';
   static String venueDetailUrl(int id) => '$apiUrl/venues/$id';
   static String venueFieldsUrl(int venueId) => '$apiUrl/venues/$venueId/fields';
-  static String fieldDetailUrl(int venueId, int fieldId) => '$apiUrl/venues/$venueId/fields/$fieldId';
-  static String venueReviewsUrl(int venueId) => '$apiUrl/venues/$venueId/reviews';
+  static String fieldDetailUrl(int venueId, int fieldId) =>
+      '$apiUrl/venues/$venueId/fields/$fieldId';
+  static String venueReviewsUrl(int venueId) =>
+      '$apiUrl/venues/$venueId/reviews';
 
   // ============================================================
   // VENUES (PARTNER)
   // ============================================================
   static String get myVenuesUrl => '$apiUrl/my-venues';
   static String myVenueDetailUrl(int id) => '$apiUrl/my-venues/$id';
-  static String myVenueFieldsUrl(int venueId) => '$apiUrl/venues/$venueId/my-fields';
+  static String myVenueFieldsUrl(int venueId) =>
+      '$apiUrl/venues/$venueId/my-fields';
 
   // ============================================================
   // VENUE ONBOARDING (PARTNER)
   // ============================================================
-  static String venueOnboardingStatusUrl(int venueId) => '$apiUrl/venues/$venueId/onboarding/status';
-  static String venueOnboardingCreateUrl(int venueId) => '$apiUrl/venues/$venueId/onboarding/create';
-  static String venueOnboardingRefreshUrl(int venueId) => '$apiUrl/venues/$venueId/onboarding/refresh';
-  static String venueOnboardingSimulateUrl(int venueId) => '$apiUrl/venues/$venueId/onboarding/simulate';
-  static String venueOnboardingSimulateVerifyUrl(int venueId) => '$apiUrl/venues/$venueId/onboarding/simulate-verify';
+  static String venueOnboardingStatusUrl(int venueId) =>
+      '$apiUrl/venues/$venueId/onboarding/status';
+  static String venueOnboardingCreateUrl(int venueId) =>
+      '$apiUrl/venues/$venueId/onboarding/create';
+  static String venueOnboardingRefreshUrl(int venueId) =>
+      '$apiUrl/venues/$venueId/onboarding/refresh';
+  static String venueOnboardingSimulateUrl(int venueId) =>
+      '$apiUrl/venues/$venueId/onboarding/simulate';
+  static String venueOnboardingSimulateVerifyUrl(int venueId) =>
+      '$apiUrl/venues/$venueId/onboarding/simulate-verify';
 
   // ============================================================
   // VENUES (ADMIN)
   // ============================================================
   static String get adminVenuesUrl => '$apiUrl/admin/venues';
   static String adminVenueDetailUrl(int id) => '$apiUrl/admin/venues/$id';
-  static String adminVenueStatusUrl(int id) => '$apiUrl/admin/venues/$id/status';
-  static String adminVenueFieldsUrl(int venueId) => '$apiUrl/admin/venues/$venueId/fields';
+  static String adminVenueStatusUrl(int id) =>
+      '$apiUrl/admin/venues/$id/status';
+  static String adminVenueFieldsUrl(int venueId) =>
+      '$apiUrl/admin/venues/$venueId/fields';
 
   // ============================================================
   // FIELDS (PARTNER)
   // ============================================================
   static String createFieldUrl(int venueId) => '$apiUrl/venues/$venueId/fields';
-  static String updateFieldUrl(int venueId, int fieldId) => '$apiUrl/venues/$venueId/fields/$fieldId';
-  static String deleteFieldUrl(int venueId, int fieldId) => '$apiUrl/venues/$venueId/fields/$fieldId';
+  static String updateFieldUrl(int venueId, int fieldId) =>
+      '$apiUrl/venues/$venueId/fields/$fieldId';
+  static String deleteFieldUrl(int venueId, int fieldId) =>
+      '$apiUrl/venues/$venueId/fields/$fieldId';
 
   // ============================================================
   // VENUE SCHEDULE EXCEPTIONS (PARTNER)
   // ============================================================
-  static String venueScheduleExceptionsUrl(int venueId) => '$apiUrl/venues/$venueId/schedule-exceptions';
+  static String venueScheduleExceptionsUrl(int venueId) =>
+      '$apiUrl/venues/$venueId/schedule-exceptions';
   static String venueScheduleExceptionDetailUrl(int venueId, int exceptionId) =>
       '$apiUrl/venues/$venueId/schedule-exceptions/$exceptionId';
 
@@ -189,30 +208,46 @@ class ApiConfig {
   // ============================================================
   static String fieldSchedulesUrl(int venueId, int fieldId) =>
       '$apiUrl/venues/$venueId/fields/$fieldId/schedules';
-  static String fieldScheduleDetailUrl(int venueId, int fieldId, int scheduleId) =>
-      '$apiUrl/venues/$venueId/fields/$fieldId/schedules/$scheduleId';
+  static String fieldScheduleDetailUrl(
+    int venueId,
+    int fieldId,
+    int scheduleId,
+  ) => '$apiUrl/venues/$venueId/fields/$fieldId/schedules/$scheduleId';
 
   // ============================================================
   // FIELD PRICING RULES (PARTNER)
   // ============================================================
   static String fieldPricingRulesUrl(int venueId, int fieldId) =>
       '$apiUrl/venues/$venueId/fields/$fieldId/pricing-rules';
-  static String fieldPricingRuleDetailUrl(int venueId, int fieldId, int ruleId) =>
-      '$apiUrl/venues/$venueId/fields/$fieldId/pricing-rules/$ruleId';
+  static String fieldPricingRuleDetailUrl(
+    int venueId,
+    int fieldId,
+    int ruleId,
+  ) => '$apiUrl/venues/$venueId/fields/$fieldId/pricing-rules/$ruleId';
 
   // ============================================================
   // BOOKINGS (CUSTOMER)
   // ============================================================
-  static String availableSlotsUrl(int fieldId) => '$apiUrl/fields/$fieldId/available-slots';
+  static String availableSlotsUrl(int fieldId) =>
+      '$apiUrl/fields/$fieldId/available-slots';
   static String get bookingsUrl => '$apiUrl/bookings';
+
+  /// Periksa kode promo sebelum menekan Bayar.
+  static String get cekPromoUrl => '$apiUrl/promos/cek';
+
+  /// Banner promo beranda. Publik; server hanya mengirim yang tayang.
+  static String get bannersUrl => '$apiUrl/banners';
   static String bookingDetailUrl(int id) => '$apiUrl/bookings/$id';
   static String cancelBookingUrl(int id) => '$apiUrl/bookings/$id/cancel';
-  static String simulatePaymentUrl(int id) => '$apiUrl/bookings/$id/simulate-payment';
-  static String refundPreviewUrl(int id) => '$apiUrl/bookings/$id/refund-preview';
+  static String simulatePaymentUrl(int id) =>
+      '$apiUrl/bookings/$id/simulate-payment';
+  static String refundPreviewUrl(int id) =>
+      '$apiUrl/bookings/$id/refund-preview';
   // Kebijakan refund berlaku global, bukan per booking: backend
   // menyediakannya di /refund-policy tanpa id.
   static String get refundPolicyUrl => '$apiUrl/refund-policy';
-  static String canReviewBookingUrl(int id) => '$apiUrl/bookings/$id/can-review';
+  static String canReviewBookingUrl(int id) =>
+      '$apiUrl/bookings/$id/can-review';
 
   // ============================================================
   // WITHDRAWALS (CUSTOMER)
@@ -222,9 +257,11 @@ class ApiConfig {
   // BOOKINGS (PARTNER)
   // ============================================================
   static String get partnerBookingsUrl => '$apiUrl/partner/bookings';
-  static String partnerBookingDetailUrl(int id) => '$apiUrl/partner/bookings/$id';
+  static String partnerBookingDetailUrl(int id) =>
+      '$apiUrl/partner/bookings/$id';
   static String get partnerCheckInUrl => '$apiUrl/partner/bookings/check-in';
-  static String venueScheduleUrl(int venueId) => '$apiUrl/partner/venues/$venueId/schedule';
+  static String venueScheduleUrl(int venueId) =>
+      '$apiUrl/partner/venues/$venueId/schedule';
 
   // ============================================================
   // REVIEWS
@@ -232,12 +269,14 @@ class ApiConfig {
   static String get reviewsUrl => '$apiUrl/reviews';
   static String get myReviewsUrl => '$apiUrl/my-reviews';
   static String get partnerReviewsUrl => '$apiUrl/partner/reviews';
-  static String reviewReplyUrl(int reviewId) => '$apiUrl/reviews/$reviewId/reply';
+  static String reviewReplyUrl(int reviewId) =>
+      '$apiUrl/reviews/$reviewId/reply';
 
   // ============================================================
   // FINANCIAL & ANALYTICS (PARTNER)
   // ============================================================
-  static String get partnerFinancialReportUrl => '$apiUrl/partner/financial-report';
+  static String get partnerFinancialReportUrl =>
+      '$apiUrl/partner/financial-report';
   static String get partnerAnalyticsUrl => '$apiUrl/partner/analytics';
 
   // ============================================================
@@ -267,7 +306,8 @@ class ApiConfig {
   // ============================================================
   // WEBHOOKS (Not versioned)
   // ============================================================
-  static String get duitkuCallbackUrl => '$hostUrl/api/webhooks/duitku/callback';
+  static String get duitkuCallbackUrl =>
+      '$hostUrl/api/webhooks/duitku/callback';
 
   // ============================================================
   // FIELD TYPES

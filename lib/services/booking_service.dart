@@ -48,29 +48,40 @@ class BookingService {
     required int durationHours,
     String? notes,
     String? paymentMethod,
+    String? promoCode,
   }) async {
     if (AuthService.token == null) {
-      return BookingResult(success: false, message: 'Silakan login terlebih dahulu');
+      return BookingResult(
+        success: false,
+        message: 'Silakan login terlebih dahulu',
+      );
     }
 
     try {
-      final response = await http.post(
-        Uri.parse(ApiConfig.bookingsUrl),
-        headers: ApiConfig.authHeaders(AuthService.token!),
-        body: jsonEncode({
-          'field_id': fieldId,
-          'booking_date': bookingDate,
-          'start_time': startTime,
-          'duration_hours': durationHours,
-          'notes': notes,
-          // API memakai kode huruf kecil ('qris', 'va_bca', ...) dan
-          // memvalidasinya persis. App menyimpan id metode dengan huruf
-          // besar untuk tampilan, jadi harus diturunkan di sini.
-          // Sebelumnya setiap pemesanan dari app ditolak 422
-          // "Selected payment method is not supported."
-          'payment_method': (paymentMethod ?? 'qris').toLowerCase(),
-        }),
-      ).timeout(const Duration(seconds: 20));
+      final response = await http
+          .post(
+            Uri.parse(ApiConfig.bookingsUrl),
+            headers: ApiConfig.authHeaders(AuthService.token!),
+            body: jsonEncode({
+              'field_id': fieldId,
+              'booking_date': bookingDate,
+              'start_time': startTime,
+              'duration_hours': durationHours,
+              'notes': notes,
+              // API memakai kode huruf kecil ('qris', 'va_bca', ...) dan
+              // memvalidasinya persis. App menyimpan id metode dengan huruf
+              // besar untuk tampilan, jadi harus diturunkan di sini.
+              // Sebelumnya setiap pemesanan dari app ditolak 422
+              // "Selected payment method is not supported."
+              'payment_method': (paymentMethod ?? 'qris').toLowerCase(),
+              // Diperiksa ulang server DI DALAM transaksi pemesanan, bukan
+              // dipercaya dari hasil /promos/cek sebelumnya: kuota bisa
+              // habis di sela antara keduanya.
+              if (promoCode != null && promoCode.isNotEmpty)
+                'promo_code': promoCode,
+            }),
+          )
+          .timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 
@@ -89,7 +100,10 @@ class BookingService {
           message: data['message'],
           errors: data['errors'] != null
               ? Map<String, List<String>>.from(
-                  data['errors'].map((key, value) => MapEntry(key, List<String>.from(value))))
+                  data['errors'].map(
+                    (key, value) => MapEntry(key, List<String>.from(value)),
+                  ),
+                )
               : null,
         );
       }
@@ -104,17 +118,20 @@ class BookingService {
   /// Get my bookings
   static Future<BookingResult> getMyBookings({int page = 1}) async {
     if (AuthService.token == null) {
-      return BookingResult(success: false, message: 'Silakan login terlebih dahulu');
+      return BookingResult(
+        success: false,
+        message: 'Silakan login terlebih dahulu',
+      );
     }
 
     try {
-      final uri = Uri.parse(ApiConfig.bookingsUrl)
-          .replace(queryParameters: {'page': page.toString()});
+      final uri = Uri.parse(
+        ApiConfig.bookingsUrl,
+      ).replace(queryParameters: {'page': page.toString()});
 
-      final response = await http.get(
-        uri,
-        headers: ApiConfig.authHeaders(AuthService.token!),
-      ).timeout(const Duration(seconds: 20));
+      final response = await http
+          .get(uri, headers: ApiConfig.authHeaders(AuthService.token!))
+          .timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 
@@ -127,16 +144,14 @@ class BookingService {
           success: true,
           bookings: bookings,
           pagination: {
-            'current_page': data['meta']?['current_page'] ?? data['current_page'],
+            'current_page':
+                data['meta']?['current_page'] ?? data['current_page'],
             'last_page': data['meta']?['last_page'] ?? data['last_page'],
             'total': data['meta']?['total'] ?? data['total'],
           },
         );
       } else {
-        return BookingResult(
-          success: false,
-          message: data['message'],
-        );
+        return BookingResult(success: false, message: data['message']);
       }
     } catch (e) {
       return BookingResult(
@@ -149,14 +164,19 @@ class BookingService {
   /// Get booking detail
   static Future<BookingResult> getBookingDetail(int id) async {
     if (AuthService.token == null) {
-      return BookingResult(success: false, message: 'Silakan login terlebih dahulu');
+      return BookingResult(
+        success: false,
+        message: 'Silakan login terlebih dahulu',
+      );
     }
 
     try {
-      final response = await http.get(
-        Uri.parse(ApiConfig.bookingDetailUrl(id)),
-        headers: ApiConfig.authHeaders(AuthService.token!),
-      ).timeout(const Duration(seconds: 20));
+      final response = await http
+          .get(
+            Uri.parse(ApiConfig.bookingDetailUrl(id)),
+            headers: ApiConfig.authHeaders(AuthService.token!),
+          )
+          .timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 
@@ -168,10 +188,7 @@ class BookingService {
           booking: Booking.fromJson(bookingData),
         );
       } else {
-        return BookingResult(
-          success: false,
-          message: data['message'],
-        );
+        return BookingResult(success: false, message: data['message']);
       }
     } catch (e) {
       return BookingResult(
@@ -184,14 +201,19 @@ class BookingService {
   /// Cancel booking
   static Future<BookingResult> cancelBooking(int id) async {
     if (AuthService.token == null) {
-      return BookingResult(success: false, message: 'Silakan login terlebih dahulu');
+      return BookingResult(
+        success: false,
+        message: 'Silakan login terlebih dahulu',
+      );
     }
 
     try {
-      final response = await http.post(
-        Uri.parse(ApiConfig.cancelBookingUrl(id)),
-        headers: ApiConfig.authHeaders(AuthService.token!),
-      ).timeout(const Duration(seconds: 20));
+      final response = await http
+          .post(
+            Uri.parse(ApiConfig.cancelBookingUrl(id)),
+            headers: ApiConfig.authHeaders(AuthService.token!),
+          )
+          .timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 
@@ -204,10 +226,7 @@ class BookingService {
           booking: Booking.fromJson(bookingData),
         );
       } else {
-        return BookingResult(
-          success: false,
-          message: data['message'],
-        );
+        return BookingResult(success: false, message: data['message']);
       }
     } catch (e) {
       return BookingResult(
@@ -220,14 +239,19 @@ class BookingService {
   /// Simulate payment (development only)
   static Future<BookingResult> simulatePayment(int bookingId) async {
     if (AuthService.token == null) {
-      return BookingResult(success: false, message: 'Silakan login terlebih dahulu');
+      return BookingResult(
+        success: false,
+        message: 'Silakan login terlebih dahulu',
+      );
     }
 
     try {
-      final response = await http.post(
-        Uri.parse(ApiConfig.simulatePaymentUrl(bookingId)),
-        headers: ApiConfig.authHeaders(AuthService.token!),
-      ).timeout(const Duration(seconds: 20));
+      final response = await http
+          .post(
+            Uri.parse(ApiConfig.simulatePaymentUrl(bookingId)),
+            headers: ApiConfig.authHeaders(AuthService.token!),
+          )
+          .timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 
@@ -242,10 +266,7 @@ class BookingService {
           alasanGatewayDilewati: data['fallback_reason'] as String?,
         );
       } else {
-        return BookingResult(
-          success: false,
-          message: data['message'],
-        );
+        return BookingResult(success: false, message: data['message']);
       }
     } catch (e) {
       return BookingResult(
@@ -260,17 +281,20 @@ class BookingService {
   /// Get partner bookings
   static Future<BookingResult> getPartnerBookings({int page = 1}) async {
     if (AuthService.token == null) {
-      return BookingResult(success: false, message: 'Silakan login terlebih dahulu');
+      return BookingResult(
+        success: false,
+        message: 'Silakan login terlebih dahulu',
+      );
     }
 
     try {
-      final uri = Uri.parse(ApiConfig.partnerBookingsUrl)
-          .replace(queryParameters: {'page': page.toString()});
+      final uri = Uri.parse(
+        ApiConfig.partnerBookingsUrl,
+      ).replace(queryParameters: {'page': page.toString()});
 
-      final response = await http.get(
-        uri,
-        headers: ApiConfig.authHeaders(AuthService.token!),
-      ).timeout(const Duration(seconds: 20));
+      final response = await http
+          .get(uri, headers: ApiConfig.authHeaders(AuthService.token!))
+          .timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 
@@ -283,16 +307,14 @@ class BookingService {
           success: true,
           bookings: bookings,
           pagination: {
-            'current_page': data['meta']?['current_page'] ?? data['current_page'],
+            'current_page':
+                data['meta']?['current_page'] ?? data['current_page'],
             'last_page': data['meta']?['last_page'] ?? data['last_page'],
             'total': data['meta']?['total'] ?? data['total'],
           },
         );
       } else {
-        return BookingResult(
-          success: false,
-          message: data['message'],
-        );
+        return BookingResult(success: false, message: data['message']);
       }
     } catch (e) {
       return BookingResult(
@@ -303,19 +325,22 @@ class BookingService {
   }
 
   /// Get venue schedule for a specific date
-  static Future<Map<String, dynamic>> getVenueSchedule(int venueId, String date) async {
+  static Future<Map<String, dynamic>> getVenueSchedule(
+    int venueId,
+    String date,
+  ) async {
     if (AuthService.token == null) {
       return {'success': false, 'message': 'Silakan login terlebih dahulu'};
     }
 
     try {
-      final uri = Uri.parse(ApiConfig.venueScheduleUrl(venueId))
-          .replace(queryParameters: {'date': date});
+      final uri = Uri.parse(
+        ApiConfig.venueScheduleUrl(venueId),
+      ).replace(queryParameters: {'date': date});
 
-      final response = await http.get(
-        uri,
-        headers: ApiConfig.authHeaders(AuthService.token!),
-      ).timeout(const Duration(seconds: 20));
+      final response = await http
+          .get(uri, headers: ApiConfig.authHeaders(AuthService.token!))
+          .timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 
@@ -327,16 +352,10 @@ class BookingService {
           'schedule': data['schedule'],
         };
       } else {
-        return {
-          'success': false,
-          'message': data['message'],
-        };
+        return {'success': false, 'message': data['message']};
       }
     } catch (e) {
-      return {
-        'success': false,
-        'message': 'Gagal terhubung ke server: $e',
-      };
+      return {'success': false, 'message': 'Gagal terhubung ke server: $e'};
     }
   }
 
@@ -347,10 +366,12 @@ class BookingService {
     }
 
     try {
-      final response = await http.get(
-        Uri.parse(ApiConfig.refundPreviewUrl(bookingId)),
-        headers: ApiConfig.authHeaders(AuthService.token!),
-      ).timeout(const Duration(seconds: 20));
+      final response = await http
+          .get(
+            Uri.parse(ApiConfig.refundPreviewUrl(bookingId)),
+            headers: ApiConfig.authHeaders(AuthService.token!),
+          )
+          .timeout(const Duration(seconds: 20));
 
       final data = jsonDecode(response.body);
 
@@ -358,11 +379,16 @@ class BookingService {
         return {
           'success': true,
           'booking': data['booking'] ?? data['data']?['booking'],
-          'refund_percentage': data['refund_percentage'] ?? data['data']?['refund_percentage'],
-          'refund_amount': data['refund_amount'] ?? data['data']?['refund_amount'],
-          'original_amount': data['original_amount'] ?? data['data']?['original_amount'],
-          'policy_description': data['policy_description'] ?? data['data']?['policy_description'],
-          'can_refund': data['can_refund'] ?? data['data']?['can_refund'] ?? false,
+          'refund_percentage':
+              data['refund_percentage'] ?? data['data']?['refund_percentage'],
+          'refund_amount':
+              data['refund_amount'] ?? data['data']?['refund_amount'],
+          'original_amount':
+              data['original_amount'] ?? data['data']?['original_amount'],
+          'policy_description':
+              data['policy_description'] ?? data['data']?['policy_description'],
+          'can_refund':
+              data['can_refund'] ?? data['data']?['can_refund'] ?? false,
         };
       } else {
         return {
@@ -371,10 +397,7 @@ class BookingService {
         };
       }
     } catch (e) {
-      return {
-        'success': false,
-        'message': 'Gagal terhubung ke server: $e',
-      };
+      return {'success': false, 'message': 'Gagal terhubung ke server: $e'};
     }
   }
 }

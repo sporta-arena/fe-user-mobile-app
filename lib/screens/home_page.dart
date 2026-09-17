@@ -22,7 +22,9 @@ import 'profile_page.dart';
 import '../services/venue_service.dart';
 import '../services/field_type_service.dart';
 import '../models/venue.dart' as model;
+import '../models/banner_promo.dart';
 import '../models/booking.dart';
+import '../services/banner_service.dart';
 import '../services/booking_service.dart';
 import '../services/notifikasi_service.dart';
 import '../models/field_type.dart';
@@ -177,6 +179,13 @@ class _DashboardContentState extends State<DashboardContent> {
   /// Jumlah notifikasi belum dibaca, untuk titik merah di lonceng.
   int _notifBelumDibaca = 0;
 
+  /// Banner promo yang sedang tayang. Kosong berarti bagiannya tidak
+  /// ditampilkan sama sekali, bukan menampilkan kotak kosong.
+  List<BannerPromo> _banner = const [];
+  final PageController _pageBanner = PageController(viewportFraction: 0.9);
+  int _bannerAktif = 0;
+  Timer? _geserBanner;
+
   /// Detik yang berdenyut untuk hitung mundur pembayaran.
   Timer? _detak;
 
@@ -288,6 +297,33 @@ class _DashboardContentState extends State<DashboardContent> {
     if (AuthService.isLoggedIn) PushNotifikasi.siapkan();
     _muatBooking();
     _muatJumlahNotif();
+    _muatBanner();
+  }
+
+  Future<void> _muatBanner() async {
+    final hasil = await BannerService.ambil();
+    if (!mounted || hasil.isEmpty) return;
+    setState(() => _banner = hasil);
+    if (hasil.length > 1) _mulaiGeserBanner();
+  }
+
+  /// Geser sendiri tiap 5 detik.
+  ///
+  /// Carousel yang diam nyaris tidak pernah digeser orang, jadi banner
+  /// kedua dan seterusnya tidak pernah terlihat. Lima detik cukup lama
+  /// untuk dibaca dan cukup cepat untuk sempat berputar sebelum orang
+  /// menggulir melewatinya.
+  void _mulaiGeserBanner() {
+    _geserBanner?.cancel();
+    _geserBanner = Timer.periodic(const Duration(seconds: 5), (_) {
+      if (!mounted || !_pageBanner.hasClients || _banner.length < 2) return;
+      final berikut = (_bannerAktif + 1) % _banner.length;
+      _pageBanner.animateToPage(
+        berikut,
+        duration: const Duration(milliseconds: 420),
+        curve: Curves.easeOutCubic,
+      );
+    });
   }
 
   Future<void> _muatJumlahNotif() async {
@@ -359,6 +395,8 @@ class _DashboardContentState extends State<DashboardContent> {
     // tidak ada.
     _notifRealtime?.tutup();
     _detak?.cancel();
+    _geserBanner?.cancel();
+    _pageBanner.dispose();
     super.dispose();
   }
 
@@ -544,6 +582,15 @@ class _DashboardContentState extends State<DashboardContent> {
 
                 _searchBar(),
                 const SizedBox(height: 20),
+
+                // Banner di bawah pencarian, bukan di paling atas:
+                // yang membuka app ini datang untuk memesan, dan promo
+                // itu tawaran, bukan urusan yang sedang dia kerjakan.
+                if (_banner.isNotEmpty) ...[
+                  _carouselBanner(),
+                  const SizedBox(height: 20),
+                ],
+
                 _categories(),
                 const SizedBox(height: 24),
                 _venueSection(_judulTerdekat, _urutTerdekat),
@@ -809,6 +856,109 @@ class _DashboardContentState extends State<DashboardContent> {
         ),
       ),
     );
+  }
+
+  // ---- Banner promo ------------------------------------------------------
+
+  Widget _carouselBanner() {
+    return Column(
+      children: [
+        SizedBox(
+          height: 150,
+          child: PageView.builder(
+            controller: _pageBanner,
+            itemCount: _banner.length,
+            onPageChanged: (i) => setState(() => _bannerAktif = i),
+            itemBuilder: (context, i) {
+              final b = _banner[i];
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6),
+                child: GestureDetector(
+                  onTap: () => _bukaBanner(b),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(18),
+                    child: Image.network(
+                      b.gambarUrl,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      // Banner yang gagal dimuat ditampilkan sebagai
+                      // kotak berjudul, bukan ikon rusak: judulnya tetap
+                      // membawa informasi promonya.
+                      errorBuilder: (context, _, __) => Container(
+                        color: context.c.accentSoft,
+                        alignment: Alignment.center,
+                        padding: const EdgeInsets.all(16),
+                        child: Text(
+                          b.judul,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: context.c.accent,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        if (_banner.length > 1) ...[
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(_banner.length, (i) {
+              final aktif = i == _bannerAktif;
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 250),
+                margin: const EdgeInsets.symmetric(horizontal: 3),
+                height: 6,
+                width: aktif ? 18 : 6,
+                decoration: BoxDecoration(
+                  color: aktif ? context.c.accent : context.c.line,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              );
+            }),
+          ),
+        ],
+      ],
+    );
+  }
+
+  void _bukaBanner(BannerPromo b) {
+    switch (b.tujuanTipe) {
+      case 'venue':
+        final id = int.tryParse(b.tujuanNilai ?? '');
+        if (id == null) return;
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => VenueDetailPage(venueId: id)),
+        );
+      case 'kategori':
+        final jenis = b.tujuanNilai;
+        if (jenis == null) return;
+        final tipe = _fieldTypes.where((t) => t.value == jenis).firstOrNull;
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => CategoryVenuesPage(
+              categoryName: tipe?.label ?? jenis,
+              categoryIcon: tipe?.icon ?? Icons.sports,
+              categoryColor: context.c.kategori(tipe?.indeksWarna ?? 0),
+              fieldType: jenis,
+            ),
+          ),
+        );
+      default:
+        // Banner pengumuman atau berpromo tanpa tujuan: kodenya dibaca
+        // dari gambarnya dan diketik sendiri di layar bayar. Tidak ada
+        // yang perlu dibuka, jadi ketukannya sengaja tidak melakukan
+        // apa-apa daripada membuka layar yang tidak nyambung.
+        break;
+    }
   }
 
   // ---- Search -------------------------------------------------------------

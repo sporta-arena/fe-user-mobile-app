@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 
 import 'keterangan_biaya.dart';
+import '../services/promo_service.dart';
 import '../theme/app_tokens.dart';
 import '../widgets/sampul_venue.dart';
 import 'package:flutter/services.dart';
@@ -65,6 +66,13 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
   String _selectedPaymentMethod = "QRIS";
   bool _refundPolicyAccepted =
       false; // State untuk acknowledgment refund policy
+
+  /// Kode promo yang sudah lolos pemeriksaan server, kalau ada.
+  HasilPromo? _promo;
+  int _potongan = 0;
+  final _promoController = TextEditingController();
+  String? _promoGalat;
+  bool _memeriksaPromo = false;
 
   // Tarif biaya: HARUS sama dengan backend (BookingService::PLATFORM_FEE_RATE
   // dan PLATFORM_FEE_CAP di be-main). Sebelumnya di sini 5% tanpa batas,
@@ -138,6 +146,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
   @override
   void dispose() {
     _notesController.dispose();
+    _promoController.dispose();
     super.dispose();
   }
 
@@ -237,10 +246,192 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
   }
 
   // Calculate prices
-  int get _fieldPrice => widget.price * _durationHours;
+  //
+  // `_hargaLapangan` harga kotor; `_fieldPrice` subtotal SESUDAH
+  // potongan promo. Semua turunannya — biaya platform, biaya gateway,
+  // total — membaca `_fieldPrice`, jadi urutan hitungnya sama persis
+  // dengan server: potongan dulu, baru 8% dari sisanya. Kalau app
+  // menghitung dari harga kotor, angka di layar berbeda dari yang
+  // ditagih dan pemesan melihat totalnya berubah sendiri setelah bayar.
+  int get _hargaLapangan => widget.price * _durationHours;
+  int get _fieldPrice => math.max(0, _hargaLapangan - _potongan);
   int get _platformFee =>
       math.min((_fieldPrice * _platformFeePercent).round(), _platformFeeCap);
   int get _totalPrice => _fieldPrice + _platformFee + _paymentGatewayFee;
+
+  Future<void> _terapkanPromo() async {
+    final kode = _promoController.text.trim();
+    if (kode.isEmpty) return;
+
+    setState(() {
+      _memeriksaPromo = true;
+      _promoGalat = null;
+    });
+
+    try {
+      final hasil = await PromoService.cek(
+        kode: kode,
+        fieldId: widget.fieldId,
+        tanggal: widget.selectedDate,
+        jamMulai: widget.selectedTimeSlots.first,
+        durasiJam: _durationHours,
+      );
+      if (!mounted) return;
+      setState(() {
+        _promo = hasil;
+        _potongan = hasil.potongan.round();
+        _promoGalat = null;
+      });
+    } on PromoDitolak catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _promo = null;
+        _potongan = 0;
+        _promoGalat = e.pesan;
+      });
+    } finally {
+      if (mounted) setState(() => _memeriksaPromo = false);
+    }
+  }
+
+  void _lepasPromo() {
+    setState(() {
+      _promo = null;
+      _potongan = 0;
+      _promoGalat = null;
+      _promoController.clear();
+    });
+  }
+
+  /// Kolom kode promo.
+  ///
+  /// Kodenya diperiksa ke server sebelum menekan Bayar supaya
+  /// potongannya terlihat di rincian biaya lebih dulu. Tanpa itu pemesan
+  /// baru tahu kodenya ditolak setelah pemesanannya gagal seluruhnya —
+  /// bukan cuma promonya.
+  Widget _kolomPromo() {
+    if (_promo != null) {
+      return Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: context.c.accentSoft,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: context.c.accent.withValues(alpha: 0.35)),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.local_offer_rounded, color: context.c.accent, size: 20),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _promo!.kode,
+                    style: TextStyle(
+                      color: context.c.ink,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  if (_promo!.judul.isNotEmpty)
+                    Text(
+                      _promo!.judul,
+                      style: TextStyle(color: context.c.inkSoft, fontSize: 12),
+                    ),
+                ],
+              ),
+            ),
+            TextButton(
+              onPressed: _lepasPromo,
+              child: Text(
+                'Lepas',
+                style: TextStyle(
+                  color: context.c.danger,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: context.c.raised,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: _promoGalat != null
+                        ? context.c.danger
+                        : context.c.line,
+                  ),
+                ),
+                child: TextField(
+                  controller: _promoController,
+                  textCapitalization: TextCapitalization.characters,
+                  style: TextStyle(color: context.c.ink),
+                  onSubmitted: (_) => _terapkanPromo(),
+                  decoration: InputDecoration(
+                    hintText: 'Punya kode promo?',
+                    hintStyle: TextStyle(color: context.c.inkDim, fontSize: 14),
+                    prefixIcon: Icon(
+                      Icons.local_offer_outlined,
+                      color: context.c.inkDim,
+                      size: 20,
+                    ),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            SizedBox(
+              height: 48,
+              child: ElevatedButton(
+                onPressed: _memeriksaPromo ? null : _terapkanPromo,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: context.c.accent,
+                  foregroundColor: context.c.onAccent,
+                  minimumSize: const Size(88, 48),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: _memeriksaPromo
+                    ? SizedBox(
+                        height: 18,
+                        width: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: context.c.onAccent,
+                        ),
+                      )
+                    : const Text(
+                        'Pakai',
+                        style: TextStyle(fontWeight: FontWeight.w700),
+                      ),
+              ),
+            ),
+          ],
+        ),
+        if (_promoGalat != null) ...[
+          const SizedBox(height: 8),
+          Text(
+            _promoGalat!,
+            style: TextStyle(color: context.c.danger, fontSize: 12.5),
+          ),
+        ],
+      ],
+    );
+  }
 
   void _showPaymentMethodSheet() {
     showModalBottomSheet(
@@ -480,6 +671,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
         durationHours: _durationHours,
         notes: _notesController.text.isNotEmpty ? _notesController.text : null,
         paymentMethod: _selectedPaymentMethod,
+        promoCode: _promo?.kode,
       );
 
       if (mounted) {
@@ -991,6 +1183,13 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                         Divider(color: context.c.line),
                         const SizedBox(height: 24),
 
+                        // Kolom promo tepat di atas rincian biaya, bukan
+                        // di dekat catatan: potongannya muncul sebagai
+                        // baris di rincian di bawahnya, jadi sebab dan
+                        // akibatnya terbaca dalam satu tarikan mata.
+                        _kolomPromo(),
+                        const SizedBox(height: 24),
+
                         // --- SUMMARY OF CHARGE ---
                         Text(
                           "Rincian Biaya",
@@ -1003,8 +1202,33 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                         const SizedBox(height: 16),
                         _buildSummaryRow(
                           "Harga Lapangan (${widget.fieldName})",
-                          _formatCurrency(_fieldPrice),
+                          _formatCurrency(_hargaLapangan),
                         ),
+                        if (_potongan > 0) ...[
+                          const SizedBox(height: 10),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  'Potongan ${_promo?.kode ?? ""}'.trim(),
+                                  style: TextStyle(
+                                    color: context.c.accent,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                              Text(
+                                '-${_formatCurrency(_potongan)}',
+                                style: TextStyle(
+                                  color: context.c.accent,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                         const SizedBox(height: 10),
                         _buildSummaryRow(
                           _labelBiayaPlatform,
