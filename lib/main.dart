@@ -44,9 +44,16 @@ class MyApp extends StatelessWidget {
           title: 'Sportago',
           theme: AppTheme.light,
           darkTheme: AppTheme.dark,
-          // ThemeMode.system dipakai selama pengguna belum pernah
-          // memilih sendiri, sama seperti di fe-web.
-          themeMode: mode,
+          // DIKUNCI ke terang, menyamai app mitra.
+          //
+          // Tema gelap app ini sendiri sebenarnya sehat; yang dikunci
+          // di app mitra rusak. Keduanya disamakan supaya satu mitra
+          // yang memegang dua aplikasi tidak melihat dua rupa berbeda
+          // di perangkat yang sama.
+          //
+          // Pengendali temanya dibiarkan utuh. Kembalikan ke `mode`
+          // bersamaan dengan app mitra, bukan sendirian.
+          themeMode: ThemeMode.light,
           // Ikon bilah status (jam, sinyal, baterai) ikut tema. Tanpa
           // ini, layar tanpa AppBar, seperti halaman masuk, tetap
           // memakai ikon terang, dan jamnya hilang di latar putih.
