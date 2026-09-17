@@ -61,6 +61,14 @@ class PromoService {
 
     final badan = jsonDecode(respons.body) as Map<String, dynamic>;
 
+    if (respons.statusCode == 401) {
+      // Token kedaluwarsa. Pesan mentah server berbunyi
+      // "Unauthenticated." dan itu bukan kalimat untuk pemesan.
+      throw const PromoDitolak(
+        'Sesi kamu habis. Masuk lagi untuk memakai kode promo.',
+      );
+    }
+
     if (respons.statusCode != 200) {
       // Server menjelaskan sebabnya — promonya belum mulai, tidak
       // berlaku di venue itu, di luar jam, atau kuotanya habis.
