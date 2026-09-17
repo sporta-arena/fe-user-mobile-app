@@ -30,7 +30,10 @@ const String namaEventNotifikasi = 'notifikasi.baru';
 /// sendiri, dan token baru yang tidak dilaporkan membuat server terus
 /// menembak token mati: pemesan berhenti menerima notifikasi tanpa
 /// tahu sebabnya.
-bool perluDaftarUlang({required String? tokenLama, required String? tokenBaru}) {
+bool perluDaftarUlang({
+  required String? tokenLama,
+  required String? tokenBaru,
+}) {
   if (tokenBaru == null || tokenBaru.isEmpty) return false;
 
   return tokenLama != tokenBaru;
@@ -132,17 +135,20 @@ class PushNotifikasi {
         final muatan = respons.payload;
         if (muatan == null || saatDiketuk == null) return;
         final data = jsonDecode(muatan) as Map<String, dynamic>;
-        saatDiketuk(PesanPush.dariData(
-          judul: data['title']?.toString(),
-          isi: data['body']?.toString(),
-          data: data,
-        ));
+        saatDiketuk(
+          PesanPush.dariData(
+            judul: data['title']?.toString(),
+            isi: data['body']?.toString(),
+            data: data,
+          ),
+        );
       },
     );
 
     await _lokal
         .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
+          AndroidFlutterLocalNotificationsPlugin
+        >()
         ?.createNotificationChannel(_kanalPenting);
 
     // Saat aplikasi terbuka, Android tidak menampilkan apa pun sendiri.
@@ -150,11 +156,13 @@ class PushNotifikasi {
 
     if (saatDiketuk != null) {
       FirebaseMessaging.onMessageOpenedApp.listen((pesan) {
-        saatDiketuk(PesanPush.dariData(
-          judul: pesan.notification?.title,
-          isi: pesan.notification?.body,
-          data: pesan.data,
-        ));
+        saatDiketuk(
+          PesanPush.dariData(
+            judul: pesan.notification?.title,
+            isi: pesan.notification?.body,
+            data: pesan.data,
+          ),
+        );
       });
     }
 
@@ -164,8 +172,24 @@ class PushNotifikasi {
   }
 
   /// Daftarkan token perangkat ini ke server.
+  ///
+  /// getToken() melempar di iOS selama token APNs belum tersedia, dan itu
+  /// keadaan yang wajar: build bertanda tangan personal team tidak punya
+  /// hak APNs sama sekali, dan di TestFlight pun tokennya baru datang
+  /// beberapa saat setelah aplikasi dibuka. Karena pemanggilnya tidak
+  /// meng-await, lemparan itu naik jadi unhandled exception dan mengotori
+  /// log setiap kali aplikasi dijalankan.
+  ///
+  /// Gagal mendapat token bukan kondisi gawat: pemesannya cuma tidak
+  /// menerima notifikasi, dan panggilan berikutnya akan mencoba lagi.
   static Future<void> daftarkanToken() async {
-    final token = await FirebaseMessaging.instance.getToken();
+    final String? token;
+    try {
+      token = await FirebaseMessaging.instance.getToken();
+    } catch (_) {
+      return;
+    }
+
     final prefs = await SharedPreferences.getInstance();
 
     if (!perluDaftarUlang(

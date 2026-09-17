@@ -18,6 +18,7 @@ import '../models/booking.dart';
 import 'home_page.dart';
 import 'login_page.dart';
 import 'e_ticket_page.dart';
+import '../utils/sisipan_bawah.dart';
 
 class BookingConfirmationPage extends StatefulWidget {
   final int fieldId;
@@ -281,7 +282,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
               Expanded(
                 child: ListView(
                   controller: scrollController,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: EdgeInsets.fromLTRB(16, 0, 16, context.sisipanBawah),
                   children: [
                     if (_memuatMetode)
                       const Padding(

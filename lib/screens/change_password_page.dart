@@ -4,6 +4,7 @@ import '../services/auth_service.dart';
 import 'validasi_ganti_password.dart';
 import '../utils/tanpa_spasi.dart';
 import '../theme/app_tokens.dart';
+import '../utils/sisipan_bawah.dart';
 
 class ChangePasswordPage extends StatefulWidget {
   const ChangePasswordPage({super.key});
@@ -45,7 +46,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
         builder: (context, setSheetState) {
           return Container(
             padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom,
+              bottom: context.sisipanBawah,
             ),
             decoration: BoxDecoration(
               color: context.c.raised,

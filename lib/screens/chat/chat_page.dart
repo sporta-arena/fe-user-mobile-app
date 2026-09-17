@@ -7,6 +7,7 @@ import '../../services/realtime_chat.dart';
 import 'alasan_laporan.dart';
 import 'chat_models.dart';
 import 'chat_service.dart';
+import '../../utils/sisipan_bawah.dart';
 
 // Chat untuk user menghubungi partner venue
 // Entry point: halaman e-ticket setelah booking confirmed
@@ -181,7 +182,7 @@ class _ChatPageState extends State<ChatPage> {
             left: 20,
             right: 20,
             top: 20,
-            bottom: MediaQuery.of(sheetContext).viewInsets.bottom + 20,
+            bottom: sheetContext.sisipanBawah + 20,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -287,7 +288,7 @@ class _ChatPageState extends State<ChatPage> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => Container(
-        padding: const EdgeInsets.all(24),
+        padding: EdgeInsets.fromLTRB(24, 24, 24, 24 + context.sisipanBawah),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
