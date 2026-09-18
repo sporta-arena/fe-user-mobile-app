@@ -28,6 +28,7 @@ import '../services/banner_service.dart';
 import '../services/booking_service.dart';
 import '../services/notifikasi_service.dart';
 import '../models/field_type.dart';
+import '../utils/waktu_wib.dart';
 
 class HomePage extends StatefulWidget {
   /// Tab yang dibuka pertama (0=Beranda, 1=Transaksi, 2=Profil).
@@ -839,9 +840,11 @@ class _DashboardContentState extends State<DashboardContent> {
   /// "Main lagi di ..." — pengulangan booking terakhir.
   Widget _kartuMainLagi(Booking b) {
     final venue = b.field!.venue!;
-    final jam = b.startTime.length >= 5
-        ? b.startTime.substring(0, 5)
-        : b.startTime;
+    // Jam pemesanan datang dari server dalam UTC — pemesanan 09:00 WIB
+    // tersimpan sebagai 02:00 — dan setiap permukaan Sportago
+    // menggesernya +7 saat menampilkan. Tanpa ini kartunya berbunyi
+    // "Terakhir Lapangan A · 02:00" untuk pemesanan jam 9 pagi.
+    final jam = WaktuWib.tampil(b.startTime);
 
     return _kartuAksi(
       ikon: Icons.replay_rounded,
