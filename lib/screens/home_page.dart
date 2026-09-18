@@ -1192,6 +1192,10 @@ class _DashboardContentState extends State<DashboardContent> {
             categoryName: type.label,
             categoryIcon: type.icon,
             categoryColor: warna,
+            // Nilai cabangnya WAJIB ikut. Sebelum penyaringnya pindah
+            // ke server, layar kategori mencocokkan sendiri dari nama
+            // kategorinya, jadi baris ini tidak pernah terasa hilang.
+            fieldType: type.value,
           ),
         ),
       ),

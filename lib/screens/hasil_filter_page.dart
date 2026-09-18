@@ -23,10 +23,15 @@ class HasilFilterPage extends StatefulWidget {
     super.key,
     this.filterAwal = const FilterVenue(),
     this.kataKunci,
+    this.judul,
   });
 
   final FilterVenue filterAwal;
   final String? kataKunci;
+
+  /// Judul AppBar. Dipakai halaman kategori, yang pada dasarnya layar
+  /// ini dengan cabang olahraga yang sudah dipilihkan.
+  final String? judul;
 
   @override
   State<HasilFilterPage> createState() => _HasilFilterPageState();
@@ -112,9 +117,10 @@ class _HasilFilterPageState extends State<HasilFilterPage> {
         elevation: 0,
         iconTheme: IconThemeData(color: context.c.ink),
         title: Text(
-          widget.kataKunci?.isNotEmpty == true
-              ? '"${widget.kataKunci}"'
-              : 'Cari Arena',
+          widget.judul ??
+              (widget.kataKunci?.isNotEmpty == true
+                  ? '"${widget.kataKunci}"'
+                  : 'Cari Arena'),
           style: TextStyle(
             color: context.c.ink,
             fontSize: 18,
