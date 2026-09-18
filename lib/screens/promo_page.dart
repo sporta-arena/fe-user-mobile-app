@@ -143,53 +143,21 @@ class _PromoPageState extends State<PromoPage> {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 5,
-                        ),
-                        decoration: BoxDecoration(
-                          color: context.c.accentSoft,
-                          borderRadius: BorderRadius.circular(999),
-                          border: Border.all(color: context.c.accentLine),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.local_offer_rounded,
-                              size: 13,
-                              color: context.c.accent,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              p.kode,
-                              style: TextStyle(
-                                color: context.c.ink,
-                                fontSize: 12.5,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 0.4,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Flexible(
-                        child: Text(
-                          'Potongan ${p.potonganTeks}',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: context.c.accent,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ],
+                  // Kodenya TIDAK ditampilkan di kartu.
+                  //
+                  // Kode yang terbaca sekilas di daftar akan diketik
+                  // ulang dari ingatan, dan salah ketik terbaca sebagai
+                  // "promonya tidak berlaku". Di lembar rincian ia
+                  // muncul besar dengan tombol salin — satu ketukan,
+                  // tanpa peluang salah. Kartu ini cukup mengatakan
+                  // promonya ada dan berapa potongannya.
+                  Text(
+                    'Potongan ${p.potonganTeks}',
+                    style: TextStyle(
+                      color: context.c.accent,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   if (p.berlakuSampai != null) ...[
                     const SizedBox(height: 8),

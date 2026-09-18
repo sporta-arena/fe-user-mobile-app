@@ -991,56 +991,18 @@ class _DashboardContentState extends State<DashboardContent> {
                       ),
                     ),
 
-                    // Satu penanda saja di atas gambar: kodenya.
+                    // Tidak ada apa pun digambar di atas gambarnya.
                     //
-                    // Versi sebelumnya menumpuk judul, kode,
-                    // potongan, dan masa berlaku di sini. Di atas
-                    // banner berdesain hasilnya berjejalan — teksnya
-                    // berebut tempat dengan gambar yang sudah
-                    // mengatakan hal yang sama. Selebihnya pindah ke
-                    // lembar rincian yang terbuka saat diketuk.
-                    if (b.promo != null)
-                      Positioned(
-                        left: 14,
-                        bottom: 14,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 7,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(999),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Colors.black26,
-                                blurRadius: 10,
-                                offset: Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.local_offer_rounded,
-                                size: 14,
-                                color: context.c.accent,
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                b.promo!.kode,
-                                style: TextStyle(
-                                  color: context.c.ink,
-                                  fontSize: 12.5,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: 0.4,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+                    // Sempat ada pil berisi kodenya di sini, dan
+                    // sebelum itu judul plus potongan plus masa
+                    // berlaku. Dua-duanya salah tempat: banner promo
+                    // dibuat tim desain, dan judul serta kodenya sudah
+                    // ada DI DALAM gambar itu. Apa pun yang digambar
+                    // aplikasi di atasnya cuma menutupi karya yang
+                    // sudah mengatakan hal yang sama.
+                    //
+                    // Keterangannya ada di lembar rincian yang terbuka
+                    // saat diketuk.
                   ],
                 ),
               ),
