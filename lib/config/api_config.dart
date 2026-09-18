@@ -237,6 +237,9 @@ class ApiConfig {
 
   /// Banner promo beranda. Publik; server hanya mengirim yang tayang.
   static String get bannersUrl => '$apiUrl/banners';
+
+  /// Promo yang sedang berjalan.
+  static String get promosUrl => '$apiUrl/promos';
   static String bookingDetailUrl(int id) => '$apiUrl/bookings/$id';
   static String cancelBookingUrl(int id) => '$apiUrl/bookings/$id/cancel';
   static String simulatePaymentUrl(int id) =>

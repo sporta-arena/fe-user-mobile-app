@@ -7,6 +7,7 @@ class RingkasPromo {
     required this.potonganTeks,
     this.berlakuSampai,
     this.syarat = const [],
+    this.gambarUrl,
   });
 
   final String kode;
@@ -23,6 +24,10 @@ class RingkasPromo {
   /// Syarat yang benar-benar bisa membuat kodenya ditolak.
   final List<String> syarat;
 
+  /// Gambar banner promo ini, kalau punya. Hanya terisi lewat /promos;
+  /// di /banners gambarnya dibawa BannerPromo sendiri.
+  final String? gambarUrl;
+
   factory RingkasPromo.fromJson(Map<String, dynamic> json) {
     return RingkasPromo(
       kode: json['kode']?.toString() ?? '',
@@ -33,6 +38,7 @@ class RingkasPromo {
       syarat: ((json['syarat'] as List?) ?? const [])
           .map((e) => e.toString())
           .toList(),
+      gambarUrl: json['gambar_url']?.toString(),
     );
   }
 }

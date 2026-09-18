@@ -29,8 +29,8 @@ import '../services/booking_service.dart';
 import '../services/notifikasi_service.dart';
 import '../models/field_type.dart';
 import '../utils/waktu_wib.dart';
-import '../utils/sisipan_bawah.dart';
-import 'package:flutter/services.dart';
+import '../widgets/lembar_promo.dart';
+import 'promo_page.dart';
 
 class HomePage extends StatefulWidget {
   /// Tab yang dibuka pertama (0=Beranda, 1=Transaksi, 2=Profil).
@@ -185,9 +185,6 @@ class _DashboardContentState extends State<DashboardContent> {
   /// Banner promo yang sedang tayang. Kosong berarti bagiannya tidak
   /// ditampilkan sama sekali, bukan menampilkan kotak kosong.
   List<BannerPromo> _banner = const [];
-  final PageController _pageBanner = PageController(viewportFraction: 0.9);
-  int _bannerAktif = 0;
-  Timer? _geserBanner;
 
   /// Detik yang berdenyut untuk hitung mundur pembayaran.
   Timer? _detak;
@@ -307,26 +304,6 @@ class _DashboardContentState extends State<DashboardContent> {
     final hasil = await BannerService.ambil();
     if (!mounted || hasil.isEmpty) return;
     setState(() => _banner = hasil);
-    if (hasil.length > 1) _mulaiGeserBanner();
-  }
-
-  /// Geser sendiri tiap 5 detik.
-  ///
-  /// Carousel yang diam nyaris tidak pernah digeser orang, jadi banner
-  /// kedua dan seterusnya tidak pernah terlihat. Lima detik cukup lama
-  /// untuk dibaca dan cukup cepat untuk sempat berputar sebelum orang
-  /// menggulir melewatinya.
-  void _mulaiGeserBanner() {
-    _geserBanner?.cancel();
-    _geserBanner = Timer.periodic(const Duration(seconds: 5), (_) {
-      if (!mounted || !_pageBanner.hasClients || _banner.length < 2) return;
-      final berikut = (_bannerAktif + 1) % _banner.length;
-      _pageBanner.animateToPage(
-        berikut,
-        duration: const Duration(milliseconds: 420),
-        curve: Curves.easeOutCubic,
-      );
-    });
   }
 
   Future<void> _muatJumlahNotif() async {
@@ -398,8 +375,6 @@ class _DashboardContentState extends State<DashboardContent> {
     // tidak ada.
     _notifRealtime?.tutup();
     _detak?.cancel();
-    _geserBanner?.cancel();
-    _pageBanner.dispose();
     super.dispose();
   }
 
@@ -586,17 +561,21 @@ class _DashboardContentState extends State<DashboardContent> {
                 _searchBar(),
                 const SizedBox(height: 20),
 
-                // Banner di bawah pencarian, bukan di paling atas:
-                // yang membuka app ini datang untuk memesan, dan promo
-                // itu tawaran, bukan urusan yang sedang dia kerjakan.
-                if (_banner.isNotEmpty) ...[
-                  _carouselBanner(),
-                  const SizedBox(height: 20),
-                ],
-
                 _categories(),
+
                 const SizedBox(height: 24),
                 _venueSection(_judulTerdekat, _urutTerdekat),
+
+                // Promo SESUDAH daftar arena. Yang membuka app ini
+                // datang untuk memesan; promo itu tawaran, bukan urusan
+                // yang sedang dia kerjakan. Ditaruh di atas, ia memotong
+                // jalan orang ke hal yang dicarinya — di bawah, ia
+                // ditemukan justru saat orang sudah selesai melihat
+                // pilihannya.
+                if (_banner.isNotEmpty) ...[
+                  const SizedBox(height: 28),
+                  _seksiPromo(),
+                ],
 
                 // Seksi kedua ditahan sampai katalognya cukup tebal.
                 // Dengan satu venue, "Terdekat" dan "Paling banyak
@@ -865,149 +844,210 @@ class _DashboardContentState extends State<DashboardContent> {
 
   // ---- Banner promo ------------------------------------------------------
 
-  Widget _carouselBanner() {
+  Widget _seksiPromo() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(
-          height: 150,
-          child: PageView.builder(
-            controller: _pageBanner,
-            itemCount: _banner.length,
-            onPageChanged: (i) => setState(() => _bannerAktif = i),
-            itemBuilder: (context, i) {
-              final b = _banner[i];
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 6),
-                child: GestureDetector(
-                  onTap: () => _bukaBanner(b),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(18),
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        Image.network(
-                          b.gambarUrl,
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          // Gambarnya yang bicara kalau berhasil dimuat.
-                          // Kalau gagal, barulah keterangannya digambar
-                          // sendiri — di situ tidak ada yang bersaing
-                          // dengannya.
-                          errorBuilder: (context, _, __) => Container(
-                            color: context.c.accent,
-                            padding: const EdgeInsets.fromLTRB(18, 18, 18, 46),
-                            alignment: Alignment.centerLeft,
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  b.promo?.judul.isNotEmpty == true
-                                      ? b.promo!.judul
-                                      : b.judul,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w800,
-                                    height: 1.25,
-                                  ),
-                                ),
-                                if (b.promo != null) ...[
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    'Potongan ${b.promo!.potonganTeks}',
-                                    style: const TextStyle(
-                                      color: Colors.white70,
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
-                        ),
-
-                        // Satu penanda saja di atas gambar: kodenya.
-                        //
-                        // Versi sebelumnya menumpuk judul, kode,
-                        // potongan, dan masa berlaku di sini. Di atas
-                        // banner berdesain hasilnya berjejalan — teksnya
-                        // berebut tempat dengan gambar yang sudah
-                        // mengatakan hal yang sama. Selebihnya pindah ke
-                        // lembar rincian yang terbuka saat diketuk.
-                        if (b.promo != null)
-                          Positioned(
-                            left: 14,
-                            bottom: 14,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 7,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(999),
-                                boxShadow: const [
-                                  BoxShadow(
-                                    color: Colors.black26,
-                                    blurRadius: 10,
-                                    offset: Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.local_offer_rounded,
-                                    size: 14,
-                                    color: context.c.accent,
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    b.promo!.kode,
-                                    style: TextStyle(
-                                      color: context.c.ink,
-                                      fontSize: 12.5,
-                                      fontWeight: FontWeight.w800,
-                                      letterSpacing: 0.4,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+          child: GestureDetector(
+            onTap: _bukaSemuaPromo,
+            behavior: HitTestBehavior.opaque,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Promo Berjalan',
+                  style: TextStyle(
+                    color: context.c.ink,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-              );
-            },
+                Icon(Icons.chevron_right_rounded, color: context.c.inkSoft),
+              ],
+            ),
           ),
         ),
-        if (_banner.length > 1) ...[
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(_banner.length, (i) {
-              final aktif = i == _bannerAktif;
-              return AnimatedContainer(
-                duration: const Duration(milliseconds: 250),
-                margin: const EdgeInsets.symmetric(horizontal: 3),
-                height: 6,
-                width: aktif ? 18 : 6,
-                decoration: BoxDecoration(
-                  color: aktif ? context.c.accent : context.c.line,
-                  borderRadius: BorderRadius.circular(999),
-                ),
-              );
-            }),
-          ),
-        ],
+        _carouselBanner(),
       ],
+    );
+  }
+
+  void _bukaSemuaPromo() => Navigator.push(
+    context,
+    MaterialPageRoute(builder: (_) => const PromoPage()),
+  );
+
+  /// Kartu pembuka: jalan ke seluruh daftar promo.
+  ///
+  /// Beranda hanya memuat banner yang sedang dipasang; promo tanpa
+  /// banner — kode yang dibagikan lewat WhatsApp — tidak akan pernah
+  /// muncul di sini. Kartu ini pintu ke daftar lengkapnya.
+  Widget _kartuSemuaPromo() {
+    return GestureDetector(
+      onTap: _bukaSemuaPromo,
+      child: Container(
+        width: 132,
+        decoration: BoxDecoration(
+          color: context.c.accent,
+          borderRadius: BorderRadius.circular(18),
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Container(
+              height: 40,
+              width: 40,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.18),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.percent_rounded,
+                color: context.c.onAccent,
+                size: 22,
+              ),
+            ),
+            Text(
+              'Lihat Semua Promo',
+              style: TextStyle(
+                color: context.c.onAccent,
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
+                height: 1.25,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _carouselBanner() {
+    return SizedBox(
+      height: 150,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        itemCount: _banner.length + 1,
+        separatorBuilder: (_, __) => const SizedBox(width: 12),
+        itemBuilder: (context, indeks) {
+          if (indeks == 0) return _kartuSemuaPromo();
+          final b = _banner[indeks - 1];
+          return SizedBox(
+            width: 300,
+            child: GestureDetector(
+              onTap: () => _bukaBanner(b),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(18),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Image.network(
+                      b.gambarUrl,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      // Gambarnya yang bicara kalau berhasil dimuat.
+                      // Kalau gagal, barulah keterangannya digambar
+                      // sendiri — di situ tidak ada yang bersaing
+                      // dengannya.
+                      errorBuilder: (context, _, __) => Container(
+                        color: context.c.accent,
+                        padding: const EdgeInsets.fromLTRB(18, 18, 18, 46),
+                        alignment: Alignment.centerLeft,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              b.promo?.judul.isNotEmpty == true
+                                  ? b.promo!.judul
+                                  : b.judul,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w800,
+                                height: 1.25,
+                              ),
+                            ),
+                            if (b.promo != null) ...[
+                              const SizedBox(height: 4),
+                              Text(
+                                'Potongan ${b.promo!.potonganTeks}',
+                                style: const TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    // Satu penanda saja di atas gambar: kodenya.
+                    //
+                    // Versi sebelumnya menumpuk judul, kode,
+                    // potongan, dan masa berlaku di sini. Di atas
+                    // banner berdesain hasilnya berjejalan — teksnya
+                    // berebut tempat dengan gambar yang sudah
+                    // mengatakan hal yang sama. Selebihnya pindah ke
+                    // lembar rincian yang terbuka saat diketuk.
+                    if (b.promo != null)
+                      Positioned(
+                        left: 14,
+                        bottom: 14,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 7,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(999),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Colors.black26,
+                                blurRadius: 10,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.local_offer_rounded,
+                                size: 14,
+                                color: context.c.accent,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                b.promo!.kode,
+                                style: TextStyle(
+                                  color: context.c.ink,
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 0.4,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -1039,177 +1079,8 @@ class _DashboardContentState extends State<DashboardContent> {
         // Banner berpromo tidak punya tujuan_tipe — yang dibawanya
         // promo, bukan alamat. Dulu cabang ini diam saja, jadi banner
         // promo terasa seperti gambar mati yang tidak bisa diketuk.
-        if (b.promo != null) _lembarPromo(b.promo!);
+        if (b.promo != null) tampilkanLembarPromo(context, b.promo!);
     }
-  }
-
-  /// Rincian promo: kode yang bisa disalin, potongannya, dan syaratnya.
-  void _lembarPromo(RingkasPromo p) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (context) => Container(
-        padding: EdgeInsets.fromLTRB(24, 16, 24, 24 + context.sisipanBawah),
-        decoration: BoxDecoration(
-          color: context.c.raised,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: context.c.line,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              p.judul,
-              style: TextStyle(
-                color: context.c.ink,
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            if (p.deskripsi != null && p.deskripsi!.isNotEmpty) ...[
-              const SizedBox(height: 6),
-              Text(
-                p.deskripsi!,
-                style: TextStyle(color: context.c.inkSoft, fontSize: 13.5),
-              ),
-            ],
-            const SizedBox(height: 16),
-
-            // Kodenya bisa disalin, bukan cuma dibaca. Mengetik ulang
-            // kode berhuruf besar di ponsel itu tempat salah ketik, dan
-            // salah ketik terbaca sebagai "promonya tidak berlaku".
-            GestureDetector(
-              onTap: () {
-                Clipboard.setData(ClipboardData(text: p.kode));
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Kode ${p.kode} disalin'),
-                    backgroundColor: context.c.ok,
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
-              },
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 14,
-                ),
-                decoration: BoxDecoration(
-                  color: context.c.accentSoft,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: context.c.accent.withValues(alpha: 0.4),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            p.kode,
-                            style: TextStyle(
-                              color: context.c.ink,
-                              fontSize: 20,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 1,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            'Potongan ${p.potonganTeks}',
-                            style: TextStyle(
-                              color: context.c.accent,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Icon(Icons.copy_rounded, color: context.c.accent, size: 20),
-                  ],
-                ),
-              ),
-            ),
-
-            if (p.berlakuSampai != null) ...[
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Icon(Icons.event_outlined, color: context.c.inkDim, size: 16),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Berlaku sampai ${p.berlakuSampai}',
-                    style: TextStyle(color: context.c.inkSoft, fontSize: 13),
-                  ),
-                ],
-              ),
-            ],
-
-            if (p.syarat.isNotEmpty) ...[
-              const SizedBox(height: 18),
-              Text(
-                'Syarat',
-                style: TextStyle(
-                  color: context.c.ink,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 8),
-              ...p.syarat.map(
-                (t) => Padding(
-                  padding: const EdgeInsets.only(bottom: 6),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(
-                        Icons.check_rounded,
-                        color: context.c.accent,
-                        size: 16,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          t,
-                          style: TextStyle(
-                            color: context.c.inkSoft,
-                            fontSize: 13,
-                            height: 1.35,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-
-            const SizedBox(height: 18),
-            Text(
-              'Masukkan kodenya di halaman pembayaran.',
-              style: TextStyle(color: context.c.inkDim, fontSize: 12.5),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   // ---- Search -------------------------------------------------------------

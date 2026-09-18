@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../config/api_config.dart';
+import '../models/banner_promo.dart';
 import 'auth_service.dart';
 
 /// Hasil pemeriksaan kode promo.
@@ -95,4 +96,28 @@ class PromoDitolak implements Exception {
 
   @override
   String toString() => pesan;
+}
+
+/// Promo yang sedang berjalan, untuk layar "Semua Promo".
+///
+/// Terpisah dari /banners: tidak semua promo punya banner, dan kode yang
+/// dibagikan lewat WhatsApp tetap harus bisa ditemukan di sini.
+extension PromoBerjalan on PromoService {
+  static Future<List<RingkasPromo>> ambil() async {
+    try {
+      final respons = await http
+          .get(
+            Uri.parse(ApiConfig.promosUrl),
+            headers: ApiConfig.defaultHeaders,
+          )
+          .timeout(const Duration(seconds: 15));
+      if (respons.statusCode != 200) return const [];
+      final data = (jsonDecode(respons.body)['data'] as List?) ?? const [];
+      return data
+          .map((e) => RingkasPromo.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } catch (_) {
+      return const [];
+    }
+  }
 }
