@@ -889,102 +889,97 @@ class _DashboardContentState extends State<DashboardContent> {
                           b.gambarUrl,
                           fit: BoxFit.cover,
                           width: double.infinity,
-                          // Gambar yang gagal dimuat diganti bidang
-                          // warna, bukan ikon rusak: keterangannya di
-                          // lapisan atas tetap terbaca.
-                          errorBuilder: (context, _, __) =>
-                              Container(color: context.c.accent),
-                        ),
-
-                        // Lapisan gelap dari bawah supaya teksnya
-                        // terbaca di atas gambar apa pun. Tanpa ini
-                        // keterangannya hilang di gambar terang.
-                        const DecoratedBox(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.centerLeft,
-                              end: Alignment.centerRight,
-                              colors: [Colors.black87, Colors.transparent],
-                              stops: [0.05, 0.95],
+                          // Gambarnya yang bicara kalau berhasil dimuat.
+                          // Kalau gagal, barulah keterangannya digambar
+                          // sendiri — di situ tidak ada yang bersaing
+                          // dengannya.
+                          errorBuilder: (context, _, __) => Container(
+                            color: context.c.accent,
+                            padding: const EdgeInsets.fromLTRB(18, 18, 18, 46),
+                            alignment: Alignment.centerLeft,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  b.promo?.judul.isNotEmpty == true
+                                      ? b.promo!.judul
+                                      : b.judul,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w800,
+                                    height: 1.25,
+                                  ),
+                                ),
+                                if (b.promo != null) ...[
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Potongan ${b.promo!.potonganTeks}',
+                                    style: const TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ],
                             ),
                           ),
                         ),
 
-                        Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                b.promo?.judul.isNotEmpty == true
-                                    ? b.promo!.judul
-                                    : b.judul,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w800,
-                                  height: 1.25,
-                                ),
+                        // Satu penanda saja di atas gambar: kodenya.
+                        //
+                        // Versi sebelumnya menumpuk judul, kode,
+                        // potongan, dan masa berlaku di sini. Di atas
+                        // banner berdesain hasilnya berjejalan — teksnya
+                        // berebut tempat dengan gambar yang sudah
+                        // mengatakan hal yang sama. Selebihnya pindah ke
+                        // lembar rincian yang terbuka saat diketuk.
+                        if (b.promo != null)
+                          Positioned(
+                            left: 14,
+                            bottom: 14,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 7,
                               ),
-                              if (b.promo != null) ...[
-                                const SizedBox(height: 8),
-                                Row(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 10,
-                                        vertical: 5,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(
-                                          999,
-                                        ),
-                                      ),
-                                      child: Text(
-                                        b.promo!.kode,
-                                        style: TextStyle(
-                                          color: context.c.accent,
-                                          fontSize: 12.5,
-                                          fontWeight: FontWeight.w800,
-                                          letterSpacing: 0.4,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Flexible(
-                                      child: Text(
-                                        'Potongan ${b.promo!.potonganTeks}',
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 12.5,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 6),
-                                Text(
-                                  b.promo!.berlakuSampai != null
-                                      ? 'Sampai ${b.promo!.berlakuSampai} · ketuk untuk lihat syarat'
-                                      : 'Ketuk untuk lihat syarat',
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 11.5,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(999),
+                                boxShadow: const [
+                                  BoxShadow(
+                                    color: Colors.black26,
+                                    blurRadius: 10,
+                                    offset: Offset(0, 2),
                                   ),
-                                ),
-                              ],
-                            ],
+                                ],
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.local_offer_rounded,
+                                    size: 14,
+                                    color: context.c.accent,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    b.promo!.kode,
+                                    style: TextStyle(
+                                      color: context.c.ink,
+                                      fontSize: 12.5,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: 0.4,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
-                        ),
                       ],
                     ),
                   ),
