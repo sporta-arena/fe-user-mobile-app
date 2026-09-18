@@ -117,9 +117,11 @@ class _PromoPageState extends State<PromoPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (p.gambarUrl != null && p.gambarUrl!.isNotEmpty)
-              SizedBox(
-                height: 130,
-                width: double.infinity,
+              // 2:1, sama dengan carousel di beranda. Rasio yang sama di
+              // dua tempat berarti satu ukuran yang bisa diberitahukan ke
+              // tim design, dan gambarnya tidak terpotong di mana pun.
+              AspectRatio(
+                aspectRatio: 2,
                 child: Image.network(
                   p.gambarUrl!,
                   fit: BoxFit.cover,
