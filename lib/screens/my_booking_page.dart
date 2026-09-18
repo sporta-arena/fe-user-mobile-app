@@ -1167,7 +1167,7 @@ class _PaymentWaitingPageState extends State<PaymentWaitingPage> {
             ),
           ),
         );
-        // Navigate back to HomePage with Transaksi tab selected
+        // Navigate back to HomePage with Pesanan tab selected
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
@@ -1211,7 +1211,7 @@ class _PaymentWaitingPageState extends State<PaymentWaitingPage> {
             ),
           ),
         );
-        // Navigate back to HomePage with Transaksi tab selected
+        // Navigate back to HomePage with Pesanan tab selected
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(

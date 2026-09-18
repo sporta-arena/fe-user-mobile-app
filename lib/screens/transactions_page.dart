@@ -66,7 +66,7 @@ class _TransactionsPageState extends State<TransactionsPage>
         });
       } else {
         setState(() {
-          _errorMessage = result.message ?? 'Gagal memuat data transaksi';
+          _errorMessage = result.message ?? 'Gagal memuat pesanan';
           _isLoading = false;
         });
       }
@@ -136,7 +136,7 @@ class _TransactionsPageState extends State<TransactionsPage>
         backgroundColor: context.c.surface,
         appBar: AppBar(
           title: Text(
-            "Transaksi",
+            "Pesanan",
             style: TextStyle(color: context.c.ink, fontWeight: FontWeight.bold),
           ),
           backgroundColor: context.c.surface,
@@ -150,7 +150,7 @@ class _TransactionsPageState extends State<TransactionsPage>
               Icon(Icons.login, size: 80, color: context.c.inkSoft),
               const SizedBox(height: 16),
               Text(
-                "Silakan login untuk melihat transaksi",
+                "Masuk dulu untuk melihat pesanan",
                 style: TextStyle(color: context.c.inkSoft, fontSize: 16),
               ),
               const SizedBox(height: 24),
@@ -192,7 +192,7 @@ class _TransactionsPageState extends State<TransactionsPage>
         elevation: 0,
         systemOverlayStyle: gayaOverlay(context),
         title: Text(
-          'Transaksi',
+          'Pesanan',
           style: TextStyle(color: context.c.ink, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -221,7 +221,7 @@ class _TransactionsPageState extends State<TransactionsPage>
                   CircularProgressIndicator(color: context.c.accent),
                   SizedBox(height: 16),
                   Text(
-                    'Memuat data transaksi...',
+                    'Memuat pesanan...',
                     style: TextStyle(color: context.c.inkSoft),
                   ),
                 ],
@@ -281,11 +281,11 @@ class _TransactionsPageState extends State<TransactionsPage>
           emptyIcon = Icons.hourglass_empty;
           break;
         case 'history':
-          emptyMessage = 'Belum ada riwayat transaksi';
+          emptyMessage = 'Belum ada riwayat main';
           emptyIcon = Icons.history;
           break;
         default:
-          emptyMessage = 'Belum ada transaksi';
+          emptyMessage = 'Belum ada pesanan';
           emptyIcon = Icons.receipt_long_outlined;
       }
 

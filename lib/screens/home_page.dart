@@ -36,7 +36,7 @@ import '../widgets/lembar_filter.dart';
 import 'hasil_filter_page.dart';
 
 class HomePage extends StatefulWidget {
-  /// Tab yang dibuka pertama (0=Beranda, 1=Transaksi, 2=Profil).
+  /// Tab yang dibuka pertama (0=Beranda, 1=Pesanan, 2=Profil).
   final int initialIndex;
   const HomePage({super.key, this.initialIndex = 0});
 
@@ -86,7 +86,8 @@ class _BottomNav extends StatelessWidget {
 
   static const _items = [
     (Icons.home_rounded, Icons.home_outlined, 'Beranda'),
-    (Icons.receipt_long_rounded, Icons.receipt_long_outlined, 'Transaksi'),
+    (Icons.confirmation_number_rounded, Icons.confirmation_number_outlined,
+        'Pesanan'),
     (Icons.person_rounded, Icons.person_outline_rounded, 'Profil'),
   ];
 
@@ -148,7 +149,7 @@ class _BottomNav extends StatelessWidget {
 class DashboardContent extends StatefulWidget {
   /// Pindah tab bawah dari dalam beranda.
   ///
-  /// Kartu "Selesaikan pembayaran" mengarah ke tab Transaksi, bukan
+  /// Kartu "Selesaikan pembayaran" mengarah ke tab Pesanan, bukan
   /// membuka sendiri layar pembayarannya: penyusunan data pembayaran
   /// di sana sudah ada dan cukup berliku (metode, biaya, string QR).
   /// Menyalinnya ke beranda berarti dua jalur yang bisa berbeda diam-

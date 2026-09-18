@@ -5,7 +5,7 @@
 /// (`/dashboard/...`) ikut tersimpan di sana. Tanpa penyaring, ketukan
 /// pada notifikasi mitra akan membuka layar yang salah atau tidak ada.
 ///
-/// Sengaja hanya sampai daftar transaksi, bukan ke satu booking
+/// Sengaja hanya sampai daftar pesanan, bukan ke satu booking
 /// tertentu: aplikasi pemesan memang belum punya layar detail booking
 /// yang bisa dibuka lewat id. Mengantar ke daftar itu jujur; berpura-pura
 /// membuka booking tertentu lalu menampilkan daftar tidak.
