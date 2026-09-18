@@ -29,6 +29,8 @@ import '../services/booking_service.dart';
 import '../services/notifikasi_service.dart';
 import '../models/field_type.dart';
 import '../utils/waktu_wib.dart';
+import '../utils/sisipan_bawah.dart';
+import 'package:flutter/services.dart';
 
 class HomePage extends StatefulWidget {
   /// Tab yang dibuka pertama (0=Beranda, 1=Transaksi, 2=Profil).
@@ -880,27 +882,110 @@ class _DashboardContentState extends State<DashboardContent> {
                   onTap: () => _bukaBanner(b),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(18),
-                    child: Image.network(
-                      b.gambarUrl,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      // Banner yang gagal dimuat ditampilkan sebagai
-                      // kotak berjudul, bukan ikon rusak: judulnya tetap
-                      // membawa informasi promonya.
-                      errorBuilder: (context, _, __) => Container(
-                        color: context.c.accentSoft,
-                        alignment: Alignment.center,
-                        padding: const EdgeInsets.all(16),
-                        child: Text(
-                          b.judul,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: context.c.accent,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Image.network(
+                          b.gambarUrl,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          // Gambar yang gagal dimuat diganti bidang
+                          // warna, bukan ikon rusak: keterangannya di
+                          // lapisan atas tetap terbaca.
+                          errorBuilder: (context, _, __) =>
+                              Container(color: context.c.accent),
+                        ),
+
+                        // Lapisan gelap dari bawah supaya teksnya
+                        // terbaca di atas gambar apa pun. Tanpa ini
+                        // keterangannya hilang di gambar terang.
+                        const DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
+                              colors: [Colors.black87, Colors.transparent],
+                              stops: [0.05, 0.95],
+                            ),
                           ),
                         ),
-                      ),
+
+                        Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                b.promo?.judul.isNotEmpty == true
+                                    ? b.promo!.judul
+                                    : b.judul,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w800,
+                                  height: 1.25,
+                                ),
+                              ),
+                              if (b.promo != null) ...[
+                                const SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 5,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(
+                                          999,
+                                        ),
+                                      ),
+                                      child: Text(
+                                        b.promo!.kode,
+                                        style: TextStyle(
+                                          color: context.c.accent,
+                                          fontSize: 12.5,
+                                          fontWeight: FontWeight.w800,
+                                          letterSpacing: 0.4,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Flexible(
+                                      child: Text(
+                                        'Potongan ${b.promo!.potonganTeks}',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 12.5,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  b.promo!.berlakuSampai != null
+                                      ? 'Sampai ${b.promo!.berlakuSampai} · ketuk untuk lihat syarat'
+                                      : 'Ketuk untuk lihat syarat',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 11.5,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -956,12 +1041,180 @@ class _DashboardContentState extends State<DashboardContent> {
           ),
         );
       default:
-        // Banner pengumuman atau berpromo tanpa tujuan: kodenya dibaca
-        // dari gambarnya dan diketik sendiri di layar bayar. Tidak ada
-        // yang perlu dibuka, jadi ketukannya sengaja tidak melakukan
-        // apa-apa daripada membuka layar yang tidak nyambung.
-        break;
+        // Banner berpromo tidak punya tujuan_tipe — yang dibawanya
+        // promo, bukan alamat. Dulu cabang ini diam saja, jadi banner
+        // promo terasa seperti gambar mati yang tidak bisa diketuk.
+        if (b.promo != null) _lembarPromo(b.promo!);
     }
+  }
+
+  /// Rincian promo: kode yang bisa disalin, potongannya, dan syaratnya.
+  void _lembarPromo(RingkasPromo p) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => Container(
+        padding: EdgeInsets.fromLTRB(24, 16, 24, 24 + context.sisipanBawah),
+        decoration: BoxDecoration(
+          color: context.c.raised,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: context.c.line,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              p.judul,
+              style: TextStyle(
+                color: context.c.ink,
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            if (p.deskripsi != null && p.deskripsi!.isNotEmpty) ...[
+              const SizedBox(height: 6),
+              Text(
+                p.deskripsi!,
+                style: TextStyle(color: context.c.inkSoft, fontSize: 13.5),
+              ),
+            ],
+            const SizedBox(height: 16),
+
+            // Kodenya bisa disalin, bukan cuma dibaca. Mengetik ulang
+            // kode berhuruf besar di ponsel itu tempat salah ketik, dan
+            // salah ketik terbaca sebagai "promonya tidak berlaku".
+            GestureDetector(
+              onTap: () {
+                Clipboard.setData(ClipboardData(text: p.kode));
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Kode ${p.kode} disalin'),
+                    backgroundColor: context.c.ok,
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              },
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
+                decoration: BoxDecoration(
+                  color: context.c.accentSoft,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: context.c.accent.withValues(alpha: 0.4),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            p.kode,
+                            style: TextStyle(
+                              color: context.c.ink,
+                              fontSize: 20,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Potongan ${p.potonganTeks}',
+                            style: TextStyle(
+                              color: context.c.accent,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(Icons.copy_rounded, color: context.c.accent, size: 20),
+                  ],
+                ),
+              ),
+            ),
+
+            if (p.berlakuSampai != null) ...[
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Icon(Icons.event_outlined, color: context.c.inkDim, size: 16),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Berlaku sampai ${p.berlakuSampai}',
+                    style: TextStyle(color: context.c.inkSoft, fontSize: 13),
+                  ),
+                ],
+              ),
+            ],
+
+            if (p.syarat.isNotEmpty) ...[
+              const SizedBox(height: 18),
+              Text(
+                'Syarat',
+                style: TextStyle(
+                  color: context.c.ink,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 8),
+              ...p.syarat.map(
+                (t) => Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        Icons.check_rounded,
+                        color: context.c.accent,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          t,
+                          style: TextStyle(
+                            color: context.c.inkSoft,
+                            fontSize: 13,
+                            height: 1.35,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+
+            const SizedBox(height: 18),
+            Text(
+              'Masukkan kodenya di halaman pembayaran.',
+              style: TextStyle(color: context.c.inkDim, fontSize: 12.5),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   // ---- Search -------------------------------------------------------------

@@ -96,6 +96,15 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
   bool _memuatMetode = true;
   String? _galatMetode;
 
+  /// Muat ulang daftar metode beserta biayanya.
+  ///
+  /// WAJIB dipanggil lagi setiap potongan berubah. `serverFee` dihitung
+  /// server dari `jumlah` yang dikirim saat daftar ini diminta, jadi
+  /// begitu promo dipakai angkanya jadi milik harga yang lama: layar
+  /// menampilkan biaya admin dari 162.000 sementara server menagih dari
+  /// 140.400. Selisihnya kecil, tapi akibatnya totalnya berubah sendiri
+  /// setelah pemesan menekan Bayar — hal yang paling tidak boleh terjadi
+  /// di layar ini.
   Future<void> _muatMetodePembayaran() async {
     setState(() {
       _memuatMetode = true;
@@ -282,6 +291,8 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
         _potongan = hasil.potongan.round();
         _promoGalat = null;
       });
+      // Biaya gateway dihitung dari jumlah sesudah potongan.
+      await _muatMetodePembayaran();
     } on PromoDitolak catch (e) {
       if (!mounted) return;
       setState(() {
@@ -294,13 +305,14 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
     }
   }
 
-  void _lepasPromo() {
+  Future<void> _lepasPromo() async {
     setState(() {
       _promo = null;
       _potongan = 0;
       _promoGalat = null;
       _promoController.clear();
     });
+    await _muatMetodePembayaran();
   }
 
   /// Kolom kode promo.
@@ -1413,7 +1425,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          "Centang persetujuan ketentuan refund untuk melanjutkan",
+                          "Centang dulu pernyataan di atas untuk melanjutkan",
                           style: TextStyle(
                             fontSize: 12,
                             color: context.c.danger,

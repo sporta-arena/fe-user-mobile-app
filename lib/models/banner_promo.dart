@@ -1,3 +1,42 @@
+/// Ringkasan promo yang dibawa sebuah banner.
+class RingkasPromo {
+  const RingkasPromo({
+    required this.kode,
+    required this.judul,
+    this.deskripsi,
+    required this.potonganTeks,
+    this.berlakuSampai,
+    this.syarat = const [],
+  });
+
+  final String kode;
+  final String judul;
+  final String? deskripsi;
+
+  /// Sudah berbentuk teks siap tampil: "Rp20.000" atau "20% (maks Rp20.000)".
+  /// Diformat server supaya angka yang dibaca pemesan tidak bisa berbeda
+  /// dari angka yang dihitung saat membayar.
+  final String potonganTeks;
+
+  final String? berlakuSampai;
+
+  /// Syarat yang benar-benar bisa membuat kodenya ditolak.
+  final List<String> syarat;
+
+  factory RingkasPromo.fromJson(Map<String, dynamic> json) {
+    return RingkasPromo(
+      kode: json['kode']?.toString() ?? '',
+      judul: json['judul']?.toString() ?? '',
+      deskripsi: json['deskripsi']?.toString(),
+      potonganTeks: json['potongan_teks']?.toString() ?? '',
+      berlakuSampai: json['berlaku_sampai']?.toString(),
+      syarat: ((json['syarat'] as List?) ?? const [])
+          .map((e) => e.toString())
+          .toList(),
+    );
+  }
+}
+
 /// Banner promo yang tampil di beranda.
 ///
 /// Server hanya mengirim yang sedang tayang, jadi aplikasi tidak perlu
@@ -7,6 +46,7 @@ class BannerPromo {
     required this.id,
     required this.judul,
     required this.gambarUrl,
+    this.promo,
     this.tujuanTipe,
     this.tujuanNilai,
   });
@@ -14,6 +54,13 @@ class BannerPromo {
   final int id;
   final String judul;
   final String gambarUrl;
+
+  /// Promo yang diiklankan banner ini, kalau ada.
+  ///
+  /// Gambarnya sendiri tidak bisa diandalkan memuat kode dan syaratnya —
+  /// admin bisa saja mengunggah logo polos, dan itu yang terjadi pada
+  /// banner pertama. Jadi keterangannya dibawa datanya, bukan gambarnya.
+  final RingkasPromo? promo;
 
   /// 'venue', 'kategori', atau 'tautan'. Null berarti banner
   /// pengumuman yang tidak mengantar ke mana-mana.
@@ -25,6 +72,9 @@ class BannerPromo {
       id: json['id'] as int,
       judul: json['judul']?.toString() ?? '',
       gambarUrl: json['gambar_url']?.toString() ?? '',
+      promo: json['promo'] is Map<String, dynamic>
+          ? RingkasPromo.fromJson(json['promo'] as Map<String, dynamic>)
+          : null,
       tujuanTipe: json['tujuan_tipe']?.toString(),
       tujuanNilai: json['tujuan_nilai']?.toString(),
     );
