@@ -64,6 +64,12 @@ class VenueService {
     String? olahraga,
     double? lat,
     double? lng,
+    int? hargaMin,
+    int? hargaMaks,
+    double? ratingMin,
+    double? radiusKm,
+    String? urutkan,
+    String? tersedia,
     int page = 1,
   }) async {
     try {
@@ -71,6 +77,15 @@ class VenueService {
       if (city != null) queryParams['city'] = city;
       if (search != null) queryParams['search'] = search;
       if (olahraga != null) queryParams['sport'] = olahraga;
+      // Semua penyaring dikirim ke server. Menyaringnya di app berarti
+      // menyaring 15 venue yang sudah dipotong server, dan venue yang
+      // cocok tapi ada di halaman berikutnya hilang tanpa tanda.
+      if (hargaMin != null) queryParams['harga_min'] = hargaMin.toString();
+      if (hargaMaks != null) queryParams['harga_maks'] = hargaMaks.toString();
+      if (ratingMin != null) queryParams['rating_min'] = ratingMin.toString();
+      if (radiusKm != null) queryParams['radius_km'] = radiusKm.toString();
+      if (urutkan != null) queryParams['urutkan'] = urutkan;
+      if (tersedia != null) queryParams['tersedia'] = tersedia;
       if (lat != null && lng != null) {
         queryParams['lat'] = lat.toString();
         queryParams['lng'] = lng.toString();

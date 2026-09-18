@@ -31,6 +31,9 @@ import '../models/field_type.dart';
 import '../utils/waktu_wib.dart';
 import '../widgets/lembar_promo.dart';
 import 'promo_page.dart';
+import '../models/filter_venue.dart';
+import '../widgets/lembar_filter.dart';
+import 'hasil_filter_page.dart';
 
 class HomePage extends StatefulWidget {
   /// Tab yang dibuka pertama (0=Beranda, 1=Transaksi, 2=Profil).
@@ -874,6 +877,19 @@ class _DashboardContentState extends State<DashboardContent> {
     );
   }
 
+  Future<void> _bukaFilter() async {
+    final filter = await tampilkanLembarFilter(
+      context,
+      awal: const FilterVenue(),
+      cabang: _fieldTypes,
+    );
+    if (filter == null || !mounted) return;
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => HasilFilterPage(filterAwal: filter)),
+    );
+  }
+
   void _bukaSemuaPromo() => Navigator.push(
     context,
     MaterialPageRoute(builder: (_) => const PromoPage()),
@@ -1076,11 +1092,11 @@ class _DashboardContentState extends State<DashboardContent> {
               ),
               Container(width: 1, height: 22, color: context.c.line),
               const SizedBox(width: 14),
+              // Ikon saring membuka penyaring, bukan daftar kategori.
+              // Sebelumnya ia menuju halaman Semua Kategori — ikonnya
+              // menjanjikan satu hal dan melakukan hal lain.
               GestureDetector(
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const AllCategoriesPage()),
-                ),
+                onTap: _bukaFilter,
                 child: Icon(Icons.tune_rounded, color: context.c.ink, size: 21),
               ),
             ],
