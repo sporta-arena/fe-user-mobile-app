@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart' show kDebugMode;
-import 'dart:ui' show FontFeature;
 import '../utils/waktu_wib.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -14,7 +13,6 @@ import 'login_page.dart';
 import 'venue_detail_page.dart';
 import 'e_ticket_page.dart';
 import 'chat/chat_page.dart';
-import '../utils/sisipan_bawah.dart';
 
 class TransactionsPage extends StatefulWidget {
   const TransactionsPage({super.key});
@@ -122,10 +120,6 @@ class _TransactionsPageState extends State<TransactionsPage>
       default:
         return _allBookings;
     }
-  }
-
-  int _getTabCount(String filterStatus) {
-    return _getFilteredBookings(filterStatus).length;
   }
 
   @override
@@ -963,38 +957,6 @@ class _TransactionBookingCardState extends State<TransactionBookingCard> {
     );
   }
 
-  void _goToPaymentSelector(BuildContext context) {
-    final navigator = Navigator.of(context);
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => FractionallySizedBox(
-        heightFactor: 0.85,
-        child: TransactionPaymentSelectorSheet(
-          totalPrice: booking.totalPrice.toInt(),
-        ),
-      ),
-    ).then((result) {
-      if (result != null) {
-        Map<String, dynamic> paymentData = _getPaymentData();
-        paymentData["selectedMethod"] = result['method'];
-        paymentData["adminFee"] = result['fee'];
-        paymentData["totalWithFee"] = result['total'];
-
-        navigator.push(
-          MaterialPageRoute(
-            builder: (context) => TransactionPaymentWaitingPage(
-              booking: booking,
-              bookingData: paymentData,
-              onPaymentComplete: onRefresh,
-            ),
-          ),
-        );
-      }
-    });
-  }
-
   Map<String, dynamic> _getPaymentData() {
     return {
       "id": booking.bookingCode,
@@ -1119,7 +1081,6 @@ class _TransactionBookingCardState extends State<TransactionBookingCard> {
     Color btnColor = context.c.accent;
     IconData statusIcon;
     VoidCallback? onMainAction;
-    bool showSecondaryBtn = false;
     bool showCancelBtn = false;
 
     switch (status) {
@@ -1129,7 +1090,6 @@ class _TransactionBookingCardState extends State<TransactionBookingCard> {
         mainBtnText = "BAYAR SEKARANG";
         statusIcon = Icons.timer_outlined;
         onMainAction = () => _goToPaymentDirect(context);
-        showSecondaryBtn = true;
         showCancelBtn = true;
         break;
       case 'confirmed':
@@ -1473,250 +1433,6 @@ class _TransactionBookingCardState extends State<TransactionBookingCard> {
     );
   }
 }
-
-// =========================================================
-// PAYMENT SELECTOR SHEET FOR TRANSACTIONS
-// =========================================================
-class TransactionPaymentSelectorSheet extends StatelessWidget {
-  final int totalPrice;
-
-  const TransactionPaymentSelectorSheet({super.key, required this.totalPrice});
-
-  @override
-  Widget build(BuildContext context) {
-    String formatCurrency(int amount) {
-      return "Rp ${amount.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}";
-    }
-
-    return Container(
-      padding: EdgeInsets.only(top: 10, bottom: context.sisipanBawah),
-      decoration: BoxDecoration(
-        color: context.c.raised,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Header Sheet
-          Container(
-            width: 40,
-            height: 4,
-            margin: const EdgeInsets.only(bottom: 20),
-            decoration: BoxDecoration(
-              color: context.c.line,
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24),
-            child: Text(
-              "Pilih Pembayaran",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: context.c.ink,
-              ),
-            ),
-          ),
-          Divider(height: 24, color: context.c.line),
-
-          // Ringkasan Tagihan
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(20),
-            color: context.c.surface,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Total Tagihan",
-                  style: TextStyle(color: context.c.inkSoft),
-                ),
-                Text(
-                  formatCurrency(totalPrice),
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w900,
-                    color: context.c.ink,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // List Metode
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              children: [
-                _buildSectionTitle(context, "Rekomendasi"),
-                _buildPaymentOption(
-                  context,
-                  icon: Icons.qr_code_scanner,
-                  title: "QRIS (Gopay/OVO/Dana)",
-                  fee: 700,
-                  color: context.c.info,
-                  isRecommended: true,
-                ),
-                const SizedBox(height: 20),
-                _buildSectionTitle(context, "Virtual Account"),
-                _buildPaymentOption(
-                  context,
-                  icon: Icons.account_balance,
-                  title: "BCA Virtual Account",
-                  fee: 2500,
-                  color: Colors.purple,
-                ),
-                _buildPaymentOption(
-                  context,
-                  icon: Icons.account_balance,
-                  title: "Mandiri Virtual Account",
-                  fee: 2500,
-                  color: context.c.info!,
-                ),
-                _buildPaymentOption(
-                  context,
-                  icon: Icons.account_balance,
-                  title: "BRI Virtual Account",
-                  fee: 2500,
-                  color: context.c.warn,
-                ),
-                const SizedBox(height: 20),
-                _buildSectionTitle(context, "Gerai Retail"),
-                _buildPaymentOption(
-                  context,
-                  icon: Icons.storefront,
-                  title: "Alfamart / Indomaret",
-                  fee: 5000,
-                  color: context.c.danger,
-                ),
-                const SizedBox(height: 40),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSectionTitle(BuildContext context, String title) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Text(
-        title,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.bold,
-          color: context.c.inkSoft,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPaymentOption(
-    BuildContext context, {
-    required IconData icon,
-    required String title,
-    required int fee,
-    required Color color,
-    bool isRecommended = false,
-  }) {
-    int finalPrice = totalPrice + fee;
-
-    String formatCurrency(int amount) =>
-        "Rp ${amount.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}";
-
-    return InkWell(
-      onTap: () {
-        Navigator.pop(context, {
-          "method": title,
-          "fee": fee,
-          "total": finalPrice,
-        });
-      },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: context.c.raised,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isRecommended ? context.c.accent : context.c.line,
-          ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              height: 50,
-              width: 50,
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(icon, color: color, size: 28),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Flexible(
-                        child: Text(
-                          title,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            color: context.c.ink,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      if (isRecommended) ...[
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: context.c.accent,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            "PROMO",
-                            style: TextStyle(
-                              fontSize: 8,
-                              color: context.c.onAccent,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    fee == 0
-                        ? "Bebas Biaya Admin"
-                        : "Biaya Admin: ${formatCurrency(fee)}",
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: fee == 0 ? context.c.ok : context.c.inkSoft,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(Icons.arrow_forward_ios, size: 16, color: context.c.inkSoft),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 // =========================================================
 // PAYMENT WAITING PAGE FOR TRANSACTIONS
 // =========================================================

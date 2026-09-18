@@ -4,6 +4,7 @@ import '../theme/app_tokens.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:intl/intl.dart';
 import '../services/booking_service.dart';
+import '../services/review_service.dart';
 import '../services/auth_service.dart';
 import '../models/booking.dart';
 import 'venue_detail_page.dart';
@@ -485,38 +486,6 @@ class BookingCard extends StatelessWidget {
         bookingId: booking.id,
       ),
     );
-  }
-
-  Future<void> _cancelBooking(BuildContext context) async {
-    final result = await BookingService.cancelBooking(booking.id);
-    if (context.mounted) {
-      if (result.success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Row(
-              children: [
-                Icon(Icons.check_circle, color: Colors.white, size: 20),
-                SizedBox(width: 12),
-                Text("Pesanan berhasil dibatalkan"),
-              ],
-            ),
-            backgroundColor: context.c.danger,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-        );
-        onRefresh();
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(result.message ?? 'Gagal membatalkan pesanan'),
-            backgroundColor: context.c.danger,
-          ),
-        );
-      }
-    }
   }
 
   @override
@@ -2463,10 +2432,67 @@ class _RatingDialogState extends State<RatingDialog> {
     }
   }
 
+  bool _mengirim = false;
+
   @override
   void dispose() {
     _reviewController.dispose();
     super.dispose();
+  }
+
+  /// Sebelumnya tombol "Kirim" cuma menutup dialog dan mengucapkan terima
+  /// kasih. Penilaiannya tidak pernah dikirim ke mana pun: `ReviewService`
+  /// sudah lengkap tapi tidak pernah di-import satu berkas pun. Jadi app
+  /// ini berterima kasih atas ulasan yang dibuangnya sendiri.
+  Future<void> _kirim() async {
+    setState(() => _mengirim = true);
+
+    final hasil = await ReviewService.createReview(
+      bookingId: widget.bookingId,
+      rating: _selectedStars,
+      comment: _reviewController.text.trim().isEmpty
+          ? null
+          : _reviewController.text.trim(),
+    );
+
+    if (!mounted) return;
+    setState(() => _mengirim = false);
+
+    // Ditutup hanya kalau benar-benar terkirim. Kalau gagal, dialognya
+    // bertahan dengan bintang dan tulisannya utuh, supaya orang tidak
+    // perlu mengetik ulang.
+    if (hasil.success) {
+      Navigator.pop(context);
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(
+              hasil.success
+                  ? Icons.check_circle
+                  : Icons.error_outline_rounded,
+              color: Colors.white,
+              size: 20,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                hasil.success
+                    ? 'Terima kasih atas penilaiannya!'
+                    : (hasil.message ?? 'Penilaiannya gagal dikirim.'),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: hasil.success ? context.c.accent : context.c.danger,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+      ),
+    );
   }
 
   @override
@@ -2608,31 +2634,8 @@ class _RatingDialogState extends State<RatingDialog> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: _selectedStars > 0
-                        ? () {
-                            Navigator.pop(context);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: const Row(
-                                  children: [
-                                    Icon(
-                                      Icons.check_circle,
-                                      color: Colors.white,
-                                      size: 20,
-                                    ),
-                                    SizedBox(width: 12),
-                                    Text("Terima kasih atas penilaiannya!"),
-                                  ],
-                                ),
-                                backgroundColor: context.c.accent,
-                                behavior: SnackBarBehavior.floating,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                            );
-                          }
-                        : null,
+                    onPressed:
+                        _selectedStars > 0 && !_mengirim ? _kirim : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: context.c.accent,
                       disabledBackgroundColor: context.c.line,
@@ -2642,13 +2645,22 @@ class _RatingDialogState extends State<RatingDialog> {
                       ),
                       elevation: 0,
                     ),
-                    child: Text(
-                      "Kirim",
-                      style: TextStyle(
-                        color: context.c.onAccent,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
+                    child: _mengirim
+                        ? SizedBox(
+                            height: 18,
+                            width: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: context.c.onAccent,
+                            ),
+                          )
+                        : Text(
+                            "Kirim",
+                            style: TextStyle(
+                              color: context.c.onAccent,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
                   ),
                 ),
               ],

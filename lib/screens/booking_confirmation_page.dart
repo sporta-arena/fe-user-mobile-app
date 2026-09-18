@@ -4,6 +4,7 @@ import 'dart:async';
 import '../utils/waktu_wib.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 
 import 'keterangan_biaya.dart';
 import '../services/promo_service.dart';
@@ -2354,67 +2355,11 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
 Download Sportago App untuk booking lapangan olahraga!
 ''';
 
-    // For now, show a snackbar. In production, use share_plus package
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Info booking disalin ke clipboard!',
-          style: TextStyle(color: context.c.onAccent),
-        ),
-        backgroundColor: context.c.accent,
-        action: SnackBarAction(
-          label: 'OK',
-          textColor: context.c.onAccent,
-          onPressed: () {},
-        ),
-      ),
-    );
-
-    // Note: In production, use:
-    // Share.share(bookingInfo);
-  }
-
-  Widget _buildDetailRow(IconData icon, String label, String value) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(icon, size: 18, color: context.c.inkSoft),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: TextStyle(fontSize: 12, color: context.c.inkSoft),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                value,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: context.c.ink,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPriceRow(String label, int? amount, [String? suffix]) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(label, style: TextStyle(color: context.c.inkSoft)),
-        Text(
-          suffix ?? _formatCurrency(amount!),
-          style: TextStyle(fontWeight: FontWeight.w500, color: context.c.ink),
-        ),
-      ],
-    );
+    // Sebelumnya di sini cuma ada snackbar "Info booking disalin ke
+    // clipboard!" dengan `Share.share` dibiarkan jadi komentar. Jadi
+    // tombolnya mengaku menyalin sesuatu yang tidak pernah ke mana-mana.
+    // Paketnya sudah terpasang dan sudah dipakai di halaman e-ticket.
+    Share.share(bookingInfo);
   }
 
   String _formatCurrency(int amount) {
@@ -2463,13 +2408,13 @@ class _BookingCreatedPageState extends State<BookingCreatedPage>
   bool _isExpired = false;
   bool _isPaid = false;
   bool _isCheckingStatus = false;
-  bool _showSuccessAnimation = false;
   Booking? _currentBooking;
 
-  // Animation
+  // Controllernya dipakai sebagai penunda sebelum popup sukses, bukan
+  // untuk menganimasikan apa pun. Dua Tween yang dulu ada di sini
+  // (_scaleAnimation, _opacityAnimation) tidak pernah dibaca widget mana
+  // pun, begitu juga _showSuccessAnimation.
   late AnimationController _animationController;
-  late Animation<double> _scaleAnimation;
-  late Animation<double> _opacityAnimation;
 
   @override
   void initState() {
@@ -2480,12 +2425,6 @@ class _BookingCreatedPageState extends State<BookingCreatedPage>
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
-    );
-    _scaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.elasticOut),
-    );
-    _opacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
     );
 
     // Start countdown timer
@@ -2553,10 +2492,7 @@ class _BookingCreatedPageState extends State<BookingCreatedPage>
     _pollingTimer?.cancel();
     _countdownTimer?.cancel();
 
-    setState(() {
-      _isPaid = true;
-      _showSuccessAnimation = true;
-    });
+    setState(() => _isPaid = true);
 
     // Play animation
     _animationController.forward().then((_) {

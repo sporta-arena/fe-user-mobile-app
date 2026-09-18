@@ -359,45 +359,4 @@ class BookingService {
     }
   }
 
-  /// Get refund preview for a booking
-  static Future<Map<String, dynamic>> getRefundPreview(int bookingId) async {
-    if (AuthService.token == null) {
-      return {'success': false, 'message': 'Silakan login terlebih dahulu'};
-    }
-
-    try {
-      final response = await http
-          .get(
-            Uri.parse(ApiConfig.refundPreviewUrl(bookingId)),
-            headers: ApiConfig.authHeaders(AuthService.token!),
-          )
-          .timeout(const Duration(seconds: 20));
-
-      final data = jsonDecode(response.body);
-
-      if (response.statusCode == 200) {
-        return {
-          'success': true,
-          'booking': data['booking'] ?? data['data']?['booking'],
-          'refund_percentage':
-              data['refund_percentage'] ?? data['data']?['refund_percentage'],
-          'refund_amount':
-              data['refund_amount'] ?? data['data']?['refund_amount'],
-          'original_amount':
-              data['original_amount'] ?? data['data']?['original_amount'],
-          'policy_description':
-              data['policy_description'] ?? data['data']?['policy_description'],
-          'can_refund':
-              data['can_refund'] ?? data['data']?['can_refund'] ?? false,
-        };
-      } else {
-        return {
-          'success': false,
-          'message': data['message'] ?? 'Gagal memuat preview refund',
-        };
-      }
-    } catch (e) {
-      return {'success': false, 'message': 'Gagal terhubung ke server: $e'};
-    }
-  }
 }

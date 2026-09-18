@@ -244,11 +244,6 @@ class ApiConfig {
   static String cancelBookingUrl(int id) => '$apiUrl/bookings/$id/cancel';
   static String simulatePaymentUrl(int id) =>
       '$apiUrl/bookings/$id/simulate-payment';
-  static String refundPreviewUrl(int id) =>
-      '$apiUrl/bookings/$id/refund-preview';
-  // Kebijakan refund berlaku global, bukan per booking: backend
-  // menyediakannya di /refund-policy tanpa id.
-  static String get refundPolicyUrl => '$apiUrl/refund-policy';
   static String canReviewBookingUrl(int id) =>
       '$apiUrl/bookings/$id/can-review';
 
