@@ -1,3 +1,4 @@
+import '../services/versi_app.dart';
 import 'package:flutter/material.dart';
 import '../theme/app_tokens.dart';
 import 'package:flutter/services.dart';
@@ -83,7 +84,7 @@ class AboutPage extends StatelessWidget {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        "Versi 1.0.0 (Beta)",
+                        VersiApp.tampil,
                         style: TextStyle(
                           fontSize: 12,
                           color: context.c.inkSoft,

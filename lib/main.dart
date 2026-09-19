@@ -5,6 +5,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/login_page.dart';
 import 'screens/home_page.dart';
+import 'services/versi_app.dart';
 import 'services/auth_service.dart';
 import 'services/favorite_service.dart';
 import 'theme/app_theme.dart';
@@ -19,6 +20,9 @@ void main() async {
   // Tema dibaca sebelum frame pertama supaya layar tidak berkedip
   // terang lalu gelap waktu aplikasi dibuka.
   await ThemeController.instance.muat();
+  // Nomor versi dibaca dari paketnya sendiri, bukan ditulis tangan di
+  // layar Tentang.
+  await VersiApp.muat();
   // Favorit dibaca sebelum frame pertama supaya ikon hati di detail
   // venue langsung tampil dengan keadaan yang benar, bukan kosong dulu
   // lalu berubah sendiri.

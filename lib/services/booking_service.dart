@@ -116,7 +116,13 @@ class BookingService {
   }
 
   /// Get my bookings
-  static Future<BookingResult> getMyBookings({int page = 1}) async {
+  ///
+  /// [perPage] dibutuhkan halaman Profil, yang harus menjumlahkan
+  /// SELURUH booking, bukan satu halaman saja.
+  static Future<BookingResult> getMyBookings({
+    int page = 1,
+    int? perPage,
+  }) async {
     if (AuthService.token == null) {
       return BookingResult(
         success: false,
@@ -125,9 +131,12 @@ class BookingService {
     }
 
     try {
-      final uri = Uri.parse(
-        ApiConfig.bookingsUrl,
-      ).replace(queryParameters: {'page': page.toString()});
+      final uri = Uri.parse(ApiConfig.bookingsUrl).replace(
+        queryParameters: {
+          'page': page.toString(),
+          if (perPage != null) 'per_page': perPage.toString(),
+        },
+      );
 
       final response = await http
           .get(uri, headers: ApiConfig.authHeaders(AuthService.token!))

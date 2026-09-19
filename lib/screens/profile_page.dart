@@ -1,3 +1,4 @@
+import '../services/versi_app.dart';
 import 'package:flutter/material.dart';
 import '../utils/tanpa_spasi.dart';
 import '../theme/app_tokens.dart';
@@ -55,7 +56,6 @@ class _ProfilePageState extends State<ProfilePage> {
   // Data statistik dari database
   int _totalBookings = 0;
   int _completedBookings = 0;
-  String _memberLevel = "Member";
   int _totalSpent = 0;
   bool _isLoadingStats = true;
 
@@ -65,19 +65,38 @@ class _ProfilePageState extends State<ProfilePage> {
     _loadUserStats();
   }
 
+  /// Ringkasan riwayat memesan.
+  ///
+  /// Dulu ketiganya dihitung dari HALAMAN PERTAMA saja, kecuali "Total
+  /// Booking" yang diambil dari `pagination.total`. Halaman berisi 15
+  /// baris, jadi begitu pemesan punya booking ke-16 angkanya berhenti
+  /// nyambung: totalnya benar, "Selesai" dan "Total Belanja" membeku di
+  /// 15 booking pertama. Tiga angka berdampingan yang saling
+  /// bertentangan, dan yang paling sering memesan justru yang paling
+  /// salah.
   Future<void> _loadUserStats() async {
     setState(() => _isLoadingStats = true);
 
     try {
-      // Load all bookings to calculate stats
-      final result = await BookingService.getMyBookings(page: 1);
+      int total = 0;
+      int completed = 0;
+      double spent = 0;
+      int halaman = 1;
 
-      if (result.success && result.bookings != null) {
-        int total = 0;
-        int completed = 0;
-        double spent = 0;
+      // Batas aman supaya akun dengan riwayat panjang tidak membuat
+      // layar Profil menggantung tanpa ujung.
+      const maksHalaman = 20;
+      const perHalaman = 100;
 
-        for (var booking in result.bookings!) {
+      while (halaman <= maksHalaman) {
+        final result = await BookingService.getMyBookings(
+          page: halaman,
+          perPage: perHalaman,
+        );
+
+        if (!result.success || result.bookings == null) break;
+
+        for (final booking in result.bookings!) {
           total++;
           if (booking.status == 'completed') {
             completed++;
@@ -88,34 +107,19 @@ class _ProfilePageState extends State<ProfilePage> {
           }
         }
 
-        // Get total from pagination if available
-        if (result.pagination != null && result.pagination!['total'] != null) {
-          total = result.pagination!['total'];
-        }
+        final terakhir = result.pagination?['last_page'];
+        if (terakhir is int && halaman >= terakhir) break;
+        if (result.bookings!.length < perHalaman) break;
+        halaman++;
+      }
 
-        // Calculate member level based on total spent
-        String level = "Member";
-        if (spent >= 5000000) {
-          level = "Platinum";
-        } else if (spent >= 2000000) {
-          level = "Gold";
-        } else if (spent >= 500000) {
-          level = "Silver";
-        }
-
-        if (mounted) {
-          setState(() {
-            _totalBookings = total;
-            _completedBookings = completed;
-            _totalSpent = spent.toInt();
-            _memberLevel = level;
-            _isLoadingStats = false;
-          });
-        }
-      } else {
-        if (mounted) {
-          setState(() => _isLoadingStats = false);
-        }
+      if (mounted) {
+        setState(() {
+          _totalBookings = total;
+          _completedBookings = completed;
+          _totalSpent = spent.toInt();
+          _isLoadingStats = false;
+        });
       }
     } catch (e) {
       if (mounted) {
@@ -281,7 +285,17 @@ class _ProfilePageState extends State<ProfilePage> {
                         ],
                       ),
                       const SizedBox(height: 16),
-                      // Member info row
+                      // "Member sejak" saja, selebar kartu.
+                      //
+                      // Di sebelahnya dulu ada lencana "Level: Silver".
+                      // Sportago tidak punya sistem tingkatan member sama
+                      // sekali — tidak di server, tidak di database, dan
+                      // tidak ada satu pun keuntungan yang melekat
+                      // padanya. Angkanya dikarang di app dari ambang
+                      // belanja yang ditulis di sini (500rb Silver, 2jt
+                      // Gold, 5jt Platinum). Pemesan yang melihat dirinya
+                      // "Silver" wajar bertanya dapat apa, dan tidak ada
+                      // jawabannya.
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 16,
@@ -293,84 +307,28 @@ class _ProfilePageState extends State<ProfilePage> {
                           border: Border.all(color: context.c.line),
                         ),
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            // Member Since
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.calendar_today_outlined,
-                                  size: 16,
-                                  color: context.c.inkSoft,
-                                ),
-                                const SizedBox(width: 8),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      "Member sejak",
-                                      style: TextStyle(
-                                        fontSize: 10,
-                                        color: context.c.inkSoft,
-                                      ),
-                                    ),
-                                    Text(
-                                      _memberSince,
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                        color: context.c.ink,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                            Icon(
+                              Icons.calendar_today_outlined,
+                              size: 16,
+                              color: context.c.inkSoft,
                             ),
-                            // Divider
-                            Container(
-                              width: 1,
-                              height: 30,
-                              color: context.c.line,
+                            const SizedBox(width: 8),
+                            Text(
+                              "Member sejak",
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: context.c.inkSoft,
+                              ),
                             ),
-                            // Member Level
-                            Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(6),
-                                  decoration: BoxDecoration(
-                                    color: _getMemberLevelColor().withValues(
-                                      alpha: 0.1,
-                                    ),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Icon(
-                                    Icons.workspace_premium,
-                                    size: 16,
-                                    color: _getMemberLevelColor(),
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      "Level",
-                                      style: TextStyle(
-                                        fontSize: 10,
-                                        color: context.c.inkSoft,
-                                      ),
-                                    ),
-                                    Text(
-                                      _memberLevel,
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                        color: _getMemberLevelColor(),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                            const Spacer(),
+                            Text(
+                              _memberSince,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: context.c.ink,
+                              ),
                             ),
                           ],
                         ),
@@ -384,19 +342,6 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
       ],
     );
-  }
-
-  Color _getMemberLevelColor() {
-    switch (_memberLevel) {
-      case "Platinum":
-        return Colors.purple;
-      case "Gold":
-        return context.c.warn;
-      case "Silver":
-        return context.c.inkDim;
-      default:
-        return context.c.accent;
-    }
   }
 
   // Stats Section dengan 4 kartu
@@ -423,84 +368,95 @@ class _ProfilePageState extends State<ProfilePage> {
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Column(
-        children: [
-          Row(
+      // Satu kartu berisi tiga angka, bukan dua kartu berdampingan lalu
+      // satu kartu yatim selebar layar di bawahnya. Ketiganya bercerita
+      // tentang hal yang sama — riwayat memesan — jadi tidak ada alasan
+      // yang satu dipisah sendirian.
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+        decoration: BoxDecoration(
+          color: context.c.raised,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: context.c.line),
+        ),
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Expanded(
-                child: _buildStatCard(
+                child: _kolomStat(
                   icon: Icons.confirmation_number_outlined,
-                  title: "Total Booking",
+                  title: "Booking",
                   value: "$_totalBookings",
                   color: context.c.accent,
                 ),
               ),
-              const SizedBox(width: 12),
+              _garis(),
               Expanded(
-                child: _buildStatCard(
+                child: _kolomStat(
                   icon: Icons.check_circle_outline,
                   title: "Selesai",
                   value: "$_completedBookings",
                   color: context.c.ok,
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
+              _garis(),
               Expanded(
-                child: _buildStatCard(
+                child: _kolomStat(
                   icon: Icons.account_balance_wallet_outlined,
                   title: "Total Belanja",
                   value: _formatCurrency(_totalSpent),
                   color: context.c.accent,
-                  isSmallText: true,
+                  kecil: true,
                 ),
               ),
             ],
           ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildStatCard({
+  Widget _garis() => Container(width: 1, color: context.c.line);
+
+  Widget _kolomStat({
     required IconData icon,
     required String title,
     required String value,
     required Color color,
-    bool isSmallText = false,
+    bool kecil = false,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: context.c.raised,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: context.c.line),
-      ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, color: color, size: 22),
+            child: Icon(icon, color: color, size: 18),
           ),
-          const SizedBox(height: 10),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: isSmallText ? 15 : 20,
-              fontWeight: FontWeight.bold,
-              color: context.c.ink,
+          const SizedBox(height: 8),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              value,
+              maxLines: 1,
+              style: TextStyle(
+                fontSize: kecil ? 14 : 20,
+                fontWeight: FontWeight.bold,
+                color: context.c.ink,
+              ),
             ),
           ),
           const SizedBox(height: 4),
           Text(
             title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(fontSize: 11, color: context.c.inkSoft),
             textAlign: TextAlign.center,
           ),
@@ -633,7 +589,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 _buildMenuItem(
                   icon: Icons.info_outline,
                   title: "Tentang Sportago",
-                  subtitle: "Versi 1.0.0",
+                  subtitle: VersiApp.tampil,
                   onTap: () {
                     Navigator.push(
                       context,
