@@ -36,7 +36,13 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
 
   // --- IMAGE CAROUSEL ---
   final PageController _imagePageController = PageController();
-  List<String> _venueImages = [];
+  /// Galeri lengkap: url DAN keterangannya.
+  ///
+  /// Dulu di sini cuma `List<String>` url — keterangan dari server
+  /// (nama lapangan) dibuang saat dibaca. Di venue berisi empat
+  /// lapangan, pemesan melihat dua belas foto tanpa satu pun petunjuk
+  /// foto mana milik lapangan mana.
+  List<model.FotoVenue> _galeri = [];
 
   // --- DATA FROM API ---
   model.Venue? _venue;
@@ -141,9 +147,11 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
           // dengan catatan bahwa sisanya "menyusul dari API" -- padahal
           // API-nya sudah lama mengirimkannya. Venue dengan lima
           // lapangan berfoto tetap tampil satu gambar.
-          _venueImages = _venue!.galeri.map((f) => f.url).toList();
-          if (_venueImages.isEmpty && _venue!.coverImageUrl != null) {
-            _venueImages.add(_venue!.coverImageUrl!);
+          _galeri = List<model.FotoVenue>.from(_venue!.galeri);
+          if (_galeri.isEmpty && _venue!.coverImageUrl != null) {
+            _galeri.add(
+              model.FotoVenue(url: _venue!.coverImageUrl!, keterangan: ''),
+            );
           }
         });
         _calculateDistance();
@@ -454,7 +462,7 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                     const SizedBox(height: 24),
                     _buildLocationSection(),
                     const SizedBox(height: 24),
-                    if (_venueImages.isNotEmpty) ...[
+                    if (_galeri.isNotEmpty) ...[
                       _buildGallerySection(),
                       const SizedBox(height: 24),
                     ],
@@ -516,10 +524,18 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
     );
   }
 
+  /// Keterangan satu slide, aman kalau indeksnya sudah lewat batas
+  /// (bisa terjadi sekejap saat galerinya berganti isi).
+  static String _keteranganFoto(List<model.FotoVenue> foto, int i) {
+    if (i < 0 || i >= foto.length) return '';
+
+    return foto[i].keteranganTampil;
+  }
+
   Widget _buildImageCarousel() {
-    final images = _venueImages.isNotEmpty
-        ? _venueImages
-        : [_venue?.coverImageUrl ?? ''];
+    final images = _galeri.isNotEmpty
+        ? _galeri
+        : [model.FotoVenue(url: _venue?.coverImageUrl ?? '', keterangan: '')];
 
     return SliverAppBar(
       systemOverlayStyle: gayaOverlay(context),
@@ -571,12 +587,40 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                 // bidang warna berinisial, sama seperti di web.
                 return SampulVenue(
                   nama: _venue?.name ?? '',
-                  urlGambar: images[index],
+                  urlGambar: images[index].url,
                   olahraga: _selectedField?.type,
                   ukuranInisial: 56,
                 );
               },
             ),
+            // Keterangan foto: nama lapangannya.
+            //
+            // Server sudah lama mengirim `caption`, tapi tidak ada satu
+            // layar pun yang memakainya. Tanpa ini pemesan menggeser
+            // dua belas foto tanpa tahu foto mana milik lapangan mana.
+            if (_keteranganFoto(images, _currentImageIndex).isNotEmpty)
+              Positioned(
+                bottom: 40,
+                left: 16,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.6),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    _keteranganFoto(images, _currentImageIndex),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
             // Image indicators
             if (images.length > 1)
               Positioned(
@@ -946,7 +990,7 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
   }
 
   Widget _buildGallerySection() {
-    final images = _venueImages;
+    final images = _galeri;
     if (images.isEmpty) return const SizedBox.shrink();
 
     return Column(
@@ -979,6 +1023,8 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
             scrollDirection: Axis.horizontal,
             itemCount: images.length,
             itemBuilder: (context, index) {
+              final keterangan = _keteranganFoto(images, index);
+
               return GestureDetector(
                 onTap: () => _showImageViewer(index),
                 child: Container(
@@ -988,16 +1034,42 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: context.c.line),
                   ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.network(
-                      images[index],
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(
-                        color: context.c.raised,
-                        child: Icon(Icons.image, color: context.c.inkSoft),
+                  clipBehavior: Clip.antiAlias,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Image.network(
+                        images[index].url,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(
+                          color: context.c.raised,
+                          child: Icon(Icons.image, color: context.c.inkSoft),
+                        ),
                       ),
-                    ),
+                      if (keterangan.isNotEmpty)
+                        Positioned(
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 4,
+                            ),
+                            color: Colors.black.withValues(alpha: 0.55),
+                            child: Text(
+                              keterangan,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
               );
@@ -1059,7 +1131,7 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                   crossAxisSpacing: 12,
                   mainAxisSpacing: 12,
                 ),
-                itemCount: _venueImages.length,
+                itemCount: _galeri.length,
                 itemBuilder: (context, index) {
                   return GestureDetector(
                     onTap: () {
@@ -1068,17 +1140,45 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                     },
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(12),
-                      child: Image.network(
-                        _venueImages[index],
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
-                          color: context.c.raised,
-                          child: Icon(
-                            Icons.image,
-                            color: context.c.inkSoft,
-                            size: 40,
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          Image.network(
+                            _galeri[index].url,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => Container(
+                              color: context.c.raised,
+                              child: Icon(
+                                Icons.image,
+                                color: context.c.inkSoft,
+                                size: 40,
+                              ),
+                            ),
                           ),
-                        ),
+                          if (_keteranganFoto(_galeri, index).isNotEmpty)
+                            Positioned(
+                              left: 0,
+                              right: 0,
+                              bottom: 0,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 5,
+                                ),
+                                color: Colors.black.withValues(alpha: 0.55),
+                                child: Text(
+                                  _keteranganFoto(_galeri, index),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                   );
@@ -1096,7 +1196,7 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
       context,
       MaterialPageRoute(
         builder: (context) => _ImageViewerPage(
-          images: _venueImages,
+          images: _galeri,
           initialIndex: initialIndex,
           venueName: _venue?.name ?? 'Venue',
         ),
@@ -1602,7 +1702,7 @@ class _MapGridPainter extends CustomPainter {
 
 // Full screen image viewer
 class _ImageViewerPage extends StatefulWidget {
-  final List<String> images;
+  final List<model.FotoVenue> images;
   final int initialIndex;
   final String venueName;
 
@@ -1633,6 +1733,12 @@ class _ImageViewerPageState extends State<_ImageViewerPage> {
     super.dispose();
   }
 
+  String get _keterangan {
+    if (_currentIndex < 0 || _currentIndex >= widget.images.length) return '';
+
+    return widget.images[_currentIndex].keteranganTampil;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -1644,9 +1750,23 @@ class _ImageViewerPageState extends State<_ImageViewerPage> {
           icon: const Icon(Icons.close, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
-          '${_currentIndex + 1} / ${widget.images.length}',
-          style: const TextStyle(color: Colors.white),
+        title: Column(
+          children: [
+            Text(
+              '${_currentIndex + 1} / ${widget.images.length}',
+              style: const TextStyle(color: Colors.white, fontSize: 15),
+            ),
+            // Nama lapangannya. Layar penuh justru tempat paling
+            // penting untuk keterangan ini: di sinilah pemesan
+            // memutuskan lapangan mana yang dia mau.
+            if (_keterangan.isNotEmpty)
+              Text(
+                _keterangan,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(color: Colors.white70, fontSize: 12),
+              ),
+          ],
         ),
         centerTitle: true,
       ),
@@ -1662,7 +1782,7 @@ class _ImageViewerPageState extends State<_ImageViewerPage> {
             maxScale: 4.0,
             child: Center(
               child: Image.network(
-                widget.images[index],
+                widget.images[index].url,
                 fit: BoxFit.contain,
                 errorBuilder: (_, __, ___) =>
                     const Icon(Icons.image, color: Colors.white54, size: 100),

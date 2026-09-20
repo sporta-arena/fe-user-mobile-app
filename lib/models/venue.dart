@@ -13,6 +13,15 @@ class FotoVenue {
   final String keterangan;
 
   const FotoVenue({required this.url, required this.keterangan});
+
+  /// Keterangan yang layak ditunjukkan ke pemesan.
+  ///
+  /// `Cover` itu label internal server untuk foto sampul — buat
+  /// pemesan artinya tidak ada, dan nama venuenya sudah tertulis besar
+  /// di atas foto itu juga. Yang bernilai cuma nama lapangan: di venue
+  /// berisi empat lapangan, itu satu-satunya cara tahu foto mana milik
+  /// lapangan mana.
+  String get keteranganTampil => keterangan == 'Cover' ? '' : keterangan;
 }
 
 class Venue {

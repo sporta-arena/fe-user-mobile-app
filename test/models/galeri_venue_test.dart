@@ -74,4 +74,56 @@ void main() {
       expect(venue.galeri.single.keterangan, isEmpty);
     });
   });
+
+  /// Keterangan yang benar-benar ditunjukkan ke pemesan.
+  ///
+  /// Server mengirim `caption` untuk SETIAP baris, termasuk label
+  /// internal "Cover" untuk foto sampul. Sebelum ini keterangannya
+  /// tidak dipakai sama sekali di layar mana pun; begitu dipakai,
+  /// "Cover" tidak boleh ikut muncul — nama venuenya sudah tertulis
+  /// besar di atas foto yang sama.
+  group('FotoVenue.keteranganTampil', () {
+    test('nama lapangan ditampilkan apa adanya', () {
+      const foto = FotoVenue(url: 'x', keterangan: 'Lapangan Indoor A');
+
+      expect(foto.keteranganTampil, 'Lapangan Indoor A');
+    });
+
+    test('label sampul tidak ditampilkan', () {
+      const foto = FotoVenue(url: 'x', keterangan: 'Cover');
+
+      expect(foto.keteranganTampil, isEmpty);
+    });
+
+    test('keterangan kosong tetap kosong', () {
+      const foto = FotoVenue(url: 'x', keterangan: '');
+
+      expect(foto.keteranganTampil, isEmpty);
+    });
+
+    test('lapangan yang kebetulan bernama mirip tetap ditampilkan', () {
+      // Penyaringnya harus persis, bukan "mengandung". Lapangan
+      // bernama "Cover Court" milik mitra yang nyata.
+      const foto = FotoVenue(url: 'x', keterangan: 'Cover Court');
+
+      expect(foto.keteranganTampil, 'Cover Court');
+    });
+  });
+
+  /// Keterangan ini yang menjawab "dari 4 lapangan di venue, fotonya
+  /// yang mana". Kalau server berhenti mengirimkannya, galerinya tetap
+  /// jalan — cuma kembali tanpa petunjuk.
+  test('galeri bercampur: tiap foto membawa nama lapangannya', () {
+    final venue = Venue.fromJson(muatan([
+      {'url': 'https://contoh.test/cover.jpg', 'caption': 'Cover'},
+      {'url': 'https://contoh.test/a1.jpg', 'caption': 'Lapangan A'},
+      {'url': 'https://contoh.test/a2.jpg', 'caption': 'Lapangan A'},
+      {'url': 'https://contoh.test/b1.jpg', 'caption': 'Lapangan B'},
+    ]));
+
+    expect(
+      venue.galeri.map((g) => g.keteranganTampil).toList(),
+      ['', 'Lapangan A', 'Lapangan A', 'Lapangan B'],
+    );
+  });
 }
