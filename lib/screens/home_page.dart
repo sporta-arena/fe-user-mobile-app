@@ -1,6 +1,9 @@
 import 'dart:async';
 
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
+import '../models/flash_sale.dart';
+import '../services/flash_sale_service.dart';
 import '../services/auth_service.dart';
 import '../services/push_notifikasi.dart';
 import '../services/realtime_chat.dart';
@@ -302,6 +305,20 @@ class _DashboardContentState extends State<DashboardContent> {
     _muatBooking();
     _muatJumlahNotif();
     _muatBanner();
+    _muatFlashSale();
+  }
+
+  List<FlashSaleBerjalan> _flashSale = const [];
+
+  /// Flash sale di sekitar pemesan.
+  ///
+  /// Dimuat setelah lokasi diketahui supaya radiusnya berarti; kalau
+  /// lokasinya belum ada, server mengirim yang mana saja dan itu masih
+  /// lebih baik daripada bagian kosong.
+  Future<void> _muatFlashSale() async {
+    final hasil = await FlashSaleService.ambil(lat: _lat, lng: _lng);
+    if (!mounted) return;
+    setState(() => _flashSale = hasil);
   }
 
   Future<void> _muatBanner() async {
@@ -518,6 +535,10 @@ class _DashboardContentState extends State<DashboardContent> {
           _lat = pos.latitude;
           _lng = pos.longitude;
         });
+        // Dimuat ulang begitu lokasinya diketahui: panggilan pertama
+        // terjadi sebelum izin lokasi selesai, jadi radiusnya belum
+        // berarti apa-apa.
+        _muatFlashSale();
       }
       final placemarks = await placemarkFromCoordinates(
         pos.latitude,
@@ -576,6 +597,16 @@ class _DashboardContentState extends State<DashboardContent> {
                 // jalan orang ke hal yang dicarinya — di bawah, ia
                 // ditemukan justru saat orang sudah selesai melihat
                 // pilihannya.
+                // Flash sale SEBELUM promo dan sesudah daftar arena.
+                // Urutannya disengaja: flash sale punya batas waktu,
+                // promo tidak. Yang akan hilang dalam hitungan jam
+                // pantas dilihat lebih dulu daripada yang masih ada
+                // minggu depan.
+                if (_flashSale.isNotEmpty) ...[
+                  const SizedBox(height: 28),
+                  _seksiFlashSale(),
+                ],
+
                 if (_banner.isNotEmpty) ...[
                   const SizedBox(height: 28),
                   _seksiPromo(),
@@ -841,6 +872,169 @@ class _DashboardContentState extends State<DashboardContent> {
         MaterialPageRoute(
           builder: (_) =>
               VenueDetailPage(venueId: venue.id, venueName: venue.name),
+        ),
+      ),
+    );
+  }
+
+  // ---- Flash sale --------------------------------------------------------
+
+  /// Baris ringkas, bukan banner besar.
+  ///
+  /// Flash sale melekat pada satu jam di satu lapangan, jadi ia baru
+  /// berarti kalau jam dan harganya terlihat bersamaan — sesuatu yang
+  /// tidak muat di banner bergambar. Digulir mendatar supaya beberapa
+  /// tawaran muat tanpa mendorong daftar arena turun jauh.
+  Widget _seksiFlashSale() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+          child: Row(
+            children: [
+              Icon(Icons.bolt_rounded, color: context.c.danger, size: 20),
+              const SizedBox(width: 6),
+              Text(
+                'Flash Sale',
+                style: TextStyle(
+                  color: context.c.ink,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '${_flashSale.length} tawaran',
+                style: TextStyle(color: context.c.inkSoft, fontSize: 12),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(
+          height: 132,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            itemCount: _flashSale.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            itemBuilder: (context, i) => _kartuFlashSale(_flashSale[i]),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _kartuFlashSale(FlashSaleBerjalan f) {
+    final rupiah = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    );
+
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) =>
+              VenueDetailPage(venueId: f.venueId, venueName: f.venueName),
+        ),
+      ),
+      child: Container(
+        width: 232,
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: context.c.raised,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: context.c.danger.withValues(alpha: 0.35)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: context.c.danger,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    '-${f.diskonPersen}%',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    f.hariIni ? 'Hari ini' : f.tanggal,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: context.c.inkSoft,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                if (f.jarakKm != null)
+                  Text(
+                    '${f.jarakKm!.toStringAsFixed(1)} km',
+                    style: TextStyle(color: context.c.inkDim, fontSize: 10),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              f.venueName,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: context.c.ink,
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            Text(
+              '${f.fieldName} · ${WaktuWib.tampil(f.mulai)}-${WaktuWib.tampil(f.selesai)}',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: context.c.inkSoft, fontSize: 11),
+            ),
+            const Spacer(),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  rupiah.format(f.harga),
+                  style: TextStyle(
+                    color: context.c.danger,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 2),
+                  child: Text(
+                    rupiah.format(f.hargaNormal),
+                    style: TextStyle(
+                      color: context.c.inkDim,
+                      fontSize: 11,
+                      decoration: TextDecoration.lineThrough,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -1372,6 +1566,44 @@ class _VenueCard extends StatelessWidget {
                     warnaIkon: context.c.warn,
                   ),
                 ),
+                // Badge flash sale di sudut bawah, bukan menumpuk
+                // dengan jarak dan rating di atas: ketiganya menjawab
+                // pertanyaan berbeda, dan sudut yang sama membuat
+                // mereka saling menutupi di kartu sempit.
+                if (venue.adaFlashSale)
+                  Positioned(
+                    left: 10,
+                    bottom: 10,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: context.c.danger,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.bolt_rounded,
+                            size: 13,
+                            color: Colors.white,
+                          ),
+                          SizedBox(width: 3),
+                          Text(
+                            'Flash Sale',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
               ],
             ),
             const SizedBox(height: 12),

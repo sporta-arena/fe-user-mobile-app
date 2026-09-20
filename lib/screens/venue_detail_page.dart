@@ -1346,6 +1346,10 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
               bgColor = context.c.accent;
               textColor = context.c.onAccent;
               borderColor = context.c.accent;
+            } else if (slot.diskonPersen > 0) {
+              bgColor = context.c.danger.withValues(alpha: 0.06);
+              textColor = context.c.ink;
+              borderColor = context.c.danger.withValues(alpha: 0.45);
             } else {
               bgColor = context.c.raised;
               textColor = context.c.ink;
@@ -1372,20 +1376,54 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: borderColor),
                 ),
-                child: Text(
-                  // Label ditampilkan dalam WIB. `slotTime` yang mentah
-                  // tetap dipakai sebagai nilai pilihan, karena itu yang
-                  // dikirim balik ke API.
-                  WaktuWib.tampil(slotTime),
-                  style: TextStyle(
-                    color: textColor,
-                    fontWeight: isSelected
-                        ? FontWeight.bold
-                        : FontWeight.normal,
-                    decoration: (!slot.available || isPassed)
-                        ? TextDecoration.lineThrough
-                        : null,
-                  ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      // Label ditampilkan dalam WIB. `slotTime` yang mentah
+                      // tetap dipakai sebagai nilai pilihan, karena itu yang
+                      // dikirim balik ke API.
+                      WaktuWib.tampil(slotTime),
+                      style: TextStyle(
+                        color: textColor,
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                        decoration: (!slot.available || isPassed)
+                            ? TextDecoration.lineThrough
+                            : null,
+                      ),
+                    ),
+                    // Penanda flash sale menempel di chip jamnya, bukan
+                    // di banner terpisah: di sinilah orang benar-benar
+                    // memutuskan, dan diskon baru berarti kalau terlihat
+                    // berdampingan dengan jamnya.
+                    if (isAvailable && slot.diskonPersen > 0) ...[
+                      const SizedBox(height: 2),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.bolt_rounded,
+                            size: 11,
+                            color: isSelected
+                                ? context.c.onAccent
+                                : context.c.danger,
+                          ),
+                          Text(
+                            '-${slot.diskonPersen}%',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                              color: isSelected
+                                  ? context.c.onAccent
+                                  : context.c.danger,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ],
                 ),
               ),
             );
@@ -1395,9 +1433,40 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
     );
   }
 
+  /// Total dari harga TIAP slot yang dipilih, bukan harga dasar
+  /// lapangan dikali jumlah jam.
+  ///
+  /// Perhitungan lama memakai `_selectedField.pricePerHour`, sehingga
+  /// aturan harga jam sibuk pun tidak pernah ikut terhitung di layar:
+  /// pemesan melihat satu angka lalu ditagih angka lain oleh server,
+  /// yang memang menghitung per slot. Flash sale membuat selisih itu
+  /// jauh lebih kentara, jadi sekalian dibetulkan di sini.
+  int get _totalTerpilih {
+    var total = 0.0;
+
+    for (final jam in _selectedTimeSlots) {
+      final slot = _availableSlots.firstWhere(
+        (s) => s.startTime.substring(0, 5) == jam,
+        orElse: () => field_model.TimeSlot(
+          startTime: jam,
+          endTime: jam,
+          available: false,
+          pricePerHour: _selectedField?.pricePerHour ?? 0,
+        ),
+      );
+
+      // Slot lama dari API yang belum mengirim harga tetap jatuh ke
+      // harga dasar, bukan ke nol.
+      total += slot.pricePerHour > 0
+          ? slot.pricePerHour
+          : (_selectedField?.pricePerHour ?? 0);
+    }
+
+    return total.round();
+  }
+
   Widget _buildBottomBar() {
-    final price = _selectedField?.pricePerHour.toInt() ?? 0;
-    final totalPrice = price * _selectedTimeSlots.length;
+    final totalPrice = _totalTerpilih;
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -1453,7 +1522,17 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                                 ' ',
                               )[0],
                               selectedTimeSlots: _selectedTimeSlots,
-                              price: price,
+                              // Harga per jam yang dikirim ke layar
+                              // berikutnya adalah rata-rata dari slot
+                              // yang benar-benar dipilih, bukan harga
+                              // dasar lapangan — kalau tidak, ringkasan
+                              // pesanan menampilkan angka yang berbeda
+                              // dari total di bilah bawah.
+                              price: _selectedTimeSlots.isEmpty
+                                  ? 0
+                                  : (_totalTerpilih /
+                                          _selectedTimeSlots.length)
+                                      .round(),
                             ),
                           ),
                         );

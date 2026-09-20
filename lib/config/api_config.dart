@@ -238,6 +238,10 @@ class ApiConfig {
   /// Banner promo beranda. Publik; server hanya mengirim yang tayang.
   static String get bannersUrl => '$apiUrl/banners';
 
+  /// Flash sale yang sedang berjalan. Berbasis data, bukan gambar
+  /// unggahan seperti banner.
+  static String get flashSalesUrl => '$apiUrl/flash-sales';
+
   /// Promo yang sedang berjalan.
   static String get promosUrl => '$apiUrl/promos';
   static String bookingDetailUrl(int id) => '$apiUrl/bookings/$id';

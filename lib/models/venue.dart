@@ -48,6 +48,13 @@ class Venue {
   /// sebenarnya sudah ada di tangan.
   ///
   /// Null kalau venuenya belum punya lapangan aktif sama sekali.
+  /// Venue ini punya flash sale berjalan (hari ini sampai H+2).
+  ///
+  /// Dihitung server di kueri daftar, bukan per kartu: menghitungnya di
+  /// klien berarti satu permintaan tambahan per venue, dan daftar venue
+  /// adalah layar paling ramai di aplikasi.
+  final bool adaFlashSale;
+
   final double? hargaMin;
   final double? hargaMaks;
 
@@ -87,6 +94,7 @@ class Venue {
     this.fields,
     this.averageRating,
     this.reviewCount,
+    this.adaFlashSale = false,
     this.hargaMin,
     this.hargaMaks,
     this.jarakKm,
@@ -130,6 +138,7 @@ class Venue {
           ? double.tryParse(json['average_rating'].toString())
           : null,
       reviewCount: json['review_count'],
+      adaFlashSale: json['has_flash_sale'] == true,
       hargaMin: json['min_price'] != null
           ? double.tryParse(json['min_price'].toString())
           : null,

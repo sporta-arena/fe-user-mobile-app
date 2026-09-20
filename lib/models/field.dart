@@ -97,17 +97,49 @@ class TimeSlot {
   final String endTime;
   final bool available;
 
+  /// Harga yang berlaku untuk slot ini — sudah termasuk potongan flash
+  /// sale kalau ada. Ini juga harga yang akan ditagih; server memakai
+  /// resolusi harga yang sama saat booking dibuat, jadi angka di layar
+  /// dan angka di tagihan tidak bisa berbeda.
+  final double pricePerHour;
+
+  /// Harga sebelum diskon, untuk dicoret. Sama dengan [pricePerHour]
+  /// kalau slot ini bukan flash sale.
+  final double originalPricePerHour;
+
+  final bool isFlashSale;
+
   TimeSlot({
     required this.startTime,
     required this.endTime,
     required this.available,
+    this.pricePerHour = 0,
+    this.originalPricePerHour = 0,
+    this.isFlashSale = false,
   });
 
+  /// Besar potongan dalam persen, dibulatkan. Nol kalau bukan flash sale
+  /// atau harga pembandingnya tidak masuk akal.
+  int get diskonPersen {
+    if (!isFlashSale) return 0;
+    if (originalPricePerHour <= 0) return 0;
+    if (pricePerHour >= originalPricePerHour) return 0;
+
+    return (((originalPricePerHour - pricePerHour) / originalPricePerHour) *
+            100)
+        .round();
+  }
+
   factory TimeSlot.fromJson(Map<String, dynamic> json) {
+    double angka(String k) => (json[k] as num?)?.toDouble() ?? 0;
+
     return TimeSlot(
       startTime: json['start_time'] ?? '',
       endTime: json['end_time'] ?? '',
       available: json['available'] ?? false,
+      pricePerHour: angka('price_per_hour'),
+      originalPricePerHour: angka('original_price_per_hour'),
+      isFlashSale: json['is_flash_sale'] == true,
     );
   }
 }
