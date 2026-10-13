@@ -33,12 +33,20 @@ import 'auth_service.dart';
 /// yang harus diperbaiki bersamaan setiap kali ada yang salah di
 /// penyambungan ulang, dan yang terlewat akan diam tanpa pesan galat.
 class RealtimeChat {
-  RealtimeChat._(this._namaKanal, this._namaEvent, this._onPesan, this._onStatus);
+  RealtimeChat._(
+    this._namaKanal,
+    this._namaEvent,
+    this._onPesan,
+    this._onStatus,
+  );
 
   final String _namaKanal;
   final String _namaEvent;
   final void Function(Map<String, dynamic> pesan) _onPesan;
   final void Function(bool tersambung)? _onStatus;
+
+  /// Event tambahan pada kanal yang sama, misalnya `messages.read`.
+  final Map<String, void Function(Map<String, dynamic> muatan)> _eventLain = {};
 
   WebSocketChannel? _kanal;
   StreamSubscription<dynamic>? _langganan;
@@ -54,17 +62,24 @@ class RealtimeChat {
   String? socketId;
 
   /// Mulai mendengarkan pesan baru pada satu booking.
+  ///
+  /// [onDibaca] dipanggil saat lawan bicara membaca pesan (`messages.read`),
+  /// supaya centang pengirim langsung jadi biru tanpa memuat ulang.
   static RealtimeChat dengarkan(
     int bookingId, {
     required void Function(Map<String, dynamic> pesan) onPesan,
+    void Function(Map<String, dynamic> muatan)? onDibaca,
     void Function(bool tersambung)? onStatus,
   }) {
-    return dengarkanKanal(
-      namaKanal: namaKanalBooking(bookingId),
-      namaEvent: 'message.sent',
-      onPesan: onPesan,
-      onStatus: onStatus,
+    final klien = RealtimeChat._(
+      namaKanalBooking(bookingId),
+      'message.sent',
+      onPesan,
+      onStatus,
     );
+    if (onDibaca != null) klien._eventLain['messages.read'] = onDibaca;
+    klien._sambung();
+    return klien;
   }
 
   /// Mulai mendengarkan satu event pada kanal privat apa pun.
@@ -136,7 +151,11 @@ class RealtimeChat {
         break;
 
       default:
-        if (event == _namaEvent) _onPesan(muatan());
+        if (event == _namaEvent) {
+          _onPesan(muatan());
+        } else if (_eventLain[event] != null) {
+          _eventLain[event]!(muatan());
+        }
         break;
     }
   }
@@ -149,15 +168,17 @@ class RealtimeChat {
     final kanal = _namaKanal;
 
     try {
-      final respons = await http.post(
-        Uri.parse('${ApiConfig.baseUrl}/broadcasting/auth'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: json.encode({'socket_id': id, 'channel_name': kanal}),
-      ).timeout(const Duration(seconds: 20));
+      final respons = await http
+          .post(
+            Uri.parse('${ApiConfig.baseUrl}/broadcasting/auth'),
+            headers: {
+              'Authorization': 'Bearer $token',
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+            body: json.encode({'socket_id': id, 'channel_name': kanal}),
+          )
+          .timeout(const Duration(seconds: 20));
 
       if (respons.statusCode != 200) {
         _onStatus?.call(false);

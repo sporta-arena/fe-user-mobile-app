@@ -55,6 +55,7 @@ class _ChatPageState extends State<ChatPage> {
     _realtime = RealtimeChat.dengarkan(
       widget.booking.id,
       onPesan: _terimaPesan,
+      onDibaca: _terimaTandaBaca,
       onStatus: (tersambung) {
         if (mounted) setState(() => _terhubung = tersambung);
       },
@@ -84,6 +85,20 @@ class _ChatPageState extends State<ChatPage> {
     setState(() => _messages.add(pesan));
     _scrollToBottom();
     ChatService.markAsRead(widget.booking.id);
+  }
+
+  /// Mitra baru saja membaca pesan kita: semua pesan milik pemesan yang
+  /// belum biru jadi biru, sama dengan yang ditandai server.
+  void _terimaTandaBaca(Map<String, dynamic> data) {
+    if (!mounted || data['sender_type'] != 'user') return;
+    setState(() {
+      _messages = [
+        for (final m in _messages)
+          m.senderType == 'user' && m.status != MessageStatus.read
+              ? m.withStatus(MessageStatus.read)
+              : m,
+      ];
+    });
   }
 
   Future<void> _loadData() async {

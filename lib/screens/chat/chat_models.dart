@@ -50,6 +50,19 @@ class Message {
     );
   }
 
+  /// Salinan dengan status lain, dipakai saat tanda baca realtime tiba.
+  Message withStatus(MessageStatus baru) => Message(
+    id: id,
+    bookingId: bookingId,
+    senderId: senderId,
+    senderName: senderName,
+    senderType: senderType,
+    content: content,
+    timestamp: timestamp,
+    type: type,
+    status: baru,
+  );
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,
