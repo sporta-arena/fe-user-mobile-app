@@ -1438,7 +1438,12 @@ class _PaymentWaitingPageState extends State<PaymentWaitingPage> {
                                   // dicetak sebagai teks tebal di sini.
                                   KodeQris(qrString: qrString, ukuran: 200)
                                 else if (tautanBayar != null)
-                                  TombolHalamanBayar(url: tautanBayar)
+                                  TombolHalamanBayar(
+                                    url: tautanBayar,
+                                    lewatDoku:
+                                        widget.booking.payment?.paymentMethod ==
+                                        'doku_checkout',
+                                  )
                                 else
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.center,

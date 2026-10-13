@@ -1862,7 +1862,10 @@ class _TransactionPaymentWaitingPageState
                               tautanBayar.isNotEmpty) ...[
                             // E-wallet atau DOKU Checkout: lanjut di
                             // halaman bayar gateway.
-                            TombolHalamanBayar(url: tautanBayar),
+                            TombolHalamanBayar(
+                              url: tautanBayar,
+                              lewatDoku: paymentMethod == 'DOKU_CHECKOUT',
+                            ),
                           ] else ...[
                             // Virtual Account - Show VA Number
                             Container(

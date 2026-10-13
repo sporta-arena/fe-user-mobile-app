@@ -11,17 +11,55 @@ import '../theme/app_tokens.dart';
 /// lain jatuh ke tampilan "Nomor Virtual Account" yang kosong.
 class TombolHalamanBayar extends StatelessWidget {
   final String url;
-  final String keterangan;
+
+  /// true untuk DOKU Checkout (halaman DOKU di browser, didahului
+  /// penjelasan); false untuk e-wallet yang membuka aplikasi dompetnya.
+  final bool lewatDoku;
 
   const TombolHalamanBayar({
     super.key,
     required this.url,
-    this.keterangan =
-        'Pilih cara bayar di halaman DOKU: VA bank lain, '
-        'e-wallet, minimarket, PayLater, atau kartu.',
+    this.lewatDoku = true,
   });
 
+  String get _keterangan => lewatDoku
+      ? 'Pembayaran dilanjutkan di halaman DOKU yang terbuka di browser. '
+            'Di sana kamu bisa pilih VA bank lain, e-wallet, minimarket, '
+            'PayLater, atau kartu.'
+      : 'Pembayaran dilanjutkan di aplikasi e-wallet kamu.';
+
+  /// Penjelasan singkat sebelum aplikasi berganti ke browser.
+  ///
+  /// Tanpa ini pelanggan mendadak berada di halaman DOKU yang asing,
+  /// mengira tersasar, lalu menutupnya.
+  Future<bool> _setuju(BuildContext context) async {
+    final hasil = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Lanjut ke halaman DOKU'),
+        content: const Text(
+          'Pembayaran dilanjutkan di halaman resmi DOKU, mitra pembayaran '
+          'Sportago, yang terbuka di browser.\n\n'
+          'Pilih cara bayar di sana. Setelah selesai, kembali ke aplikasi '
+          'Sportago: status pesananmu diperbarui otomatis.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Batal'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Buka halaman DOKU'),
+          ),
+        ],
+      ),
+    );
+    return hasil ?? false;
+  }
+
   Future<void> _buka(BuildContext context) async {
+    if (lewatDoku && (!await _setuju(context) || !context.mounted)) return;
     final uri = Uri.tryParse(url);
     final bisa =
         uri != null &&
@@ -38,7 +76,7 @@ class TombolHalamanBayar extends StatelessWidget {
     return Column(
       children: [
         Text(
-          keterangan,
+          _keterangan,
           textAlign: TextAlign.center,
           style: TextStyle(fontSize: 12, color: context.c.inkSoft),
         ),
@@ -50,7 +88,7 @@ class TombolHalamanBayar extends StatelessWidget {
             onPressed: () => _buka(context),
             icon: Icon(Icons.open_in_new, size: 18, color: context.c.onAccent),
             label: Text(
-              'Lanjutkan Pembayaran',
+              lewatDoku ? 'Bayar di halaman DOKU' : 'Lanjutkan Pembayaran',
               style: TextStyle(
                 color: context.c.onAccent,
                 fontWeight: FontWeight.bold,
@@ -66,8 +104,8 @@ class TombolHalamanBayar extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         Text(
-          'Setelah membayar, kembali ke aplikasi. Status pesanan diperbarui '
-          'otomatis.',
+          'Setelah membayar, kembali ke aplikasi Sportago. Status pesanan '
+          'diperbarui otomatis. Selesaikan dalam 10 menit.',
           textAlign: TextAlign.center,
           style: TextStyle(fontSize: 11, color: context.c.inkDim),
         ),

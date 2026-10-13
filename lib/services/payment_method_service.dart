@@ -29,13 +29,13 @@ class MetodePembayaran {
   final double nilaiBiaya;
 
   factory MetodePembayaran.fromJson(Map<String, dynamic> j) => MetodePembayaran(
-        kode: (j['code'] ?? '').toString(),
-        label: (j['label'] ?? '').toString(),
-        kategori: (j['category'] ?? '').toString(),
-        biaya: (j['fee'] as num?)?.toInt() ?? 0,
-        jenisBiaya: (j['fee_type'] ?? '').toString(),
-        nilaiBiaya: (j['fee_value'] as num?)?.toDouble() ?? 0,
-      );
+    kode: (j['code'] ?? '').toString(),
+    label: (j['label'] ?? '').toString(),
+    kategori: (j['category'] ?? '').toString(),
+    biaya: (j['fee'] as num?)?.toInt() ?? 0,
+    jenisBiaya: (j['fee_type'] ?? '').toString(),
+    nilaiBiaya: (j['fee_value'] as num?)?.toDouble() ?? 0,
+  );
 
   /// Keterangan singkat untuk kartu pilihan.
   String get keterangan {
@@ -46,6 +46,11 @@ class MetodePembayaran {
         return 'Bayar langsung dari aplikasi $label';
       case 'va':
         return 'Transfer via ATM atau m-Banking';
+      case 'checkout':
+        // Dikatakan sejak di daftar pilihan bahwa pembayarannya pindah ke
+        // browser, supaya pelanggan tidak kaget saat aplikasi berganti.
+        return 'Dibuka di browser: VA bank lain, minimarket, PayLater, '
+            'atau kartu';
       default:
         return '';
     }
@@ -86,20 +91,24 @@ class PaymentMethodService {
       'amount': '$jumlah',
       if (idLapangan != null && idLapangan > 0) 'field_id': '$idLapangan',
     };
-    final url = Uri.parse('${ApiConfig.apiUrl}/payment-methods')
-        .replace(queryParameters: kueri);
+    final url = Uri.parse(
+      '${ApiConfig.apiUrl}/payment-methods',
+    ).replace(queryParameters: kueri);
     final token = AuthService.token;
     if (token == null) {
       throw Exception('Perlu masuk dulu untuk melihat metode pembayaran');
     }
 
-    final r = await http.get(url, headers: ApiConfig.authHeaders(token)).timeout(const Duration(seconds: 20));
+    final r = await http
+        .get(url, headers: ApiConfig.authHeaders(token))
+        .timeout(const Duration(seconds: 20));
 
     if (r.statusCode != 200) {
       throw Exception('Gagal memuat metode pembayaran (${r.statusCode})');
     }
 
-    final daftar = (jsonDecode(r.body) as Map<String, dynamic>)['payment_methods'];
+    final daftar =
+        (jsonDecode(r.body) as Map<String, dynamic>)['payment_methods'];
     if (daftar is! List) return const [];
 
     return daftar
