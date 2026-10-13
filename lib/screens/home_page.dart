@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show ValueListenable;
 import 'dart:async';
 
 import 'package:intl/intl.dart';
@@ -59,11 +60,29 @@ class HomePageWithTab extends StatelessWidget {
 class _HomePageState extends State<HomePage> {
   late int _selectedIndex = widget.initialIndex;
 
+  /// Dinaikkan setiap kali Beranda dibuka lagi dari tab lain.
+  ///
+  /// IndexedStack menjaga Beranda tetap hidup, jadi initState-nya tidak
+  /// terulang. Booking yang dibatalkan atau dibayar di tab Pesanan
+  /// dulu tetap tampil sebagai "Selesaikan pembayaran" di Beranda.
+  final _berandaDibuka = ValueNotifier<int>(0);
+
   late final List<Widget> _pages = <Widget>[
-    DashboardContent(onBukaTab: (i) => setState(() => _selectedIndex = i)),
+    DashboardContent(onBukaTab: _pindahTab, berandaDibuka: _berandaDibuka),
     const TransactionsPage(),
     const ProfilePage(),
   ];
+
+  void _pindahTab(int i) {
+    if (i == 0 && _selectedIndex != 0) _berandaDibuka.value++;
+    setState(() => _selectedIndex = i);
+  }
+
+  @override
+  void dispose() {
+    _berandaDibuka.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +91,7 @@ class _HomePageState extends State<HomePage> {
       body: IndexedStack(index: _selectedIndex, children: _pages),
       bottomNavigationBar: _BottomNav(
         selectedIndex: _selectedIndex,
-        onTap: (i) => setState(() => _selectedIndex = i),
+        onTap: _pindahTab,
       ),
     );
   }
@@ -89,8 +108,11 @@ class _BottomNav extends StatelessWidget {
 
   static const _items = [
     (Icons.home_rounded, Icons.home_outlined, 'Beranda'),
-    (Icons.confirmation_number_rounded, Icons.confirmation_number_outlined,
-        'Pesanan'),
+    (
+      Icons.confirmation_number_rounded,
+      Icons.confirmation_number_outlined,
+      'Pesanan',
+    ),
     (Icons.person_rounded, Icons.person_outline_rounded, 'Profil'),
   ];
 
@@ -159,13 +181,17 @@ class DashboardContent extends StatefulWidget {
   /// diam begitu salah satunya berubah.
   final ValueChanged<int>? onBukaTab;
 
-  const DashboardContent({super.key, this.onBukaTab});
+  /// Berdenyut setiap kali Beranda dibuka lagi dari tab lain.
+  final ValueListenable<int>? berandaDibuka;
+
+  const DashboardContent({super.key, this.onBukaTab, this.berandaDibuka});
 
   @override
   State<DashboardContent> createState() => _DashboardContentState();
 }
 
-class _DashboardContentState extends State<DashboardContent> {
+class _DashboardContentState extends State<DashboardContent>
+    with WidgetsBindingObserver {
   /// Langganan notifikasi realtime milik pemesan yang sedang masuk.
   RealtimeChat? _notifRealtime;
 
@@ -306,6 +332,15 @@ class _DashboardContentState extends State<DashboardContent> {
     _muatJumlahNotif();
     _muatBanner();
     _muatFlashSale();
+    widget.berandaDibuka?.addListener(_muatBooking);
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  /// Kembali dari aplikasi m-banking atau e-wallet: status bookingnya
+  /// bisa sudah lunas, kedaluwarsa, atau dibatalkan.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _muatBooking();
   }
 
   List<FlashSaleBerjalan> _flashSale = const [];
@@ -396,6 +431,8 @@ class _DashboardContentState extends State<DashboardContent> {
     // tidak ada.
     _notifRealtime?.tutup();
     _detak?.cancel();
+    widget.berandaDibuka?.removeListener(_muatBooking);
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
