@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../utils/waktu_wib.dart';
 import '../theme/app_tokens.dart';
 import 'package:share_plus/share_plus.dart';
@@ -6,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../services/booking_service.dart';
 import '../services/review_service.dart';
 import '../services/auth_service.dart';
+import '../widgets/kode_qris.dart';
 import '../models/booking.dart';
 import 'venue_detail_page.dart';
 import 'login_page.dart';
@@ -1423,42 +1425,60 @@ class _PaymentWaitingPageState extends State<PaymentWaitingPage> {
                                     color: context.c.inkSoft,
                                   ),
                                 ),
-                                const SizedBox(height: 6),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      paymentCode ?? 'Belum tersedia',
-                                      style: TextStyle(
-                                        fontSize: paymentCode == null ? 14 : 18,
-                                        fontWeight: FontWeight.bold,
-                                        letterSpacing: paymentCode == null
-                                            ? 0
-                                            : 1,
-                                        color: paymentCode == null
-                                            ? context.c.danger
-                                            : context.c.ink,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    InkWell(
-                                      onTap: () {
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          const SnackBar(
-                                            content: Text("Nomor disalin!"),
+                                const SizedBox(height: 10),
+                                if (method.contains("QRIS"))
+                                  // QR asli. Dulu string QRIS 200 karakter
+                                  // dicetak sebagai teks tebal di sini.
+                                  KodeQris(qrString: qrString, ukuran: 200)
+                                else
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Flexible(
+                                        child: Text(
+                                          paymentCode ?? 'Belum tersedia',
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            fontSize: paymentCode == null
+                                                ? 14
+                                                : 18,
+                                            fontWeight: FontWeight.bold,
+                                            letterSpacing: paymentCode == null
+                                                ? 0
+                                                : 1,
+                                            color: paymentCode == null
+                                                ? context.c.danger
+                                                : context.c.ink,
                                           ),
-                                        );
-                                      },
-                                      child: Icon(
-                                        Icons.copy,
-                                        size: 18,
-                                        color: context.c.accent,
+                                        ),
                                       ),
-                                    ),
-                                  ],
-                                ),
+                                      if (paymentCode != null) ...[
+                                        const SizedBox(width: 8),
+                                        InkWell(
+                                          // Dulu snackbar "Nomor disalin!"
+                                          // muncul tanpa menyalin apa pun.
+                                          onTap: () async {
+                                            await Clipboard.setData(
+                                              ClipboardData(text: paymentCode),
+                                            );
+                                            if (!context.mounted) return;
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              const SnackBar(
+                                                content: Text("Nomor disalin!"),
+                                              ),
+                                            );
+                                          },
+                                          child: Icon(
+                                            Icons.copy,
+                                            size: 18,
+                                            color: context.c.accent,
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
                               ],
                             ),
                           ),
@@ -2470,9 +2490,7 @@ class _RatingDialogState extends State<RatingDialog> {
         content: Row(
           children: [
             Icon(
-              hasil.success
-                  ? Icons.check_circle
-                  : Icons.error_outline_rounded,
+              hasil.success ? Icons.check_circle : Icons.error_outline_rounded,
               color: Colors.white,
               size: 20,
             ),
@@ -2488,9 +2506,7 @@ class _RatingDialogState extends State<RatingDialog> {
         ),
         backgroundColor: hasil.success ? context.c.accent : context.c.danger,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
   }
@@ -2634,8 +2650,7 @@ class _RatingDialogState extends State<RatingDialog> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed:
-                        _selectedStars > 0 && !_mengirim ? _kirim : null,
+                    onPressed: _selectedStars > 0 && !_mengirim ? _kirim : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: context.c.accent,
                       disabledBackgroundColor: context.c.line,

@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../services/booking_service.dart';
 import '../services/auth_service.dart';
+import '../widgets/kode_qris.dart';
 import '../models/booking.dart';
 import 'login_page.dart';
 import 'venue_detail_page.dart';
@@ -1433,6 +1434,7 @@ class _TransactionBookingCardState extends State<TransactionBookingCard> {
     );
   }
 }
+
 // =========================================================
 // PAYMENT WAITING PAGE FOR TRANSACTIONS
 // =========================================================
@@ -1852,62 +1854,8 @@ class _TransactionPaymentWaitingPageState
 
                           // Payment Display - QRIS or VA
                           if (isQRIS) ...[
-                            // QRIS - Show QR Code
-                            Center(
-                              child: Container(
-                                width: 200,
-                                height: 200,
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: Colors.grey.shade300,
-                                  ),
-                                ),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.qr_code_2,
-                                      size: 120,
-                                      color: Colors.grey[800],
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      "SCAN ME",
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: context.c.onAccent,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            if (qrString != null) ...[
-                              const SizedBox(height: 12),
-                              Center(
-                                child: Text(
-                                  "Kode: $qrString",
-                                  style: TextStyle(
-                                    color: context.c.inkSoft,
-                                    fontSize: 11,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            ],
-                            const SizedBox(height: 12),
-                            Center(
-                              child: Text(
-                                "Scan dengan aplikasi e-wallet atau m-banking",
-                                style: TextStyle(
-                                  color: context.c.inkSoft,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ),
+                            // QR asli dari qr_string gateway, bukan ikon.
+                            Center(child: KodeQris(qrString: qrString)),
                           ] else ...[
                             // Virtual Account - Show VA Number
                             Container(
