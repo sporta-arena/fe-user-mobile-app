@@ -9,6 +9,7 @@ import 'package:share_plus/share_plus.dart';
 import 'keterangan_biaya.dart';
 import '../services/promo_service.dart';
 import '../theme/app_tokens.dart';
+import '../widgets/kode_qris.dart';
 import '../widgets/sampul_venue.dart';
 import 'package:flutter/services.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -3232,36 +3233,7 @@ class _BookingCreatedPageState extends State<BookingCreatedPage>
           style: TextStyle(fontSize: 12, color: context.c.inkSoft),
         ),
         const SizedBox(height: 8),
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            // QR wajib gelap di atas terang apa pun temanya, jadi warnanya
-            // dipatok, bukan diambil dari token.
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: context.c.line),
-          ),
-          child: QrImageView(
-            data: qr,
-            version: QrVersions.auto,
-            size: 220,
-            backgroundColor: Colors.white,
-            eyeStyle: const QrEyeStyle(
-              eyeShape: QrEyeShape.square,
-              color: Colors.black,
-            ),
-            dataModuleStyle: const QrDataModuleStyle(
-              dataModuleShape: QrDataModuleShape.square,
-              color: Colors.black,
-            ),
-          ),
-        ),
-        const SizedBox(height: 12),
-        Text(
-          'Scan dengan aplikasi e-wallet atau m-banking',
-          style: TextStyle(fontSize: 11, color: context.c.inkSoft),
-          textAlign: TextAlign.center,
-        ),
+        KodeQris(qrString: qr),
       ],
     );
   }
