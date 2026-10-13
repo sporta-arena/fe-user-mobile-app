@@ -10,6 +10,7 @@ import 'keterangan_biaya.dart';
 import '../services/promo_service.dart';
 import '../theme/app_tokens.dart';
 import '../widgets/kode_qris.dart';
+import '../widgets/logo_metode_bayar.dart';
 import '../widgets/sampul_venue.dart';
 import 'package:flutter/services.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -592,18 +593,9 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
         ),
         child: Row(
           children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: context.c.surface,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(
-                method['icon'] as IconData,
-                color: context.c.inkSoft,
-                size: 22,
-              ),
+            LogoMetodeBayar(
+              kode: method['id'] as String,
+              kategori: method['kategori'] as String?,
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -1053,18 +1045,11 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                             ),
                             child: Row(
                               children: [
-                                Container(
-                                  width: 44,
-                                  height: 44,
-                                  decoration: BoxDecoration(
-                                    color: context.c.surface,
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Icon(
-                                    _selectedPaymentData['icon'] as IconData,
-                                    color: context.c.accent,
-                                    size: 24,
-                                  ),
+                                LogoMetodeBayar(
+                                  kode: _selectedPaymentData['id'] as String,
+                                  kategori:
+                                      _selectedPaymentData['kategori']
+                                          as String?,
                                 ),
                                 const SizedBox(width: 14),
                                 Expanded(
