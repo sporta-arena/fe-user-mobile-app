@@ -9,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../services/booking_service.dart';
 import '../services/auth_service.dart';
 import '../widgets/kode_qris.dart';
+import '../widgets/tombol_halaman_bayar.dart';
 import '../models/booking.dart';
 import 'login_page.dart';
 import 'venue_detail_page.dart';
@@ -1605,6 +1606,7 @@ class _TransactionPaymentWaitingPageState
         .toString()
         .toUpperCase();
     bool isQRIS = paymentMethod == "QRIS";
+    final String? tautanBayar = widget.booking.payment?.checkoutUrl;
 
     // Use actual booking data
     // Komponen biaya diambil dari server, bukan disusun ulang di sini.
@@ -1856,6 +1858,11 @@ class _TransactionPaymentWaitingPageState
                           if (isQRIS) ...[
                             // QR asli dari qr_string gateway, bukan ikon.
                             Center(child: KodeQris(qrString: qrString)),
+                          ] else if (tautanBayar != null &&
+                              tautanBayar.isNotEmpty) ...[
+                            // E-wallet atau DOKU Checkout: lanjut di
+                            // halaman bayar gateway.
+                            TombolHalamanBayar(url: tautanBayar),
                           ] else ...[
                             // Virtual Account - Show VA Number
                             Container(

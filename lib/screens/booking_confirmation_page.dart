@@ -11,6 +11,7 @@ import '../services/promo_service.dart';
 import '../theme/app_tokens.dart';
 import '../widgets/kode_qris.dart';
 import '../widgets/logo_metode_bayar.dart';
+import '../widgets/tombol_halaman_bayar.dart';
 import '../widgets/sampul_venue.dart';
 import 'package:flutter/services.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -526,6 +527,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                         ('qris', 'QRIS', Icons.qr_code_2),
                         ('ewallet', 'E-Wallet', Icons.account_balance_wallet),
                         ('va', 'Virtual Account', Icons.account_balance),
+                        ('checkout', 'Metode Lain', Icons.more_horiz_rounded),
                       ])
                         if (_paymentMethods.any(
                           (m) => m['kategori'] == k.$1,
@@ -2797,6 +2799,7 @@ class _BookingCreatedPageState extends State<BookingCreatedPage>
     final kode = (widget.paymentMethod ?? '').toUpperCase();
     if (kode.startsWith('VA_')) return 'va';
     if (kode == 'QRIS') return 'qris';
+    if (kode == 'DOKU_CHECKOUT') return 'checkout';
     // Server mengirim tautan checkout hanya untuk e-wallet, jadi
     // keberadaannya sekaligus jadi penanda yang paling bisa dipercaya.
     if (_tautanEwallet != null) return 'ewallet';
@@ -3120,6 +3123,14 @@ class _BookingCreatedPageState extends State<BookingCreatedPage>
             _blokVirtualAccount(context)
           else if (kategori == 'ewallet')
             _blokEwallet(context, label)
+          else if (kategori == 'checkout')
+            _tautanEwallet == null
+                ? _pesanGagal(
+                    context,
+                    'Tautan halaman pembayaran DOKU belum diterima. Coba '
+                    'tekan "Cek Status Pembayaran", atau buat ulang pemesanan.',
+                  )
+                : TombolHalamanBayar(url: _tautanEwallet!)
           else
             _blokQris(context),
           if (kDebugMode) ...[
@@ -3162,6 +3173,11 @@ class _BookingCreatedPageState extends State<BookingCreatedPage>
         Icons.account_balance,
         context.c.kategori(3),
         context.c.kategori(3).withValues(alpha: 0.12),
+      ),
+      'checkout' => (
+        Icons.more_horiz_rounded,
+        context.c.kategori(1),
+        context.c.kategori(1).withValues(alpha: 0.12),
       ),
       'ewallet' => (
         Icons.account_balance_wallet,

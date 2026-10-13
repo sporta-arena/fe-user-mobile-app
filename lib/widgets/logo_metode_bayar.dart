@@ -38,6 +38,7 @@ class LogoMetodeBayar extends StatelessWidget {
     'va_maybank': (Color(0xFFFFC709), Color(0xFF1A1A1A), 'Maybank'),
     'va_artha_graha': (Color(0xFF8A6D3B), Colors.white, 'AG'),
     'va_sampoerna': (Color(0xFFC8102E), Colors.white, 'Sampoerna'),
+    'doku_checkout': (Color(0xFFE1251B), Colors.white, 'DOKU'),
   };
 
   @override

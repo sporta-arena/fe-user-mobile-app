@@ -102,7 +102,9 @@ class Booking {
           : DateTime.now(),
       field: json['field'] != null ? Field.fromJson(json['field']) : null,
       user: json['user'] != null ? User.fromJson(json['user']) : null,
-      payment: json['payment'] != null ? Payment.fromJson(json['payment']) : null,
+      payment: json['payment'] != null
+          ? Payment.fromJson(json['payment'])
+          : null,
     );
   }
 
@@ -127,7 +129,6 @@ class Booking {
       (Match m) => '${m[1]}.',
     );
   }
-
 
   String get statusLabel {
     switch (status) {
@@ -164,6 +165,9 @@ class Payment {
   /// e-wallet). Jangan pernah diisi nilai cadangan: nomor VA karangan
   /// yang ditransfer sungguhan membuat uang pelanggan hilang.
   final String? virtualAccountNo;
+
+  /// Tautan halaman bayar gateway (e-wallet atau DOKU Checkout).
+  final String? checkoutUrl;
   final DateTime? paidAt;
   final DateTime? expiresAt;
   final DateTime createdAt;
@@ -178,6 +182,7 @@ class Payment {
     required this.paymentMethod,
     this.qrString,
     this.virtualAccountNo,
+    this.checkoutUrl,
     this.paidAt,
     this.expiresAt,
     required this.createdAt,
@@ -189,11 +194,14 @@ class Payment {
       id: json['id'] ?? 0,
       xenditId: json['xendit_id'],
       externalId: json['external_id'] ?? '',
-      amount: json['amount'] != null ? double.parse(json['amount'].toString()) : 0,
+      amount: json['amount'] != null
+          ? double.parse(json['amount'].toString())
+          : 0,
       status: json['status'] ?? 'pending',
       paymentMethod: json['payment_method'] ?? 'qris',
       qrString: json['qr_string'],
       virtualAccountNo: json['virtual_account_no'],
+      checkoutUrl: json['checkout_url'],
       // Parse UTC datetime from server
       paidAt: json['paid_at'] != null
           ? TimezoneUtils.parseUtcToLocal(json['paid_at'])

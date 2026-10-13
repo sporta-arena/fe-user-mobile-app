@@ -8,6 +8,7 @@ import '../services/booking_service.dart';
 import '../services/review_service.dart';
 import '../services/auth_service.dart';
 import '../widgets/kode_qris.dart';
+import '../widgets/tombol_halaman_bayar.dart';
 import '../models/booking.dart';
 import 'venue_detail_page.dart';
 import 'login_page.dart';
@@ -1213,6 +1214,10 @@ class _PaymentWaitingPageState extends State<PaymentWaitingPage> {
 
     // Get QR string from payment if available
     String? qrString = widget.booking.payment?.qrString;
+    final String? tautanBayar =
+        (widget.booking.payment?.checkoutUrl?.isNotEmpty ?? false)
+        ? widget.booking.payment!.checkoutUrl
+        : null;
     // Untuk QRIS yang dipakai adalah qrString; untuk Virtual Account,
     // nomor rekeningnya. Baris lama menyamakan keduanya lalu jatuh ke
     // "8800 1234 5678 9012" kalau kosong, nomor karangan yang kalau
@@ -1419,6 +1424,8 @@ class _PaymentWaitingPageState extends State<PaymentWaitingPage> {
                                 Text(
                                   method.contains("QRIS")
                                       ? "Scan QR Code"
+                                      : tautanBayar != null
+                                      ? "Halaman Pembayaran"
                                       : "Nomor Virtual Account",
                                   style: TextStyle(
                                     fontSize: 11,
@@ -1430,6 +1437,8 @@ class _PaymentWaitingPageState extends State<PaymentWaitingPage> {
                                   // QR asli. Dulu string QRIS 200 karakter
                                   // dicetak sebagai teks tebal di sini.
                                   KodeQris(qrString: qrString, ukuran: 200)
+                                else if (tautanBayar != null)
+                                  TombolHalamanBayar(url: tautanBayar)
                                 else
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
