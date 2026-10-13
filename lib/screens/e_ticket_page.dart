@@ -22,6 +22,10 @@ class ETicketPage extends StatefulWidget {
 
 class _ETicketPageState extends State<ETicketPage> {
   final GlobalKey _ticketKey = GlobalKey();
+
+  /// Titik asal lembar bagikan iOS. Tanpa titik asal yang ada di layar,
+  /// iOS menolak lembar bagikan dan unduhan tiket selalu gagal.
+  final GlobalKey _tombolUnduhKey = GlobalKey();
   String _userName = "";
   String _userPhone = "";
   bool _isDownloading = false;
@@ -89,8 +93,13 @@ class _ETicketPageState extends State<ETicketPage> {
 
       // Share the file
       if (mounted) {
+        final kotak =
+            _tombolUnduhKey.currentContext?.findRenderObject() as RenderBox?;
         await Share.shareXFiles(
-          [XFile(file.path)],
+          [XFile(file.path, mimeType: 'image/png')],
+          sharePositionOrigin: kotak == null
+              ? null
+              : kotak.localToGlobal(Offset.zero) & kotak.size,
           text:
               'E-Tiket Sportago\n${widget.booking.field?.venue?.name ?? "Venue"}\n${widget.booking.bookingCode}',
         );
@@ -434,6 +443,7 @@ class _ETicketPageState extends State<ETicketPage> {
               width: double.infinity,
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
               child: ElevatedButton.icon(
+                key: _tombolUnduhKey,
                 onPressed: _isDownloading ? null : _downloadTicket,
                 icon: _isDownloading
                     ? SizedBox(
