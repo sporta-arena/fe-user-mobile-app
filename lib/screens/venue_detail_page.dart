@@ -1573,8 +1573,9 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                         ? "Rp 0"
                         : "Rp ${_formatPrice(totalPrice.toDouble())}",
                     style: TextStyle(
-                      fontSize: 21,
-                      fontWeight: FontWeight.w800,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w900,
+                      fontStyle: FontStyle.italic,
                       letterSpacing: -0.4,
                       color: context.c.ink,
                     ),

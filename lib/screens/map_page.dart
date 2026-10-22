@@ -350,10 +350,10 @@ class _MapPageState extends State<MapPage> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
               decoration: BoxDecoration(
-                // Jarum hijau aksen; yang dipilih berganti warna kontras
-                // (gelap di tema terang) supaya menonjol di antara jarum
-                // lainnya.
-                color: isSel ? context.c.inverse : _latarAktif,
+                // Jarum hitam berteks kuning; yang dipilih berganti
+                // kuning merek berteks hitam supaya menonjol di antara
+                // jarum lainnya.
+                color: isSel ? _latarPilih : _latarAktif,
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(color: Colors.white, width: 1.5),
                 boxShadow: const [
@@ -368,7 +368,7 @@ class _MapPageState extends State<MapPage> {
                 teks,
                 maxLines: 1,
                 style: TextStyle(
-                  color: isSel ? context.c.onInverse : _tintaAktif,
+                  color: isSel ? _tintaPilih : _tintaAktif,
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
                 ),
@@ -379,7 +379,7 @@ class _MapPageState extends State<MapPage> {
             Container(
               width: 2,
               height: 7,
-              color: isSel ? context.c.inverse : _latarAktif,
+              color: isSel ? _latarPilih : _latarAktif,
             ),
           ],
         ),
@@ -387,10 +387,17 @@ class _MapPageState extends State<MapPage> {
     );
   }
 
-  /// Bidang aktif memakai aksen tema, sama dengan pil filter dan
-  /// bottom-nav: hijau lapangan di terang, volt di gelap.
+  /// Bidang aktif memakai aksen tema, sama dengan pil filter: hitam
+  /// berteks kuning di terang, kuning berteks hitam di gelap.
   Color get _latarAktif => context.c.accent;
   Color get _tintaAktif => context.c.onAccent;
+
+  bool get _gelap => Theme.of(context).brightness == Brightness.dark;
+
+  /// Jarum terpilih: kebalikan jarum biasa. Di terang kuning merek, di
+  /// gelap (yang jarum biasanya sudah kuning) permukaan terang.
+  Color get _latarPilih => _gelap ? context.c.inverse : SportagoColors.kuning;
+  Color get _tintaPilih => _gelap ? context.c.onInverse : context.c.ink;
 
   Widget _topBar() {
     return Positioned(

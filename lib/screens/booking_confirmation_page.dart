@@ -788,6 +788,29 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              // Pita kuning merek: penanda "ini yang kamu
+                              // pesan", sebahasa dengan panel Masuk.
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 4,
+                                ),
+                                margin: const EdgeInsets.only(bottom: 12),
+                                decoration: BoxDecoration(
+                                  color: SportagoColors.kuning,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  'PESANANMU',
+                                  style: TextStyle(
+                                    color: SportagoColors.light.ink,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w900,
+                                    fontStyle: FontStyle.italic,
+                                    letterSpacing: 0.6,
+                                  ),
+                                ),
+                              ),
                               Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -820,8 +843,9 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                                               child: Text(
                                                 widget.venueName,
                                                 style: TextStyle(
-                                                  fontWeight: FontWeight.w800,
-                                                  fontSize: 16.5,
+                                                  fontWeight: FontWeight.w900,
+                                                  fontStyle: FontStyle.italic,
+                                                  fontSize: 17,
                                                   letterSpacing: -0.3,
                                                   color: context.c.ink,
                                                 ),
@@ -960,7 +984,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                                       vertical: 8,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: context.c.accentSoft,
+                                      color: SportagoColors.kuning,
                                       borderRadius: BorderRadius.circular(999),
                                     ),
                                     child: Text(
@@ -970,8 +994,8 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                                       // hanya labelnya.
                                       WaktuWib.tampil(slot),
                                       style: TextStyle(
-                                        color: context.c.accent,
-                                        fontWeight: FontWeight.w700,
+                                        color: SportagoColors.light.ink,
+                                        fontWeight: FontWeight.w800,
                                         fontSize: 14,
                                       ),
                                     ),

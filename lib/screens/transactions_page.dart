@@ -317,7 +317,7 @@ class _PilFilter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: aktif ? context.c.accent : context.c.sunken,
+      color: aktif ? SportagoColors.kuning : context.c.sunken,
       shape: const StadiumBorder(),
       child: InkWell(
         customBorder: const StadiumBorder(),
@@ -330,7 +330,7 @@ class _PilFilter extends StatelessWidget {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 13,
                 fontWeight: aktif ? FontWeight.w800 : FontWeight.w600,
-                color: aktif ? context.c.onAccent : context.c.inkSoft,
+                color: aktif ? SportagoColors.light.ink : context.c.inkSoft,
               ),
             ),
           ),
@@ -476,7 +476,9 @@ class _BookingCardState extends State<_BookingCard> {
                 width: 64,
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
-                  color: context.c.accentSoft,
+                  // Kuning merek: jam main adalah hal pertama yang dicari
+                  // di kartu pesanan.
+                  color: SportagoColors.kuning,
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Column(
@@ -485,8 +487,9 @@ class _BookingCardState extends State<_BookingCard> {
                       jam.first,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                        color: context.c.accent,
+                        fontWeight: FontWeight.w900,
+                        fontStyle: FontStyle.italic,
+                        color: SportagoColors.light.ink,
                       ),
                     ),
                     if (jam.length > 1)
@@ -494,8 +497,8 @@ class _BookingCardState extends State<_BookingCard> {
                         's/d ${jam.last}',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 10.5,
-                          fontWeight: FontWeight.w600,
-                          color: context.c.inkSoft,
+                          fontWeight: FontWeight.w700,
+                          color: SportagoColors.light.inkSoft,
                         ),
                       ),
                   ],

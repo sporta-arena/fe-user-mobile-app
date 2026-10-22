@@ -76,12 +76,12 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                     child: Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: context.c.accent.withValues(alpha: 0.15),
+                        color: SportagoColors.kuning,
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
                         Icons.lock_reset,
-                        color: context.c.accent,
+                        color: SportagoColors.light.ink,
                         size: 40,
                       ),
                     ),
@@ -93,8 +93,11 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                     child: Text(
                       "Reset Password",
                       style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Archivo',
+                        fontSize: 24,
+                        fontWeight: FontWeight.w900,
+                        fontStyle: FontStyle.italic,
+                        letterSpacing: -0.8,
                         color: context.c.ink,
                       ),
                     ),
@@ -255,7 +258,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: context.c.accent.withValues(alpha: 0.15),
+                  color: context.c.accentSoft,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(

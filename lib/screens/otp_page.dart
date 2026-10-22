@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import '../widgets/sportago_ui.dart';
 import '../theme/app_tokens.dart';
 import 'package:flutter/services.dart';
 import 'package:pinput/pinput.dart';
@@ -230,15 +229,30 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                 ],
 
                 // Brand mark
-                const UbinIkon(Icons.mark_email_read_outlined, ukuran: 56),
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: SportagoColors.kuning,
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: Icon(
+                    Icons.mark_email_read_outlined,
+                    color: SportagoColors.light.ink,
+                    size: 28,
+                  ),
+                ),
                 const SizedBox(height: 24),
 
                 // Heading
                 Text(
                   title,
                   style: TextStyle(
+                    fontFamily: 'Archivo',
                     fontSize: 30,
                     fontWeight: FontWeight.w900,
+                    fontStyle: FontStyle.italic,
+                    letterSpacing: -1,
                     color: context.c.ink,
                     height: 1.1,
                   ),

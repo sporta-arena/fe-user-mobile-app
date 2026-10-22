@@ -148,15 +148,15 @@ class _SearchPageState extends State<SearchPage> {
                       errorBuilder: (context, error, stackTrace) => Container(
                         width: 80,
                         height: 80,
-                        color: context.c.accent.withValues(alpha: 0.15),
-                        child: Icon(Icons.sports, color: context.c.accent),
+                        color: context.c.accentSoft,
+                        child: Icon(Icons.sports, color: context.c.ink),
                       ),
                     )
                   : Container(
                       width: 80,
                       height: 80,
-                      color: context.c.accent.withValues(alpha: 0.15),
-                      child: Icon(Icons.sports, color: context.c.accent),
+                      color: context.c.accentSoft,
+                      child: Icon(Icons.sports, color: context.c.ink),
                     ),
             ),
             const SizedBox(width: 12),
@@ -201,7 +201,7 @@ class _SearchPageState extends State<SearchPage> {
                   Row(
                     children: [
                       if (venue.averageRating != null) ...[
-                        Icon(Icons.star, size: 14, color: context.c.accent),
+                        Icon(Icons.star, size: 14, color: context.c.warn),
                         const SizedBox(width: 2),
                         Text(
                           venue.averageRating!.toStringAsFixed(1),

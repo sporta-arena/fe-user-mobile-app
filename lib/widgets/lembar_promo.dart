@@ -78,9 +78,7 @@ Future<void> tampilkanLembarPromo(BuildContext context, RingkasPromo p) {
                 decoration: BoxDecoration(
                   color: context.c.accentSoft,
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: context.c.accent.withValues(alpha: 0.4),
-                  ),
+                  border: Border.all(color: context.c.accentLine),
                 ),
                 child: Row(
                   children: [

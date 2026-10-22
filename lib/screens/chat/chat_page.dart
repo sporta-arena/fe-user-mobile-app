@@ -603,11 +603,11 @@ class _ChatPageState extends State<ChatPage> {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    // Tombol kirim hijau lapangan, seperti tombol utama
-                    // di halaman lain.
+                    // Tombol kirim kuning merek berikon hitam, warna logo
+                    // customer. Sama di dua tema.
                     Container(
-                      decoration: BoxDecoration(
-                        color: context.c.accent,
+                      decoration: const BoxDecoration(
+                        color: SportagoColors.kuning,
                         shape: BoxShape.circle,
                       ),
                       child: IconButton(
@@ -618,12 +618,12 @@ class _ChatPageState extends State<ChatPage> {
                                 height: 20,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  color: context.c.onAccent,
+                                  color: SportagoColors.light.ink,
                                 ),
                               )
                             : Icon(
                                 Icons.send_rounded,
-                                color: context.c.onAccent,
+                                color: SportagoColors.light.ink,
                               ),
                       ),
                     ),
@@ -694,7 +694,7 @@ class _ChatPageState extends State<ChatPage> {
         ),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: isUser ? context.c.accent : context.c.raised,
+          color: isUser ? context.c.inverse : context.c.raised,
           border: isUser ? null : Border.all(color: context.c.line),
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(18),
@@ -711,7 +711,7 @@ class _ChatPageState extends State<ChatPage> {
               style: TextStyle(
                 fontSize: 14,
                 height: 1.4,
-                color: isUser ? context.c.onAccent : context.c.ink,
+                color: isUser ? context.c.onInverse : context.c.ink,
               ),
             ),
             const SizedBox(height: 4),
@@ -723,7 +723,7 @@ class _ChatPageState extends State<ChatPage> {
                   style: TextStyle(
                     fontSize: 11,
                     color: isUser
-                        ? context.c.onAccent.withValues(alpha: 0.7)
+                        ? context.c.onInverse.withValues(alpha: 0.65)
                         : context.c.inkDim,
                   ),
                 ),
@@ -736,12 +736,16 @@ class _ChatPageState extends State<ChatPage> {
                         ? Icons.done_all
                         : Icons.done,
                     size: message.status == MessageStatus.read ? 16 : 14,
-                    // Sudah dibaca: penuh dan sedikit lebih besar; terkirim
-                    // pudar. Gelembungnya hijau di tema terang dan volt di
-                    // tema gelap, jadi warna isinya selalu onAccent.
+                    // Sudah dibaca: kuning merek dan sedikit lebih besar;
+                    // terkirim abu pudar. Gelembungnya hitam di tema
+                    // terang, jadi kuningnya menyala. Di tema gelap
+                    // gelembungnya terang, kuning tenggelam, jadi
+                    // penandanya pakai hijau ok.
                     color: message.status == MessageStatus.read
-                        ? context.c.onAccent
-                        : context.c.onAccent.withValues(alpha: 0.5),
+                        ? (Theme.of(context).brightness == Brightness.dark
+                              ? context.c.ok
+                              : SportagoColors.kuning)
+                        : context.c.onInverse.withValues(alpha: 0.45),
                   ),
                 ],
               ],

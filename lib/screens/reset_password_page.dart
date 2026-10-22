@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../utils/tanpa_spasi.dart';
-import '../widgets/sportago_ui.dart';
 import '../theme/app_tokens.dart';
 import 'package:flutter/services.dart';
 import 'login_page.dart';
@@ -123,12 +122,12 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: context.c.accent.withValues(alpha: 0.15),
+                  color: SportagoColors.kuning,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.check_rounded,
-                  color: context.c.accent,
+                  color: SportagoColors.light.ink,
                   size: 48,
                 ),
               ),
@@ -215,15 +214,30 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 ],
 
                 // Brand mark
-                const UbinIkon(Icons.password_rounded, ukuran: 56),
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: SportagoColors.kuning,
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: Icon(
+                    Icons.password_rounded,
+                    color: SportagoColors.light.ink,
+                    size: 28,
+                  ),
+                ),
                 const SizedBox(height: 24),
 
                 // Heading
                 Text(
                   "Buat password baru",
                   style: TextStyle(
+                    fontFamily: 'Archivo',
                     fontSize: 30,
                     fontWeight: FontWeight.w900,
+                    fontStyle: FontStyle.italic,
+                    letterSpacing: -1,
                     color: context.c.ink,
                     height: 1.1,
                   ),

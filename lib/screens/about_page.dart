@@ -30,7 +30,9 @@ class AboutPage extends StatelessWidget {
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 40),
-                color: context.c.surface,
+                // Panel kuning merek di balik ikon app (kuning di atas
+                // hitam), sebahasa dengan kepala Masuk dan Profil.
+                color: SportagoColors.kuning,
                 child: Column(
                   children: [
                     // Logo App
@@ -41,7 +43,9 @@ class AboutPage extends StatelessWidget {
                         borderRadius: BorderRadius.circular(25),
                         boxShadow: [
                           BoxShadow(
-                            color: context.c.accent.withValues(alpha: 0.2),
+                            color: SportagoColors.light.ink.withValues(
+                              alpha: 0.25,
+                            ),
                             blurRadius: 20,
                             offset: const Offset(0, 8),
                           ),
@@ -59,11 +63,14 @@ class AboutPage extends StatelessWidget {
                     const SizedBox(height: 20),
 
                     Text(
-                      "Sportago",
+                      "SPORTAGO",
                       style: TextStyle(
+                        fontFamily: 'Archivo',
                         fontSize: 28,
                         fontWeight: FontWeight.w900,
-                        color: context.c.accent,
+                        fontStyle: FontStyle.italic,
+                        letterSpacing: -0.5,
+                        color: SportagoColors.light.ink,
                       ),
                     ),
 
@@ -75,14 +82,14 @@ class AboutPage extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: context.c.raised,
+                        color: SportagoColors.light.ink.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
                         VersiApp.tampil,
                         style: TextStyle(
                           fontSize: 12,
-                          color: context.c.inkSoft,
+                          color: SportagoColors.light.ink,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -232,7 +239,7 @@ class AboutPage extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: context.c.accent.withValues(alpha: 0.15),
+            color: context.c.accentSoft,
             borderRadius: BorderRadius.circular(16),
           ),
           child: Icon(icon, color: context.c.accent, size: 24),

@@ -139,15 +139,11 @@ class _ProfilePageState extends State<ProfilePage> {
         // menyisihkan bagian atasnya sendiri.
         top: false,
         child: AnnotatedRegion<SystemUiOverlayStyle>(
-          // Kepala putih di tema terang, gelap di tema gelap: ikon bilah
-          // status mengikuti tema supaya jam dan baterai tetap terbaca.
-          value: Theme.of(context).brightness == Brightness.dark
-              ? SystemUiOverlayStyle.light.copyWith(
-                  statusBarColor: Colors.transparent,
-                )
-              : SystemUiOverlayStyle.dark.copyWith(
-                  statusBarColor: Colors.transparent,
-                ),
+          // Kepalanya panel kuning di dua tema: ikon bilah status selalu
+          // gelap supaya jam dan baterai terbaca di atas kuning.
+          value: SystemUiOverlayStyle.dark.copyWith(
+            statusBarColor: Colors.transparent,
+          ),
           child: RefreshIndicator(
             onRefresh: _loadUserStats,
             color: context.c.accent,
@@ -191,32 +187,45 @@ class _ProfilePageState extends State<ProfilePage> {
     return bagian.first[0].toUpperCase();
   }
 
-  // Kepala tab: avatar inisial, nama, kontak, dan "Member sejak".
+  // Kepala tab: panel kuning merek bertepi miring (sebahasa dengan
+  // kepala Masuk), avatar inisial, nama, kontak, dan "Member sejak".
+  //
+  // Panelnya selalu kuning di dua tema, jadi tintanya selalu hitam
+  // dan tidak diambil dari tema.
   Widget _buildProfileHeader() {
-    final media = context.c;
-    return KepalaTab(
-      judul: "Profil",
-      jarakBawah: 60,
-      bawah: Column(
+    final tinta = _KepalaKuning.tinta;
+    return _KepalaKuning(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Text(
+            "Profil",
+            style: TextStyle(
+              fontFamily: 'Archivo',
+              fontSize: 32,
+              fontWeight: FontWeight.w900,
+              fontStyle: FontStyle.italic,
+              letterSpacing: -1,
+              height: 1.05,
+              color: tinta,
+            ),
+          ),
+          const SizedBox(height: 18),
           Row(
             children: [
               Container(
                 width: 68,
                 height: 68,
                 alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: media.accentSoft,
-                  border: Border.all(color: media.accentLine, width: 2),
-                ),
+                decoration: BoxDecoration(shape: BoxShape.circle, color: tinta),
                 child: Text(
                   _inisial,
-                  style: TextStyle(
+                  style: const TextStyle(
+                    fontFamily: 'Archivo',
                     fontSize: 24,
-                    fontWeight: FontWeight.w800,
-                    color: media.accent,
+                    fontWeight: FontWeight.w900,
+                    fontStyle: FontStyle.italic,
+                    color: SportagoColors.kuning,
                   ),
                 ),
               ),
@@ -230,10 +239,10 @@ class _ProfilePageState extends State<ProfilePage> {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: 19,
                         fontWeight: FontWeight.w800,
                         letterSpacing: -0.3,
-                        color: media.ink,
+                        color: tinta,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -241,13 +250,19 @@ class _ProfilePageState extends State<ProfilePage> {
                       _userEmail,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: media.inkSoft, fontSize: 13),
+                      style: TextStyle(
+                        color: tinta.withValues(alpha: 0.72),
+                        fontSize: 13,
+                      ),
                     ),
                     if (_userPhone != "-") ...[
                       const SizedBox(height: 2),
                       Text(
                         _userPhone,
-                        style: TextStyle(color: media.inkSoft, fontSize: 12),
+                        style: TextStyle(
+                          color: tinta.withValues(alpha: 0.72),
+                          fontSize: 12,
+                        ),
                       ),
                     ],
                   ],
@@ -255,8 +270,8 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          // "Member sejak" saja, selebar kepala.
+          const SizedBox(height: 14),
+          // "Member sejak" saja, sebagai pil di panel kuning.
           //
           // Di sebelahnya dulu ada lencana "Level: Silver".
           // Sportago tidak punya sistem tingkatan member sama
@@ -268,30 +283,22 @@ class _ProfilePageState extends State<ProfilePage> {
           // "Silver" wajar bertanya dapat apa, dan tidak ada
           // jawabannya.
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
             decoration: BoxDecoration(
-              color: media.sunken,
-              borderRadius: BorderRadius.circular(14),
+              color: tinta.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(20),
             ),
             child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  Icons.calendar_today_outlined,
-                  size: 15,
-                  color: media.accent,
-                ),
+                Icon(Icons.calendar_today_outlined, size: 14, color: tinta),
                 const SizedBox(width: 8),
                 Text(
-                  "Member sejak",
-                  style: TextStyle(fontSize: 12, color: media.inkSoft),
-                ),
-                const Spacer(),
-                Text(
-                  _memberSince,
+                  "Member sejak $_memberSince",
                   style: TextStyle(
-                    fontSize: 13,
+                    fontSize: 12,
                     fontWeight: FontWeight.w700,
-                    color: media.ink,
+                    color: tinta,
                   ),
                 ),
               ],
@@ -1269,4 +1276,61 @@ class _ProfilePageState extends State<ProfilePage> {
   String _formatCurrency(int amount) {
     return "Rp ${amount.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}";
   }
+}
+
+/// Panel kuning merek bertepi bawah miring untuk kepala tab Profil.
+///
+/// Bahasanya sama dengan kepala layar Masuk/Daftar
+/// (`KepalaFotoAuth`), tapi tingginya mengikuti isi dan tanpa kartu
+/// foto. Ruang bawahnya dilebihkan karena kartu angka menumpang ke tepi
+/// miringnya.
+class _KepalaKuning extends StatelessWidget {
+  const _KepalaKuning({required this.child});
+
+  final Widget child;
+
+  /// Tinta di atas kuning. Selalu hitam karena panelnya selalu kuning.
+  static final Color tinta = SportagoColors.light.ink;
+
+  static const double _miring = 40;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: ClipPath(
+            clipper: const _TepiMiring(_miring),
+            child: const ColoredBox(color: SportagoColors.kuning),
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.fromLTRB(
+            24,
+            MediaQuery.of(context).padding.top + 18,
+            24,
+            60 + _miring,
+          ),
+          child: child,
+        ),
+      ],
+    );
+  }
+}
+
+/// Memotong tepi bawah jadi garis miring: kiri lebih rendah dari kanan.
+class _TepiMiring extends CustomClipper<Path> {
+  const _TepiMiring(this.miring);
+
+  final double miring;
+
+  @override
+  Path getClip(Size size) => Path()
+    ..lineTo(size.width, 0)
+    ..lineTo(size.width, size.height - miring)
+    ..lineTo(0, size.height)
+    ..close();
+
+  @override
+  bool shouldReclip(_TepiMiring old) => old.miring != miring;
 }

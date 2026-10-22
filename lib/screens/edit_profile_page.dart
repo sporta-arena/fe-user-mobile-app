@@ -105,9 +105,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       height: 120,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: context.c.accentSoft,
+                        // Avatar hitam berbingkai kuning: warna logo
+                        // customer, sama dengan avatar di kepala Profil.
+                        color: context.c.inverse,
                         border: Border.all(
-                          color: context.c.accentLine,
+                          color: SportagoColors.kuning,
                           width: 3,
                         ),
                         image: AuthService.currentUser?.avatarUrl != null
@@ -123,7 +125,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                           ? Icon(
                               Icons.person_rounded,
                               size: 52,
-                              color: context.c.accent,
+                              color: SportagoColors.kuning,
                             )
                           : null,
                     ),
@@ -144,7 +146,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         child: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: context.c.accent,
+                            color: SportagoColors.kuning,
                             shape: BoxShape.circle,
                             border: Border.all(
                               color: context.c.sunken,
@@ -153,7 +155,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                           ),
                           child: Icon(
                             Icons.camera_alt_rounded,
-                            color: context.c.onAccent,
+                            color: SportagoColors.light.ink,
                             size: 18,
                           ),
                         ),

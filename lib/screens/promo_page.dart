@@ -140,12 +140,24 @@ class _PromoPageState extends State<PromoPage> {
                   // muncul besar dengan tombol salin — satu ketukan,
                   // tanpa peluang salah. Kartu ini cukup mengatakan
                   // promonya ada dan berapa potongannya.
-                  Text(
-                    'Potongan ${p.potonganTeks}',
-                    style: TextStyle(
-                      color: context.c.accent,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
+                  // Potongannya pil kuning merek berteks hitam: angka
+                  // inilah yang dicari, jadi ia yang paling mencolok.
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: SportagoColors.kuning,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      'Potongan ${p.potonganTeks}',
+                      style: TextStyle(
+                        color: SportagoColors.light.ink,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
                   ),
                   if (p.berlakuSampai != null) ...[

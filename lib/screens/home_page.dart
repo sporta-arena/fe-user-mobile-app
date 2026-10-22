@@ -12,7 +12,6 @@ import '../services/realtime_chat.dart';
 import '../utils/tampilan_venue.dart';
 import '../theme/app_tokens.dart';
 import '../widgets/sampul_venue.dart';
-import '../widgets/sportago_ui.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 
@@ -88,11 +87,11 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // Ketiga tab berkepala putih, jadi ikon bilah status ikut tema
-    // supaya jam dan baterai tidak hilang. Bilah navigasi sistem menyatu
-    // dengan bottom-nav.
+    // Pesanan dan Profil berkepala putih, jadi ikon bilah status ikut
+    // tema. Beranda berkepala kuning merek di kedua tema, jadi ikonnya
+    // selalu gelap. Bilah navigasi sistem menyatu dengan bottom-nav.
     final gelap = Theme.of(context).brightness == Brightness.dark;
-    final ikonTerang = gelap;
+    final ikonTerang = gelap && _selectedIndex != 0;
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
         systemNavigationBarColor: context.c.raised,
@@ -137,8 +136,12 @@ class _BottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Pil hijau muda di belakang ikon aktif, ikon dan label hijau
-    // lapangan. Di tema gelap aksennya otomatis volt.
+    // Pil kuning merek di belakang ikon aktif dengan ikon hitam, label
+    // aktif hitam tebal. Di tema gelap pilnya ikut aksen (kuning) dan
+    // ikonnya onAccent, jadi tetap kontras.
+    final gelap = Theme.of(context).brightness == Brightness.dark;
+    final pilAktif = gelap ? context.c.accent : SportagoColors.kuning;
+    final ikonAktif = gelap ? context.c.onAccent : context.c.ink;
     return DecoratedBox(
       decoration: BoxDecoration(
         color: context.c.raised,
@@ -170,14 +173,12 @@ class _BottomNav extends StatelessWidget {
                           width: sel ? 56 : 40,
                           height: 30,
                           decoration: BoxDecoration(
-                            color: sel
-                                ? context.c.accentSoft
-                                : Colors.transparent,
+                            color: sel ? pilAktif : Colors.transparent,
                             borderRadius: BorderRadius.circular(15),
                           ),
                           child: Icon(
                             sel ? active : inactive,
-                            color: sel ? context.c.accent : context.c.inkDim,
+                            color: sel ? ikonAktif : context.c.inkDim,
                             size: 21,
                           ),
                         ),
@@ -189,7 +190,7 @@ class _BottomNav extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 11.5,
                             fontWeight: sel ? FontWeight.w800 : FontWeight.w500,
-                            color: sel ? context.c.accent : context.c.inkDim,
+                            color: sel ? context.c.ink : context.c.inkDim,
                           ),
                         ),
                       ],
@@ -734,70 +735,128 @@ class _DashboardContentState extends State<DashboardContent>
     return '$salam, ${nama.split(RegExp(r'\s+')).first}';
   }
 
-  /// Kepala putih dengan sapaan. Lokasi dan kolom cari ikut masuk ke
-  /// dalamnya, jadi hal pertama yang terlihat adalah "di mana" dan "cari
-  /// apa". Sengaja tanpa foto: kepala berfoto venue itu gaya app mitra.
+  /// Kepala kuning merek bertepi miring, sebahasa dengan layar Masuk:
+  /// lambang + SPORTAGO, sapaan, judul tebal miring, lalu lokasi dan
+  /// kolom cari. Warnanya tidak ikut tema (kuning juga di tema gelap),
+  /// jadi isinya memakai tinta tetap.
   Widget _header() {
-    final c = context.c;
-    return KepalaTab(
-      atas: _sapaan,
-      judul: 'Mau main di mana?',
-      jarakBawah: 22,
-      aksi: [
-        // Peta naik ke kepala dari tombol mengambang di atas daftar.
-        // Di posisi lamanya ia menimpa kartu venue paling bawah.
-        TombolIkonKepala(
-          ikon: Icons.map_outlined,
-          tooltip: 'Peta',
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const MapPage()),
-          ),
+    final tinta = SportagoColors.light.ink;
+    return ClipPath(
+      clipper: const _TepiMiringBeranda(26),
+      child: Container(
+        color: SportagoColors.kuning,
+        padding: EdgeInsets.fromLTRB(
+          20,
+          MediaQuery.of(context).padding.top + 12,
+          20,
+          44,
         ),
-        // Angkanya dari unread_count sungguhan, bukan dinyalakan terus.
-        TombolIkonKepala(
-          ikon: Icons.notifications_none_rounded,
-          tooltip: 'Notifikasi',
-          lencana: _notifBelumDibaca,
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const NotificationsPage()),
-          ),
-        ),
-      ],
-      bawah: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          GestureDetector(
-            onTap: _bukaPemilihLokasi,
-            behavior: HitTestBehavior.opaque,
-            child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               children: [
-                Icon(Icons.location_on_rounded, color: c.accent, size: 18),
-                const SizedBox(width: 6),
-                Flexible(
-                  child: Text(
-                    _address,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: c.ink,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
+                Image.asset(
+                  'assets/sportago_mark.png',
+                  height: 24,
+                  color: tinta,
+                  colorBlendMode: BlendMode.srcIn,
+                  filterQuality: FilterQuality.medium,
+                  excludeFromSemantics: true,
+                ),
+                const SizedBox(width: 7),
+                Text(
+                  'SPORTAGO',
+                  style: TextStyle(
+                    fontFamily: 'Archivo',
+                    fontSize: 17,
+                    fontWeight: FontWeight.w900,
+                    fontStyle: FontStyle.italic,
+                    letterSpacing: -0.4,
+                    color: tinta,
+                  ),
+                ),
+                const Spacer(),
+                // Peta naik ke kepala dari tombol mengambang di atas
+                // daftar. Di posisi lamanya ia menimpa kartu venue.
+                _TombolKuning(
+                  ikon: Icons.map_outlined,
+                  tooltip: 'Peta',
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const MapPage()),
+                  ),
+                ),
+                // Angkanya dari unread_count sungguhan.
+                _TombolKuning(
+                  ikon: Icons.notifications_none_rounded,
+                  tooltip: 'Notifikasi',
+                  lencana: _notifBelumDibaca,
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const NotificationsPage(),
                     ),
                   ),
                 ),
-                Icon(
-                  Icons.keyboard_arrow_down_rounded,
-                  color: c.inkSoft,
-                  size: 20,
-                ),
               ],
             ),
-          ),
-          const SizedBox(height: 14),
-          _searchBar(),
-        ],
+            const SizedBox(height: 18),
+            Text(
+              _sapaan,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: tinta.withValues(alpha: 0.72),
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              'Mau main di mana?',
+              style: TextStyle(
+                fontFamily: 'Archivo',
+                fontSize: 30,
+                fontWeight: FontWeight.w900,
+                fontStyle: FontStyle.italic,
+                letterSpacing: -1,
+                height: 1.05,
+                color: tinta,
+              ),
+            ),
+            const SizedBox(height: 12),
+            GestureDetector(
+              onTap: _bukaPemilihLokasi,
+              behavior: HitTestBehavior.opaque,
+              child: Row(
+                children: [
+                  Icon(Icons.location_on_rounded, color: tinta, size: 18),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                      _address,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: tinta,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    color: tinta,
+                    size: 20,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
+            _searchBar(),
+          ],
+        ),
       ),
     );
   }
@@ -935,14 +994,30 @@ class _DashboardContentState extends State<DashboardContent>
           padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
           child: Row(
             children: [
-              Icon(Icons.bolt_rounded, color: context.c.danger, size: 20),
-              const SizedBox(width: 6),
+              // Lencana petir kuning-hitam, sama dengan badge di kartu.
+              Container(
+                width: 26,
+                height: 26,
+                decoration: const BoxDecoration(
+                  color: SportagoColors.kuning,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.bolt_rounded,
+                  color: SportagoColors.light.ink,
+                  size: 18,
+                ),
+              ),
+              const SizedBox(width: 8),
               Text(
                 'Flash Sale',
                 style: TextStyle(
+                  fontFamily: 'Archivo',
                   color: context.c.ink,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800,
+                  fontSize: 19,
+                  fontWeight: FontWeight.w900,
+                  fontStyle: FontStyle.italic,
+                  letterSpacing: -0.4,
                 ),
               ),
               const SizedBox(width: 8),
@@ -988,7 +1063,7 @@ class _DashboardContentState extends State<DashboardContent>
         decoration: BoxDecoration(
           color: context.c.raised,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: context.c.danger.withValues(alpha: 0.35)),
+          border: Border.all(color: context.c.accentLine, width: 1.5),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1001,15 +1076,15 @@ class _DashboardContentState extends State<DashboardContent>
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: context.c.danger,
+                    color: SportagoColors.kuning,
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
                     '-${f.diskonPersen}%',
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: SportagoColors.light.ink,
                       fontSize: 11,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w900,
                     ),
                   ),
                 ),
@@ -1057,9 +1132,9 @@ class _DashboardContentState extends State<DashboardContent>
                 Text(
                   rupiah.format(f.harga),
                   style: TextStyle(
-                    color: context.c.danger,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
+                    color: context.c.ink,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w900,
                   ),
                 ),
                 const SizedBox(width: 6),
@@ -1099,9 +1174,12 @@ class _DashboardContentState extends State<DashboardContent>
                 Text(
                   'Promo Berjalan',
                   style: TextStyle(
+                    fontFamily: 'Archivo',
                     color: context.c.ink,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
+                    fontSize: 19,
+                    fontWeight: FontWeight.w900,
+                    fontStyle: FontStyle.italic,
+                    letterSpacing: -0.4,
                   ),
                 ),
                 Icon(Icons.chevron_right_rounded, color: context.c.inkSoft),
@@ -1310,10 +1388,10 @@ class _DashboardContentState extends State<DashboardContent>
         height: 52,
         padding: const EdgeInsets.symmetric(horizontal: 18),
         decoration: BoxDecoration(
-          // Pil abu tanpa garis tepi di atas kepala putih: kolom cari
+          // Pil putih tanpa garis tepi di atas kepala kuning: kolom cari
           // yang dikelilingi garis terbaca seperti kotak isian yang
           // sedang menunggu diketik, padahal ini tombol ke layar cari.
-          color: context.c.sunken,
+          color: context.c.raised,
           borderRadius: BorderRadius.circular(999),
         ),
         child: Row(
@@ -1343,7 +1421,7 @@ class _DashboardContentState extends State<DashboardContent>
 
   // ---- Categories ---------------------------------------------------------
 
-  /// Kategori sebagai lingkaran berwarna, bukan pil.
+  /// Kategori sebagai ubin kuning merek, bukan pil.
   ///
   /// Sebelumnya pil, dan begitu pintasan "Mau main kapan?" ditambahkan
   /// di atasnya jadi dua baris pil berdempetan yang bentuknya nyaris
@@ -1386,14 +1464,36 @@ class _DashboardContentState extends State<DashboardContent>
           width: 60,
           child: Column(
             children: [
-              Container(
-                height: 56,
-                width: 56,
-                decoration: BoxDecoration(
-                  color: warna.withValues(alpha: 0.12),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(ikon, color: warna, size: 26),
+              // Ubin kuning pucat bergaris kuning dengan ikon hitam:
+              // seragam untuk semua kategori, supaya deretan ini terbaca
+              // sebagai bagian merek, bukan pelangi. [warna] tinggal
+              // sebagai titik kecil penanda kategori.
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Container(
+                    height: 56,
+                    width: 56,
+                    decoration: BoxDecoration(
+                      color: context.c.accentSoft,
+                      border: Border.all(color: context.c.accentLine),
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    child: Icon(ikon, color: context.c.ink, size: 26),
+                  ),
+                  Positioned(
+                    right: 6,
+                    top: 6,
+                    child: Container(
+                      width: 7,
+                      height: 7,
+                      decoration: BoxDecoration(
+                        color: warna,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 8),
               Text(
@@ -1450,9 +1550,12 @@ class _DashboardContentState extends State<DashboardContent>
               Text(
                 title,
                 style: TextStyle(
+                  fontFamily: 'Archivo',
                   color: context.c.ink,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800,
+                  fontSize: 19,
+                  fontWeight: FontWeight.w900,
+                  fontStyle: FontStyle.italic,
+                  letterSpacing: -0.4,
                 ),
               ),
               GestureDetector(
@@ -1611,25 +1714,27 @@ class _VenueCard extends StatelessWidget {
                         horizontal: 8,
                         vertical: 4,
                       ),
+                      // Kuning-hitam merek: badge ini menjual, bukan
+                      // memperingatkan, jadi bukan merah.
                       decoration: BoxDecoration(
-                        color: context.c.danger,
+                        color: SportagoColors.kuning,
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Row(
+                      child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
                             Icons.bolt_rounded,
                             size: 13,
-                            color: Colors.white,
+                            color: SportagoColors.light.ink,
                           ),
-                          SizedBox(width: 3),
+                          const SizedBox(width: 3),
                           Text(
                             'Flash Sale',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: SportagoColors.light.ink,
                               fontSize: 10,
-                              fontWeight: FontWeight.w800,
+                              fontWeight: FontWeight.w900,
                             ),
                           ),
                         ],
@@ -1650,7 +1755,7 @@ class _VenueCard extends StatelessWidget {
                     style: TextStyle(
                       color: context.c.ink,
                       fontSize: 16,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -1716,7 +1821,7 @@ class _VenueCard extends StatelessWidget {
                               style: TextStyle(
                                 color: context.c.ink,
                                 fontSize: 18,
-                                fontWeight: FontWeight.w800,
+                                fontWeight: FontWeight.w900,
                               ),
                             ),
                             Text(
@@ -1813,4 +1918,93 @@ class _VenueCard extends StatelessWidget {
   // lapangan dengan harga, jarak, dan jam kosong; wifi dan toilet
   // tidak pernah menentukan. Daftar fasilitas lengkapnya tetap ada
   // di halaman detail venue, tempat orang memang mencarinya.
+}
+
+/// Tombol ikon bulat di atas kepala kuning Beranda: kaca gelap tipis
+/// dengan ikon hitam, lencana hitam berangka kuning.
+class _TombolKuning extends StatelessWidget {
+  const _TombolKuning({
+    required this.ikon,
+    required this.onTap,
+    this.lencana,
+    this.tooltip,
+  });
+
+  final IconData ikon;
+  final VoidCallback onTap;
+  final int? lencana;
+  final String? tooltip;
+
+  @override
+  Widget build(BuildContext context) {
+    final tinta = SportagoColors.light.ink;
+    final tombol = Material(
+      color: tinta.withValues(alpha: 0.08),
+      shape: const CircleBorder(),
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        child: SizedBox(
+          width: 42,
+          height: 42,
+          child: Icon(ikon, color: tinta, size: 21),
+        ),
+      ),
+    );
+    final isi = (lencana ?? 0) <= 0
+        ? tombol
+        : Stack(
+            clipBehavior: Clip.none,
+            children: [
+              tombol,
+              Positioned(
+                right: -2,
+                top: -2,
+                child: Container(
+                  constraints: const BoxConstraints(
+                    minWidth: 18,
+                    minHeight: 18,
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 5),
+                  decoration: BoxDecoration(
+                    color: tinta,
+                    borderRadius: BorderRadius.circular(9),
+                    border: Border.all(color: SportagoColors.kuning, width: 2),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    lencana! > 99 ? '99+' : '$lencana',
+                    style: const TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      color: SportagoColors.kuning,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+    return Padding(
+      padding: const EdgeInsets.only(left: 8),
+      child: tooltip == null ? isi : Tooltip(message: tooltip!, child: isi),
+    );
+  }
+}
+
+/// Tepi bawah kepala Beranda dipotong miring, kiri lebih rendah, sama
+/// arahnya dengan panel kuning di layar Masuk.
+class _TepiMiringBeranda extends CustomClipper<Path> {
+  const _TepiMiringBeranda(this.miring);
+
+  final double miring;
+
+  @override
+  Path getClip(Size size) => Path()
+    ..lineTo(size.width, 0)
+    ..lineTo(size.width, size.height - miring)
+    ..lineTo(0, size.height)
+    ..close();
+
+  @override
+  bool shouldReclip(_TepiMiringBeranda old) => old.miring != miring;
 }

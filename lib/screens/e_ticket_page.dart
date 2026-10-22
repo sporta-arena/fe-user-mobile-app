@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_tokens.dart';
 import '../widgets/sportago_ui.dart';
@@ -126,13 +127,23 @@ class _ETicketPageState extends State<ETicketPage> {
   Widget build(BuildContext context) {
     final c = context.c;
 
-    // Tiket putih bergaris duduk di atas latar abu muda, jadi kartunya
-    // yang paling menonjol. Kotak QR selalu putih murni (juga di mode
-    // gelap) supaya pemindai di pintu venue tetap membacanya.
+    // Tiket berbingkai hitam di atas kuning merek, warna yang sama dengan
+    // ikon app, jadi layar ini langsung dikenali saat ditunjukkan di
+    // pintu venue. Kuningnya tidak ikut tema; teks di atasnya selalu
+    // hitam. Kotak QR selalu putih murni (juga di mode gelap) supaya
+    // pemindai tetap membacanya.
+    final diKuning = SportagoColors.light.ink;
     return Scaffold(
-      backgroundColor: c.sunken,
+      backgroundColor: SportagoColors.kuning,
       appBar: AppBar(
-        backgroundColor: c.sunken,
+        backgroundColor: SportagoColors.kuning,
+        foregroundColor: diKuning,
+        iconTheme: IconThemeData(color: diKuning),
+        systemOverlayStyle: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.dark,
+          statusBarBrightness: Brightness.light,
+        ),
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
@@ -174,7 +185,7 @@ class _ETicketPageState extends State<ETicketPage> {
                         decoration: BoxDecoration(
                           color: c.raised,
                           borderRadius: BorderRadius.circular(24),
-                          border: Border.all(color: c.line),
+                          border: Border.all(color: diKuning, width: 2),
                         ),
                         child: Column(
                           children: [
@@ -192,9 +203,10 @@ class _ETicketPageState extends State<ETicketPage> {
                                     widget.booking.field?.venue?.name ??
                                         "Venue",
                                     style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.w800,
-                                      letterSpacing: -0.4,
+                                      fontSize: 21,
+                                      fontWeight: FontWeight.w900,
+                                      fontStyle: FontStyle.italic,
+                                      letterSpacing: -0.5,
                                       color: c.ink,
                                     ),
                                     textAlign: TextAlign.center,
@@ -233,9 +245,9 @@ class _ETicketPageState extends State<ETicketPage> {
                                   Text(
                                     widget.booking.bookingCode,
                                     style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.w800,
-                                      letterSpacing: 1.5,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: 2,
                                       color: c.ink,
                                     ),
                                   ),
@@ -259,7 +271,7 @@ class _ETicketPageState extends State<ETicketPage> {
                                   width: 14,
                                   height: 28,
                                   decoration: BoxDecoration(
-                                    color: c.sunken,
+                                    color: SportagoColors.kuning,
                                     borderRadius: const BorderRadius.only(
                                       topRight: Radius.circular(14),
                                       bottomRight: Radius.circular(14),
@@ -289,7 +301,7 @@ class _ETicketPageState extends State<ETicketPage> {
                                   width: 14,
                                   height: 28,
                                   decoration: BoxDecoration(
-                                    color: c.sunken,
+                                    color: SportagoColors.kuning,
                                     borderRadius: const BorderRadius.only(
                                       topLeft: Radius.circular(14),
                                       bottomLeft: Radius.circular(14),
@@ -355,6 +367,10 @@ class _ETicketPageState extends State<ETicketPage> {
                       SizedBox(
                         width: double.infinity,
                         child: OutlinedButton.icon(
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: diKuning,
+                            side: BorderSide(color: diKuning, width: 1.5),
+                          ),
                           onPressed: _openChat,
                           icon: const Icon(
                             Icons.chat_bubble_outline_rounded,
@@ -410,7 +426,7 @@ class _ETicketPageState extends State<ETicketPage> {
                           height: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color: c.onAccent,
+                            color: SportagoColors.kuning,
                           ),
                         )
                       : const Icon(Icons.download_rounded),
@@ -418,10 +434,12 @@ class _ETicketPageState extends State<ETicketPage> {
                     _isDownloading ? "Menyimpan..." : "Download Ticket",
                   ),
                   style: FilledButton.styleFrom(
-                    backgroundColor: c.accent,
-                    foregroundColor: c.onAccent,
-                    disabledBackgroundColor: c.accent.withValues(alpha: 0.7),
-                    disabledForegroundColor: c.onAccent,
+                    // Hitam teks kuning di semua tema: latarnya selalu
+                    // kuning, jadi aksen tema gelap (kuning) akan hilang.
+                    backgroundColor: diKuning,
+                    foregroundColor: SportagoColors.kuning,
+                    disabledBackgroundColor: diKuning.withValues(alpha: 0.7),
+                    disabledForegroundColor: SportagoColors.kuning,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
                 ),
