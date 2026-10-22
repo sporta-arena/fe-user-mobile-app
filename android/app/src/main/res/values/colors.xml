@@ -2,4 +2,6 @@
 <resources>
     <color name="ic_launcher_background">#000000</color>
     <color name="warna_notifikasi">#111111</color>
+    <!-- Latar layar pembuka: hitam, sama dengan splash Flutter dan ikon app. -->
+    <color name="latar_pembuka">#000000</color>
 </resources>

@@ -226,8 +226,8 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Kepala berfoto dan form di permukaan putih, sama dengan layar
-    // Masuk, jadi bolak-balik Masuk/Daftar tidak terasa pindah aplikasi.
+    // Panel kuning dan form di permukaan tema, sama dengan layar Masuk,
+    // jadi bolak-balik Masuk/Daftar tidak terasa pindah aplikasi.
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: gayaOverlayKepalaFoto(context),
       child: Scaffold(
@@ -240,7 +240,7 @@ class _RegisterPageState extends State<RegisterPage> {
             child: Column(
               children: [
                 KepalaFotoAuth(
-                  judul: 'Bikin akun,\nlangsung booking',
+                  judul: 'Gabung,\nlangsung\nbooking.',
                   foto: 'assets/images/hero/daftar.jpg',
                   onKembali: () => Navigator.pop(context),
                 ),

@@ -117,8 +117,8 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Kepala foto pemain yang terang, lalu form langsung di permukaan
-    // putih tanpa kartu menumpang (itu gaya layar Masuk app mitra).
+    // Panel kuning merek dengan kartu foto miring, lalu form langsung di
+    // permukaan tema. Bukan foto selebar layar: itu gaya Masuk app mitra.
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: gayaOverlayKepalaFoto(context),
       child: Scaffold(
@@ -131,7 +131,7 @@ class _LoginPageState extends State<LoginPage> {
             child: Column(
               children: [
                 KepalaFotoAuth(
-                  judul: 'Selamat datang lagi',
+                  judul: 'Main lagi,\nyuk.',
                   onKembali: _kembali,
                 ),
                 Padding(
@@ -157,7 +157,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _buildFormCard() {
-    // Judulnya sudah di kepala ("Selamat datang lagi"), jadi di sini
+    // Sapaannya sudah di kepala ("Main lagi, yuk."), jadi di sini
     // cuma kalimat penjelas lalu kolom.
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),

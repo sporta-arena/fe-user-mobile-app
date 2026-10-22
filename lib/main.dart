@@ -10,7 +10,6 @@ import 'services/auth_service.dart';
 import 'services/favorite_service.dart';
 import 'theme/app_theme.dart';
 import 'theme/app_tokens.dart';
-import 'widgets/sportago_mark.dart';
 import 'theme/theme_controller.dart';
 import 'utils/tutup_papan_ketik.dart';
 
@@ -101,6 +100,9 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  /// Sama dengan @color/latar_pembuka (Android) dan LaunchScreen (iOS).
+  static const Color _latarSplash = Color(0xFF000000);
+
   @override
   void initState() {
     super.initState();
@@ -154,22 +156,18 @@ class _SplashScreenState extends State<SplashScreen> {
     // hitam dengan isian kuning, jadi isiannya lenyap ke latar dan yang
     // kebaca cuma garis hitamnya, logonya jadi nyaru.
     //
-    // Sekarang: permukaan tema customer (putih, atau hitam di tema
-    // gelap), sama dengan layar peluncur Android/iOS, jadi tidak ada
-    // kedip ganti warna. Hijau pekat sengaja tidak dipakai: itu ciri
-    // aplikasi mitra.
-    final gelap = Theme.of(context).brightness == Brightness.dark;
+    // Sekarang kebalikannya, sama dengan ikon aplikasi: lambang dan
+    // tulisan kuning merek di atas hitam. Layar peluncur Android/iOS
+    // juga hitam, jadi tidak ada kedip ganti warna. Hijau pekat sengaja
+    // tidak dipakai: itu ciri aplikasi mitra.
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: (gelap ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark)
-          .copyWith(
-            statusBarColor: Colors.transparent,
-            systemNavigationBarColor: context.c.surface,
-            systemNavigationBarIconBrightness: gelap
-                ? Brightness.light
-                : Brightness.dark,
-          ),
+      value: SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: Colors.transparent,
+        systemNavigationBarColor: _latarSplash,
+        systemNavigationBarIconBrightness: Brightness.light,
+      ),
       child: Scaffold(
-        backgroundColor: context.c.surface,
+        backgroundColor: _latarSplash,
         body: SizedBox.expand(
           child: Center(
             child: TweenAnimationBuilder<double>(
@@ -180,9 +178,30 @@ class _SplashScreenState extends State<SplashScreen> {
                 opacity: t,
                 child: Transform.scale(scale: 0.92 + 0.08 * t, child: child),
               ),
-              child: SportagoWordmark(
-                markHeight: screenWidth * 0.16,
-                fontSize: screenWidth * 0.095,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Image.asset(
+                    'assets/sportago_mark.png',
+                    height: screenWidth * 0.3,
+                    color: SportagoColors.kuning,
+                    colorBlendMode: BlendMode.srcIn,
+                    filterQuality: FilterQuality.medium,
+                    excludeFromSemantics: true,
+                  ),
+                  SizedBox(height: screenWidth * 0.05),
+                  Text(
+                    'SPORTAGO',
+                    style: TextStyle(
+                      fontFamily: 'Archivo',
+                      fontSize: screenWidth * 0.11,
+                      fontWeight: FontWeight.w900,
+                      fontStyle: FontStyle.italic,
+                      letterSpacing: -1,
+                      color: SportagoColors.kuning,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
