@@ -1,7 +1,6 @@
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../widgets/sportago_ui.dart';
 import '../widgets/sportago_mark.dart';
 import '../theme/app_tokens.dart';
 import 'login_page.dart';
@@ -26,26 +25,26 @@ class _OnboardingPageState extends State<OnboardingPage>
   /// ketiga cerita tetap terlihat walau pengguna tidak menggeser.
   late final AnimationController _zoomController;
 
-  // Dulu satu foto statis dengan satu kalimat. Sekarang tiga slide
-  // berfoto dari keluarga yang sama dengan aplikasi mitra (ComfyUI,
-  // lihat assets/images/hero/), urut sesuai perjalanan pemain.
+  // Tiga slide berfoto pemain (ComfyUI, lihat assets/images/hero/),
+  // urut sesuai perjalanan pemain. Sengaja foto siang yang terang dan
+  // berisi orang: foto lapangan malam yang gelap itu milik app mitra.
   static const List<_Slide> _slides = [
     _Slide(
-      image: 'assets/images/hero/venue.jpg',
+      image: 'assets/images/hero/onboarding-1.jpg',
       title: 'Cari lapangan\nyang dekat',
       description:
           'Futsal, badminton, basket, mini soccer. Lihat venue di '
           'sekitarmu lengkap dengan jam yang masih kosong.',
     ),
     _Slide(
-      image: 'assets/images/hero/main.jpg',
+      image: 'assets/images/hero/onboarding-2.jpg',
       title: 'Booking dan bayar\ndalam semenit',
       description:
           'Pilih jam, bayar pakai QRIS atau virtual account. '
           'Nggak perlu telepon atau chat admin dulu.',
     ),
     _Slide(
-      image: 'assets/images/hero/tiket.jpg',
+      image: 'assets/images/hero/onboarding-3.jpg',
       title: 'Tunjukin tiket,\nlangsung main',
       description:
           'E-tiket muncul di aplikasi begitu pembayaran masuk. '
@@ -139,49 +138,106 @@ class _OnboardingPageState extends State<OnboardingPage>
 
   @override
   Widget build(BuildContext context) {
+    final c = context.c;
+    final gelap = Theme.of(context).brightness == Brightness.dark;
     final pendek = MediaQuery.of(context).size.height < 700;
 
+    // Foto di atas memudar ke permukaan tema; teks dan tombol duduk di
+    // permukaan itu. Ikon bilah status terang karena ujung atas foto
+    // diberi bayangan tipis.
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.light.copyWith(
+      value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        systemNavigationBarColor: KepalaTab.redupFoto,
-        systemNavigationBarIconBrightness: Brightness.light,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+        systemNavigationBarColor: c.surface,
+        systemNavigationBarIconBrightness: gelap
+            ? Brightness.light
+            : Brightness.dark,
       ),
       child: Scaffold(
-        backgroundColor: KepalaTab.redupFoto,
-        body: Stack(
+        backgroundColor: c.surface,
+        body: Column(
+          children: [
+            Expanded(
+              child: PageView.builder(
+                controller: _pageController,
+                itemCount: _slides.length,
+                onPageChanged: _onPageChanged,
+                itemBuilder: (context, i) => _buildPage(_slides[i], i, pendek),
+              ),
+            ),
+            SafeArea(top: false, child: _buildBottomSection(pendek)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Foto slide: mengisi ±60% layar, sudut bawah membulat besar, dan
+  /// ujung bawahnya memudar ke permukaan tema supaya teks di bawahnya
+  /// tidak terasa menempel di atas foto.
+  Widget _buildPhoto(_Slide slide, int index) {
+    final c = context.c;
+    final tinggi = MediaQuery.of(context).size.height * 0.58;
+    final aktif = index == _currentPage;
+    return SizedBox(
+      height: tinggi,
+      width: double.infinity,
+      child: ClipRRect(
+        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(40)),
+        child: Stack(
           fit: StackFit.expand,
           children: [
-            _buildPhoto(),
-            _buildScrim(),
+            AnimatedBuilder(
+              animation: _zoomController,
+              builder: (context, child) => Transform.scale(
+                scale: aktif
+                    ? 1.0 +
+                          0.06 * Curves.easeOut.transform(_zoomController.value)
+                    : 1.0,
+                child: child,
+              ),
+              child: Image.asset(
+                slide.image,
+                fit: BoxFit.cover,
+                // Foto hiasan; isinya sudah dijelaskan judul slide.
+                excludeFromSemantics: true,
+              ),
+            ),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  stops: const [0.0, 0.2, 0.7, 1.0],
+                  colors: [
+                    Colors.black.withValues(alpha: 0.35),
+                    Colors.black.withValues(alpha: 0.0),
+                    c.surface.withValues(alpha: 0.0),
+                    c.surface.withValues(alpha: 0.85),
+                  ],
+                ),
+              ),
+            ),
             SafeArea(
-              child: Column(
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.fromLTRB(24, 16, 24, 0),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: SportagoWordmark(
-                        markHeight: 26,
-                        fontSize: 15,
-                        onMedia: true,
-                      ),
+              bottom: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
+                child: Align(
+                  alignment: Alignment.topLeft,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
                     ),
-                  ),
-                  Expanded(
-                    // Hanya teksnya yang digeser; fotonya berganti lewat
-                    // crossfade di belakang, jadi tidak ada jahitan dua
-                    // foto yang terlihat di tengah geseran.
-                    child: PageView.builder(
-                      controller: _pageController,
-                      itemCount: _slides.length,
-                      onPageChanged: _onPageChanged,
-                      itemBuilder: (context, i) =>
-                          _buildPage(_slides[i], i, pendek),
+                    decoration: BoxDecoration(
+                      color: c.raised,
+                      borderRadius: BorderRadius.circular(999),
                     ),
+                    child: const SportagoWordmark(markHeight: 20, fontSize: 13),
                   ),
-                  _buildBottomSection(pendek),
-                ],
+                ),
               ),
             ),
           ],
@@ -190,96 +246,47 @@ class _OnboardingPageState extends State<OnboardingPage>
     );
   }
 
-  Widget _buildPhoto() {
-    final slide = _slides[_currentPage];
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 600),
-      child: AnimatedBuilder(
-        key: ValueKey(slide.image),
-        animation: _zoomController,
-        builder: (context, child) => Transform.scale(
-          scale: 1.0 + 0.08 * Curves.easeOut.transform(_zoomController.value),
-          child: child,
-        ),
-        child: Image.asset(
-          slide.image,
-          fit: BoxFit.cover,
-          width: double.infinity,
-          height: double.infinity,
-          // Foto hiasan; isinya sudah dijelaskan judul slide.
-          excludeFromSemantics: true,
-        ),
-      ),
-    );
-  }
-
-  /// Gelap di atas untuk bilah status dan wordmark, gelap netral di
-  /// bawah untuk teks dan tombol. Ujung bawahnya sama persis dengan warna
-  /// bilah navigasi supaya tidak ada garis sambungan.
-  Widget _buildScrim() {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          stops: const [0.0, 0.18, 0.38, 0.62, 1.0],
-          colors: [
-            Colors.black.withValues(alpha: 0.55),
-            Colors.black.withValues(alpha: 0.0),
-            KepalaTab.redupFoto.withValues(alpha: 0.05),
-            KepalaTab.redupFoto.withValues(alpha: 0.9),
-            KepalaTab.redupFoto,
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildPage(_Slide slide, int index, bool pendek) {
-    final media = context.c.onMedia;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 28),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '0${index + 1} / 0${_slides.length}',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 1.6,
-              color: media.inkSoft,
+    final c = context.c;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildPhoto(slide, index),
+        Expanded(
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(28, pendek ? 12 : 20, 28, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  slide.title,
+                  style: TextStyle(
+                    fontSize: pendek ? 26 : 30,
+                    fontWeight: FontWeight.w800,
+                    color: c.ink,
+                    letterSpacing: -0.9,
+                    height: 1.12,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  slide.description,
+                  style: TextStyle(
+                    fontSize: pendek ? 14 : 15,
+                    color: c.inkSoft,
+                    height: 1.55,
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 10),
-          Text(
-            slide.title,
-            style: TextStyle(
-              fontSize: pendek ? 28 : 34,
-              fontWeight: FontWeight.w800,
-              color: media.ink,
-              letterSpacing: -1.0,
-              height: 1.1,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            slide.description,
-            style: TextStyle(
-              fontSize: pendek ? 14 : 15,
-              color: media.inkSoft,
-              height: 1.55,
-            ),
-          ),
-          SizedBox(height: pendek ? 16 : 24),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
   Widget _buildBottomSection(bool pendek) {
-    final media = context.c.onMedia;
+    final c = context.c;
     return Padding(
       padding: EdgeInsets.fromLTRB(28, 0, 28, pendek ? 12 : 20),
       child: Column(
@@ -295,9 +302,7 @@ class _OnboardingPageState extends State<OnboardingPage>
                 width: _currentPage == i ? 28 : 8,
                 height: 6,
                 decoration: BoxDecoration(
-                  color: _currentPage == i
-                      ? media.ink
-                      : media.ink.withValues(alpha: 0.28),
+                  color: _currentPage == i ? c.accent : c.lineStrong,
                   borderRadius: BorderRadius.circular(3),
                 ),
               ),
@@ -310,41 +315,42 @@ class _OnboardingPageState extends State<OnboardingPage>
           // memunculkan snackbar "belum tersedia". Lagi pula app
           // ini baru rilis di Android.
 
+          // Masuk pakai email: tombol utama aksen tema customer
+          // (hijau lapangan, volt di tema gelap).
+          _AuthButton(
+            label: 'Lanjut pakai email',
+            background: c.accent,
+            foreground: c.onAccent,
+            height: pendek ? 52 : 56,
+            trailing: const Icon(Icons.arrow_forward_rounded, size: 20),
+            onPressed: _continueWithEmail,
+          ),
+
           // Masuk lewat Google baru jalan di Android
           // (Google Sign-In di iOS belum dikonfigurasi).
           if (!Platform.isIOS) ...[
+            const SizedBox(height: 10),
             _AuthButton(
               label: _isGoogleLoading
                   ? 'Menghubungkan…'
                   : 'Lanjut dengan Google',
-              background: SportagoColors.pure,
-              foreground: KepalaTab.redupFoto,
+              background: c.raised,
+              foreground: c.ink,
+              garis: c.lineStrong,
               height: pendek ? 52 : 56,
               leading: _isGoogleLoading
-                  ? const SizedBox(
+                  ? SizedBox(
                       height: 20,
                       width: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: KepalaTab.redupFoto,
+                        color: c.accent,
                       ),
                     )
                   : Image.asset('assets/google_logo.png', height: 20),
               onPressed: _isGoogleLoading ? () {} : _continueWithGoogle,
             ),
-            const SizedBox(height: 10),
           ],
-
-          // Masuk pakai email: tombol utama aksen tema customer
-          // (hijau lapangan, volt di tema gelap).
-          _AuthButton(
-            label: 'Lanjut pakai email',
-            background: context.c.accent,
-            foreground: context.c.onAccent,
-            height: pendek ? 52 : 56,
-            trailing: const Icon(Icons.arrow_forward_rounded, size: 20),
-            onPressed: _continueWithEmail,
-          ),
           SizedBox(height: pendek ? 4 : 8),
         ],
       ),
@@ -373,6 +379,9 @@ class _AuthButton extends StatelessWidget {
   final Widget? trailing;
   final VoidCallback onPressed;
 
+  /// Garis tepi untuk tombol sekunder (Google). Null = tanpa garis.
+  final Color? garis;
+
   const _AuthButton({
     required this.label,
     required this.background,
@@ -381,6 +390,7 @@ class _AuthButton extends StatelessWidget {
     this.height = 56,
     this.leading,
     this.trailing,
+    this.garis,
   });
 
   @override
@@ -395,6 +405,7 @@ class _AuthButton extends StatelessWidget {
           foregroundColor: foreground,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
+            side: garis == null ? BorderSide.none : BorderSide(color: garis!),
           ),
         ),
         child: Row(

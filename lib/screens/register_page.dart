@@ -226,8 +226,8 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Kepala berfoto dan kartu form, sama dengan layar Masuk, jadi
-    // bolak-balik Masuk/Daftar tidak terasa pindah aplikasi.
+    // Kepala berfoto dan form di permukaan putih, sama dengan layar
+    // Masuk, jadi bolak-balik Masuk/Daftar tidak terasa pindah aplikasi.
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: gayaOverlayKepalaFoto(context),
       child: Scaffold(
@@ -241,35 +241,20 @@ class _RegisterPageState extends State<RegisterPage> {
               children: [
                 KepalaFotoAuth(
                   judul: 'Bikin akun,\nlangsung booking',
-                  foto: 'assets/images/hero/main.jpg',
+                  foto: 'assets/images/hero/daftar.jpg',
                   onKembali: () => Navigator.pop(context),
                 ),
-                Transform.translate(
-                  offset: const Offset(0, -24),
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
                     child: Column(
                       children: [
-                        Container(
-                          padding: const EdgeInsets.all(24),
-                          decoration: BoxDecoration(
-                            color: context.c.raised,
-                            borderRadius: BorderRadius.circular(24),
-                            border: Border.all(color: context.c.line),
-                          ),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                "Daftar",
-                                style: TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.w800,
-                                  color: context.c.ink,
-                                  letterSpacing: -0.5,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
                               Text(
                                 "Lengkapi data diri untuk bergabung di Sportago.",
                                 style: TextStyle(

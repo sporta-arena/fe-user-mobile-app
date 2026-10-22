@@ -88,12 +88,11 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // Beranda berkepala foto yang diredupkan, jadi ikon bilah status
-    // terang. Pesanan dan Profil berkepala putih, jadi ikonnya ikut tema
+    // Ketiga tab berkepala putih, jadi ikon bilah status ikut tema
     // supaya jam dan baterai tidak hilang. Bilah navigasi sistem menyatu
     // dengan bottom-nav.
     final gelap = Theme.of(context).brightness == Brightness.dark;
-    final ikonTerang = gelap || _selectedIndex == 0;
+    final ikonTerang = gelap;
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
         systemNavigationBarColor: context.c.raised,
@@ -735,12 +734,12 @@ class _DashboardContentState extends State<DashboardContent>
     return '$salam, ${nama.split(RegExp(r'\s+')).first}';
   }
 
-  /// Kepala berfoto, sama keluarganya dengan pembuka. Lokasi dan kolom cari ikut masuk ke dalamnya, jadi hal
-  /// pertama yang terlihat adalah "di mana" dan "cari apa".
+  /// Kepala putih dengan sapaan. Lokasi dan kolom cari ikut masuk ke
+  /// dalamnya, jadi hal pertama yang terlihat adalah "di mana" dan "cari
+  /// apa". Sengaja tanpa foto: kepala berfoto venue itu gaya app mitra.
   Widget _header() {
-    final media = context.c.onMedia;
+    final c = context.c;
     return KepalaTab(
-      foto: 'assets/images/hero/venue.jpg',
       atas: _sapaan,
       judul: 'Mau main di mana?',
       jarakBawah: 22,
@@ -750,7 +749,6 @@ class _DashboardContentState extends State<DashboardContent>
         TombolIkonKepala(
           ikon: Icons.map_outlined,
           tooltip: 'Peta',
-          diFoto: true,
           onTap: () => Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const MapPage()),
@@ -761,7 +759,6 @@ class _DashboardContentState extends State<DashboardContent>
           ikon: Icons.notifications_none_rounded,
           tooltip: 'Notifikasi',
           lencana: _notifBelumDibaca,
-          diFoto: true,
           onTap: () => Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const NotificationsPage()),
@@ -776,7 +773,7 @@ class _DashboardContentState extends State<DashboardContent>
             behavior: HitTestBehavior.opaque,
             child: Row(
               children: [
-                Icon(Icons.location_on_rounded, color: media.ink, size: 18),
+                Icon(Icons.location_on_rounded, color: c.accent, size: 18),
                 const SizedBox(width: 6),
                 Flexible(
                   child: Text(
@@ -784,7 +781,7 @@ class _DashboardContentState extends State<DashboardContent>
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      color: media.ink,
+                      color: c.ink,
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
                     ),
@@ -792,7 +789,7 @@ class _DashboardContentState extends State<DashboardContent>
                 ),
                 Icon(
                   Icons.keyboard_arrow_down_rounded,
-                  color: media.inkSoft,
+                  color: c.inkSoft,
                   size: 20,
                 ),
               ],
@@ -1313,10 +1310,10 @@ class _DashboardContentState extends State<DashboardContent>
         height: 52,
         padding: const EdgeInsets.symmetric(horizontal: 18),
         decoration: BoxDecoration(
-          // Pil putih tanpa garis tepi di atas kepala berfoto: kolom cari
+          // Pil abu tanpa garis tepi di atas kepala putih: kolom cari
           // yang dikelilingi garis terbaca seperti kotak isian yang
           // sedang menunggu diketik, padahal ini tombol ke layar cari.
-          color: context.c.raised,
+          color: context.c.sunken,
           borderRadius: BorderRadius.circular(999),
         ),
         child: Row(
