@@ -510,9 +510,14 @@ class KeadaanKosong extends StatelessWidget {
     this.pesan,
     this.aksi,
     this.onAksi,
+    this.gambar,
   });
 
   final IconData ikon;
+
+  /// Ilustrasi 3D dari `assets/images/ilustrasi/` (render Blender, latar
+  /// transparan). Kalau berkasnya belum ada, [ikon] yang tampil.
+  final String? gambar;
   final String judul;
   final String? pesan;
   final String? aksi;
@@ -526,7 +531,16 @@ class KeadaanKosong extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          UbinIkon(ikon, ukuran: 64),
+          if (gambar == null)
+            UbinIkon(ikon, ukuran: 64)
+          else
+            Image.asset(
+              gambar!,
+              width: 168,
+              height: 168,
+              excludeFromSemantics: true,
+              errorBuilder: (_, _, _) => UbinIkon(ikon, ukuran: 64),
+            ),
           const SizedBox(height: 16),
           Text(
             judul,
