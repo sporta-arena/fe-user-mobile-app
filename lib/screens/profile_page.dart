@@ -192,7 +192,7 @@ class _ProfilePageState extends State<ProfilePage> {
   // Kepala hijau pekat: avatar inisial, nama, kontak, dan "Member sejak".
   Widget _buildProfileHeader() {
     final media = context.c.onMedia;
-    return KepalaPekat(
+    return KepalaTab(
       judul: "Profil",
       jarakBawah: 60,
       bawah: Column(

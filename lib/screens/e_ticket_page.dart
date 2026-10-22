@@ -150,7 +150,7 @@ class _ETicketPageState extends State<ETicketPage> {
         centerTitle: false,
         actions: [
           if (_isChatEnabled)
-            TombolIkonPekat(
+            TombolIkonKepala(
               ikon: Icons.chat_bubble_outline_rounded,
               tooltip: 'Chat venue',
               onTap: _openChat,

@@ -143,7 +143,7 @@ class _TransactionsPageState extends State<TransactionsPage>
         backgroundColor: context.c.sunken,
         body: Column(
           children: [
-            const KepalaPekat(
+            const KepalaTab(
               judul: 'Pesanan',
               subjudul: 'Jadwal main dan pembayaranmu ada di sini.',
             ),
@@ -173,14 +173,14 @@ class _TransactionsPageState extends State<TransactionsPage>
       backgroundColor: context.c.sunken,
       body: Column(
         children: [
-          KepalaPekat(
+          KepalaTab(
             judul: 'Pesanan',
             subjudul: _isLoading
                 ? 'Memuat pesanan…'
                 : '${_allBookings.length} pesanan tercatat',
             jarakBawah: 18,
             aksi: [
-              TombolIkonPekat(
+              TombolIkonKepala(
                 ikon: Icons.refresh_rounded,
                 tooltip: 'Muat ulang',
                 onTap: _loadBookings,

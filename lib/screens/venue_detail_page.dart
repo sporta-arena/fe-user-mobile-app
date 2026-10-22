@@ -548,14 +548,14 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
       foregroundColor: SportagoColors.pure,
       elevation: 0,
       leading: Center(
-        child: TombolIkonPekat(
+        child: TombolIkonKepala(
           ikon: Icons.arrow_back_ios_new_rounded,
           tooltip: 'Kembali',
           onTap: () => Navigator.pop(context),
         ),
       ),
       actions: [
-        TombolIkonPekat(
+        TombolIkonKepala(
           ikon: _isFavorite
               ? Icons.favorite_rounded
               : Icons.favorite_border_rounded,

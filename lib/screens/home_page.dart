@@ -739,7 +739,7 @@ class _DashboardContentState extends State<DashboardContent>
   /// pertama yang terlihat adalah "di mana" dan "cari apa".
   Widget _header() {
     final media = context.c.onMedia;
-    return KepalaPekat(
+    return KepalaTab(
       foto: 'assets/images/hero/venue.jpg',
       atas: _sapaan,
       judul: 'Mau main di mana?',
@@ -747,7 +747,7 @@ class _DashboardContentState extends State<DashboardContent>
       aksi: [
         // Peta naik ke kepala dari tombol mengambang di atas daftar.
         // Di posisi lamanya ia menimpa kartu venue paling bawah.
-        TombolIkonPekat(
+        TombolIkonKepala(
           ikon: Icons.map_outlined,
           tooltip: 'Peta',
           onTap: () => Navigator.push(
@@ -756,7 +756,7 @@ class _DashboardContentState extends State<DashboardContent>
           ),
         ),
         // Angkanya dari unread_count sungguhan, bukan dinyalakan terus.
-        TombolIkonPekat(
+        TombolIkonKepala(
           ikon: Icons.notifications_none_rounded,
           tooltip: 'Notifikasi',
           lencana: _notifBelumDibaca,

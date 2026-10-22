@@ -2,6 +2,4 @@
 <resources>
     <color name="ic_launcher_background">#000000</color>
     <color name="warna_notifikasi">#00693C</color>
-    <!-- Latar layar pembuka, sama dengan SportagoColors.pekat. -->
-    <color name="latar_pembuka">#0B2E1F</color>
 </resources>

@@ -4,11 +4,12 @@ import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_tokens.dart';
 
 /// ═══════════════════════════════════════════════════════════════════
-/// Komponen bersama tampilan mitra
+/// Komponen bersama tampilan customer
 /// ───────────────────────────────────────────────────────────────────
-/// Bahasa visualnya diturunkan dari pembuka (splash, onboarding,
-/// Masuk): bidang hijau pekat dengan teks putih dan aksen volt di atas,
-/// kartu putih lega di atas latar abu muda di bawahnya.
+/// Tata letaknya serumpun dengan app mitra (kepala tab, kartu lega,
+/// chip status), tapi warnanya tema customer yang sama dengan web:
+/// permukaan putih, aksen hijau lapangan, dan volt di tema gelap.
+/// Hijau pekat tetap ciri app mitra, tidak dipakai di sini.
 ///
 /// Halaman memakai komponen ini, bukan menggambar ulang gradien,
 /// bayangan, dan sudutnya sendiri. Dulu tiap halaman punya versinya
@@ -40,13 +41,15 @@ extension NadaWarna on Nada {
       };
 }
 
-/// Kepala halaman hijau pekat untuk akar tiap tab.
+/// Kepala halaman untuk akar tiap tab.
 ///
-/// [foto] opsional: foto venue yang sama keluarganya dengan pembuka,
-/// diredupkan supaya teks tetap jadi yang terbaca duluan. [bawah] untuk
-/// isi tambahan di dalam kepala, misalnya ringkasan angka.
-class KepalaPekat extends StatelessWidget {
-  const KepalaPekat({
+/// Tanpa [foto] kepalanya putih (permukaan `raised`) dengan teks gelap,
+/// mengikuti tema customer yang sama dengan web. Dengan [foto], foto
+/// venue diredupkan dengan gradasi gelap netral supaya teks putih tetap
+/// terbaca. [bawah] untuk isi tambahan di dalam kepala, misalnya kolom
+/// cari atau pil tab.
+class KepalaTab extends StatelessWidget {
+  const KepalaTab({
     super.key,
     required this.judul,
     this.atas,
@@ -55,7 +58,7 @@ class KepalaPekat extends StatelessWidget {
     this.foto,
     this.bawah,
     this.bawahTembus = false,
-    this.jarakBawah = 28,
+    this.jarakBawah = 20,
   });
 
   final String judul;
@@ -76,128 +79,137 @@ class KepalaPekat extends StatelessWidget {
   /// tepi bawah kepala.
   final double jarakBawah;
 
+  /// Gelap netral di bawah teks putih kepala berfoto. Sengaja bukan
+  /// hijau pekat: itu ciri app mitra.
+  static const Color redupFoto = Color(0xFF101E17);
+
   @override
   Widget build(BuildContext context) {
-    final media = context.c.onMedia;
-    return ClipRRect(
-      borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
-      child: DecoratedBox(
-        decoration: const BoxDecoration(color: SportagoColors.pekat),
-        child: Stack(
-          children: [
-            if (foto != null)
-              Positioned.fill(
-                child: Opacity(
-                  opacity: 0.45,
-                  child: Image.asset(
-                    foto!,
-                    fit: BoxFit.cover,
-                    excludeFromSemantics: true,
-                  ),
+    final c = context.c;
+    final berfoto = foto != null;
+    final ink = berfoto ? c.onMedia.ink : c.ink;
+    final inkSoft = berfoto ? c.onMedia.inkSoft : c.inkSoft;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: berfoto ? redupFoto : c.raised,
+        border: berfoto ? null : Border(bottom: BorderSide(color: c.line)),
+      ),
+      child: Stack(
+        children: [
+          if (berfoto)
+            Positioned.fill(
+              child: Opacity(
+                opacity: 0.55,
+                child: Image.asset(
+                  foto!,
+                  fit: BoxFit.cover,
+                  excludeFromSemantics: true,
                 ),
-              ),
-            if (foto != null)
-              Positioned.fill(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        SportagoColors.pekat.withValues(alpha: 0.35),
-                        SportagoColors.pekat.withValues(alpha: 0.95),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            Padding(
-              padding: EdgeInsets.only(
-                top: MediaQuery.of(context).padding.top + 14,
-                bottom: jarakBawah,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (atas != null)
-                                Padding(
-                                  padding: const EdgeInsets.only(bottom: 4),
-                                  child: Text(
-                                    atas!,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w600,
-                                      color: media.inkSoft,
-                                    ),
-                                  ),
-                                ),
-                              Text(
-                                judul,
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 26,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: -0.8,
-                                  height: 1.15,
-                                  color: media.ink,
-                                ),
-                              ),
-                              if (subjudul != null)
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 6),
-                                  child: Text(
-                                    subjudul!,
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 14,
-                                      height: 1.45,
-                                      color: media.inkSoft,
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
-                        ...aksi,
-                      ],
-                    ),
-                  ),
-                  if (bawah != null) ...[
-                    const SizedBox(height: 20),
-                    Padding(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: bawahTembus ? 0 : 20),
-                      child: bawah!,
-                    ),
-                  ],
-                ],
               ),
             ),
-          ],
-        ),
+          if (berfoto)
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      redupFoto.withValues(alpha: 0.25),
+                      redupFoto.withValues(alpha: 0.9),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          Padding(
+            padding: EdgeInsets.only(
+              top: MediaQuery.of(context).padding.top + 14,
+              bottom: jarakBawah,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (atas != null)
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 4),
+                                child: Text(
+                                  atas!,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: inkSoft,
+                                  ),
+                                ),
+                              ),
+                            Text(
+                              judul,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 26,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -0.8,
+                                height: 1.15,
+                                color: ink,
+                              ),
+                            ),
+                            if (subjudul != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 6),
+                                child: Text(
+                                  subjudul!,
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 14,
+                                    height: 1.45,
+                                    color: inkSoft,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      ...aksi,
+                    ],
+                  ),
+                ),
+                if (bawah != null) ...[
+                  const SizedBox(height: 16),
+                  Padding(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: bawahTembus ? 0 : 20),
+                    child: bawah!,
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
-/// Tombol ikon bulat untuk di atas bidang pekat.
-class TombolIkonPekat extends StatelessWidget {
-  const TombolIkonPekat({
+/// Tombol ikon bulat untuk kepala halaman. [diFoto] untuk tombol yang
+/// duduk di atas kepala berfoto (ikon putih di atas kaca gelap).
+class TombolIkonKepala extends StatelessWidget {
+  const TombolIkonKepala({
     super.key,
     required this.ikon,
     required this.onTap,
     this.lencana,
     this.tooltip,
+    this.diFoto = false,
   });
 
   final IconData ikon;
@@ -206,11 +218,13 @@ class TombolIkonPekat extends StatelessWidget {
   /// Angka kecil di pojok (notifikasi, pesan). Null atau 0 = tanpa.
   final int? lencana;
   final String? tooltip;
+  final bool diFoto;
 
   @override
   Widget build(BuildContext context) {
+    final c = context.c;
     final tombol = Material(
-      color: SportagoColors.pure.withValues(alpha: 0.1),
+      color: diFoto ? SportagoColors.pure.withValues(alpha: 0.14) : c.sunken,
       shape: const CircleBorder(),
       child: InkWell(
         customBorder: const CircleBorder(),
@@ -218,7 +232,11 @@ class TombolIkonPekat extends StatelessWidget {
         child: SizedBox(
           width: 44,
           height: 44,
-          child: Icon(ikon, color: SportagoColors.pure, size: 22),
+          child: Icon(
+            ikon,
+            color: diFoto ? SportagoColors.pure : c.ink,
+            size: 22,
+          ),
         ),
       ),
     );
@@ -236,9 +254,9 @@ class TombolIkonPekat extends StatelessWidget {
                       const BoxConstraints(minWidth: 18, minHeight: 18),
                   padding: const EdgeInsets.symmetric(horizontal: 5),
                   decoration: BoxDecoration(
-                    color: SportagoColors.volt,
+                    color: c.danger,
                     borderRadius: BorderRadius.circular(9),
-                    border: Border.all(color: SportagoColors.pekat, width: 2),
+                    border: Border.all(color: c.raised, width: 2),
                   ),
                   alignment: Alignment.center,
                   child: Text(
@@ -246,7 +264,7 @@ class TombolIkonPekat extends StatelessWidget {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 10,
                       fontWeight: FontWeight.w800,
-                      color: SportagoColors.pekat,
+                      color: SportagoColors.pure,
                     ),
                   ),
                 ),
@@ -274,7 +292,7 @@ class Kartu extends StatelessWidget {
   final EdgeInsetsGeometry padding;
   final VoidCallback? onTap;
 
-  /// Latar pengganti, misalnya [SportagoColors.pekat] untuk kartu sorot.
+  /// Latar pengganti, misalnya [SportagoColors.accentSoft] untuk kartu sorot.
   final Color? warna;
 
   @override

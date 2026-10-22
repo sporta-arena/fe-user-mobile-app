@@ -123,7 +123,7 @@ class _MyBookingPageState extends State<MyBookingPage>
         appBar: _bilahKembali,
         body: Column(
           children: [
-            const KepalaPekat(judul: 'Pesanan Saya'),
+            const KepalaTab(judul: 'Pesanan Saya'),
             Expanded(
               child: Center(
                 child: KeadaanKosong(
@@ -151,7 +151,7 @@ class _MyBookingPageState extends State<MyBookingPage>
       appBar: _bilahKembali,
       body: Column(
         children: [
-          KepalaPekat(
+          KepalaTab(
             judul: 'Pesanan Saya',
             subjudul: _isLoading
                 ? 'Memuat data booking…'
