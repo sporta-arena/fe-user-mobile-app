@@ -19,9 +19,7 @@ class AppTheme {
   /// fe-web. Hierarki dibawa bobot, bukan ganti-ganti keluarga huruf.
   static TextTheme _teks(TextTheme dasar, SportagoColors c) {
     final t = GoogleFonts.plusJakartaSansTextTheme(dasar);
-    return t
-        .apply(bodyColor: c.ink, displayColor: c.ink)
-        .copyWith(
+    return t.apply(bodyColor: c.ink, displayColor: c.ink).copyWith(
           displayLarge: t.displayLarge?.copyWith(
             fontWeight: FontWeight.w800,
             letterSpacing: -1.2,
@@ -86,38 +84,43 @@ class AppTheme {
     // Sudut: dibedakan menurut peran, bukan satu angka untuk semuanya.
     // Satu radius untuk segala benda adalah salah satu ciri tampilan
     // hasil generate.
-    const rKartu = 14.0;
-    const rKontrol = 10.0;
+    const rKartu = 20.0;
+    const rKontrol = 14.0;
 
     return dasar.copyWith(
       colorScheme: skema,
-      scaffoldBackgroundColor: c.surface,
+      // Latar sedikit abu supaya kartu putih terbaca sebagai benda,
+      // bukan sekadar garis tipis di atas putih.
+      scaffoldBackgroundColor: gelap ? c.surface : c.sunken,
       canvasColor: c.surface,
       dividerColor: c.line,
       splashFactory: InkSparkle.splashFactory,
       extensions: <ThemeExtension<dynamic>>[c],
       textTheme: _teks(dasar.textTheme, c),
 
+      // Bilah aplikasi hijau pekat, sama dengan pembuka dan kepala
+      // dasbor. Dulu permukaan putih polos, jadi tiap halaman turunan
+      // terasa seperti aplikasi lain begitu keluar dari dasbor.
       appBarTheme: AppBarTheme(
-        backgroundColor: c.surface,
-        foregroundColor: c.ink,
+        backgroundColor: SportagoColors.pekat,
+        foregroundColor: SportagoColors.pure,
+        iconTheme: const IconThemeData(color: SportagoColors.pure),
+        actionsIconTheme: const IconThemeData(color: SportagoColors.pure),
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
         titleTextStyle: GoogleFonts.plusJakartaSans(
           fontSize: 18,
-          fontWeight: FontWeight.w700,
-          letterSpacing: -0.3,
-          color: c.ink,
+          fontWeight: FontWeight.w800,
+          letterSpacing: -0.4,
+          color: SportagoColors.pure,
         ),
-        // Ikon bilah status ikut tema, jadi jam & baterai tidak hilang
-        // di atas latar terang.
-        systemOverlayStyle: SystemUiOverlayStyle(
+        // Bidangnya selalu gelap, jadi ikon bilah status selalu terang.
+        systemOverlayStyle: const SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
-          statusBarIconBrightness:
-              gelap ? Brightness.light : Brightness.dark,
-          statusBarBrightness: gelap ? Brightness.dark : Brightness.light,
+          statusBarIconBrightness: Brightness.light,
+          statusBarBrightness: Brightness.dark,
         ),
       ),
 
@@ -139,20 +142,22 @@ class AppTheme {
         filled: true,
         fillColor: c.raised,
         hintStyle: TextStyle(color: c.inkDim),
+        prefixIconColor: c.inkDim,
+        suffixIconColor: c.inkDim,
         labelStyle: TextStyle(color: c.inkSoft),
         contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(rKontrol),
           borderSide: BorderSide(color: c.lineStrong),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(rKontrol),
-          borderSide: BorderSide(color: c.lineStrong),
+          borderSide: BorderSide(color: c.line),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(rKontrol),
-          borderSide: BorderSide(color: c.accent, width: 2),
+          borderSide: BorderSide(color: c.accent, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(rKontrol),
@@ -166,8 +171,10 @@ class AppTheme {
 
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: c.accent,
-          foregroundColor: c.onAccent,
+          // Tombol utama hijau pekat, warna yang sama dengan bilah
+          // aplikasi; hijau lapangan tetap untuk tautan dan ikon.
+          backgroundColor: gelap ? c.accent : SportagoColors.pekat,
+          foregroundColor: gelap ? c.onAccent : SportagoColors.pure,
           // Tombol nonaktif harus tetap TERBACA. Sebelumnya teksnya
           // disetel ke warna permukaan (putih di tema terang) di atas
           // garis pucat, labelnya jadi hilang sama sekali.
@@ -218,8 +225,10 @@ class AppTheme {
 
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          backgroundColor: c.accent,
-          foregroundColor: c.onAccent,
+          // Tombol utama hijau pekat, warna yang sama dengan bilah
+          // aplikasi; hijau lapangan tetap untuk tautan dan ikon.
+          backgroundColor: gelap ? c.accent : SportagoColors.pekat,
+          foregroundColor: gelap ? c.onAccent : SportagoColors.pure,
           // Size.fromHeight() berarti lebar TAK TERHINGGA. Itu memaksa
           // tombol memenuhi lebar, dan meledak begitu tombolnya ada
           // di dalam Row atau wadah lain yang lebarnya tak dibatasi.
@@ -265,7 +274,7 @@ class AppTheme {
         backgroundColor: c.raised,
         surfaceTintColor: Colors.transparent,
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         ),
       ),
 
@@ -273,7 +282,7 @@ class AppTheme {
         backgroundColor: c.raised,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(rKartu),
+          borderRadius: BorderRadius.circular(24),
         ),
         titleTextStyle: GoogleFonts.plusJakartaSans(
           fontSize: 18,
@@ -288,9 +297,12 @@ class AppTheme {
       ),
 
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: c.inverse,
-        contentTextStyle: GoogleFonts.plusJakartaSans(color: c.onInverse),
-        actionTextColor: c.accent,
+        backgroundColor: SportagoColors.pekat,
+        contentTextStyle: GoogleFonts.plusJakartaSans(
+          color: SportagoColors.pure,
+          fontWeight: FontWeight.w500,
+        ),
+        actionTextColor: SportagoColors.volt,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(rKontrol),
@@ -308,7 +320,8 @@ class AppTheme {
 
       checkboxTheme: CheckboxThemeData(
         fillColor: WidgetStateProperty.resolveWith(
-          (s) => s.contains(WidgetState.selected) ? c.accent : Colors.transparent,
+          (s) =>
+              s.contains(WidgetState.selected) ? c.accent : Colors.transparent,
         ),
         checkColor: WidgetStateProperty.all(c.onAccent),
         side: BorderSide(color: c.lineStrong, width: 1.5),
@@ -347,8 +360,7 @@ class AppTheme {
     );
   }
 
-  static ThemeData get light =>
-      _bangun(SportagoColors.light, Brightness.light);
+  static ThemeData get light => _bangun(SportagoColors.light, Brightness.light);
 
   static ThemeData get dark => _bangun(SportagoColors.dark, Brightness.dark);
 }

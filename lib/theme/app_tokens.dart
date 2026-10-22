@@ -95,6 +95,15 @@ class SportagoColors extends ThemeExtension<SportagoColors> {
   /// (splash, konten di atas foto), bukan sebagai warna aksi umum.
   static const Color volt = Color(0xFFC5F400);
 
+  /// Hijau pekat merek: latar pembuka, kepala halaman, bilah aplikasi,
+  /// dan tombol utama. Tidak ikut tema karena bidang pekat memang selalu
+  /// gelap; di atasnya teks putih dan aksen [volt].
+  static const Color pekat = Color(0xFF0B2E1F);
+
+  /// Pekat yang sedikit lebih terang, untuk kartu atau tombol yang duduk
+  /// DI ATAS bidang pekat supaya tetap terbaca sebagai benda terpisah.
+  static const Color pekatNaik = Color(0xFF14452F);
+
   /// Palet KONTEN: untuk membedakan kategori, bukan untuk menyatakan
   /// keadaan. Kartu komunitas, kartu event, dan ikon judul bagian pakai
   /// ini.
