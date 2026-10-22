@@ -4,6 +4,7 @@ import '../models/banner_promo.dart';
 import '../services/promo_service.dart';
 import '../theme/app_tokens.dart';
 import '../widgets/lembar_promo.dart';
+import '../widgets/sportago_ui.dart';
 
 /// Semua promo yang sedang berjalan.
 ///
@@ -61,31 +62,12 @@ class _PromoPageState extends State<PromoPage> {
   }
 
   Widget _kosong() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.local_offer_outlined, size: 44, color: context.c.inkDim),
-            const SizedBox(height: 14),
-            Text(
-              'Belum ada promo berjalan',
-              style: TextStyle(
-                color: context.c.ink,
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              'Promo baru muncul di sini begitu ada yang dibuka. '
-              'Cek lagi nanti ya.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: context.c.inkSoft, fontSize: 13.5),
-            ),
-          ],
-        ),
+    return const Center(
+      child: KeadaanKosong(
+        ikon: Icons.local_offer_outlined,
+        judul: 'Belum ada promo berjalan',
+        pesan: 'Promo baru muncul di sini begitu ada yang dibuka. '
+            'Cek lagi nanti ya.',
       ),
     );
   }

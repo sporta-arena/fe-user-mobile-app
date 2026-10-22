@@ -9,10 +9,10 @@ import '../utils/tampilan_venue.dart';
 /// untuk venue apa pun, dan kartu tanpa foto jatuh ke kotak abu-abu yang
 /// sama untuk semuanya. Dua-duanya membuat venue kehilangan wajahnya.
 ///
-/// Penggantinya sengaja tidak menyamar sebagai foto: bidang warna dari
-/// palet kategori plus inisial venue membuat tiap venue terlihat berbeda,
-/// jujur bahwa fotonya belum ada, dan memberi mitra alasan mengunggah
-/// yang asli. Nama venue sudah dibacakan oleh judul kartunya, jadi bidang
+/// Penggantinya sengaja tidak menyamar sebagai foto: bidang hitam merek
+/// dengan inisial kuning, plus pita bawah dari palet kategori supaya
+/// venue yang bersebelahan tetap terbedakan. Jujur bahwa fotonya belum
+/// ada, dan memberi mitra alasan mengunggah yang asli. Nama venue sudah dibacakan oleh judul kartunya, jadi bidang
 /// ini disembunyikan dari pembaca layar.
 class SampulVenue extends StatelessWidget {
   final String nama;
@@ -50,28 +50,20 @@ class SampulVenue extends StatelessWidget {
     return ClipRRect(borderRadius: radius!, child: isi);
   }
 
-  /// Hitam merek atau putih, mana pun yang rasio kontrasnya lebih tinggi
-  /// di atas [latar]. Rumusnya WCAG 2.1: (L terang + 0,05) / (L gelap + 0,05).
-  static Color _tintaTerbaca(Color latar) {
-    const gelap = Color(0xFF101E17);
-    final l = latar.computeLuminance();
-    final rasioPutih = 1.05 / (l + 0.05);
-    final rasioGelap = (l + 0.05) / (gelap.computeLuminance() + 0.05);
-    return rasioPutih >= rasioGelap ? Colors.white : gelap;
-  }
-
   Widget _pengganti(BuildContext context) {
-    final warna = context.c.kategori(indeksWarnaVenue(nama));
-    // Palet kategori tema terang gelap-gelap, tema gelap terang-terang.
-    // Tinta putih yang dipatok akan jatuh ke 2,2:1 di atas amber tema
-    // gelap, jadi rasio kedua kandidat benar-benar dihitung dan yang
-    // menang yang dipakai.
-    final tinta = _tintaTerbaca(warna);
+    final pita = context.c.kategori(indeksWarnaVenue(nama));
+    // Hitam merek, bukan bidang warna kategori: kartu tanpa foto dulu
+    // tampil teal/tembaga yang terbaca sebagai sisa tema lama di antara
+    // kartu kuning-hitam. Warna kategori tinggal pita tipis di bawah.
+    final latar = SportagoColors.light.ink;
     return ExcludeSemantics(
       child: Container(
         width: lebar,
         height: tinggi,
-        color: warna,
+        decoration: BoxDecoration(
+          color: latar,
+          border: Border(bottom: BorderSide(color: pita, width: 4)),
+        ),
         alignment: Alignment.center,
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -79,15 +71,16 @@ class SampulVenue extends StatelessWidget {
             Icon(
               ikonOlahraga(olahraga),
               size: ukuranInisial * 0.8,
-              color: tinta.withValues(alpha: 0.7),
+              color: SportagoColors.kuning.withValues(alpha: 0.75),
             ),
             const SizedBox(height: 2),
             Text(
               inisialVenue(nama),
               style: TextStyle(
-                color: tinta,
+                color: SportagoColors.kuning,
                 fontSize: ukuranInisial,
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w900,
+                fontStyle: FontStyle.italic,
                 letterSpacing: -0.5,
               ),
             ),
