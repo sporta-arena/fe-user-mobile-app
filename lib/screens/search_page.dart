@@ -51,21 +51,18 @@ class _SearchPageState extends State<SearchPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: context.c.surface,
       appBar: AppBar(
-        systemOverlayStyle: gayaOverlay(context),
-        backgroundColor: context.c.surface,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: context.c.ink),
+          icon: Icon(Icons.arrow_back_ios),
           onPressed: () => Navigator.pop(context),
         ),
         title: Container(
           height: 40,
+          // Pil putih di atas bilah pekat, sama dengan kolom cari Beranda.
           decoration: BoxDecoration(
             color: context.c.raised,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: context.c.line),
+            borderRadius: BorderRadius.circular(999),
           ),
           child: TextField(
             controller: _searchController,
@@ -136,14 +133,14 @@ class _SearchPageState extends State<SearchPage> {
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: context.c.raised,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(color: context.c.line),
         ),
         child: Row(
           children: [
             // Venue Image
             ClipRRect(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(14),
               child: venue.coverImageUrl != null
                   ? Image.network(
                       venue.coverImageUrl!,

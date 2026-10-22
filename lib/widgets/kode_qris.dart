@@ -120,7 +120,7 @@ class _KodeQrisState extends State<KodeQris> {
           decoration: BoxDecoration(
             // QR wajib gelap di atas terang apa pun temanya.
             color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(color: context.c.line),
           ),
           child: QrImageView(

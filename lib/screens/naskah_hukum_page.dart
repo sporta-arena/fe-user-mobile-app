@@ -20,11 +20,7 @@ import '../theme/app_tokens.dart';
 /// orang dari layar pendaftaran di tengah jalan adalah cara paling
 /// mudah kehilangan mereka.
 class NaskahHukumPage extends StatefulWidget {
-  const NaskahHukumPage({
-    super.key,
-    required this.slug,
-    required this.judul,
-  });
+  const NaskahHukumPage({super.key, required this.slug, required this.judul});
 
   /// `partner-terms` atau `privacy`, sama dengan yang dipakai server.
   final String slug;
@@ -93,7 +89,6 @@ class _NaskahHukumPageState extends State<NaskahHukumPage> {
       backgroundColor: context.c.surface,
       appBar: AppBar(
         title: Text(widget.judul),
-        backgroundColor: context.c.surface,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
       ),

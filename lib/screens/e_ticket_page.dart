@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_tokens.dart';
+import '../widgets/sportago_ui.dart';
 import 'package:flutter/rendering.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -122,14 +124,18 @@ class _ETicketPageState extends State<ETicketPage> {
 
   @override
   Widget build(BuildContext context) {
+    final c = context.c;
+
+    // Tiket duduk di atas bidang hijau pekat, sama dengan pembuka dan
+    // kepala halaman. Kotak QR selalu putih murni (juga di mode gelap)
+    // supaya pemindai di pintu venue tetap membacanya.
     return Scaffold(
-      backgroundColor: context.c.surface,
+      backgroundColor: SportagoColors.pekat,
       appBar: AppBar(
-        backgroundColor: context.c.surface,
-        systemOverlayStyle: gayaOverlay(context),
-        elevation: 0,
+        backgroundColor: SportagoColors.pekat,
+        scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: context.c.ink),
+          icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () {
             Navigator.pushAndRemoveUntil(
               context,
@@ -140,29 +146,16 @@ class _ETicketPageState extends State<ETicketPage> {
             );
           },
         ),
-        title: Text(
-          "E-Tiket",
-          style: TextStyle(
-            color: context.c.ink,
-            fontWeight: FontWeight.w600,
-            fontSize: 18,
-          ),
-        ),
+        title: const Text("E-Tiket"),
         centerTitle: false,
         actions: [
           if (_isChatEnabled)
-            IconButton(
-              icon: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: context.c.ok.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(Icons.chat_outlined, color: context.c.ok, size: 20),
-              ),
-              onPressed: _openChat,
+            TombolIkonPekat(
+              ikon: Icons.chat_bubble_outline_rounded,
+              tooltip: 'Chat venue',
+              onTap: _openChat,
             ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 12),
         ],
       ),
       body: SafeArea(
@@ -170,7 +163,7 @@ class _ETicketPageState extends State<ETicketPage> {
           children: [
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
                 child: Column(
                   children: [
                     // Ticket Card - wrapped in RepaintBoundary for screenshot
@@ -179,63 +172,93 @@ class _ETicketPageState extends State<ETicketPage> {
                       child: Container(
                         width: double.infinity,
                         decoration: BoxDecoration(
-                          color: context.c.raised,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: context.c.line),
+                          color: c.raised,
+                          borderRadius: BorderRadius.circular(24),
                         ),
                         child: Column(
                           children: [
                             // Top Section - Venue Name & QR Code
                             Padding(
-                              padding: const EdgeInsets.all(24),
+                              padding: const EdgeInsets.fromLTRB(
+                                24,
+                                24,
+                                24,
+                                20,
+                              ),
                               child: Column(
                                 children: [
-                                  // Venue Name
                                   Text(
                                     widget.booking.field?.venue?.name ??
                                         "Venue",
-                                    style: TextStyle(
+                                    style: GoogleFonts.plusJakartaSans(
                                       fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                      color: context.c.ink,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: -0.4,
+                                      color: c.ink,
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
-                                  const SizedBox(height: 24),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    widget.booking.field?.name ?? "-",
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 13.5,
+                                      color: c.inkSoft,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: 20),
 
                                   // Real QR Code
                                   Container(
-                                    width: 180,
-                                    height: 180,
-                                    padding: const EdgeInsets.all(8),
+                                    width: 212,
+                                    height: 212,
+                                    padding: const EdgeInsets.all(14),
                                     decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(
-                                        color: Colors.grey.shade200,
-                                      ),
+                                      color: SportagoColors.pure,
+                                      borderRadius: BorderRadius.circular(20),
+                                      border: Border.all(color: c.line),
                                     ),
                                     child: QrImageView(
                                       data: widget.booking.bookingCode,
                                       version: QrVersions.auto,
-                                      size: 164,
-                                      backgroundColor: Colors.white,
+                                      size: 184,
+                                      backgroundColor: SportagoColors.pure,
                                       errorCorrectionLevel:
                                           QrErrorCorrectLevel.M,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 14),
+                                  Text(
+                                    widget.booking.bookingCode,
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: 1.5,
+                                      color: c.ink,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'Tunjukkan QR ini di meja venue',
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 12,
+                                      color: c.inkDim,
                                     ),
                                   ),
                                 ],
                               ),
                             ),
 
-                            // Simple Divider with Notches
+                            // Sobekan tiket: lekuk kiri-kanan berwarna latar
+                            // pekat, garis putus di tengah.
                             Row(
                               children: [
                                 Container(
                                   width: 14,
                                   height: 28,
-                                  decoration: BoxDecoration(
-                                    color: context.c.surface,
+                                  decoration: const BoxDecoration(
+                                    color: SportagoColors.pekat,
                                     borderRadius: BorderRadius.only(
                                       topRight: Radius.circular(14),
                                       bottomRight: Radius.circular(14),
@@ -243,16 +266,29 @@ class _ETicketPageState extends State<ETicketPage> {
                                   ),
                                 ),
                                 Expanded(
-                                  child: Container(
-                                    height: 1,
-                                    color: context.c.line,
+                                  child: LayoutBuilder(
+                                    builder: (context, box) {
+                                      final n = (box.maxWidth / 10).floor();
+                                      return Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: List.generate(
+                                          n,
+                                          (_) => Container(
+                                            width: 5,
+                                            height: 1.5,
+                                            color: c.lineStrong,
+                                          ),
+                                        ),
+                                      );
+                                    },
                                   ),
                                 ),
                                 Container(
                                   width: 14,
                                   height: 28,
-                                  decoration: BoxDecoration(
-                                    color: context.c.surface,
+                                  decoration: const BoxDecoration(
+                                    color: SportagoColors.pekat,
                                     borderRadius: BorderRadius.only(
                                       topLeft: Radius.circular(14),
                                       bottomLeft: Radius.circular(14),
@@ -264,21 +300,26 @@ class _ETicketPageState extends State<ETicketPage> {
 
                             // Bottom Section - Info Grid
                             Padding(
-                              padding: const EdgeInsets.all(24),
+                              padding: const EdgeInsets.fromLTRB(
+                                24,
+                                20,
+                                24,
+                                24,
+                              ),
                               child: Column(
                                 children: [
-                                  _buildInfoRow(
-                                    "Nama",
-                                    _userName.isNotEmpty ? _userName : "-",
-                                    "No. Telepon",
-                                    _userPhone,
-                                  ),
-                                  const SizedBox(height: 16),
                                   _buildInfoRow(
                                     "Tanggal",
                                     _formatDate(widget.booking.bookingDate),
                                     "Waktu",
                                     widget.booking.formattedTime,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  _buildInfoRow(
+                                    "Nama",
+                                    _userName.isNotEmpty ? _userName : "-",
+                                    "No. Telepon",
+                                    _userPhone,
                                   ),
                                   const SizedBox(height: 16),
                                   _buildInfoRow(
@@ -289,13 +330,15 @@ class _ETicketPageState extends State<ETicketPage> {
                                   ),
                                   const SizedBox(height: 16),
                                   _buildInfoRow(
-                                    "Kode Booking",
-                                    widget.booking.bookingCode,
+                                    "Status",
+                                    widget.booking.status == 'checked_in'
+                                        ? 'Sudah check-in'
+                                        : 'Terkonfirmasi',
                                     "Total",
                                     _formatCurrency(
                                       widget.booking.totalPrice.toInt(),
                                     ),
-                                    valueColor: context.c.accent,
+                                    valueColor: c.accent,
                                   ),
                                 ],
                               ),
@@ -307,72 +350,30 @@ class _ETicketPageState extends State<ETicketPage> {
 
                     const SizedBox(height: 16),
 
-                    // Action Buttons Row
-                    if (_isChatEnabled)
-                      Row(
-                        children: [
-                          // Chat Button
-                          Expanded(
-                            child: OutlinedButton.icon(
-                              onPressed: _openChat,
-                              icon: Icon(
-                                Icons.chat_outlined,
-                                color: context.c.ok,
-                                size: 18,
-                              ),
-                              label: Text(
-                                "Chat Venue",
-                                style: TextStyle(
-                                  color: context.c.ok,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 13,
-                                ),
-                              ),
-                              style: OutlinedButton.styleFrom(
-                                side: BorderSide(color: context.c.ok),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 12,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                backgroundColor: context.c.raised,
-                              ),
+                    if (_isChatEnabled) ...[
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: _openChat,
+                          icon: const Icon(
+                            Icons.chat_bubble_outline_rounded,
+                            size: 18,
+                          ),
+                          label: const Text("Chat Venue"),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: SportagoColors.pure,
+                            side: BorderSide(
+                              color: SportagoColors.pure.withValues(alpha: 0.2),
                             ),
                           ),
-                        ],
+                        ),
                       ),
+                      const SizedBox(height: 12),
+                    ],
 
-                    const SizedBox(height: 12),
-
-                    // Info Box
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: context.c.raised,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: context.c.line),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.info_outline,
-                            color: context.c.inkSoft,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              "Harap datang 10 menit sebelum jadwal",
-                              style: TextStyle(
-                                color: context.c.inkSoft,
-                                fontSize: 13,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                    _catatanPekat(
+                      ikon: Icons.schedule_rounded,
+                      judul: 'Harap datang 10 menit sebelum jadwal',
                     ),
 
                     // Keterangan pembatalan.
@@ -385,52 +386,14 @@ class _ETicketPageState extends State<ETicketPage> {
                     // perlu ditanyakan ke server dan tidak ada angka yang
                     // bisa berubah di belakang layar.
                     if (widget.booking.status == 'confirmed') ...[
-                      const SizedBox(height: 12),
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: context.c.raised,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: context.c.line),
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Icon(
-                              Icons.receipt_long_outlined,
-                              color: context.c.inkSoft,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Pembatalan',
-                                    style: TextStyle(
-                                      color: context.c.ink,
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    'Pemesanan yang sudah dibayar tidak dapat '
-                                    'dibatalkan, dan pembayarannya tidak '
-                                    'dikembalikan.',
-                                    style: TextStyle(
-                                      color: context.c.inkSoft,
-                                      fontSize: 12,
-                                      height: 1.4,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
+                      const SizedBox(height: 10),
+                      _catatanPekat(
+                        ikon: Icons.receipt_long_outlined,
+                        judul: 'Pembatalan',
+                        pesan:
+                            'Pemesanan yang sudah dibayar tidak dapat '
+                            'dibatalkan, dan pembayarannya tidak '
+                            'dikembalikan.',
                       ),
                     ],
                   ],
@@ -439,46 +402,92 @@ class _ETicketPageState extends State<ETicketPage> {
             ),
 
             // Bottom Button
-            Container(
-              width: double.infinity,
+            Padding(
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-              child: ElevatedButton.icon(
-                key: _tombolUnduhKey,
-                onPressed: _isDownloading ? null : _downloadTicket,
-                icon: _isDownloading
-                    ? SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: context.c.onAccent,
-                        ),
-                      )
-                    : Icon(Icons.download, color: context.c.onAccent),
-                label: Text(
-                  _isDownloading ? "Menyimpan..." : "Download Ticket",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: context.c.onAccent,
+              child: SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  key: _tombolUnduhKey,
+                  onPressed: _isDownloading ? null : _downloadTicket,
+                  icon: _isDownloading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: SportagoColors.pekat,
+                          ),
+                        )
+                      : const Icon(Icons.download_rounded),
+                  label: Text(
+                    _isDownloading ? "Menyimpan..." : "Download Ticket",
                   ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: context.c.accent,
-                  foregroundColor: context.c.onAccent,
-                  disabledBackgroundColor: context.c.accent.withValues(
-                    alpha: 0.7,
-                  ),
-                  elevation: 0,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(999),
+                  // Di atas bidang pekat tombol utama memakai volt, sama
+                  // dengan tombol di pembuka; tombol pekat akan tenggelam.
+                  style: FilledButton.styleFrom(
+                    backgroundColor: SportagoColors.volt,
+                    foregroundColor: SportagoColors.pekat,
+                    disabledBackgroundColor: SportagoColors.volt.withValues(
+                      alpha: 0.7,
+                    ),
+                    disabledForegroundColor: SportagoColors.pekat,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
                 ),
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  /// Catatan kecil di atas bidang pekat, di bawah tiket.
+  Widget _catatanPekat({
+    required IconData ikon,
+    required String judul,
+    String? pesan,
+  }) {
+    final media = context.c.onMedia;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: SportagoColors.pekatNaik,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(ikon, color: SportagoColors.volt, size: 20),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  judul,
+                  style: GoogleFonts.plusJakartaSans(
+                    color: media.ink,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                if (pesan != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    pesan,
+                    style: GoogleFonts.plusJakartaSans(
+                      color: media.inkSoft,
+                      fontSize: 12,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

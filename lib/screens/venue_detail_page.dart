@@ -1,11 +1,13 @@
 import 'dart:io';
 import '../utils/waktu_wib.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_map/flutter_map.dart';
 import '../theme/app_tokens.dart';
 import '../utils/tampilan_venue.dart';
 import '../widgets/sampul_venue.dart';
+import '../widgets/sportago_ui.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'booking_confirmation_page.dart';
@@ -36,6 +38,7 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
 
   // --- IMAGE CAROUSEL ---
   final PageController _imagePageController = PageController();
+
   /// Galeri lengkap: url DAN keterangannya.
   ///
   /// Dulu di sini cuma `List<String>` url — keterangan dari server
@@ -391,19 +394,12 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        backgroundColor: context.c.surface,
         appBar: AppBar(
-          systemOverlayStyle: gayaOverlay(context),
-          backgroundColor: context.c.surface,
-          elevation: 0,
           leading: IconButton(
-            icon: Icon(Icons.arrow_back_ios_new, color: context.c.ink),
+            icon: const Icon(Icons.arrow_back_ios_new),
             onPressed: () => Navigator.pop(context),
           ),
-          title: Text(
-            widget.venueName ?? 'Detail Venue',
-            style: TextStyle(color: context.c.ink),
-          ),
+          title: Text(widget.venueName ?? 'Detail Venue'),
         ),
         body: Center(child: CircularProgressIndicator(color: context.c.accent)),
       );
@@ -411,13 +407,9 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
 
     if (_errorMessage != null) {
       return Scaffold(
-        backgroundColor: context.c.surface,
         appBar: AppBar(
-          systemOverlayStyle: gayaOverlay(context),
-          backgroundColor: context.c.surface,
-          elevation: 0,
           leading: IconButton(
-            icon: Icon(Icons.arrow_back_ios_new, color: context.c.ink),
+            icon: const Icon(Icons.arrow_back_ios_new),
             onPressed: () => Navigator.pop(context),
           ),
         ),
@@ -431,10 +423,6 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: _loadVenueDetail,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: context.c.accent,
-                  foregroundColor: context.c.onAccent,
-                ),
                 child: const Text('Coba Lagi'),
               ),
             ],
@@ -444,76 +432,52 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
     }
 
     return Scaffold(
-      backgroundColor: context.c.surface,
       bottomNavigationBar: _buildBottomBar(),
+      // Bagian atas tidak diberi SafeArea: kepala foto pekat sendiri yang
+      // mengisi bawah bilah status, jadi tidak ada pita latar di atasnya.
       body: SafeArea(
+        top: false,
         child: CustomScrollView(
           slivers: [
             _buildImageCarousel(),
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.all(20.0),
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildHeaderInfo(),
-                    const SizedBox(height: 24),
-                    _buildDescriptionSection(),
-                    const SizedBox(height: 24),
-                    _buildLocationSection(),
-                    const SizedBox(height: 24),
+                    Kartu(child: _buildHeaderInfo()),
+                    const SizedBox(height: 12),
+                    Kartu(child: _buildDescriptionSection()),
+                    const SizedBox(height: 12),
+                    Kartu(child: _buildLocationSection()),
+                    const SizedBox(height: 12),
                     if (_galeri.isNotEmpty) ...[
-                      _buildGallerySection(),
-                      const SizedBox(height: 24),
-                    ],
-                    Divider(color: context.c.line),
-                    const SizedBox(height: 20),
-
-                    if (_fields.length > 1) ...[
-                      Text(
-                        "Pilih Lapangan",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: context.c.ink,
-                        ),
-                      ),
+                      Kartu(child: _buildGallerySection()),
                       const SizedBox(height: 12),
-                      _buildFieldSelector(),
-                      const SizedBox(height: 24),
                     ],
-
-                    Text(
-                      "Pilih Jadwal Main",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: context.c.ink,
+                    const JudulBagian('Pilih Jadwal Main'),
+                    Kartu(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (_fields.length > 1) ...[
+                            _labelBagian('Lapangan'),
+                            const SizedBox(height: 10),
+                            _buildFieldSelector(),
+                            const SizedBox(height: 20),
+                          ],
+                          _labelBagian('Tanggal'),
+                          const SizedBox(height: 10),
+                          _buildDatePicker(),
+                          const SizedBox(height: 20),
+                          _labelBagian('Jam Tersedia'),
+                          const SizedBox(height: 10),
+                          _buildTimeSlotGrid(),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 20),
-
-                    Text(
-                      "Tanggal",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: context.c.inkSoft,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    _buildDatePicker(),
-                    const SizedBox(height: 24),
-
-                    Text(
-                      "Jam Tersedia",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: context.c.inkSoft,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    _buildTimeSlotGrid(),
-                    const SizedBox(height: 100),
+                    const SizedBox(height: 80),
                   ],
                 ),
               ),
@@ -523,6 +487,39 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
       ),
     );
   }
+
+  /// Label kecil di dalam kartu jadwal (Lapangan, Tanggal, Jam).
+  Widget _labelBagian(String teks) {
+    return Text(
+      teks.toUpperCase(),
+      style: TextStyle(
+        fontSize: 11.5,
+        fontWeight: FontWeight.w800,
+        letterSpacing: 0.8,
+        color: context.c.inkDim,
+      ),
+    );
+  }
+
+  /// Judul di dalam kartu bagian, ukurannya sama dengan [JudulBagian].
+  Widget _judulKartu(String teks) {
+    return Text(
+      teks,
+      style: TextStyle(
+        fontSize: 17,
+        fontWeight: FontWeight.w800,
+        letterSpacing: -0.3,
+        color: context.c.ink,
+      ),
+    );
+  }
+
+  bool get _gelap => Theme.of(context).brightness == Brightness.dark;
+
+  /// Bidang pilihan aktif (lapangan, tanggal, jam): hijau pekat di
+  /// tema terang, aksen di tema gelap supaya tidak tenggelam.
+  Color get _pilihBg => _gelap ? context.c.accent : SportagoColors.pekat;
+  Color get _pilihFg => _gelap ? context.c.onAccent : SportagoColors.pure;
 
   /// Keterangan satu slide, aman kalau indeksnya sudah lewat batas
   /// (bisa terjadi sekejap saat galerinya berganti isi).
@@ -538,38 +535,34 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
         : [model.FotoVenue(url: _venue?.coverImageUrl ?? '', keterangan: '')];
 
     return SliverAppBar(
-      systemOverlayStyle: gayaOverlay(context),
-      expandedHeight: 280.0,
+      // Kepala foto selalu gelap, jadi ikon bilah status selalu terang.
+      systemOverlayStyle: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+      ),
+      expandedHeight: 300.0,
       floating: false,
       pinned: true,
-      backgroundColor: context.c.surface,
+      backgroundColor: SportagoColors.pekat,
+      foregroundColor: SportagoColors.pure,
       elevation: 0,
-      leading: Container(
-        margin: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: context.c.raised.withValues(alpha: 0.9),
-          shape: BoxShape.circle,
-        ),
-        child: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new, color: context.c.ink, size: 20),
-          onPressed: () => Navigator.pop(context),
+      leading: Center(
+        child: TombolIkonPekat(
+          ikon: Icons.arrow_back_ios_new_rounded,
+          tooltip: 'Kembali',
+          onTap: () => Navigator.pop(context),
         ),
       ),
       actions: [
-        Container(
-          margin: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: context.c.raised.withValues(alpha: 0.9),
-            shape: BoxShape.circle,
-          ),
-          child: IconButton(
-            icon: Icon(
-              _isFavorite ? Icons.favorite : Icons.favorite_border,
-              color: context.c.danger,
-            ),
-            onPressed: _toggleFavorite,
-          ),
+        TombolIkonPekat(
+          ikon: _isFavorite
+              ? Icons.favorite_rounded
+              : Icons.favorite_border_rounded,
+          tooltip: _isFavorite ? 'Hapus dari favorit' : 'Simpan ke favorit',
+          onTap: _toggleFavorite,
         ),
+        const SizedBox(width: 12),
       ],
       flexibleSpace: FlexibleSpaceBar(
         background: Stack(
@@ -593,6 +586,26 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                 );
               },
             ),
+            // Gradasi pekat di atas dan bawah foto: tombol dan keterangan
+            // tetap terbaca di foto seterang apa pun.
+            IgnorePointer(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    stops: const [0, 0.3, 0.6, 1],
+                    colors: [
+                      SportagoColors.pekat.withValues(alpha: 0.6),
+                      SportagoColors.pekat.withValues(alpha: 0),
+                      SportagoColors.pekat.withValues(alpha: 0),
+                      SportagoColors.pekat.withValues(alpha: 0.85),
+                    ],
+                  ),
+                ),
+                child: const SizedBox.expand(),
+              ),
+            ),
             // Keterangan foto: nama lapangannya.
             //
             // Server sudah lama mengirim `caption`, tapi tidak ada satu
@@ -608,13 +621,13 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                     vertical: 5,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.6),
-                    borderRadius: BorderRadius.circular(12),
+                    color: SportagoColors.pekat.withValues(alpha: 0.75),
+                    borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(
                     _keteranganFoto(images, _currentImageIndex),
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: SportagoColors.pure,
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                     ),
@@ -637,8 +650,8 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                       margin: const EdgeInsets.symmetric(horizontal: 3),
                       decoration: BoxDecoration(
                         color: _currentImageIndex == index
-                            ? context.c.accent
-                            : Colors.white.withValues(alpha: 0.5),
+                            ? SportagoColors.volt
+                            : SportagoColors.pure.withValues(alpha: 0.5),
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),
@@ -655,12 +668,16 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.6),
-                  borderRadius: BorderRadius.circular(12),
+                  color: SportagoColors.pekat.withValues(alpha: 0.75),
+                  borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
                   '${_currentImageIndex + 1}/${images.length}',
-                  style: const TextStyle(color: Colors.white, fontSize: 12),
+                  style: const TextStyle(
+                    color: SportagoColors.pure,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ),
@@ -677,8 +694,10 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
         Text(
           _venue?.name ?? 'Venue',
           style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.w900,
+            fontSize: 23,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.5,
+            height: 1.2,
             color: context.c.ink,
           ),
         ),
@@ -734,28 +753,14 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          "Tentang Arena",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-            color: context.c.ink,
-          ),
-        ),
+        _judulKartu('Tentang Arena'),
         const SizedBox(height: 8),
         Text(
           _venue?.description ?? 'Tidak ada deskripsi',
           style: TextStyle(color: context.c.inkSoft, height: 1.5),
         ),
         const SizedBox(height: 20),
-        Text(
-          "Fasilitas",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-            color: context.c.ink,
-          ),
-        ),
+        _judulKartu('Fasilitas'),
         const SizedBox(height: 12),
         Wrap(
           spacing: 10,
@@ -768,15 +773,15 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: context.c.accent.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(8),
+                    color: context.c.accentSoft,
+                    borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(
                     formatFasilitas(facility),
                     style: TextStyle(
                       color: context.c.accent,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
@@ -796,14 +801,7 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              "Lokasi Venue",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-                color: context.c.ink,
-              ),
-            ),
+            _judulKartu('Lokasi Venue'),
             if (hasLocation)
               TextButton.icon(
                 onPressed: _openMapsNavigation,
@@ -820,8 +818,8 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
             height: 180,
             width: double.infinity,
             decoration: BoxDecoration(
-              color: context.c.raised,
-              borderRadius: BorderRadius.circular(16),
+              color: context.c.sunken,
+              borderRadius: BorderRadius.circular(14),
               border: Border.all(color: context.c.line),
             ),
             child: Stack(
@@ -837,7 +835,7 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                 // halaman; tombol "Buka Maps" di bawah yang mengantar ke
                 // aplikasi peta sungguhan.
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(14),
                   child: SizedBox(
                     height: 180,
                     width: double.infinity,
@@ -888,30 +886,19 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
-                            color: context.c.accent,
-                            borderRadius: BorderRadius.circular(8),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.1),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
+                            color: _pilihBg,
+                            borderRadius: BorderRadius.circular(999),
                           ),
                           child: Text(
                             _venue?.name ?? '',
                             style: TextStyle(
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w700,
                               fontSize: 12,
-                              color: context.c.onAccent,
+                              color: _pilihFg,
                             ),
                           ),
                         ),
-                        Icon(
-                          Icons.location_on,
-                          color: context.c.accent,
-                          size: 40,
-                        ),
+                        Icon(Icons.location_on, color: _pilihBg, size: 40),
                         Container(
                           width: 8,
                           height: 8,
@@ -933,22 +920,18 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                       vertical: 8,
                     ),
                     decoration: BoxDecoration(
-                      color: context.c.accent,
-                      borderRadius: BorderRadius.circular(8),
+                      color: _pilihBg,
+                      borderRadius: BorderRadius.circular(999),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
-                          Icons.map_outlined,
-                          color: context.c.onAccent,
-                          size: 16,
-                        ),
+                        Icon(Icons.map_outlined, color: _pilihFg, size: 16),
                         SizedBox(width: 6),
                         Text(
                           'Buka Maps',
                           style: TextStyle(
-                            color: context.c.onAccent,
+                            color: _pilihFg,
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                           ),
@@ -969,7 +952,8 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                     ),
                     decoration: BoxDecoration(
                       color: context.c.raised.withValues(alpha: 0.95),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: context.c.line),
                     ),
                     child: Text(
                       [_venue?.address, formatKota(_venue?.city)]
@@ -999,19 +983,15 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              "Galeri Foto",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-                color: context.c.ink,
-              ),
-            ),
+            _judulKartu('Galeri Foto'),
             TextButton(
               onPressed: () => _showFullGallery(),
               child: Text(
                 'Lihat Semua',
-                style: TextStyle(color: context.c.accent),
+                style: TextStyle(
+                  color: context.c.accent,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
           ],
@@ -1029,9 +1009,9 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                 onTap: () => _showImageViewer(index),
                 child: Container(
                   width: 120,
-                  margin: const EdgeInsets.only(right: 12),
+                  margin: const EdgeInsets.only(right: 10),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(14),
                     border: Border.all(color: context.c.line),
                   ),
                   clipBehavior: Clip.antiAlias,
@@ -1056,13 +1036,13 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                               horizontal: 6,
                               vertical: 4,
                             ),
-                            color: Colors.black.withValues(alpha: 0.55),
+                            color: SportagoColors.pekat.withValues(alpha: 0.7),
                             child: Text(
                               keterangan,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
-                                color: Colors.white,
+                                color: SportagoColors.pure,
                                 fontSize: 10,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -1090,7 +1070,7 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
         height: MediaQuery.of(context).size.height * 0.8,
         decoration: BoxDecoration(
           color: context.c.raised,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         ),
         child: Column(
           children: [
@@ -1112,7 +1092,8 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                     'Galeri Foto',
                     style: TextStyle(
                       fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.3,
                       color: context.c.ink,
                     ),
                   ),
@@ -1165,13 +1146,15 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                                   horizontal: 8,
                                   vertical: 5,
                                 ),
-                                color: Colors.black.withValues(alpha: 0.55),
+                                color: SportagoColors.pekat.withValues(
+                                  alpha: 0.7,
+                                ),
                                 child: Text(
                                   _keteranganFoto(_galeri, index),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: const TextStyle(
-                                    color: Colors.white,
+                                    color: SportagoColors.pure,
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -1206,7 +1189,7 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
 
   Widget _buildFieldSelector() {
     return SizedBox(
-      height: 50,
+      height: 44,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: _fields.length,
@@ -1223,21 +1206,21 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
               _loadAvailableSlots();
             },
             child: Container(
-              margin: const EdgeInsets.only(right: 12),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              margin: const EdgeInsets.only(right: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
               decoration: BoxDecoration(
-                color: isSelected ? context.c.accent : context.c.raised,
-                borderRadius: BorderRadius.circular(12),
+                color: isSelected ? _pilihBg : context.c.raised,
+                borderRadius: BorderRadius.circular(999),
                 border: Border.all(
-                  color: isSelected ? context.c.accent : context.c.line,
+                  color: isSelected ? _pilihBg : context.c.line,
                 ),
               ),
               child: Center(
                 child: Text(
                   field.name,
                   style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: isSelected ? context.c.onAccent : context.c.ink,
+                    fontWeight: FontWeight.w700,
+                    color: isSelected ? _pilihFg : context.c.ink,
                   ),
                 ),
               ),
@@ -1252,7 +1235,7 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
     List<String> dayNames = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"];
 
     return SizedBox(
-      height: 85,
+      height: 76,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: 7,
@@ -1271,23 +1254,14 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
               _loadAvailableSlots();
             },
             child: Container(
-              width: 70,
-              margin: const EdgeInsets.only(right: 12),
+              width: 62,
+              margin: const EdgeInsets.only(right: 8),
               decoration: BoxDecoration(
-                color: isSelected ? context.c.accent : context.c.raised,
+                color: isSelected ? _pilihBg : context.c.raised,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: isSelected ? context.c.accent : context.c.line,
+                  color: isSelected ? _pilihBg : context.c.line,
                 ),
-                boxShadow: isSelected
-                    ? [
-                        BoxShadow(
-                          color: context.c.accent.withValues(alpha: 0.3),
-                          blurRadius: 8,
-                          offset: const Offset(0, 4),
-                        ),
-                      ]
-                    : [],
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -1295,9 +1269,10 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                   Text(
                     dayNames[date.weekday - 1],
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
                       color: isSelected
-                          ? context.c.onAccent
+                          ? (_gelap ? context.c.onAccent : SportagoColors.volt)
                           : context.c.inkSoft,
                     ),
                   ),
@@ -1306,8 +1281,8 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                     date.day.toString(),
                     style: TextStyle(
                       fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: isSelected ? context.c.onAccent : context.c.ink,
+                      fontWeight: FontWeight.w800,
+                      color: isSelected ? _pilihFg : context.c.ink,
                     ),
                   ),
                 ],
@@ -1391,12 +1366,16 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
             margin: const EdgeInsets.only(bottom: 12),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              color: context.c.accent.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(8),
+              color: context.c.accentSoft,
+              borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
               children: [
-                Icon(Icons.info_outline, size: 16, color: context.c.accent),
+                Icon(
+                  Icons.check_circle_rounded,
+                  size: 16,
+                  color: context.c.accent,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -1422,9 +1401,9 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
           physics: const NeverScrollableScrollPhysics(),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 4,
-            childAspectRatio: 1.8,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
+            childAspectRatio: 1.7,
+            crossAxisSpacing: 8,
+            mainAxisSpacing: 8,
           ),
           itemCount: _availableSlots.length,
           itemBuilder: (context, index) {
@@ -1439,13 +1418,13 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
             Color borderColor;
 
             if (!isAvailable) {
-              bgColor = context.c.raised;
-              textColor = context.c.inkSoft;
+              bgColor = context.c.sunken;
+              textColor = context.c.inkDim;
               borderColor = Colors.transparent;
             } else if (isSelected) {
-              bgColor = context.c.accent;
-              textColor = context.c.onAccent;
-              borderColor = context.c.accent;
+              bgColor = _pilihBg;
+              textColor = _pilihFg;
+              borderColor = _pilihBg;
             } else if (slot.diskonPersen > 0) {
               bgColor = context.c.danger.withValues(alpha: 0.06);
               textColor = context.c.ink;
@@ -1487,8 +1466,8 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                       style: TextStyle(
                         color: textColor,
                         fontWeight: isSelected
-                            ? FontWeight.bold
-                            : FontWeight.normal,
+                            ? FontWeight.w800
+                            : FontWeight.w600,
                         decoration: (!slot.available || isPassed)
                             ? TextDecoration.lineThrough
                             : null,
@@ -1506,18 +1485,14 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                           Icon(
                             Icons.bolt_rounded,
                             size: 11,
-                            color: isSelected
-                                ? context.c.onAccent
-                                : context.c.danger,
+                            color: isSelected ? _pilihFg : context.c.danger,
                           ),
                           Text(
                             '-${slot.diskonPersen}%',
                             style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w800,
-                              color: isSelected
-                                  ? context.c.onAccent
-                                  : context.c.danger,
+                              color: isSelected ? _pilihFg : context.c.danger,
                             ),
                           ),
                         ],
@@ -1569,9 +1544,9 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
     final totalPrice = _totalTerpilih;
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(20, 14, 16, 14),
       decoration: BoxDecoration(
-        color: context.c.surface,
+        color: context.c.raised,
         border: Border(top: BorderSide(color: context.c.line)),
       ),
       child: SafeArea(
@@ -1586,24 +1561,30 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                     _selectedTimeSlots.isEmpty
                         ? "Total Harga"
                         : "Total (${_selectedTimeSlots.length} jam)",
-                    style: TextStyle(color: context.c.inkSoft, fontSize: 12),
+                    style: TextStyle(
+                      color: context.c.inkSoft,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
+                  const SizedBox(height: 2),
                   Text(
                     _selectedTimeSlots.isEmpty
                         ? "Rp 0"
                         : "Rp ${_formatPrice(totalPrice.toDouble())}",
                     style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w900,
-                      color: context.c.accent,
+                      fontSize: 21,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.4,
+                      color: context.c.ink,
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: 20),
+            const SizedBox(width: 16),
             SizedBox(
-              height: 50,
+              height: 52,
               child: ElevatedButton(
                 onPressed: _selectedTimeSlots.isEmpty || _selectedField == null
                     ? null
@@ -1630,19 +1611,17 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                               // dari total di bilah bawah.
                               price: _selectedTimeSlots.isEmpty
                                   ? 0
-                                  : (_totalTerpilih /
-                                          _selectedTimeSlots.length)
-                                      .round(),
+                                  : (_totalTerpilih / _selectedTimeSlots.length)
+                                        .round(),
                             ),
                           ),
                         );
                       },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: context.c.accent,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(999),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 32),
+                  padding: const EdgeInsets.symmetric(horizontal: 28),
                   // disabledBackgroundColor sengaja TIDAK disetel di sini:
                   // nilai dari tema (bidang redup + teks redup) sudah benar.
                   // Sebelumnya di sini dipaksa putih sementara labelnya juga
@@ -1651,8 +1630,8 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                   elevation: 0,
                 ),
                 child: const Text(
-                  "BOOKING SEKARANG",
-                  style: TextStyle(fontWeight: FontWeight.w700),
+                  "Booking Sekarang",
+                  style: TextStyle(fontWeight: FontWeight.w800),
                 ),
               ),
             ),

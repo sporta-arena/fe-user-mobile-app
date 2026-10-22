@@ -196,9 +196,8 @@ class _LembarFilterState extends State<_LembarFilter> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () => Navigator.pop(context, _f),
+                  // Warna mengikuti tema: pekat di terang, hijau di gelap.
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: context.c.accent,
-                    foregroundColor: context.c.onAccent,
                     minimumSize: const Size(0, 50),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
@@ -216,6 +215,12 @@ class _LembarFilterState extends State<_LembarFilter> {
       ),
     );
   }
+
+  /// Pil terpilih hijau pekat, sama dengan pil filter app mitra. Di tema
+  /// gelap pekat tenggelam ke latar, jadi memakai aksen.
+  bool get _gelap => Theme.of(context).brightness == Brightness.dark;
+  Color get _latarAktif => _gelap ? context.c.accent : SportagoColors.pekat;
+  Color get _tintaAktif => _gelap ? context.c.onAccent : SportagoColors.pure;
 
   Widget _judul(String teks) => Padding(
     padding: const EdgeInsets.only(bottom: 10),
@@ -244,16 +249,14 @@ class _LembarFilterState extends State<_LembarFilter> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
             decoration: BoxDecoration(
-              color: aktif ? context.c.accent : context.c.surface,
+              color: aktif ? _latarAktif : context.c.raised,
               borderRadius: BorderRadius.circular(999),
-              border: Border.all(
-                color: aktif ? context.c.accent : context.c.line,
-              ),
+              border: Border.all(color: aktif ? _latarAktif : context.c.line),
             ),
             child: Text(
               p.$1,
               style: TextStyle(
-                color: aktif ? context.c.onAccent : context.c.ink,
+                color: aktif ? _tintaAktif : context.c.ink,
                 fontSize: 13.5,
                 fontWeight: FontWeight.w600,
               ),
@@ -276,16 +279,14 @@ class _LembarFilterState extends State<_LembarFilter> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
             decoration: BoxDecoration(
-              color: aktif ? context.c.accent : context.c.surface,
+              color: aktif ? _latarAktif : context.c.raised,
               borderRadius: BorderRadius.circular(999),
-              border: Border.all(
-                color: aktif ? context.c.accent : context.c.line,
-              ),
+              border: Border.all(color: aktif ? _latarAktif : context.c.line),
             ),
             child: Text(
               r.$1,
               style: TextStyle(
-                color: aktif ? context.c.onAccent : context.c.ink,
+                color: aktif ? _tintaAktif : context.c.ink,
                 fontSize: 13.5,
                 fontWeight: FontWeight.w600,
               ),

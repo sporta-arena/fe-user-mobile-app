@@ -37,16 +37,9 @@ class _AllCategoriesPageState extends State<AllCategoriesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: context.c.surface,
       appBar: AppBar(
-        systemOverlayStyle: gayaOverlay(context),
-        title: Text(
-          'Semua Kategori',
-          style: TextStyle(fontWeight: FontWeight.bold, color: context.c.ink),
-        ),
-        backgroundColor: context.c.surface,
+        title: const Text('Semua Kategori'),
         elevation: 0,
-        iconTheme: IconThemeData(color: context.c.ink),
         centerTitle: true,
       ),
       body: SafeArea(
@@ -168,13 +161,6 @@ class _AllCategoriesPageState extends State<AllCategoriesPage> {
           color: context.c.raised,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: context.c.line),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
-            ),
-          ],
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

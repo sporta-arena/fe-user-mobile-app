@@ -3,6 +3,7 @@ import 'dart:async';
 
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../models/flash_sale.dart';
 import '../services/flash_sale_service.dart';
 import '../services/auth_service.dart';
@@ -11,6 +12,7 @@ import '../services/realtime_chat.dart';
 import '../utils/tampilan_venue.dart';
 import '../theme/app_tokens.dart';
 import '../widgets/sampul_venue.dart';
+import '../widgets/sportago_ui.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 
@@ -86,12 +88,25 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: context.c.surface,
-      body: IndexedStack(index: _selectedIndex, children: _pages),
-      bottomNavigationBar: _BottomNav(
-        selectedIndex: _selectedIndex,
-        onTap: _pindahTab,
+    // Ketiga tab berkepala hijau pekat, jadi ikon bilah status selalu
+    // terang. Bilah navigasi sistem menyatu dengan bottom-nav.
+    final gelap = Theme.of(context).brightness == Brightness.dark;
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        systemNavigationBarColor: context.c.raised,
+        systemNavigationBarIconBrightness: gelap
+            ? Brightness.light
+            : Brightness.dark,
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+      ),
+      child: Scaffold(
+        body: IndexedStack(index: _selectedIndex, children: _pages),
+        bottomNavigationBar: _BottomNav(
+          selectedIndex: _selectedIndex,
+          onTap: _pindahTab,
+        ),
       ),
     );
   }
@@ -118,45 +133,67 @@ class _BottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    // Dulu: ikon dan label berganti hijau di bilah polos. Sekarang pil
+    // hijau pekat di belakang ikon aktif dengan ikon volt, bahasa yang
+    // sama dengan kepala halaman dan bottom-nav app mitra.
+    final gelap = Theme.of(context).brightness == Brightness.dark;
+    return DecoratedBox(
       decoration: BoxDecoration(
-        color: context.c.surface,
+        color: context.c.raised,
         border: Border(top: BorderSide(color: context.c.line)),
       ),
       child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        top: false,
+        child: SizedBox(
+          height: 68,
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: List.generate(_items.length, (i) {
               final sel = selectedIndex == i;
               final (active, inactive, label) = _items[i];
-              return GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () => onTap(i),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 6,
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        sel ? active : inactive,
-                        color: sel ? context.c.accent : context.c.inkSoft,
-                        size: 24,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        label,
-                        style: TextStyle(
-                          color: sel ? context.c.accent : context.c.inkSoft,
-                          fontSize: 10,
-                          fontWeight: sel ? FontWeight.w700 : FontWeight.w500,
+              return Expanded(
+                child: Semantics(
+                  selected: sel,
+                  button: true,
+                  label: label,
+                  excludeSemantics: true,
+                  child: InkResponse(
+                    onTap: () => onTap(i),
+                    radius: 36,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 220),
+                          curve: Curves.easeOutCubic,
+                          width: sel ? 56 : 40,
+                          height: 30,
+                          decoration: BoxDecoration(
+                            color: sel
+                                ? (gelap
+                                      ? context.c.accentSoft
+                                      : SportagoColors.pekat)
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          child: Icon(
+                            sel ? active : inactive,
+                            color: sel ? SportagoColors.volt : context.c.inkDim,
+                            size: 21,
+                          ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 4),
+                        Text(
+                          label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 11.5,
+                            fontWeight: sel ? FontWeight.w800 : FontWeight.w500,
+                            color: sel ? context.c.ink : context.c.inkDim,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );
@@ -498,7 +535,7 @@ class _DashboardContentState extends State<DashboardContent>
                   'Pilih Lokasi',
                   style: TextStyle(
                     fontSize: 18,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w800,
                     color: context.c.ink,
                   ),
                 ),
@@ -596,8 +633,11 @@ class _DashboardContentState extends State<DashboardContent>
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      bottom: false,
+    // Tanpa SafeArea atas: kepala pekat menjangkau sampai ke balik bilah
+    // status dan memberi bantalannya sendiri.
+    return MediaQuery.removePadding(
+      context: context,
+      removeBottom: true,
       child: Stack(
         children: [
           RefreshIndicator(
@@ -610,7 +650,7 @@ class _DashboardContentState extends State<DashboardContent>
               padding: const EdgeInsets.only(bottom: 100),
               children: [
                 _header(),
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
 
                 // Urusan pemakai sendiri didahulukan dari katalog.
                 // Yang balik lagi ke app ini datang buat lihat tiket
@@ -620,9 +660,7 @@ class _DashboardContentState extends State<DashboardContent>
                 // pemakai baru tetap melihat beranda yang ramping.
                 if (_belumBayar != null) _kartuBelumBayar(_belumBayar!),
 
-                _searchBar(),
-                const SizedBox(height: 20),
-
+                // Kolom cari pindah ke dalam kepala pekat.
                 _categories(),
 
                 const SizedBox(height: 24),
@@ -676,115 +714,94 @@ class _DashboardContentState extends State<DashboardContent>
   }
 
   // ---- Header -------------------------------------------------------------
-  Widget _header() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-      child: Row(
-        children: [
-          // Peta naik ke sini dari tombol mengambang di atas daftar.
-          // Di posisi lamanya ia menimpa kartu venue paling bawah —
-          // terlihat di dua tangkapan layar — dan satu-satunya cara
-          // membacanya adalah menggulir melewatinya.
-          _circleIcon(
-            Icons.map_outlined,
-            () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const MapPage()),
-            ),
-          ),
-          Expanded(
-            child: GestureDetector(
-              onTap: _bukaPemilihLokasi,
-              behavior: HitTestBehavior.opaque,
-              child: Column(
-                children: [
-                  Text(
-                    'Lokasi kamu',
-                    style: TextStyle(color: context.c.inkDim, fontSize: 12),
-                  ),
-                  const SizedBox(height: 2),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Flexible(
-                        child: Text(
-                          _address,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: context.c.ink,
-                            fontSize: 17,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                      Icon(
-                        Icons.keyboard_arrow_down_rounded,
-                        color: context.c.ink,
-                        size: 20,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-          _circleIcon(
-            Icons.notifications_none_rounded,
-            () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const NotificationsPage()),
-            ),
-            // Titiknya dari unread_count sungguhan, bukan dinyalakan
-            // terus. Lencana yang selalu menyala berhenti berarti apa
-            // pun setelah dua kali dilihat.
-            bertitik: _notifBelumDibaca > 0,
-          ),
-        ],
-      ),
-    );
+
+  /// Sapaan menurut jam WIB, bukan jam perangkat: pemakai di luar zona
+  /// WIB tetap disapa sesuai jam lapangan yang akan dia pesan.
+  String get _sapaan {
+    final jam = DateTime.now()
+        .toUtc()
+        .add(const Duration(hours: WaktuWib.offsetJam))
+        .hour;
+    final salam = jam < 11
+        ? 'Selamat pagi'
+        : jam < 15
+        ? 'Selamat siang'
+        : jam < 19
+        ? 'Selamat sore'
+        : 'Selamat malam';
+    final nama = AuthService.currentUser?.name.trim() ?? '';
+    if (nama.isEmpty) return salam;
+    return '$salam, ${nama.split(RegExp(r'\s+')).first}';
   }
 
-  Widget _circleIcon(
-    IconData icon,
-    VoidCallback onTap, {
-    bool bertitik = false,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Stack(
-        clipBehavior: Clip.none,
+  /// Kepala pekat berfoto, sama keluarganya dengan pembuka dan Beranda
+  /// app mitra. Lokasi dan kolom cari ikut masuk ke dalamnya, jadi hal
+  /// pertama yang terlihat adalah "di mana" dan "cari apa".
+  Widget _header() {
+    final media = context.c.onMedia;
+    return KepalaPekat(
+      foto: 'assets/images/hero/venue.jpg',
+      atas: _sapaan,
+      judul: 'Mau main di mana?',
+      jarakBawah: 22,
+      aksi: [
+        // Peta naik ke kepala dari tombol mengambang di atas daftar.
+        // Di posisi lamanya ia menimpa kartu venue paling bawah.
+        TombolIkonPekat(
+          ikon: Icons.map_outlined,
+          tooltip: 'Peta',
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const MapPage()),
+          ),
+        ),
+        // Angkanya dari unread_count sungguhan, bukan dinyalakan terus.
+        TombolIkonPekat(
+          ikon: Icons.notifications_none_rounded,
+          tooltip: 'Notifikasi',
+          lencana: _notifBelumDibaca,
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const NotificationsPage()),
+          ),
+        ),
+      ],
+      bawah: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            height: 44,
-            width: 44,
-            decoration: BoxDecoration(
-              color: context.c.raised,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.06),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
+          GestureDetector(
+            onTap: _bukaPemilihLokasi,
+            behavior: HitTestBehavior.opaque,
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.location_on_rounded,
+                  color: SportagoColors.volt,
+                  size: 18,
+                ),
+                const SizedBox(width: 6),
+                Flexible(
+                  child: Text(
+                    _address,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: media.ink,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  color: media.inkSoft,
+                  size: 20,
                 ),
               ],
             ),
-            child: Icon(icon, color: context.c.ink, size: 21),
           ),
-          if (bertitik)
-            Positioned(
-              right: 2,
-              top: 2,
-              child: Container(
-                height: 9,
-                width: 9,
-                decoration: BoxDecoration(
-                  color: context.c.danger,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: context.c.raised, width: 1.5),
-                ),
-              ),
-            ),
+          const SizedBox(height: 14),
+          _searchBar(),
         ],
       ),
     );
@@ -795,7 +812,7 @@ class _DashboardContentState extends State<DashboardContent>
   String _duaDigit(int n) => n.toString().padLeft(2, '0');
 
   /// Kartu aksi bergaya sama dengan kartu venue: putih, sudut 20,
-  /// bayangan lembut, dan ikon di dalam lingkaran berwarna seperti
+  /// garis tipis tanpa bayangan, dan ikon di dalam lingkaran berwarna seperti
   /// baris kategori. Dipakai tiga blok booking supaya beranda terbaca
   /// sebagai satu bahasa, bukan tempelan yang masing-masing beda.
   Widget _kartuAksi({
@@ -817,13 +834,6 @@ class _DashboardContentState extends State<DashboardContent>
             color: latar ?? context.c.raised,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: context.c.line),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 16,
-                offset: const Offset(0, 6),
-              ),
-            ],
           ),
           child: Row(
             children: [
@@ -937,7 +947,7 @@ class _DashboardContentState extends State<DashboardContent>
                 style: TextStyle(
                   color: context.c.ink,
                   fontSize: 18,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
               const SizedBox(width: 8),
@@ -1096,7 +1106,7 @@ class _DashboardContentState extends State<DashboardContent>
                   style: TextStyle(
                     color: context.c.ink,
                     fontSize: 18,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
                 Icon(Icons.chevron_right_rounded, color: context.c.inkSoft),
@@ -1138,7 +1148,7 @@ class _DashboardContentState extends State<DashboardContent>
       child: Container(
         width: 132,
         decoration: BoxDecoration(
-          color: context.c.accent,
+          color: SportagoColors.pekat,
           borderRadius: BorderRadius.circular(18),
         ),
         padding: const EdgeInsets.all(16),
@@ -1149,20 +1159,20 @@ class _DashboardContentState extends State<DashboardContent>
             Container(
               height: 40,
               width: 40,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.18),
+              decoration: const BoxDecoration(
+                color: SportagoColors.pekatNaik,
                 shape: BoxShape.circle,
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.percent_rounded,
-                color: context.c.onAccent,
+                color: SportagoColors.volt,
                 size: 22,
               ),
             ),
-            Text(
+            const Text(
               'Lihat Semua Promo',
               style: TextStyle(
-                color: context.c.onAccent,
+                color: SportagoColors.pure,
                 fontSize: 14,
                 fontWeight: FontWeight.w800,
                 height: 1.25,
@@ -1295,44 +1305,41 @@ class _DashboardContentState extends State<DashboardContent>
 
   // ---- Search -------------------------------------------------------------
   Widget _searchBar() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: GestureDetector(
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const SearchPage(keyword: "")),
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const SearchPage(keyword: "")),
+      ),
+      child: Container(
+        height: 52,
+        padding: const EdgeInsets.symmetric(horizontal: 18),
+        decoration: BoxDecoration(
+          // Pil putih tanpa garis tepi di atas bidang pekat: kolom cari
+          // yang dikelilingi garis terbaca seperti kotak isian yang
+          // sedang menunggu diketik, padahal ini tombol ke layar cari.
+          color: context.c.raised,
+          borderRadius: BorderRadius.circular(999),
         ),
-        child: Container(
-          height: 52,
-          padding: const EdgeInsets.symmetric(horizontal: 18),
-          decoration: BoxDecoration(
-            // Bidang masuk ke dalam tanpa garis tepi: kolom cari yang
-            // dikelilingi garis terbaca seperti kotak isian yang sedang
-            // menunggu diketik, padahal ini tombol menuju layar cari.
-            color: context.c.sunken,
-            borderRadius: BorderRadius.circular(999),
-          ),
-          child: Row(
-            children: [
-              Icon(Icons.search_rounded, color: context.c.inkDim, size: 22),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  "Cari arena, venue...",
-                  style: TextStyle(color: context.c.inkDim, fontSize: 15),
-                ),
+        child: Row(
+          children: [
+            Icon(Icons.search_rounded, color: context.c.inkDim, size: 22),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                "Cari arena, venue...",
+                style: TextStyle(color: context.c.inkDim, fontSize: 15),
               ),
-              Container(width: 1, height: 22, color: context.c.line),
-              const SizedBox(width: 14),
-              // Ikon saring membuka penyaring, bukan daftar kategori.
-              // Sebelumnya ia menuju halaman Semua Kategori — ikonnya
-              // menjanjikan satu hal dan melakukan hal lain.
-              GestureDetector(
-                onTap: _bukaFilter,
-                child: Icon(Icons.tune_rounded, color: context.c.ink, size: 21),
-              ),
-            ],
-          ),
+            ),
+            Container(width: 1, height: 22, color: context.c.line),
+            const SizedBox(width: 14),
+            // Ikon saring membuka penyaring, bukan daftar kategori.
+            // Sebelumnya ia menuju halaman Semua Kategori — ikonnya
+            // menjanjikan satu hal dan melakukan hal lain.
+            GestureDetector(
+              onTap: _bukaFilter,
+              child: Icon(Icons.tune_rounded, color: context.c.ink, size: 21),
+            ),
+          ],
         ),
       ),
     );
@@ -1449,7 +1456,7 @@ class _DashboardContentState extends State<DashboardContent>
                 style: TextStyle(
                   color: context.c.ink,
                   fontSize: 18,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
               GestureDetector(
@@ -1560,29 +1567,21 @@ class _VenueCard extends StatelessWidget {
         // dan tidak menyisakan ruang untuk harga; kartu lebar memuat
         // semuanya dan tetap menyisakan kartu berikutnya mengintip di
         // tepi, yang justru memberi tahu daftarnya bisa digeser.
+        // Sampul jadi kepala kartu selebar penuh, seperti kartu venue app
+        // mitra; garis tipis menggantikan bayangan.
         width: 296,
-        padding: const EdgeInsets.all(10),
+        clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
           color: context.c.raised,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: context.c.line),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
-            ),
-          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Stack(
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(14),
-                  child: _image(context),
-                ),
+                _image(context),
                 if (jarakMeter != null)
                   Positioned(
                     left: 10,
@@ -1643,109 +1642,121 @@ class _VenueCard extends StatelessWidget {
                   ),
               ],
             ),
-            const SizedBox(height: 12),
-            Text(
-              venue.name,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: context.c.ink,
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                Icon(
-                  Icons.location_on_outlined,
-                  color: context.c.inkDim,
-                  size: 14,
-                ),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Text(
-                    formatKota(venue.city),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    venue.name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: context.c.inkSoft, fontSize: 13),
+                    style: TextStyle(
+                      color: context.c.ink,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                // Jam buka di kiri, harga di kanan — sejajar dengan cara
-                // kartu properti menaruh keterangan kecil di kiri dan
-                // angka besar di kanan. Harga yang paling menentukan,
-                // jadi harga yang paling besar.
-                Expanded(
-                  child: Row(
+                  const SizedBox(height: 4),
+                  Row(
                     children: [
                       Icon(
-                        Icons.schedule_rounded,
+                        Icons.location_on_outlined,
                         color: context.c.inkDim,
                         size: 14,
                       ),
                       const SizedBox(width: 4),
-                      Flexible(
+                      Expanded(
                         child: Text(
-                          venue.formattedOpenHours,
+                          formatKota(venue.city),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             color: context.c.inkSoft,
-                            fontSize: 12,
+                            fontSize: 13,
                           ),
                         ),
                       ),
                     ],
                   ),
-                ),
-                if (venue.hargaMin != null)
+                  const SizedBox(height: 10),
                   Row(
-                    crossAxisAlignment: CrossAxisAlignment.baseline,
-                    textBaseline: TextBaseline.alphabetic,
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Text(
-                        _rupiah(venue.hargaMin!),
-                        style: TextStyle(
-                          color: context.c.ink,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w800,
+                      // Jam buka di kiri, harga di kanan — sejajar dengan cara
+                      // kartu properti menaruh keterangan kecil di kiri dan
+                      // angka besar di kanan. Harga yang paling menentukan,
+                      // jadi harga yang paling besar.
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.schedule_rounded,
+                              color: context.c.inkDim,
+                              size: 14,
+                            ),
+                            const SizedBox(width: 4),
+                            Flexible(
+                              child: Text(
+                                venue.formattedOpenHours,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: context.c.inkSoft,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      Text(
-                        ' /jam',
-                        style: TextStyle(
-                          color: context.c.inkSoft,
-                          fontSize: 12,
+                      if (venue.hargaMin != null)
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.baseline,
+                          textBaseline: TextBaseline.alphabetic,
+                          children: [
+                            Text(
+                              _rupiah(venue.hargaMin!),
+                              style: TextStyle(
+                                color: context.c.ink,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            Text(
+                              ' /jam',
+                              style: TextStyle(
+                                color: context.c.inkSoft,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
                     ],
                   ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                onPressed: () => _bukaJadwal(context),
-                style: FilledButton.styleFrom(
-                  backgroundColor: context.c.accent,
-                  foregroundColor: context.c.onAccent,
-                  minimumSize: const Size(0, 40),
-                  padding: EdgeInsets.zero,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton(
+                      onPressed: () => _bukaJadwal(context),
+                      // Warna mengikuti tema: pekat di terang, hijau di gelap.
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size(0, 40),
+                        padding: EdgeInsets.zero,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text(
+                        'Lihat Jadwal',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-                child: const Text(
-                  'Lihat Jadwal',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
-                ),
+                ],
               ),
             ),
           ],
@@ -1766,13 +1777,7 @@ class _VenueCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.c.raised,
         borderRadius: BorderRadius.circular(999),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.12),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border.all(color: context.c.line),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1802,7 +1807,7 @@ class _VenueCard extends StatelessWidget {
       olahraga: venue.fields?.isNotEmpty == true
           ? venue.fields!.first.type
           : null,
-      lebar: 276,
+      lebar: double.infinity,
       tinggi: 150,
       ukuranInisial: 30,
     );

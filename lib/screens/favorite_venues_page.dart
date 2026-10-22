@@ -41,17 +41,11 @@ class _FavoriteVenuesPageState extends State<FavoriteVenuesPage> {
     final daftar = _service.favorites;
 
     return Scaffold(
-      backgroundColor: context.c.surface,
       appBar: AppBar(
-        systemOverlayStyle: gayaOverlay(context),
-        backgroundColor: context.c.surface,
         elevation: 0,
-        title: Text(
-          'Venue Favorit',
-          style: TextStyle(color: context.c.ink, fontWeight: FontWeight.bold),
-        ),
+        title: const Text('Venue Favorit'),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new, color: context.c.ink, size: 20),
+          icon: Icon(Icons.arrow_back_ios_new, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -106,21 +100,21 @@ class _FavoriteVenuesPageState extends State<FavoriteVenuesPage> {
     return Container(
       decoration: BoxDecoration(
         color: context.c.raised,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: context.c.line),
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
           onTap: id == null
               ? null
               : () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => VenueDetailPage(venueId: id),
-                    ),
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => VenueDetailPage(venueId: id),
                   ),
+                ),
           child: Padding(
             padding: const EdgeInsets.all(12),
             child: Row(
@@ -154,13 +148,19 @@ class _FavoriteVenuesPageState extends State<FavoriteVenuesPage> {
                         v.address,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontSize: 12, color: context.c.inkSoft),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: context.c.inkSoft,
+                        ),
                       ),
                       const SizedBox(height: 6),
                       Row(
                         children: [
-                          Icon(ikonOlahraga(v.category),
-                              size: 14, color: context.c.inkSoft),
+                          Icon(
+                            ikonOlahraga(v.category),
+                            size: 14,
+                            color: context.c.inkSoft,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             // Rating cuma muncul kalau memang ada.
@@ -170,7 +170,9 @@ class _FavoriteVenuesPageState extends State<FavoriteVenuesPage> {
                                 ? 'Belum ada ulasan'
                                 : '${v.rating!.toStringAsFixed(1)} rating',
                             style: TextStyle(
-                                fontSize: 12, color: context.c.inkSoft),
+                              fontSize: 12,
+                              color: context.c.inkSoft,
+                            ),
                           ),
                         ],
                       ),

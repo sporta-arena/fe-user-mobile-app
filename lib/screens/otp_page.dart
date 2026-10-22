@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import '../widgets/sportago_mark.dart';
+import '../widgets/sportago_ui.dart';
 import '../theme/app_tokens.dart';
 import 'package:flutter/services.dart';
 import 'package:pinput/pinput.dart';
@@ -8,10 +8,7 @@ import 'home_page.dart';
 import 'reset_password_page.dart';
 import '../services/auth_service.dart';
 
-enum OtpType {
-  registration,
-  passwordReset,
-}
+enum OtpType { registration, passwordReset }
 
 class OtpVerificationPage extends StatefulWidget {
   final String email;
@@ -223,14 +220,17 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                     onPressed: () => Navigator.pop(context),
                     padding: EdgeInsets.zero,
                     alignment: Alignment.centerLeft,
-                    icon: Icon(Icons.arrow_back_rounded,
-                        color: context.c.ink, size: 26),
+                    icon: Icon(
+                      Icons.arrow_back_rounded,
+                      color: context.c.ink,
+                      size: 26,
+                    ),
                   ),
                   const SizedBox(height: 16),
                 ],
 
                 // Brand mark
-                const SportagoMark(height: 40),
+                const UbinIkon(Icons.mark_email_read_outlined, ukuran: 56),
                 const SizedBox(height: 24),
 
                 // Heading
@@ -247,7 +247,10 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                 Text(
                   subtitle,
                   style: TextStyle(
-                      fontSize: 15, color: context.c.inkSoft, height: 1.4),
+                    fontSize: 15,
+                    color: context.c.inkSoft,
+                    height: 1.4,
+                  ),
                 ),
                 const SizedBox(height: 6),
 
@@ -305,11 +308,8 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                   child: ElevatedButton(
                     onPressed: _isLoading ? null : _verifyOtp,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: context.c.accent,
-                      disabledBackgroundColor:
-                          context.c.accent.withValues(alpha: 0.5),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(999),
+                        borderRadius: BorderRadius.circular(16),
                       ),
                       elevation: 0,
                     ),
@@ -318,14 +318,15 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                             height: 22,
                             width: 22,
                             child: CircularProgressIndicator(
-                                color: context.c.onAccent, strokeWidth: 2),
+                              color: context.c.inkDim,
+                              strokeWidth: 2,
+                            ),
                           )
                         : Text(
                             "Verifikasi",
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
-                              color: context.c.onAccent,
                             ),
                           ),
                   ),
@@ -339,8 +340,10 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                     children: [
                       Text(
                         "Tidak menerima kode? ",
-                        style:
-                            TextStyle(color: context.c.inkSoft, fontSize: 14),
+                        style: TextStyle(
+                          color: context.c.inkSoft,
+                          fontSize: 14,
+                        ),
                       ),
                       if (_resendCountdown > 0)
                         Text(
@@ -359,8 +362,9 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                                   height: 16,
                                   width: 16,
                                   child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: context.c.accent),
+                                    strokeWidth: 2,
+                                    color: context.c.accent,
+                                  ),
                                 )
                               : Text(
                                   "Kirim Ulang",
@@ -380,8 +384,11 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.info_outline,
-                        size: 16, color: context.c.inkSoft),
+                    Icon(
+                      Icons.info_outline,
+                      size: 16,
+                      color: context.c.inkSoft,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(

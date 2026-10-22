@@ -188,9 +188,6 @@ class _ChatPageState extends State<ChatPage> {
       context: context,
       isScrollControlled: true,
       backgroundColor: context.c.raised,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
       builder: (sheetContext) => StatefulBuilder(
         builder: (sheetContext, aturSheet) => Padding(
           padding: EdgeInsets.only(
@@ -207,7 +204,7 @@ class _ChatPageState extends State<ChatPage> {
                 'Laporkan percakapan',
                 style: TextStyle(
                   fontSize: 18,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w800,
                   color: context.c.ink,
                 ),
               ),
@@ -243,9 +240,6 @@ class _ChatPageState extends State<ChatPage> {
                 decoration: InputDecoration(
                   hintText: 'Ceritakan singkat (opsional)',
                   hintStyle: TextStyle(color: context.c.inkDim),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
                 ),
               ),
               const SizedBox(height: 8),
@@ -277,7 +271,7 @@ class _ChatPageState extends State<ChatPage> {
                     backgroundColor: context.c.danger,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(14),
                     ),
                   ),
                   child: sedangKirim
@@ -286,13 +280,13 @@ class _ChatPageState extends State<ChatPage> {
                           height: 18,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color: Colors.white,
+                            color: SportagoColors.pure,
                           ),
                         )
                       : const Text(
                           'Kirim Laporan',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: SportagoColors.pure,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -309,9 +303,6 @@ class _ChatPageState extends State<ChatPage> {
     showModalBottomSheet(
       context: context,
       backgroundColor: context.c.raised,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
       builder: (context) => Container(
         padding: EdgeInsets.fromLTRB(24, 24, 24, 24 + context.sisipanBawah),
         child: Column(
@@ -319,15 +310,15 @@ class _ChatPageState extends State<ChatPage> {
           children: [
             CircleAvatar(
               radius: 40,
-              backgroundColor: context.c.accent.withValues(alpha: 0.15),
+              backgroundColor: SportagoColors.pekat,
               child: Text(
                 _partnerContact?.name.isNotEmpty == true
                     ? _partnerContact!.name[0].toUpperCase()
                     : 'P',
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: context.c.accent,
+                  fontWeight: FontWeight.w800,
+                  color: SportagoColors.volt,
                 ),
               ),
             ),
@@ -374,7 +365,7 @@ class _ChatPageState extends State<ChatPage> {
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   side: BorderSide(color: context.c.accent),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(999),
+                    borderRadius: BorderRadius.circular(14),
                   ),
                 ),
               ),
@@ -388,14 +379,13 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Bilah aplikasi pekat dari tema, jadi teksnya memakai warna
+    // "di atas media", bukan tinta halaman.
+    final media = context.c.onMedia;
     return Scaffold(
-      backgroundColor: context.c.surface,
       appBar: AppBar(
-        backgroundColor: context.c.surface,
-        elevation: 0,
-        systemOverlayStyle: gayaOverlay(context),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: context.c.ink),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => Navigator.pop(context),
         ),
         title: InkWell(
@@ -404,15 +394,15 @@ class _ChatPageState extends State<ChatPage> {
             children: [
               CircleAvatar(
                 radius: 18,
-                backgroundColor: context.c.accent.withValues(alpha: 0.15),
+                backgroundColor: SportagoColors.pekatNaik,
                 child: Text(
                   _partnerContact?.name.isNotEmpty == true
                       ? _partnerContact!.name[0].toUpperCase()
                       : 'P',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: context.c.accent,
+                    fontWeight: FontWeight.w800,
+                    color: SportagoColors.volt,
                   ),
                 ),
               ),
@@ -425,8 +415,8 @@ class _ChatPageState extends State<ChatPage> {
                       _partnerContact?.name ?? 'Partner',
                       style: TextStyle(
                         fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: context.c.ink,
+                        fontWeight: FontWeight.w800,
+                        color: media.ink,
                       ),
                     ),
                     // Baris kedua biasanya nama venue. Kalau sambungan
@@ -440,8 +430,8 @@ class _ChatPageState extends State<ChatPage> {
                       style: TextStyle(
                         fontSize: 12,
                         color: (_realtime != null && !_terhubung)
-                            ? context.c.warn
-                            : context.c.inkSoft,
+                            ? media.warn
+                            : media.inkSoft,
                       ),
                     ),
                   ],
@@ -452,16 +442,16 @@ class _ChatPageState extends State<ChatPage> {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.phone, color: context.c.ink),
+            icon: const Icon(Icons.phone_rounded),
             onPressed: _callPartner,
           ),
           IconButton(
-            icon: Icon(Icons.flag_outlined, color: context.c.ink),
+            icon: const Icon(Icons.flag_outlined),
             tooltip: 'Laporkan percakapan',
             onPressed: _laporkan,
           ),
           IconButton(
-            icon: Icon(Icons.more_vert, color: context.c.ink),
+            icon: const Icon(Icons.more_vert_rounded),
             onPressed: _showPartnerInfo,
           ),
         ],
@@ -474,29 +464,30 @@ class _ChatPageState extends State<ChatPage> {
         child: Column(
           children: [
             // Booking info banner
+            // Pita kode booking menyambung dari bilah pekat di atasnya.
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              color: context.c.raised,
+              color: SportagoColors.pekatNaik,
               child: Row(
                 children: [
-                  Icon(
-                    Icons.confirmation_number,
+                  const Icon(
+                    Icons.confirmation_number_rounded,
                     size: 16,
-                    color: context.c.accent,
+                    color: SportagoColors.volt,
                   ),
                   const SizedBox(width: 8),
                   Text(
                     'Booking: ${widget.booking.bookingCode}',
                     style: TextStyle(
                       fontSize: 13,
-                      color: context.c.accent,
-                      fontWeight: FontWeight.w500,
+                      color: media.ink,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                   const Spacer(),
                   Text(
                     widget.booking.formattedTime,
-                    style: TextStyle(fontSize: 12, color: context.c.inkSoft),
+                    style: TextStyle(fontSize: 12, color: media.inkSoft),
                   ),
                 ],
               ),
@@ -544,8 +535,8 @@ class _ChatPageState extends State<ChatPage> {
                   bottom: MediaQuery.of(context).padding.bottom + 12,
                 ),
                 decoration: BoxDecoration(
-                  color: context.c.raised,
-                  border: Border(top: BorderSide(color: context.c.line)),
+                  color: context.c.sunken,
+                  border: Border(top: BorderSide(color: context.c.lineStrong)),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -556,9 +547,14 @@ class _ChatPageState extends State<ChatPage> {
                       color: context.c.inkSoft,
                     ),
                     const SizedBox(width: 8),
-                    Text(
-                      "Pemesanan sudah selesai, chat ditutup",
-                      style: TextStyle(color: context.c.inkSoft, fontSize: 13),
+                    Flexible(
+                      child: Text(
+                        "Pemesanan sudah selesai, chat ditutup",
+                        style: TextStyle(
+                          color: context.c.inkSoft,
+                          fontSize: 13,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -572,7 +568,7 @@ class _ChatPageState extends State<ChatPage> {
                   bottom: MediaQuery.of(context).padding.bottom + 12,
                 ),
                 decoration: BoxDecoration(
-                  color: context.c.surface,
+                  color: context.c.raised,
                   border: Border(top: BorderSide(color: context.c.line)),
                 ),
                 child: Row(
@@ -580,9 +576,8 @@ class _ChatPageState extends State<ChatPage> {
                     Expanded(
                       child: Container(
                         decoration: BoxDecoration(
-                          color: context.c.raised,
+                          color: context.c.sunken,
                           borderRadius: BorderRadius.circular(24),
-                          border: Border.all(color: context.c.line),
                         ),
                         child: TextField(
                           controller: _messageController,
@@ -590,7 +585,12 @@ class _ChatPageState extends State<ChatPage> {
                           decoration: InputDecoration(
                             hintText: 'Ketik pesan...',
                             hintStyle: TextStyle(color: context.c.inkSoft),
+                            // Garis tema dimatikan: bidangnya sudah
+                            // berbentuk pil dari wadah di luarnya.
                             border: InputBorder.none,
+                            enabledBorder: InputBorder.none,
+                            focusedBorder: InputBorder.none,
+                            filled: false,
                             contentPadding: EdgeInsets.symmetric(
                               horizontal: 20,
                               vertical: 12,
@@ -603,23 +603,28 @@ class _ChatPageState extends State<ChatPage> {
                       ),
                     ),
                     const SizedBox(width: 8),
+                    // Tombol kirim pekat ber-ikon volt, seperti tombol
+                    // utama di halaman lain.
                     Container(
-                      decoration: BoxDecoration(
-                        color: context.c.accent,
+                      decoration: const BoxDecoration(
+                        color: SportagoColors.pekat,
                         shape: BoxShape.circle,
                       ),
                       child: IconButton(
                         onPressed: _isSending ? null : _sendMessage,
                         icon: _isSending
-                            ? SizedBox(
+                            ? const SizedBox(
                                 width: 20,
                                 height: 20,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  color: context.c.onAccent,
+                                  color: SportagoColors.volt,
                                 ),
                               )
-                            : Icon(Icons.send, color: context.c.onAccent),
+                            : const Icon(
+                                Icons.send_rounded,
+                                color: SportagoColors.volt,
+                              ),
                       ),
                     ),
                   ],
@@ -654,9 +659,21 @@ class _ChatPageState extends State<ChatPage> {
           Expanded(child: Divider(color: context.c.line)),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: Text(
-              dateText,
-              style: TextStyle(fontSize: 12, color: context.c.inkSoft),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: context.c.raised,
+                borderRadius: BorderRadius.circular(999),
+                border: Border.all(color: context.c.line),
+              ),
+              child: Text(
+                dateText,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: context.c.inkSoft,
+                ),
+              ),
             ),
           ),
           Expanded(child: Divider(color: context.c.line)),
@@ -675,15 +692,15 @@ class _ChatPageState extends State<ChatPage> {
           left: isUser ? 60 : 0,
           right: isUser ? 0 : 60,
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: isUser ? context.c.accent : context.c.raised,
+          color: isUser ? SportagoColors.pekat : context.c.raised,
           border: isUser ? null : Border.all(color: context.c.line),
           borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(16),
-            topRight: const Radius.circular(16),
-            bottomLeft: Radius.circular(isUser ? 16 : 4),
-            bottomRight: Radius.circular(isUser ? 4 : 16),
+            topLeft: const Radius.circular(18),
+            topRight: const Radius.circular(18),
+            bottomLeft: Radius.circular(isUser ? 18 : 4),
+            bottomRight: Radius.circular(isUser ? 4 : 18),
           ),
         ),
         child: Column(
@@ -693,7 +710,8 @@ class _ChatPageState extends State<ChatPage> {
               message.content,
               style: TextStyle(
                 fontSize: 14,
-                color: isUser ? context.c.onAccent : context.c.ink,
+                height: 1.4,
+                color: isUser ? SportagoColors.pure : context.c.ink,
               ),
             ),
             const SizedBox(height: 4),
@@ -705,8 +723,8 @@ class _ChatPageState extends State<ChatPage> {
                   style: TextStyle(
                     fontSize: 11,
                     color: isUser
-                        ? context.c.onAccent.withValues(alpha: 0.6)
-                        : context.c.inkSoft,
+                        ? context.c.onMedia.inkSoft
+                        : context.c.inkDim,
                   ),
                 ),
                 if (isUser) ...[
@@ -718,9 +736,10 @@ class _ChatPageState extends State<ChatPage> {
                         ? Icons.done_all
                         : Icons.done,
                     size: 14,
+                    // Sudah dibaca: volt, supaya beda dari terkirim.
                     color: message.status == MessageStatus.read
-                        ? context.c.onAccent
-                        : context.c.onAccent.withValues(alpha: 0.6),
+                        ? SportagoColors.volt
+                        : context.c.onMedia.inkSoft,
                   ),
                 ],
               ],

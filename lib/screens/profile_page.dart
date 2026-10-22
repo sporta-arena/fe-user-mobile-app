@@ -2,6 +2,7 @@ import '../services/versi_app.dart';
 import 'package:flutter/material.dart';
 import '../utils/tanpa_spasi.dart';
 import '../theme/app_tokens.dart';
+import '../widgets/sportago_ui.dart';
 import 'package:flutter/services.dart';
 import 'favorite_venues_page.dart';
 import 'edit_profile_page.dart';
@@ -131,14 +132,20 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: context.c.surface,
+      backgroundColor: context.c.sunken,
       body: SafeArea(
         // Bilah navigasi menumpuk di atas isi layar sejak
-        // targetSdk 35. top:false karena AppBar sudah
+        // targetSdk 35. top:false karena kepala pekat sudah
         // menyisihkan bagian atasnya sendiri.
         top: false,
         child: AnnotatedRegion<SystemUiOverlayStyle>(
-          value: gayaOverlay(context),
+          // Kepala selalu hijau pekat, jadi ikon bilah status selalu
+          // terang, di tema mana pun.
+          value: const SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent,
+            statusBarIconBrightness: Brightness.light,
+            statusBarBrightness: Brightness.dark,
+          ),
           child: RefreshIndicator(
             onRefresh: _loadUserStats,
             color: context.c.accent,
@@ -147,34 +154,23 @@ class _ProfilePageState extends State<ProfilePage> {
               physics: const AlwaysScrollableScrollPhysics(),
               child: Column(
                 children: [
-                  // Header Profile
                   _buildProfileHeader(),
-
-                  const SizedBox(height: 40), // Extra space for translated card
-                  // Stats Cards
-                  _buildStatsSection(),
-
-                  const SizedBox(height: 16),
-
-                  // Divider
-                  _buildSectionDivider(),
-
-                  const SizedBox(height: 16),
-
-                  // Menu Options
-                  _buildMenuSection(),
-
-                  const SizedBox(height: 16),
-
-                  // Divider
-                  _buildSectionDivider(),
-
-                  const SizedBox(height: 16),
-
-                  // Logout Button
-                  _buildLogoutSection(),
-
-                  const SizedBox(height: 32),
+                  // Kartu angka menumpang ke tepi bawah kepala.
+                  Transform.translate(
+                    offset: const Offset(0, -36),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Column(
+                        children: [
+                          _buildStatsSection(),
+                          const SizedBox(height: 8),
+                          _buildMenuSection(),
+                          const SizedBox(height: 20),
+                          _buildLogoutSection(),
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -184,234 +180,178 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  // Profile Header with new design
+  String get _inisial {
+    final bagian = _userName.trim().split(RegExp(r'\s+'));
+    if (bagian.isEmpty || bagian.first.isEmpty) return 'S';
+    if (bagian.length >= 2) {
+      return '${bagian[0][0]}${bagian[1][0]}'.toUpperCase();
+    }
+    return bagian.first[0].toUpperCase();
+  }
+
+  // Kepala hijau pekat: avatar inisial, nama, kontak, dan "Member sejak".
   Widget _buildProfileHeader() {
-    return Stack(
-      children: [
-        // Background
-        Container(
-          width: double.infinity,
-          height: 280,
-          decoration: BoxDecoration(color: context.c.surface),
-        ),
-        // Content
-        SafeArea(
-          child: Column(
+    final media = context.c.onMedia;
+    return KepalaPekat(
+      judul: "Profil",
+      jarakBawah: 60,
+      bawah: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
-              // Title
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                child: Row(
-                  children: [
-                    Text(
-                      "Profil",
-                      style: TextStyle(
-                        color: context.c.ink,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
+              Container(
+                width: 68,
+                height: 68,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: SportagoColors.pekatNaik,
+                  border: Border.all(color: SportagoColors.volt, width: 2),
+                ),
+                child: Text(
+                  _inisial,
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w800,
+                    color: SportagoColors.volt,
+                  ),
                 ),
               ),
-              // Profile Card
-              Transform.translate(
-                offset: const Offset(0, 20),
-                child: Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 20),
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: context.c.raised,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: context.c.line),
-                  ),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          // Profile Picture
-                          Container(
-                            width: 72,
-                            height: 72,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: context.c.accent.withValues(alpha: 0.15),
-                              border: Border.all(
-                                color: context.c.accent,
-                                width: 2,
-                              ),
-                            ),
-                            child: Icon(
-                              Icons.person,
-                              size: 36,
-                              color: context.c.accent,
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          // User Info
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  _userName,
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: context.c.ink,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  _userEmail,
-                                  style: TextStyle(
-                                    color: context.c.inkSoft,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                                if (_userPhone != "-") ...[
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    _userPhone,
-                                    style: TextStyle(
-                                      color: context.c.inkSoft,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
-                        ],
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _userName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.3,
+                        color: media.ink,
                       ),
-                      const SizedBox(height: 16),
-                      // "Member sejak" saja, selebar kartu.
-                      //
-                      // Di sebelahnya dulu ada lencana "Level: Silver".
-                      // Sportago tidak punya sistem tingkatan member sama
-                      // sekali — tidak di server, tidak di database, dan
-                      // tidak ada satu pun keuntungan yang melekat
-                      // padanya. Angkanya dikarang di app dari ambang
-                      // belanja yang ditulis di sini (500rb Silver, 2jt
-                      // Gold, 5jt Platinum). Pemesan yang melihat dirinya
-                      // "Silver" wajar bertanya dapat apa, dan tidak ada
-                      // jawabannya.
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
-                        decoration: BoxDecoration(
-                          color: context.c.surface,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: context.c.line),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.calendar_today_outlined,
-                              size: 16,
-                              color: context.c.inkSoft,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              "Member sejak",
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: context.c.inkSoft,
-                              ),
-                            ),
-                            const Spacer(),
-                            Text(
-                              _memberSince,
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: context.c.ink,
-                              ),
-                            ),
-                          ],
-                        ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _userEmail,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(color: media.inkSoft, fontSize: 13),
+                    ),
+                    if (_userPhone != "-") ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        _userPhone,
+                        style: TextStyle(color: media.inkSoft, fontSize: 12),
                       ),
                     ],
-                  ),
+                  ],
                 ),
               ),
             ],
           ),
-        ),
-      ],
+          const SizedBox(height: 16),
+          // "Member sejak" saja, selebar kepala.
+          //
+          // Di sebelahnya dulu ada lencana "Level: Silver".
+          // Sportago tidak punya sistem tingkatan member sama
+          // sekali — tidak di server, tidak di database, dan
+          // tidak ada satu pun keuntungan yang melekat
+          // padanya. Angkanya dikarang di app dari ambang
+          // belanja yang ditulis di sini (500rb Silver, 2jt
+          // Gold, 5jt Platinum). Pemesan yang melihat dirinya
+          // "Silver" wajar bertanya dapat apa, dan tidak ada
+          // jawabannya.
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: SportagoColors.pekatNaik,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.calendar_today_outlined,
+                  size: 15,
+                  color: SportagoColors.volt,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  "Member sejak",
+                  style: TextStyle(fontSize: 12, color: media.inkSoft),
+                ),
+                const Spacer(),
+                Text(
+                  _memberSince,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: media.ink,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  // Stats Section dengan 4 kartu
+  // Ringkasan riwayat memesan dalam satu kartu.
   Widget _buildStatsSection() {
     if (_isLoadingStats) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Container(
-          padding: const EdgeInsets.all(32),
-          decoration: BoxDecoration(
-            color: context.c.raised,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: context.c.line),
-          ),
-          child: Center(
-            child: CircularProgressIndicator(
-              color: context.c.accent,
-              strokeWidth: 2,
-            ),
+      return Kartu(
+        padding: const EdgeInsets.all(28),
+        child: Center(
+          child: CircularProgressIndicator(
+            color: context.c.accent,
+            strokeWidth: 2,
           ),
         ),
       );
     }
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      // Satu kartu berisi tiga angka, bukan dua kartu berdampingan lalu
-      // satu kartu yatim selebar layar di bawahnya. Ketiganya bercerita
-      // tentang hal yang sama — riwayat memesan — jadi tidak ada alasan
-      // yang satu dipisah sendirian.
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-        decoration: BoxDecoration(
-          color: context.c.raised,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: context.c.line),
-        ),
-        child: IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(
-                child: _kolomStat(
-                  icon: Icons.confirmation_number_outlined,
-                  title: "Booking",
-                  value: "$_totalBookings",
-                  color: context.c.accent,
-                ),
+    // Satu kartu berisi tiga angka, bukan dua kartu berdampingan lalu
+    // satu kartu yatim selebar layar di bawahnya. Ketiganya bercerita
+    // tentang hal yang sama — riwayat memesan — jadi tidak ada alasan
+    // yang satu dipisah sendirian.
+    return Kartu(
+      padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 8),
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: _kolomStat(
+                icon: Icons.confirmation_number_outlined,
+                title: "Booking",
+                value: "$_totalBookings",
+                nada: Nada.aksen,
               ),
-              _garis(),
-              Expanded(
-                child: _kolomStat(
-                  icon: Icons.check_circle_outline,
-                  title: "Selesai",
-                  value: "$_completedBookings",
-                  color: context.c.ok,
-                ),
+            ),
+            _garis(),
+            Expanded(
+              child: _kolomStat(
+                icon: Icons.check_circle_outline,
+                title: "Selesai",
+                value: "$_completedBookings",
+                nada: Nada.ok,
               ),
-              _garis(),
-              Expanded(
-                child: _kolomStat(
-                  icon: Icons.account_balance_wallet_outlined,
-                  title: "Total Belanja",
-                  value: _formatCurrency(_totalSpent),
-                  color: context.c.accent,
-                  kecil: true,
-                ),
+            ),
+            _garis(),
+            Expanded(
+              child: _kolomStat(
+                icon: Icons.account_balance_wallet_outlined,
+                title: "Total Belanja",
+                value: _formatCurrency(_totalSpent),
+                nada: Nada.aksen,
+                kecil: true,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -423,7 +363,7 @@ class _ProfilePageState extends State<ProfilePage> {
     required IconData icon,
     required String title,
     required String value,
-    required Color color,
+    required Nada nada,
     bool kecil = false,
   }) {
     return Padding(
@@ -431,14 +371,7 @@ class _ProfilePageState extends State<ProfilePage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, color: color, size: 18),
-          ),
+          UbinIkon(icon, nada: nada, ukuran: 36),
           const SizedBox(height: 8),
           FittedBox(
             fit: BoxFit.scaleDown,
@@ -447,7 +380,8 @@ class _ProfilePageState extends State<ProfilePage> {
               maxLines: 1,
               style: TextStyle(
                 fontSize: kecil ? 14 : 20,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.4,
                 color: context.c.ink,
               ),
             ),
@@ -467,165 +401,133 @@ class _ProfilePageState extends State<ProfilePage> {
 
   // Menu Section
   Widget _buildMenuSection() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Akun Section
-          _buildSectionTitle("Akun"),
-          Container(
-            decoration: BoxDecoration(
-              color: context.c.raised,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: context.c.line),
-            ),
-            child: Column(
-              children: [
-                _buildMenuItem(
-                  icon: Icons.person_outline,
-                  title: "Ubah Profil",
-                  subtitle: "Update informasi personal",
-                  onTap: () async {
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const EditProfilePage(),
-                      ),
-                    );
-                    if (mounted) {
-                      setState(() {});
-                      _loadUserStats();
-                    }
-                  },
-                ),
-                _buildDivider(),
-                _buildMenuItem(
-                  icon: Icons.lock_outline,
-                  title: "Ubah Password",
-                  subtitle: "Ganti password akun",
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const ChangePasswordPage(),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const JudulBagian("Akun"),
+        Kartu(
+          padding: EdgeInsets.zero,
+          child: Column(
+            children: [
+              _buildMenuItem(
+                icon: Icons.person_outline_rounded,
+                title: "Ubah Profil",
+                subtitle: "Update informasi personal",
+                onTap: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const EditProfilePage(),
+                    ),
+                  );
+                  if (mounted) {
+                    setState(() {});
+                    _loadUserStats();
+                  }
+                },
+              ),
+              _buildDivider(),
+              _buildMenuItem(
+                icon: Icons.lock_outline_rounded,
+                title: "Ubah Password",
+                subtitle: "Ganti password akun",
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ChangePasswordPage(),
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
-
-          const SizedBox(height: 20),
-
-          // Aktivitas Section
-          _buildSectionTitle("Aktivitas"),
-          Container(
-            decoration: BoxDecoration(
-              color: context.c.raised,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: context.c.line),
-            ),
-            child: Column(
-              children: [
-                _buildMenuItem(
-                  icon: Icons.favorite_border,
-                  title: "Venue Favorit",
-                  subtitle: "Venue yang kamu tandai hati",
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const FavoriteVenuesPage(),
-                      ),
-                    );
-                  },
-                ),
-                _buildDivider(),
-                _buildMenuItem(
-                  icon: Icons.chat_outlined,
-                  title: "Riwayat Pesan",
-                  subtitle: "Lihat histori chat dengan venue",
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const ChatHistoryPage(),
-                      ),
-                    );
-                  },
-                ),
-                _buildDivider(),
-                _buildMenuItem(
-                  icon: Icons.notifications_outlined,
-                  title: "Notifikasi",
-                  subtitle: "Pengaturan notifikasi",
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const NotificationsPage(),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 20),
-
-          // Lainnya Section
-          _buildSectionTitle("Lainnya"),
-          Container(
-            decoration: BoxDecoration(
-              color: context.c.raised,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: context.c.line),
-            ),
-            child: Column(
-              children: [
-                _buildMenuItem(
-                  icon: Icons.info_outline,
-                  title: "Tentang Sportago",
-                  subtitle: VersiApp.tampil,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const AboutPage(),
-                      ),
-                    );
-                  },
-                ),
-                _buildDivider(),
-                _buildMenuItem(
-                  icon: Icons.delete_outline,
-                  title: "Hapus Akun",
-                  subtitle: "Hapus akun secara permanen",
-                  onTap: () => _showDeleteAccountDialog(),
-                  isDestructive: true,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSectionTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 4, bottom: 12),
-      child: Text(
-        title,
-        style: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          color: context.c.inkSoft,
         ),
-      ),
+
+        const JudulBagian(
+          "Aktivitas",
+          padding: EdgeInsets.fromLTRB(4, 20, 4, 12),
+        ),
+        Kartu(
+          padding: EdgeInsets.zero,
+          child: Column(
+            children: [
+              _buildMenuItem(
+                icon: Icons.favorite_border_rounded,
+                title: "Venue Favorit",
+                subtitle: "Venue yang kamu tandai hati",
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const FavoriteVenuesPage(),
+                    ),
+                  );
+                },
+              ),
+              _buildDivider(),
+              _buildMenuItem(
+                icon: Icons.chat_outlined,
+                title: "Riwayat Pesan",
+                subtitle: "Lihat histori chat dengan venue",
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ChatHistoryPage(),
+                    ),
+                  );
+                },
+              ),
+              _buildDivider(),
+              _buildMenuItem(
+                icon: Icons.notifications_outlined,
+                title: "Notifikasi",
+                subtitle: "Pengaturan notifikasi",
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const NotificationsPage(),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+
+        const JudulBagian(
+          "Lainnya",
+          padding: EdgeInsets.fromLTRB(4, 20, 4, 12),
+        ),
+        Kartu(
+          padding: EdgeInsets.zero,
+          child: Column(
+            children: [
+              _buildMenuItem(
+                icon: Icons.info_outline_rounded,
+                title: "Tentang Sportago",
+                subtitle: VersiApp.tampil,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const AboutPage()),
+                  );
+                },
+              ),
+              _buildDivider(),
+              _buildMenuItem(
+                icon: Icons.delete_outline_rounded,
+                title: "Hapus Akun",
+                subtitle: "Hapus akun secara permanen",
+                onTap: () => _showDeleteAccountDialog(),
+                isDestructive: true,
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -636,71 +538,77 @@ class _ProfilePageState extends State<ProfilePage> {
     required VoidCallback onTap,
     bool isDestructive = false,
   }) {
-    final Color itemColor = isDestructive ? context.c.danger : context.c.accent;
-
-    return ListTile(
+    return InkWell(
       onTap: onTap,
-      leading: Container(
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: itemColor.withValues(alpha: 0.15),
-          borderRadius: BorderRadius.circular(10),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+        child: Row(
+          children: [
+            UbinIkon(
+              icon,
+              ukuran: 42,
+              nada: isDestructive ? Nada.danger : Nada.aksen,
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 15,
+                      color: isDestructive ? context.c.danger : context.c.ink,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: TextStyle(color: context.c.inkSoft, fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right_rounded, color: context.c.inkSoft),
+          ],
         ),
-        child: Icon(icon, color: itemColor, size: 20),
       ),
-      title: Text(
-        title,
-        style: TextStyle(
-          fontWeight: FontWeight.w600,
-          fontSize: 15,
-          color: isDestructive ? context.c.danger : context.c.ink,
-        ),
-      ),
-      subtitle: Text(
-        subtitle,
-        style: TextStyle(color: context.c.inkSoft, fontSize: 12),
-      ),
-      trailing: Icon(
-        Icons.arrow_forward_ios,
-        size: 16,
-        color: context.c.inkSoft,
-      ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
     );
   }
 
   Widget _buildDivider() {
-    return Divider(height: 1, color: context.c.line, indent: 60, endIndent: 20);
-  }
-
-  Widget _buildSectionDivider() {
-    return Container(width: double.infinity, height: 8, color: context.c.line);
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 18),
+      height: 1,
+      color: context.c.line,
+    );
   }
 
   // Logout Section
   Widget _buildLogoutSection() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: SizedBox(
-        width: double.infinity,
-        child: ElevatedButton.icon(
-          onPressed: () => _showLogoutDialog(),
-          icon: const Icon(Icons.logout, color: Colors.white, size: 20),
-          label: const Text(
-            "Keluar dari Akun",
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 15,
-              color: Colors.white,
-            ),
+    // Garis merah, bukan blok merah penuh: keluar akun bukan aksi yang
+    // merusak data, jadi tidak perlu berteriak lebih keras dari menu
+    // lain. Merahnya tetap supaya terbaca sebagai pintu keluar.
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        onPressed: () => _showLogoutDialog(),
+        icon: Icon(Icons.logout_rounded, color: context.c.danger, size: 20),
+        label: Text(
+          "Keluar dari Akun",
+          style: TextStyle(
+            fontWeight: FontWeight.w700,
+            fontSize: 15,
+            color: context.c.danger,
           ),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: context.c.danger,
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            elevation: 0,
+        ),
+        style: OutlinedButton.styleFrom(
+          backgroundColor: context.c.raised,
+          side: BorderSide(color: context.c.danger.withValues(alpha: 0.5)),
+          padding: const EdgeInsets.symmetric(vertical: 15),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
           ),
         ),
       ),
@@ -775,16 +683,16 @@ class _ProfilePageState extends State<ProfilePage> {
                     child: OutlinedButton(
                       onPressed: () => Navigator.pop(context),
                       style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: Colors.grey.shade300),
+                        side: BorderSide(color: context.c.lineStrong),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
-                      child: const Text(
+                      child: Text(
                         "Batal",
                         style: TextStyle(
-                          color: Colors.grey,
+                          color: context.c.inkSoft,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -811,7 +719,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       child: const Text(
                         "Ya, Keluar",
                         style: TextStyle(
-                          color: Colors.white,
+                          color: SportagoColors.pure,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -864,12 +772,11 @@ class _ProfilePageState extends State<ProfilePage> {
         SnackBar(
           content: const Row(
             children: [
-              Icon(Icons.check_circle, color: Colors.white),
+              Icon(Icons.check_circle, color: SportagoColors.volt),
               SizedBox(width: 12),
               Text("Berhasil keluar dari akun"),
             ],
           ),
-          backgroundColor: context.c.ok,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
@@ -1154,7 +1061,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               : () => Navigator.pop(context),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 14),
-                            side: BorderSide(color: Colors.grey.shade300),
+                            side: BorderSide(color: context.c.lineStrong),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -1241,14 +1148,14 @@ class _ProfilePageState extends State<ProfilePage> {
                                   height: 20,
                                   width: 20,
                                   child: CircularProgressIndicator(
-                                    color: Colors.white,
+                                    color: SportagoColors.pure,
                                     strokeWidth: 2,
                                   ),
                                 )
                               : const Text(
                                   "Hapus Akun",
                                   style: TextStyle(
-                                    color: Colors.white,
+                                    color: SportagoColors.pure,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),

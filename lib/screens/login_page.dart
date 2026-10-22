@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../utils/tanpa_spasi.dart';
-import '../widgets/sportago_mark.dart';
+import '../widgets/kepala_foto_auth.dart';
 import '../theme/app_tokens.dart';
 import 'package:flutter/services.dart';
 import 'register_page.dart';
@@ -34,7 +34,9 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     final email = _emailController.text.trim();
-    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+    final emailRegex = RegExp(
+      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+    );
 
     if (email.isEmpty) {
       setState(() => _emailError = "Email tidak boleh kosong");
@@ -100,233 +102,241 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  void _kembali() {
+    // Pop kalau bisa, kalau tidak balik ke onboarding (supaya pengguna
+    // lama tetap bisa menemukan pilihan masuk lewat Google).
+    if (Navigator.canPop(context)) {
+      Navigator.pop(context);
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const OnboardingPage()),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: context.c.surface,
-      body: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: gayaOverlay(context),
-        child: SafeArea(
-        child: SingleChildScrollView(
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Back button: pop if possible, otherwise go back to onboarding
-              // (so returning users can still reach Apple/Google options)
-              IconButton(
-                onPressed: () {
-                  if (Navigator.canPop(context)) {
-                    Navigator.pop(context);
-                  } else {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const OnboardingPage()),
-                    );
-                  }
-                },
-                padding: EdgeInsets.zero,
-                alignment: Alignment.centerLeft,
-                icon: Icon(Icons.arrow_back_rounded,
-                    color: context.c.ink, size: 26),
-              ),
-              const SizedBox(height: 16),
-
-              // Brand mark
-              const SportagoMark(height: 44),
-              const SizedBox(height: 32),
-
-              // Heading
-              Text(
-                "Selamat datang lagi",
-                style: TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.w900,
-                  color: context.c.ink,
-                  height: 1.1,
+    // Dulu: lambang kecil dan judul di atas latar putih polos. Sekarang
+    // kepala berfoto yang sama dengan layar Masuk aplikasi mitra, form
+    // di kartu putih yang menumpang di tepi bawahnya.
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: gayaOverlayKepalaFoto(context),
+      child: Scaffold(
+        backgroundColor: context.c.surface,
+        body: SafeArea(
+          top: false,
+          child: SingleChildScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            physics: const ClampingScrollPhysics(),
+            child: Column(
+              children: [
+                KepalaFotoAuth(
+                  judul: 'Selamat datang lagi',
+                  onKembali: _kembali,
                 ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                "Masuk untuk mulai booking arena olahraga.",
-                style: TextStyle(fontSize: 15, color: context.c.inkSoft),
-              ),
-              const SizedBox(height: 32),
-
-              // Email
-              _label("Email"),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _emailController,
-                keyboardType: TextInputType.emailAddress,
-                style: TextStyle(color: context.c.ink),
-                decoration: _fieldDecoration(
-                  hint: "you@email.com",
-                  icon: Icons.mail_outline_rounded,
-                  errorText: _emailError,
-                ),
-              ),
-              const SizedBox(height: 18),
-
-              // Password
-              _label("Password"),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _passwordController,
-                obscureText: !_isPasswordVisible,
-                inputFormatters: const [TanpaSpasi()],
-                style: TextStyle(color: context.c.ink),
-                decoration: _fieldDecoration(
-                  hint: "Masukkan password",
-                  icon: Icons.lock_outline_rounded,
-                  errorText: _passwordError,
-                  suffix: IconButton(
-                    icon: Icon(
-                      _isPasswordVisible
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
-                      color: context.c.inkSoft,
-                      size: 20,
-                    ),
-                    onPressed: () =>
-                        setState(() => _isPasswordVisible = !_isPasswordVisible),
-                  ),
-                ),
-              ),
-
-              // Forgot password
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const ForgotPasswordPage()),
-                    );
-                  },
-                  child: Text(
-                    "Lupa password?",
-                    style: TextStyle(
-                      color: context.c.inkSoft,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13,
+                Transform.translate(
+                  offset: const Offset(0, -24),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      children: [
+                        _buildFormCard(),
+                        const SizedBox(height: 24),
+                        _buildDaftarLink(),
+                        const SizedBox(height: 16),
+                      ],
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 16),
-
-              // Login button (brand yellow pill)
-              SizedBox(
-                width: double.infinity,
-                height: 54,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _handleLogin,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: context.c.accent,
-                    disabledBackgroundColor:
-                        context.c.accent.withValues(alpha: 0.5),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    elevation: 0,
-                  ),
-                  child: _isLoading
-                      ? SizedBox(
-                          height: 22,
-                          width: 22,
-                          child: CircularProgressIndicator(
-                              color: context.c.onAccent, strokeWidth: 2),
-                        )
-                      : Text(
-                          "Masuk",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: context.c.onAccent,
-                          ),
-                        ),
-                ),
-              ),
-              const SizedBox(height: 28),
-
-              // Register link
-              Center(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text("Belum punya akun? ",
-                        style:
-                            TextStyle(color: context.c.inkSoft, fontSize: 14)),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const RegisterPage()),
-                        );
-                      },
-                      child: Text(
-                        "Daftar",
-                        style: TextStyle(
-                          color: context.c.accent,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
         ),
       ),
     );
   }
 
-  Widget _label(String text) => Text(
-        text,
-        style: TextStyle(
-          fontWeight: FontWeight.w600,
-          fontSize: 13,
-          color: context.c.ink,
-        ),
-      );
+  Widget _buildFormCard() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: context.c.raised,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: context.c.line),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            "Masuk",
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w800,
+              color: context.c.ink,
+              letterSpacing: -0.5,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            "Masuk untuk mulai booking arena olahraga.",
+            style: TextStyle(
+              fontSize: 14,
+              color: context.c.inkSoft,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 24),
 
+          // Email
+          _label("Email"),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _emailController,
+            keyboardType: TextInputType.emailAddress,
+            style: TextStyle(color: context.c.ink),
+            decoration: _fieldDecoration(
+              hint: "you@email.com",
+              icon: Icons.mail_outline_rounded,
+              errorText: _emailError,
+            ),
+          ),
+          const SizedBox(height: 18),
+
+          // Password
+          _label("Password"),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _passwordController,
+            obscureText: !_isPasswordVisible,
+            inputFormatters: const [TanpaSpasi()],
+            style: TextStyle(color: context.c.ink),
+            decoration: _fieldDecoration(
+              hint: "Masukkan password",
+              icon: Icons.lock_outline_rounded,
+              errorText: _passwordError,
+              suffix: IconButton(
+                icon: Icon(
+                  _isPasswordVisible
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
+                  color: context.c.inkDim,
+                  size: 20,
+                ),
+                onPressed: () =>
+                    setState(() => _isPasswordVisible = !_isPasswordVisible),
+              ),
+            ),
+          ),
+
+          // Forgot password
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ForgotPasswordPage(),
+                  ),
+                );
+              },
+              child: Text(
+                "Lupa password?",
+                style: TextStyle(
+                  color: context.c.accent,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // Tombol Masuk: warna dari tema (pekat di terang, aksen di
+          // gelap), sama dengan tombol utama di seluruh aplikasi.
+          SizedBox(
+            height: 54,
+            child: ElevatedButton(
+              onPressed: _isLoading ? null : _handleLogin,
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              child: _isLoading
+                  ? SizedBox(
+                      height: 22,
+                      width: 22,
+                      child: CircularProgressIndicator(
+                        color: context.c.inkDim,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : const Text("Masuk"),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDaftarLink() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          "Belum punya akun? ",
+          style: TextStyle(color: context.c.inkSoft, fontSize: 14),
+        ),
+        GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const RegisterPage()),
+            );
+          },
+          child: Text(
+            "Daftar",
+            style: TextStyle(
+              color: context.c.accent,
+              fontWeight: FontWeight.w700,
+              fontSize: 14,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _label(String text) => Text(
+    text,
+    style: TextStyle(
+      fontWeight: FontWeight.w600,
+      fontSize: 13,
+      color: context.c.ink,
+    ),
+  );
+
+  // Garis, isian, dan sudut kolom datang dari tema (input putih
+  // bergaris tipis), jadi di sini cukup isi yang khas per kolom.
   InputDecoration _fieldDecoration({
     required String hint,
     required IconData icon,
     String? errorText,
     Widget? suffix,
   }) {
-    OutlineInputBorder border(Color c, double w) => OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: c, width: w),
-        );
     return InputDecoration(
       hintText: hint,
-      hintStyle: TextStyle(color: context.c.inkSoft),
-      filled: true,
-      fillColor: context.c.raised,
       errorText: errorText,
       errorMaxLines: 2,
-      prefixIcon: Icon(icon, color: context.c.inkSoft, size: 20),
+      prefixIcon: Icon(icon, size: 20),
       suffixIcon: suffix,
-      border: border(context.c.line, 1),
-      enabledBorder: border(context.c.line, 1),
-      focusedBorder: border(context.c.accent, 1.6),
-      errorBorder: border(context.c.danger, 1),
-      focusedErrorBorder: border(context.c.danger, 1.6),
     );
   }
 }

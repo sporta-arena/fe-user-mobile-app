@@ -131,9 +131,6 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                         color: context.c.accent,
                       ),
                       hintText: "Masukkan email",
-                      hintStyle: TextStyle(color: context.c.inkSoft),
-                      filled: true,
-                      fillColor: context.c.raised,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(color: context.c.line),
@@ -177,9 +174,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                               }
                             },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: context.c.accent,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(999),
+                          borderRadius: BorderRadius.circular(16),
                         ),
                         elevation: 0,
                       ),
@@ -187,15 +183,11 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                           ? SizedBox(
                               height: 24,
                               width: 24,
-                              child: CircularProgressIndicator(
-                                color: context.c.onAccent,
-                                strokeWidth: 2,
-                              ),
+                              child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : Text(
                               "Kirim Link Reset",
                               style: TextStyle(
-                                color: context.c.onAccent,
                                 fontWeight: FontWeight.w700,
                                 fontSize: 16,
                               ),
@@ -289,18 +281,14 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 child: ElevatedButton(
                   onPressed: () => Navigator.pop(context),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: context.c.accent,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(999),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                     elevation: 0,
                   ),
                   child: Text(
                     "Mengerti",
-                    style: TextStyle(
-                      color: context.c.onAccent,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.w700),
                   ),
                 ),
               ),
@@ -347,15 +335,10 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     return Scaffold(
       backgroundColor: context.c.surface,
       appBar: AppBar(
-        systemOverlayStyle: gayaOverlay(context),
-        title: Text(
-          "Ganti Password",
-          style: TextStyle(color: context.c.ink, fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: context.c.surface,
+        title: Text("Ganti Password"),
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: context.c.ink),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -479,9 +462,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : _changePassword,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: context.c.accent,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(999),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                     elevation: 0,
                   ),
@@ -489,15 +471,11 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                       ? SizedBox(
                           height: 24,
                           width: 24,
-                          child: CircularProgressIndicator(
-                            color: context.c.onAccent,
-                            strokeWidth: 2,
-                          ),
+                          child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : Text(
                           "UBAH PASSWORD",
                           style: TextStyle(
-                            color: context.c.onAccent,
                             fontWeight: FontWeight.w700,
                             fontSize: 16,
                           ),
@@ -581,8 +559,6 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(color: context.c.accent),
               ),
-              filled: true,
-              fillColor: context.c.raised,
             ),
           ),
         ),

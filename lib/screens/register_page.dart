@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'naskah_hukum_page.dart';
 import '../utils/tanpa_spasi.dart';
-import '../widgets/sportago_mark.dart';
+import '../widgets/kepala_foto_auth.dart';
 import '../theme/app_tokens.dart';
 import 'package:flutter/services.dart';
 import 'otp_page.dart';
@@ -52,12 +52,16 @@ class _RegisterPageState extends State<RegisterPage> {
     }
 
     final email = _emailController.text.trim();
-    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+    final emailRegex = RegExp(
+      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+    );
     if (email.isEmpty) {
       setState(() => _emailError = "Email wajib diisi");
       isValid = false;
     } else if (!emailRegex.hasMatch(email)) {
-      setState(() => _emailError = "Format email tidak valid (contoh: user@mail.com)");
+      setState(
+        () => _emailError = "Format email tidak valid (contoh: user@mail.com)",
+      );
       isValid = false;
     }
 
@@ -69,8 +73,8 @@ class _RegisterPageState extends State<RegisterPage> {
       setState(() => _phoneError = "Nomor tidak valid (10-14 digit)");
       isValid = false;
     } else if (!phone.startsWith('08') && !phone.startsWith('62')) {
-       setState(() => _phoneError = "Awali dengan 08 atau 62");
-       isValid = false;
+      setState(() => _phoneError = "Awali dengan 08 atau 62");
+      isValid = false;
     }
 
     final password = _passwordController.text;
@@ -86,7 +90,9 @@ class _RegisterPageState extends State<RegisterPage> {
       setState(() => _passwordError = "Minimal 8 karakter");
       isValid = false;
     } else if (!hasUpper || !hasLower || !hasDigit || !hasSpecial) {
-      setState(() => _passwordError = "Wajib ada: Huruf Besar, Kecil, Angka, & Simbol");
+      setState(
+        () => _passwordError = "Wajib ada: Huruf Besar, Kecil, Angka, & Simbol",
+      );
       isValid = false;
     }
 
@@ -125,7 +131,9 @@ class _RegisterPageState extends State<RegisterPage> {
       if (result.success) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(result.message ?? "Kode OTP telah dikirim ke email Anda"),
+            content: Text(
+              result.message ?? "Kode OTP telah dikirim ke email Anda",
+            ),
             backgroundColor: context.c.ok,
             behavior: SnackBarBehavior.floating,
           ),
@@ -218,243 +226,267 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: context.c.surface,
-      body: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: gayaOverlay(context),
-        child: SafeArea(
-        child: SingleChildScrollView(
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Back button
-              IconButton(
-                onPressed: () => Navigator.pop(context),
-                padding: EdgeInsets.zero,
-                alignment: Alignment.centerLeft,
-                icon: Icon(Icons.arrow_back_rounded,
-                    color: context.c.ink, size: 26),
-              ),
-              const SizedBox(height: 16),
-
-              // Brand mark
-              const SportagoMark(height: 40),
-              const SizedBox(height: 24),
-
-              // Heading
-              Text(
-                "Buat akun",
-                style: TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.w900,
-                  color: context.c.ink,
-                  height: 1.1,
+    // Kepala berfoto dan kartu form, sama dengan layar Masuk, jadi
+    // bolak-balik Masuk/Daftar tidak terasa pindah aplikasi.
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: gayaOverlayKepalaFoto(context),
+      child: Scaffold(
+        backgroundColor: context.c.surface,
+        body: SafeArea(
+          top: false,
+          child: SingleChildScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            physics: const ClampingScrollPhysics(),
+            child: Column(
+              children: [
+                KepalaFotoAuth(
+                  judul: 'Bikin akun,\nlangsung booking',
+                  foto: 'assets/images/hero/main.jpg',
+                  onKembali: () => Navigator.pop(context),
                 ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                "Lengkapi data diri untuk bergabung di Sportago.",
-                style: TextStyle(fontSize: 15, color: context.c.inkSoft),
-              ),
-              const SizedBox(height: 28),
-
-              // Name
-              _buildLabel("Nama Lengkap"),
-              _buildTextField(
-                controller: _nameController,
-                hint: "John Doe",
-                icon: Icons.person_outline_rounded,
-                errorText: _nameError,
-              ),
-              const SizedBox(height: 16),
-
-              // Email
-              _buildLabel("Email"),
-              _buildTextField(
-                controller: _emailController,
-                hint: "nama@domain.com",
-                icon: Icons.mail_outline_rounded,
-                inputType: TextInputType.emailAddress,
-                errorText: _emailError,
-              ),
-              const SizedBox(height: 16),
-
-              // Phone
-              _buildLabel("Nomor Handphone (WhatsApp)"),
-              _buildTextField(
-                controller: _phoneController,
-                hint: "0812xxxxxxxx",
-                icon: Icons.phone_android_outlined,
-                inputType: TextInputType.phone,
-                errorText: _phoneError,
-                isNumberOnly: true,
-              ),
-              const SizedBox(height: 16),
-
-              // Password
-              _buildLabel("Password"),
-              _buildTextField(
-                controller: _passwordController,
-                hint: "Kombinasi kuat (Min. 8 char)",
-                icon: Icons.lock_outline_rounded,
-                isPassword: true,
-                isVisible: _isPasswordVisible,
-                onVisibilityToggle: () =>
-                    setState(() => _isPasswordVisible = !_isPasswordVisible),
-                errorText: _passwordError,
-              ),
-              const SizedBox(height: 16),
-
-              // Confirm Password
-              _buildLabel("Konfirmasi Password"),
-              _buildTextField(
-                controller: _confirmPasswordController,
-                hint: "Ulangi password",
-                icon: Icons.lock_reset_rounded,
-                isPassword: true,
-                isVisible: _isConfirmPasswordVisible,
-                onVisibilityToggle: () => setState(
-                    () => _isConfirmPasswordVisible = !_isConfirmPasswordVisible),
-                errorText: _confirmPasswordError,
-              ),
-              const SizedBox(height: 20),
-
-              // Terms & Conditions
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    height: 24,
-                    width: 24,
-                    child: Checkbox(
-                      value: _agreedToTerms,
-                      activeColor: context.c.accent,
-                      checkColor: context.c.onAccent,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      side: BorderSide(
-                        color: _termsError ? context.c.danger : context.c.line,
-                        width: 2,
-                      ),
-                      onChanged: (value) {
-                        setState(() {
-                          _agreedToTerms = value ?? false;
-                          _termsError = false;
-                        });
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: GestureDetector(
-                      // Sebelumnya tidak melakukan apa pun, padahal di
-                      // sebelahnya tertulis "Saya menyetujui". Meminta
-                      // orang menyetujui naskah yang tidak bisa
-                      // dibukanya adalah persetujuan yang tidak berarti
-                      // apa-apa, dan tidak akan berdiri sebagai bukti
-                      // kalau suatu saat dipersoalkan.
-                      onTap: _bukaSyarat,
-                      child: RichText(
-                        text: TextSpan(
-                          text: 'Saya menyetujui ',
-                          style: TextStyle(
-                              color: context.c.inkSoft, fontSize: 13),
-                          children: [
-                            TextSpan(
-                              text: 'Syarat & Ketentuan',
-                              style: TextStyle(
-                                color: context.c.accent,
-                                fontWeight: FontWeight.w700,
+                Transform.translate(
+                  offset: const Offset(0, -24),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(24),
+                          decoration: BoxDecoration(
+                            color: context.c.raised,
+                            borderRadius: BorderRadius.circular(24),
+                            border: Border.all(color: context.c.line),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Daftar",
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w800,
+                                  color: context.c.ink,
+                                  letterSpacing: -0.5,
+                                ),
                               ),
-                            ),
-                            TextSpan(text: ' dan '),
-                            TextSpan(
-                              text: 'Kebijakan Privasi',
-                              style: TextStyle(
-                                color: context.c.accent,
-                                fontWeight: FontWeight.w700,
+                              const SizedBox(height: 4),
+                              Text(
+                                "Lengkapi data diri untuk bergabung di Sportago.",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: context.c.inkSoft,
+                                  height: 1.5,
+                                ),
                               ),
-                            ),
-                            TextSpan(text: ' Sportago.'),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              if (_termsError)
-                Padding(
-                  padding: EdgeInsets.only(left: 34, top: 4),
-                  child: Text(
-                    "Wajib disetujui untuk melanjutkan",
-                    style: TextStyle(color: context.c.danger, fontSize: 11),
-                  ),
-                ),
-              const SizedBox(height: 28),
+                              const SizedBox(height: 24),
+                              // Name
+                              _buildLabel("Nama Lengkap"),
+                              _buildTextField(
+                                controller: _nameController,
+                                hint: "John Doe",
+                                icon: Icons.person_outline_rounded,
+                                errorText: _nameError,
+                              ),
+                              const SizedBox(height: 16),
 
-              // Register button (brand yellow pill)
-              SizedBox(
-                width: double.infinity,
-                height: 54,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _handleRegister,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: context.c.accent,
-                    disabledBackgroundColor:
-                        context.c.accent.withValues(alpha: 0.5),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    elevation: 0,
-                  ),
-                  child: _isLoading
-                      ? SizedBox(
-                          height: 22,
-                          width: 22,
-                          child: CircularProgressIndicator(
-                              color: context.c.onAccent, strokeWidth: 2),
-                        )
-                      : Text(
-                          "Daftar sekarang",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: context.c.onAccent,
+                              // Email
+                              _buildLabel("Email"),
+                              _buildTextField(
+                                controller: _emailController,
+                                hint: "nama@domain.com",
+                                icon: Icons.mail_outline_rounded,
+                                inputType: TextInputType.emailAddress,
+                                errorText: _emailError,
+                              ),
+                              const SizedBox(height: 16),
+
+                              // Phone
+                              _buildLabel("Nomor Handphone (WhatsApp)"),
+                              _buildTextField(
+                                controller: _phoneController,
+                                hint: "0812xxxxxxxx",
+                                icon: Icons.phone_android_outlined,
+                                inputType: TextInputType.phone,
+                                errorText: _phoneError,
+                                isNumberOnly: true,
+                              ),
+                              const SizedBox(height: 16),
+
+                              // Password
+                              _buildLabel("Password"),
+                              _buildTextField(
+                                controller: _passwordController,
+                                hint: "Kombinasi kuat (Min. 8 char)",
+                                icon: Icons.lock_outline_rounded,
+                                isPassword: true,
+                                isVisible: _isPasswordVisible,
+                                onVisibilityToggle: () => setState(
+                                  () =>
+                                      _isPasswordVisible = !_isPasswordVisible,
+                                ),
+                                errorText: _passwordError,
+                              ),
+                              const SizedBox(height: 16),
+
+                              // Confirm Password
+                              _buildLabel("Konfirmasi Password"),
+                              _buildTextField(
+                                controller: _confirmPasswordController,
+                                hint: "Ulangi password",
+                                icon: Icons.lock_reset_rounded,
+                                isPassword: true,
+                                isVisible: _isConfirmPasswordVisible,
+                                onVisibilityToggle: () => setState(
+                                  () => _isConfirmPasswordVisible =
+                                      !_isConfirmPasswordVisible,
+                                ),
+                                errorText: _confirmPasswordError,
+                              ),
+                              const SizedBox(height: 20),
+
+                              // Terms & Conditions
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(
+                                    height: 24,
+                                    width: 24,
+                                    child: Checkbox(
+                                      value: _agreedToTerms,
+                                      activeColor: context.c.accent,
+                                      checkColor: context.c.onAccent,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      side: BorderSide(
+                                        color: _termsError
+                                            ? context.c.danger
+                                            : context.c.line,
+                                        width: 2,
+                                      ),
+                                      onChanged: (value) {
+                                        setState(() {
+                                          _agreedToTerms = value ?? false;
+                                          _termsError = false;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: GestureDetector(
+                                      // Sebelumnya tidak melakukan apa pun, padahal di
+                                      // sebelahnya tertulis "Saya menyetujui". Meminta
+                                      // orang menyetujui naskah yang tidak bisa
+                                      // dibukanya adalah persetujuan yang tidak berarti
+                                      // apa-apa, dan tidak akan berdiri sebagai bukti
+                                      // kalau suatu saat dipersoalkan.
+                                      onTap: _bukaSyarat,
+                                      child: RichText(
+                                        text: TextSpan(
+                                          text: 'Saya menyetujui ',
+                                          style: TextStyle(
+                                            color: context.c.inkSoft,
+                                            fontSize: 13,
+                                          ),
+                                          children: [
+                                            TextSpan(
+                                              text: 'Syarat & Ketentuan',
+                                              style: TextStyle(
+                                                color: context.c.accent,
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                            ),
+                                            TextSpan(text: ' dan '),
+                                            TextSpan(
+                                              text: 'Kebijakan Privasi',
+                                              style: TextStyle(
+                                                color: context.c.accent,
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                            ),
+                                            TextSpan(text: ' Sportago.'),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              if (_termsError)
+                                Padding(
+                                  padding: EdgeInsets.only(left: 34, top: 4),
+                                  child: Text(
+                                    "Wajib disetujui untuk melanjutkan",
+                                    style: TextStyle(
+                                      color: context.c.danger,
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                                ),
+                              const SizedBox(height: 28),
+
+                              // Tombol Daftar: warna dari tema (pekat di terang, aksen
+                              // di gelap), sama dengan tombol utama di seluruh aplikasi.
+                              SizedBox(
+                                width: double.infinity,
+                                height: 54,
+                                child: ElevatedButton(
+                                  onPressed: _isLoading
+                                      ? null
+                                      : _handleRegister,
+                                  style: ElevatedButton.styleFrom(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                  ),
+                                  child: _isLoading
+                                      ? SizedBox(
+                                          height: 22,
+                                          width: 22,
+                                          child: CircularProgressIndicator(
+                                            color: context.c.inkDim,
+                                            strokeWidth: 2,
+                                          ),
+                                        )
+                                      : const Text("Daftar sekarang"),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              // Login link
-              Center(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text("Sudah punya akun? ",
-                        style: TextStyle(
-                            color: context.c.inkSoft, fontSize: 14)),
-                    GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: Text(
-                        "Masuk",
-                        style: TextStyle(
-                          color: context.c.accent,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 14,
+                        const SizedBox(height: 24),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "Sudah punya akun? ",
+                              style: TextStyle(
+                                color: context.c.inkSoft,
+                                fontSize: 14,
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () => Navigator.pop(context),
+                              child: Text(
+                                "Masuk",
+                                style: TextStyle(
+                                  color: context.c.accent,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
+                        const SizedBox(height: 16),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
         ),
       ),
     );
@@ -485,10 +517,7 @@ class _RegisterPageState extends State<RegisterPage> {
     TextInputType inputType = TextInputType.text,
     bool isNumberOnly = false,
   }) {
-    OutlineInputBorder border(Color c, double w) => OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: c, width: w),
-        );
+    // Garis, isian, dan sudut kolom datang dari tema.
     return TextField(
       controller: controller,
       obscureText: isPassword && !isVisible,
@@ -499,17 +528,9 @@ class _RegisterPageState extends State<RegisterPage> {
           : (isPassword ? const [TanpaSpasi()] : const []),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: TextStyle(color: context.c.inkSoft),
-        filled: true,
-        fillColor: context.c.raised,
         errorText: errorText,
         errorMaxLines: 2,
-        prefixIcon: Icon(icon, color: context.c.inkSoft, size: 20),
-        border: border(context.c.line, 1),
-        enabledBorder: border(context.c.line, 1),
-        focusedBorder: border(context.c.accent, 1.6),
-        errorBorder: border(context.c.danger, 1),
-        focusedErrorBorder: border(context.c.danger, 1.6),
+        prefixIcon: Icon(icon, size: 20),
         suffixIcon: isPassword
             ? IconButton(
                 icon: Icon(

@@ -44,7 +44,7 @@ class LogoMetodeBayar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final k = kode.toLowerCase();
-    final radius = BorderRadius.circular(8);
+    final radius = BorderRadius.circular(10);
 
     if (k == 'qris') {
       return Container(
@@ -70,7 +70,7 @@ class LogoMetodeBayar extends StatelessWidget {
         width: lebar,
         height: tinggi,
         decoration: BoxDecoration(
-          color: context.c.surface,
+          color: context.c.sunken,
           borderRadius: radius,
         ),
         child: Icon(

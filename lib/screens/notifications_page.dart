@@ -97,30 +97,25 @@ class _NotificationsPageState extends State<NotificationsPage> {
   }
 
   Notifikasi _salinanDibaca(Notifikasi n) => Notifikasi(
-        id: n.id,
-        judul: n.judul,
-        isi: n.isi,
-        tautan: n.tautan,
-        jenis: n.jenis,
-        sudahDibaca: true,
-        dibuatPada: n.dibuatPada,
-      );
+    id: n.id,
+    judul: n.judul,
+    isi: n.isi,
+    tautan: n.tautan,
+    jenis: n.jenis,
+    sudahDibaca: true,
+    dibuatPada: n.dibuatPada,
+  );
 
   @override
   Widget build(BuildContext context) {
     final adaBelumDibaca = _daftar.any((n) => !n.sudahDibaca);
 
     return Scaffold(
-      backgroundColor: context.c.surface,
       appBar: AppBar(
-        systemOverlayStyle: gayaOverlay(context),
-        title: Text('Notifikasi',
-            style:
-                TextStyle(color: context.c.ink, fontWeight: FontWeight.bold)),
-        backgroundColor: context.c.surface,
+        title: const Text('Notifikasi'),
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: context.c.ink),
+          icon: Icon(Icons.arrow_back_ios),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
@@ -129,7 +124,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
             child: Text(
               'Tandai Dibaca',
               style: TextStyle(
-                color: adaBelumDibaca ? context.c.accent : context.c.inkDim,
+                // Di atas bilah pekat: volt kalau bisa ditekan, putih
+                // redup kalau tidak ada yang perlu ditandai.
+                color: adaBelumDibaca
+                    ? SportagoColors.volt
+                    : context.c.onMedia.inkDim,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -159,7 +158,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
       return _keadaanKosong(
         ikon: Icons.notifications_none_rounded,
         judul: 'Belum ada notifikasi',
-        isi: 'Kabar soal booking dan pesan dari pengelola lapangan muncul di sini.',
+        isi:
+            'Kabar soal booking dan pesan dari pengelola lapangan muncul di sini.',
       );
     }
 
@@ -177,8 +177,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
     return ListTile(
       onTap: () => _buka(n),
-      tileColor:
-          n.sudahDibaca ? context.c.surface : context.c.accentSoft,
+      tileColor: n.sudahDibaca ? context.c.raised : context.c.accentSoft,
       leading: CircleAvatar(
         backgroundColor: context.c.accentSoft,
         child: Icon(
@@ -202,12 +201,16 @@ class _NotificationsPageState extends State<NotificationsPage> {
         children: [
           if (n.isi.isNotEmpty) ...[
             const SizedBox(height: 4),
-            Text(n.isi,
-                style: TextStyle(color: context.c.inkSoft, fontSize: 13)),
+            Text(
+              n.isi,
+              style: TextStyle(color: context.c.inkSoft, fontSize: 13),
+            ),
           ],
           const SizedBox(height: 6),
-          Text(_waktuSingkat(n.dibuatPada),
-              style: TextStyle(color: context.c.inkDim, fontSize: 11)),
+          Text(
+            _waktuSingkat(n.dibuatPada),
+            style: TextStyle(color: context.c.inkDim, fontSize: 11),
+          ),
         ],
       ),
       // Tanda panah hanya untuk yang benar-benar mengantar ke suatu
@@ -230,18 +233,23 @@ class _NotificationsPageState extends State<NotificationsPage> {
         Icon(ikon, size: 64, color: context.c.inkDim),
         const SizedBox(height: 20),
         Center(
-          child: Text(judul,
-              style: TextStyle(
-                  color: context.c.ink,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600)),
+          child: Text(
+            judul,
+            style: TextStyle(
+              color: context.c.ink,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
         const SizedBox(height: 8),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 48),
-          child: Text(isi,
-              textAlign: TextAlign.center,
-              style: TextStyle(color: context.c.inkSoft, fontSize: 13)),
+          child: Text(
+            isi,
+            textAlign: TextAlign.center,
+            style: TextStyle(color: context.c.inkSoft, fontSize: 13),
+          ),
         ),
       ],
     );

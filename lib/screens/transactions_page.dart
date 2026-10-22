@@ -3,7 +3,9 @@ import 'package:flutter/foundation.dart' show kDebugMode;
 import '../utils/waktu_wib.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_tokens.dart';
+import '../widgets/sportago_ui.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../services/booking_service.dart';
@@ -124,139 +126,126 @@ class _TransactionsPageState extends State<TransactionsPage>
     }
   }
 
+  /// Label pil penyaring, urutannya sama dengan anak [TabBarView].
+  static const _tab = [
+    ('upcoming', 'Mendatang'),
+    ('pending', 'Menunggu'),
+    ('history', 'Riwayat'),
+  ];
+
   @override
   Widget build(BuildContext context) {
-    // Check if user is not logged in
+    // Dulu AppBar putih dengan TabBar bergaris bawah, sementara Beranda
+    // dan app mitra sudah berkepala pekat. Sekarang kepalanya sama, dan
+    // tab pindah ke dalam kepala sebagai pil; geser kiri-kanan tetap jalan.
     if (AuthService.token == null) {
       return Scaffold(
-        backgroundColor: context.c.surface,
-        appBar: AppBar(
-          title: Text(
-            "Pesanan",
-            style: TextStyle(color: context.c.ink, fontWeight: FontWeight.bold),
-          ),
-          backgroundColor: context.c.surface,
-          elevation: 0,
-          systemOverlayStyle: gayaOverlay(context),
-        ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.login, size: 80, color: context.c.inkSoft),
-              const SizedBox(height: 16),
-              Text(
-                "Masuk dulu untuk melihat pesanan",
-                style: TextStyle(color: context.c.inkSoft, fontSize: 16),
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const LoginPage()),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: context.c.accent,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 12,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                ),
-                child: Text(
-                  "Login",
-                  style: TextStyle(
-                    color: context.c.onAccent,
-                    fontWeight: FontWeight.bold,
-                  ),
+        backgroundColor: context.c.sunken,
+        body: Column(
+          children: [
+            const KepalaPekat(
+              judul: 'Pesanan',
+              subjudul: 'Jadwal main dan pembayaranmu ada di sini.',
+            ),
+            Expanded(
+              child: Center(
+                child: KeadaanKosong(
+                  ikon: Icons.login_rounded,
+                  judul: 'Masuk dulu untuk melihat pesanan',
+                  aksi: 'Masuk',
+                  onAksi: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const LoginPage(),
+                      ),
+                    );
+                  },
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       );
     }
 
     return Scaffold(
-      backgroundColor: context.c.surface,
-      appBar: AppBar(
-        backgroundColor: context.c.surface,
-        elevation: 0,
-        systemOverlayStyle: gayaOverlay(context),
-        title: Text(
-          'Pesanan',
-          style: TextStyle(color: context.c.ink, fontWeight: FontWeight.bold),
-        ),
-        centerTitle: true,
-        bottom: TabBar(
-          controller: _tabController,
-          labelColor: context.c.accent,
-          unselectedLabelColor: context.c.inkSoft,
-          indicatorColor: context.c.accent,
-          indicatorWeight: 3,
-          labelStyle: const TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 13,
-          ),
-          tabs: const [
-            Tab(text: 'Mendatang'),
-            Tab(text: 'Menunggu'),
-            Tab(text: 'Riwayat'),
-          ],
-        ),
-      ),
-      body: _isLoading
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(color: context.c.accent),
-                  SizedBox(height: 16),
-                  Text(
-                    'Memuat pesanan...',
-                    style: TextStyle(color: context.c.inkSoft),
-                  ),
-                ],
+      backgroundColor: context.c.sunken,
+      body: Column(
+        children: [
+          KepalaPekat(
+            judul: 'Pesanan',
+            subjudul: _isLoading
+                ? 'Memuat pesanan…'
+                : '${_allBookings.length} pesanan tercatat',
+            jarakBawah: 18,
+            aksi: [
+              TombolIkonPekat(
+                ikon: Icons.refresh_rounded,
+                tooltip: 'Muat ulang',
+                onTap: _loadBookings,
               ),
-            )
-          : _errorMessage != null
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.error_outline, size: 60, color: context.c.inkSoft),
-                  const SizedBox(height: 16),
-                  Text(
-                    _errorMessage!,
-                    style: TextStyle(color: context.c.inkSoft),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: _loadBookings,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: context.c.accent,
-                    ),
-                    child: Text(
-                      'Coba Lagi',
-                      style: TextStyle(color: context.c.onAccent),
-                    ),
-                  ),
-                ],
+            ],
+            bawahTembus: true,
+            bawah: SizedBox(
+              height: 38,
+              child: AnimatedBuilder(
+                animation: _tabController,
+                builder: (context, _) => ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  itemCount: _tab.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 8),
+                  itemBuilder: (_, i) {
+                    final (status, label) = _tab[i];
+                    final jumlah = _isLoading
+                        ? 0
+                        : _getFilteredBookings(status).length;
+                    return _PilFilter(
+                      label: jumlah > 0 ? '$label · $jumlah' : label,
+                      aktif: _tabController.index == i,
+                      onTap: () => _tabController.animateTo(i),
+                    );
+                  },
+                ),
               ),
-            )
-          : TabBarView(
-              controller: _tabController,
-              children: [
-                _buildTransactionList('upcoming'),
-                _buildTransactionList('pending'),
-                _buildTransactionList('history'),
-              ],
             ),
+          ),
+          Expanded(
+            child: _isLoading
+                ? Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        CircularProgressIndicator(color: context.c.accent),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Memuat pesanan...',
+                          style: TextStyle(color: context.c.inkSoft),
+                        ),
+                      ],
+                    ),
+                  )
+                : _errorMessage != null
+                ? Center(
+                    child: KeadaanKosong(
+                      ikon: Icons.cloud_off_rounded,
+                      judul: 'Pesanan belum bisa dimuat',
+                      pesan: _errorMessage,
+                      aksi: 'Coba Lagi',
+                      onAksi: _loadBookings,
+                    ),
+                  )
+                : TabBarView(
+                    controller: _tabController,
+                    children: [
+                      for (final (status, _) in _tab)
+                        _buildTransactionList(status),
+                    ],
+                  ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -264,55 +253,86 @@ class _TransactionsPageState extends State<TransactionsPage>
     final bookings = _getFilteredBookings(status);
 
     if (bookings.isEmpty) {
-      String emptyMessage;
-      IconData emptyIcon;
-
-      switch (status) {
-        case 'upcoming':
-          emptyMessage = 'Tidak ada booking mendatang';
-          emptyIcon = Icons.event_available;
-          break;
-        case 'pending':
-          emptyMessage = 'Tidak ada pembayaran pending';
-          emptyIcon = Icons.hourglass_empty;
-          break;
-        case 'history':
-          emptyMessage = 'Belum ada riwayat main';
-          emptyIcon = Icons.history;
-          break;
-        default:
-          emptyMessage = 'Belum ada pesanan';
-          emptyIcon = Icons.receipt_long_outlined;
-      }
-
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+      final (IconData ikon, String judul, String? pesan) = switch (status) {
+        'upcoming' => (
+          Icons.event_available_rounded,
+          'Tidak ada booking mendatang',
+          'Yuk booking lapangan favoritmu!',
+        ),
+        'pending' => (
+          Icons.hourglass_empty_rounded,
+          'Tidak ada pembayaran pending',
+          null,
+        ),
+        'history' => (Icons.history_rounded, 'Belum ada riwayat main', null),
+        _ => (Icons.receipt_long_rounded, 'Belum ada pesanan', null),
+      };
+      return RefreshIndicator(
+        onRefresh: _loadBookings,
+        child: ListView(
           children: [
-            Icon(emptyIcon, size: 80, color: context.c.inkSoft),
-            const SizedBox(height: 16),
-            Text(
-              emptyMessage,
-              style: TextStyle(color: context.c.inkSoft, fontSize: 16),
-            ),
-            if (status == 'upcoming') ...[
-              const SizedBox(height: 8),
-              Text(
-                'Yuk booking lapangan favoritmu!',
-                style: TextStyle(color: context.c.inkSoft, fontSize: 13),
-              ),
-            ],
+            const SizedBox(height: 48),
+            KeadaanKosong(ikon: ikon, judul: judul, pesan: pesan),
           ],
         ),
       );
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: bookings.length,
-      itemBuilder: (context, index) {
-        return _BookingCard(booking: bookings[index], onRefresh: _loadBookings);
-      },
+    return RefreshIndicator(
+      onRefresh: _loadBookings,
+      child: ListView.separated(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+        itemCount: bookings.length,
+        separatorBuilder: (_, __) => const SizedBox(height: 12),
+        itemBuilder: (context, index) {
+          return _BookingCard(
+            booking: bookings[index],
+            onRefresh: _loadBookings,
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// Pil penyaring di dalam kepala pekat, sama dengan tab Booking mitra.
+class _PilFilter extends StatelessWidget {
+  const _PilFilter({
+    required this.label,
+    required this.aktif,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool aktif;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: aktif
+          ? SportagoColors.volt
+          : SportagoColors.pure.withValues(alpha: 0.08),
+      shape: const StadiumBorder(),
+      child: InkWell(
+        customBorder: const StadiumBorder(),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Center(
+            child: Text(
+              label,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 13,
+                fontWeight: aktif ? FontWeight.w800 : FontWeight.w600,
+                color: aktif
+                    ? SportagoColors.pekat
+                    : SportagoColors.pure.withValues(alpha: 0.8),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -425,235 +445,200 @@ class _BookingCardState extends State<_BookingCard> {
 
   @override
   Widget build(BuildContext context) {
-    final status = booking.status;
-    Color themeColor;
-    String statusText;
-    IconData statusIcon;
-
-    switch (status) {
-      case 'pending':
-        themeColor = context.c.warn;
-        statusText = "Menunggu Pembayaran";
-        statusIcon = Icons.timer_outlined;
-        break;
-      case 'confirmed':
-        themeColor = context.c.accent;
-        statusText = "Terkonfirmasi";
-        statusIcon = Icons.verified;
-        break;
-      case 'checked_in':
-        themeColor = context.c.accent;
-        statusText = "Sedang Bermain";
-        statusIcon = Icons.sports;
-        break;
-      case 'cancelled':
-        themeColor = context.c.danger;
-        statusText = "Dibatalkan";
-        statusIcon = Icons.cancel_outlined;
-        break;
-      case 'completed':
-        themeColor = context.c.ok;
-        statusText = "Selesai";
-        statusIcon = Icons.check_circle_outline;
-        break;
-      case 'expired':
-        themeColor = Colors.grey;
-        statusText = "Kadaluarsa";
-        statusIcon = Icons.timer_off_outlined;
-        break;
-      default:
-        themeColor = Colors.grey;
-        statusText = status;
-        statusIcon = Icons.help_outline;
-    }
+    final c = context.c;
+    final (String statusText, Nada nada) = switch (booking.status) {
+      'pending' => ('Menunggu Pembayaran', Nada.warn),
+      'confirmed' => ('Terkonfirmasi', Nada.aksen),
+      'checked_in' => ('Sedang Bermain', Nada.info),
+      'cancelled' => ('Dibatalkan', Nada.danger),
+      'completed' => ('Selesai', Nada.ok),
+      'expired' => ('Kadaluarsa', Nada.netral),
+      _ => (booking.status, Nada.netral),
+    };
 
     final venueAddress = booking.field?.venue?.address;
+    final jam = booking.formattedTime.split(' - ');
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: context.c.raised,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: context.c.line),
-      ),
+    // Jam mulai di kiri dalam ubin pekat, sama dengan kartu booking di
+    // app mitra: itu yang dicari pemain sebelum berangkat.
+    return Kartu(
+      padding: const EdgeInsets.all(14),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            decoration: BoxDecoration(
-              color: themeColor.withValues(alpha: 0.15),
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(16),
-              ),
-            ),
-            child: Row(
-              children: [
-                Icon(statusIcon, size: 16, color: themeColor),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    statusText,
-                    style: TextStyle(
-                      color: themeColor,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13,
-                    ),
-                  ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 64,
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                decoration: BoxDecoration(
+                  color: SportagoColors.pekat,
+                  borderRadius: BorderRadius.circular(14),
                 ),
-                // Countdown for upcoming bookings
-                if (_isUpcoming && _countdownText.isNotEmpty)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: context.c.surface,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.schedule, size: 12, color: context.c.warn),
-                        const SizedBox(width: 4),
-                        Text(
-                          _countdownText,
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: context.c.warn,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-              ],
-            ),
-          ),
-
-          // Body
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  booking.field?.venue?.name ?? "Unknown Venue",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: context.c.ink,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  booking.field?.name ?? "-",
-                  style: TextStyle(color: context.c.inkSoft, fontSize: 14),
-                ),
-                // Venue Address for upcoming bookings
-                if (_isUpcoming &&
-                    venueAddress != null &&
-                    venueAddress.isNotEmpty) ...[
-                  const SizedBox(height: 8),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(
-                        Icons.location_on_outlined,
-                        size: 14,
-                        color: context.c.inkSoft,
-                      ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          venueAddress,
-                          style: TextStyle(
-                            color: context.c.inkSoft,
-                            fontSize: 12,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-                const SizedBox(height: 12),
-                Row(
+                child: Column(
                   children: [
-                    Icon(
-                      Icons.calendar_today,
-                      size: 14,
-                      color: context.c.inkSoft,
+                    Text(
+                      jam.first,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: SportagoColors.pure,
+                      ),
                     ),
-                    const SizedBox(width: 6),
+                    if (jam.length > 1)
+                      Text(
+                        's/d ${jam.last}',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w600,
+                          color: SportagoColors.volt,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      booking.field?.venue?.name ?? "Unknown Venue",
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: c.ink,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      booking.field?.name ?? "-",
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 12.5,
+                        color: c.inkSoft,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
                     Text(
                       _formatDate(booking.bookingDate),
-                      style: TextStyle(color: context.c.inkSoft, fontSize: 13),
-                    ),
-                    const SizedBox(width: 16),
-                    Icon(Icons.access_time, size: 14, color: context.c.inkSoft),
-                    const SizedBox(width: 6),
-                    Text(
-                      booking.formattedTime,
-                      style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 11.5,
+                        color: c.inkDim,
+                      ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                Text(
-                  booking.formattedTotalPrice,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                    color: context.c.accent,
+              ),
+              const SizedBox(width: 10),
+              ChipStatus(statusText, nada: nada),
+            ],
+          ),
+          if (_isUpcoming && _countdownText.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: c.accentSoft,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.schedule_rounded, size: 15, color: c.accent),
+                  const SizedBox(width: 8),
+                  Text(
+                    _countdownText,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w700,
+                      color: c.accent,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          if (_isUpcoming &&
+              venueAddress != null &&
+              venueAddress.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.location_on_outlined, size: 15, color: c.inkDim),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    venueAddress,
+                    style: GoogleFonts.plusJakartaSans(
+                      color: c.inkSoft,
+                      fontSize: 12,
+                      height: 1.4,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const SizedBox(height: 12),
-                // Quick action buttons for upcoming bookings
-                if (_isUpcoming) ...[
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: _openMaps,
-                          icon: const Icon(Icons.directions, size: 18),
-                          label: const Text("Navigasi"),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: context.c.accent,
-                            side: BorderSide(color: context.c.accent),
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: _openChat,
-                          icon: const Icon(Icons.chat_outlined, size: 18),
-                          label: const Text("Chat"),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: context.c.ok,
-                            side: BorderSide(color: context.c.ok),
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                ],
-                _buildActionButton(context),
               ],
             ),
+          ],
+          Container(
+            height: 1,
+            margin: const EdgeInsets.symmetric(vertical: 14),
+            color: c.line,
           ),
+          Row(
+            children: [
+              Text(
+                'Total',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 13,
+                  color: c.inkSoft,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                booking.formattedTotalPrice,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.3,
+                  color: c.ink,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          if (_isUpcoming) ...[
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: _openMaps,
+                    icon: const Icon(Icons.directions_rounded, size: 18),
+                    label: const Text("Navigasi"),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: _openChat,
+                    icon: const Icon(
+                      Icons.chat_bubble_outline_rounded,
+                      size: 18,
+                    ),
+                    label: const Text("Chat"),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+          ],
+          _buildActionButton(context),
         ],
       ),
     );
@@ -662,46 +647,27 @@ class _BookingCardState extends State<_BookingCard> {
   Widget _buildActionButton(BuildContext context) {
     switch (booking.status) {
       case 'pending':
-        return Column(
+        return Row(
           children: [
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () => _goToPayment(context),
-                icon: const Icon(Icons.payment, color: Colors.white, size: 18),
-                label: const Text(
-                  "BAYAR SEKARANG",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+            Expanded(
+              child: OutlinedButton(
+                onPressed: () => _cancelBooking(context),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: context.c.danger,
+                  side: BorderSide(
+                    color: context.c.danger.withValues(alpha: 0.5),
                   ),
                 ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: context.c.ok,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
+                child: const Text("Batalkan"),
               ),
             ),
-            const SizedBox(height: 8),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: () => _cancelBooking(context),
-                icon: Icon(Icons.close, color: context.c.danger, size: 18),
-                label: Text(
-                  "Batalkan",
-                  style: TextStyle(color: context.c.danger),
-                ),
-                style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: context.c.danger),
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
+            const SizedBox(width: 10),
+            Expanded(
+              flex: 2,
+              child: FilledButton.icon(
+                onPressed: () => _goToPayment(context),
+                icon: const Icon(Icons.payment_rounded, size: 18),
+                label: const Text("Bayar Sekarang"),
               ),
             ),
           ],
@@ -710,7 +676,7 @@ class _BookingCardState extends State<_BookingCard> {
       case 'checked_in':
         return SizedBox(
           width: double.infinity,
-          child: ElevatedButton.icon(
+          child: FilledButton.icon(
             onPressed: () {
               Navigator.push(
                 context,
@@ -719,25 +685,8 @@ class _BookingCardState extends State<_BookingCard> {
                 ),
               );
             },
-            icon: Icon(
-              Icons.confirmation_number,
-              color: context.c.onAccent,
-              size: 18,
-            ),
-            label: Text(
-              "LIHAT E-TICKET",
-              style: TextStyle(
-                color: context.c.onAccent,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: context.c.accent,
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
+            icon: const Icon(Icons.confirmation_number_rounded, size: 18),
+            label: const Text("Lihat E-Ticket"),
           ),
         );
       default:
@@ -745,19 +694,8 @@ class _BookingCardState extends State<_BookingCard> {
           width: double.infinity,
           child: OutlinedButton.icon(
             onPressed: () => _rebook(context),
-            icon: Icon(Icons.replay, size: 18, color: context.c.accent),
-            label: Text(
-              "BOOKING LAGI",
-              style: TextStyle(color: context.c.accent),
-            ),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: context.c.accent,
-              side: BorderSide(color: context.c.accent),
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
+            icon: const Icon(Icons.replay_rounded, size: 18),
+            label: const Text("Booking Lagi"),
           ),
         );
     }
@@ -1633,18 +1571,11 @@ class _TransactionPaymentWaitingPageState
     // tidak terbayar.
     final String? nomorVa = widget.booking.payment?.virtualAccountNo;
 
+    // Bilah aplikasi dan warnanya dari tema (pekat), bukan ditimpa
+    // putih di sini; hitung mundur jadi kartu pekat di paling atas.
     return Scaffold(
-      backgroundColor: context.c.surface,
-      appBar: AppBar(
-        title: Text(
-          "Selesaikan Pembayaran",
-          style: TextStyle(color: context.c.ink, fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: context.c.surface,
-        elevation: 0,
-        systemOverlayStyle: gayaOverlay(context),
-        iconTheme: IconThemeData(color: context.c.ink),
-      ),
+      backgroundColor: context.c.sunken,
+      appBar: AppBar(title: const Text("Selesaikan Pembayaran")),
       body: SafeArea(
         // Bilah navigasi menumpuk di atas isi layar sejak
         // targetSdk 35. top:false karena AppBar sudah
@@ -1672,25 +1603,22 @@ class _TransactionPaymentWaitingPageState
                     // Countdown Timer Card
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(18),
                       decoration: BoxDecoration(
-                        color: context.c.raised,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: context.c.warn.withValues(alpha: 0.4),
-                        ),
+                        color: SportagoColors.pekat,
+                        borderRadius: BorderRadius.circular(20),
                       ),
                       child: Row(
                         children: [
                           Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color: context.c.warn.withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(10),
+                              color: SportagoColors.pekatNaik,
+                              borderRadius: BorderRadius.circular(14),
                             ),
-                            child: Icon(
+                            child: const Icon(
                               Icons.timer_outlined,
-                              color: context.c.warn,
+                              color: SportagoColors.volt,
                               size: 24,
                             ),
                           ),
@@ -1706,8 +1634,8 @@ class _TransactionPaymentWaitingPageState
                                             ? 'Menunggu pembayaran'
                                             : 'Selesaikan pembayaran dalam'),
                                   style: TextStyle(
-                                    fontSize: 12,
-                                    color: context.c.inkSoft,
+                                    fontSize: 12.5,
+                                    color: context.c.onMedia.inkSoft,
                                   ),
                                 ),
                                 if (_sisaWaktu.isNotEmpty) ...[
@@ -1715,14 +1643,15 @@ class _TransactionPaymentWaitingPageState
                                   Text(
                                     _sisaWaktu,
                                     style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
+                                      fontSize: 26,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: -0.5,
                                       fontFeatures: const [
                                         FontFeature.tabularFigures(),
                                       ],
                                       color: _sudahLewat
-                                          ? context.c.inkSoft
-                                          : context.c.danger,
+                                          ? context.c.onMedia.inkSoft
+                                          : SportagoColors.pure,
                                     ),
                                   ),
                                 ],
@@ -1737,10 +1666,10 @@ class _TransactionPaymentWaitingPageState
                     // Detail Booking Card
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(18),
                       decoration: BoxDecoration(
                         color: context.c.raised,
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(20),
                         border: Border.all(color: context.c.line),
                       ),
                       child: Column(
@@ -1749,16 +1678,16 @@ class _TransactionPaymentWaitingPageState
                           Row(
                             children: [
                               Icon(
-                                Icons.receipt_long,
-                                color: context.c.inkSoft,
+                                Icons.receipt_long_rounded,
+                                color: context.c.accent,
                                 size: 18,
                               ),
                               const SizedBox(width: 8),
                               Text(
                                 "Detail Booking",
                                 style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 15,
                                   color: context.c.ink,
                                 ),
                               ),
@@ -1797,10 +1726,10 @@ class _TransactionPaymentWaitingPageState
                     // Metode Pembayaran Card
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(18),
                       decoration: BoxDecoration(
                         color: context.c.raised,
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(20),
                         border: Border.all(color: context.c.line),
                       ),
                       child: Column(
@@ -1809,16 +1738,16 @@ class _TransactionPaymentWaitingPageState
                           Row(
                             children: [
                               Icon(
-                                Icons.payment,
-                                color: context.c.inkSoft,
+                                Icons.payment_rounded,
+                                color: context.c.accent,
                                 size: 18,
                               ),
                               const SizedBox(width: 8),
                               Text(
                                 "Metode Pembayaran",
                                 style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 15,
                                   color: context.c.ink,
                                 ),
                               ),
@@ -1828,8 +1757,8 @@ class _TransactionPaymentWaitingPageState
                           Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: context.c.accent.withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(10),
+                              color: context.c.accentSoft,
+                              borderRadius: BorderRadius.circular(14),
                             ),
                             child: Row(
                               children: [
@@ -1871,8 +1800,8 @@ class _TransactionPaymentWaitingPageState
                             Container(
                               padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
-                                color: context.c.surface,
-                                borderRadius: BorderRadius.circular(10),
+                                color: context.c.sunken,
+                                borderRadius: BorderRadius.circular(14),
                                 border: Border.all(color: context.c.line),
                               ),
                               // stretch, bukan center: tanpa ini Column
@@ -1968,12 +1897,6 @@ class _TransactionPaymentWaitingPageState
                                             },
                                       icon: const Icon(Icons.copy, size: 16),
                                       label: const Text("Salin"),
-                                      style: OutlinedButton.styleFrom(
-                                        foregroundColor: context.c.accent,
-                                        side: BorderSide(
-                                          color: context.c.accent,
-                                        ),
-                                      ),
                                     ),
                                   ),
                                 ],
@@ -2039,10 +1962,10 @@ class _TransactionPaymentWaitingPageState
                     // Rincian Pembayaran Card
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(18),
                       decoration: BoxDecoration(
                         color: context.c.raised,
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(20),
                         border: Border.all(color: context.c.line),
                       ),
                       child: Column(
@@ -2051,16 +1974,16 @@ class _TransactionPaymentWaitingPageState
                           Row(
                             children: [
                               Icon(
-                                Icons.receipt,
-                                color: context.c.inkSoft,
+                                Icons.receipt_rounded,
+                                color: context.c.accent,
                                 size: 18,
                               ),
                               const SizedBox(width: 8),
                               Text(
                                 "Rincian Pembayaran",
                                 style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 15,
                                   color: context.c.ink,
                                 ),
                               ),
@@ -2102,27 +2025,10 @@ class _TransactionPaymentWaitingPageState
                     SizedBox(
                       width: double.infinity,
                       height: 52,
-                      child: ElevatedButton.icon(
+                      child: FilledButton.icon(
                         onPressed: _simulatePayment,
-                        icon: Icon(
-                          Icons.check_circle_outline,
-                          color: context.c.onAccent,
-                        ),
-                        label: Text(
-                          "CEK STATUS PEMBAYARAN",
-                          style: TextStyle(
-                            color: context.c.onAccent,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                          ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: context.c.accent,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          elevation: 0,
-                        ),
+                        icon: const Icon(Icons.check_circle_outline_rounded),
+                        label: const Text("Cek Status Pembayaran"),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -2131,18 +2037,12 @@ class _TransactionPaymentWaitingPageState
                       height: 52,
                       child: OutlinedButton.icon(
                         onPressed: _cancelBooking,
-                        icon: Icon(Icons.close, color: context.c.danger),
-                        label: Text(
-                          "BATALKAN PESANAN",
-                          style: TextStyle(
-                            color: context.c.danger,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                        icon: const Icon(Icons.close_rounded),
+                        label: const Text("Batalkan Pesanan"),
                         style: OutlinedButton.styleFrom(
-                          side: BorderSide(color: context.c.danger),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
+                          foregroundColor: context.c.danger,
+                          side: BorderSide(
+                            color: context.c.danger.withValues(alpha: 0.5),
                           ),
                         ),
                       ),
@@ -2195,9 +2095,9 @@ class _TransactionPaymentWaitingPageState
           Text(
             value,
             style: TextStyle(
-              fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
-              fontSize: isBold ? 16 : 13,
-              color: isBlue ? context.c.accent : context.c.ink,
+              fontWeight: isBold ? FontWeight.w800 : FontWeight.w500,
+              fontSize: isBold ? 17 : 13,
+              color: context.c.ink,
             ),
           ),
         ],

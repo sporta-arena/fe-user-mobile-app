@@ -11,15 +11,10 @@ class AboutPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: context.c.surface,
       appBar: AppBar(
-        systemOverlayStyle: gayaOverlay(context),
-        title: Text(
-          "Tentang Sportago",
-          style: TextStyle(color: context.c.ink, fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: context.c.surface,
+        title: Text("Tentang Sportago"),
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: context.c.ink),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => Navigator.pop(context),
         ),
       ),

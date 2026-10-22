@@ -39,20 +39,7 @@ class _PromoPageState extends State<PromoPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: context.c.surface,
-      appBar: AppBar(
-        backgroundColor: context.c.surface,
-        elevation: 0,
-        title: Text(
-          'Promo Berjalan',
-          style: TextStyle(
-            color: context.c.ink,
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        iconTheme: IconThemeData(color: context.c.ink),
-      ),
+      appBar: AppBar(elevation: 0, title: const Text('Promo Berjalan')),
       body: SafeArea(
         top: false,
         child: _memuat

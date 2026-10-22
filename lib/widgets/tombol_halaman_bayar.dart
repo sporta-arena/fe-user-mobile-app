@@ -86,18 +86,15 @@ class TombolHalamanBayar extends StatelessWidget {
           height: 48,
           child: ElevatedButton.icon(
             onPressed: () => _buka(context),
-            icon: Icon(Icons.open_in_new, size: 18, color: context.c.onAccent),
+            // Warna dari tema: pekat di terang, aksen di gelap.
+            icon: const Icon(Icons.open_in_new, size: 18),
             label: Text(
               lewatDoku ? 'Bayar di halaman DOKU' : 'Lanjutkan Pembayaran',
-              style: TextStyle(
-                color: context.c.onAccent,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.w800),
             ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: context.c.accent,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(999),
               ),
             ),
           ),

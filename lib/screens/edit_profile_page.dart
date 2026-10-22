@@ -77,17 +77,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: context.c.surface,
+      // Latar dan bilah aplikasi ikut tema: abu muda dengan bilah pekat.
       appBar: AppBar(
-        systemOverlayStyle: gayaOverlay(context),
-        title: Text(
-          "Edit Profil",
-          style: TextStyle(color: context.c.ink, fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: context.c.surface,
-        elevation: 0,
+        title: const Text("Edit Profil"),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: context.c.ink),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -111,15 +105,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       height: 120,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: context.c.raised,
-                        border: Border.all(color: context.c.line, width: 4),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.1),
-                            blurRadius: 10,
-                            offset: const Offset(0, 5),
-                          ),
-                        ],
+                        color: SportagoColors.pekat,
+                        border: Border.all(
+                          color: SportagoColors.volt,
+                          width: 3,
+                        ),
                         image: AuthService.currentUser?.avatarUrl != null
                             ? DecorationImage(
                                 image: NetworkImage(
@@ -130,10 +120,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
                             : null,
                       ),
                       child: AuthService.currentUser?.avatarUrl == null
-                          ? Icon(
-                              Icons.person,
-                              size: 50,
-                              color: context.c.inkSoft,
+                          ? const Icon(
+                              Icons.person_rounded,
+                              size: 52,
+                              color: SportagoColors.volt,
                             )
                           : null,
                     ),
@@ -154,17 +144,17 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         child: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: context.c.accent,
+                            color: SportagoColors.volt,
                             shape: BoxShape.circle,
                             border: Border.all(
-                              color: context.c.surface,
-                              width: 2,
+                              color: context.c.sunken,
+                              width: 3,
                             ),
                           ),
-                          child: Icon(
-                            Icons.camera_alt,
-                            color: context.c.onAccent,
-                            size: 20,
+                          child: const Icon(
+                            Icons.camera_alt_rounded,
+                            color: SportagoColors.pekat,
+                            size: 18,
                           ),
                         ),
                       ),
@@ -235,26 +225,19 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 height: 56,
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : _saveProfile,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: context.c.accent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    elevation: 0,
-                  ),
+                  // Warna dan bentuk dari tema: tombol utama pekat.
                   child: _isLoading
-                      ? SizedBox(
+                      ? const SizedBox(
                           height: 24,
                           width: 24,
                           child: CircularProgressIndicator(
-                            color: context.c.onAccent,
+                            color: SportagoColors.pure,
                             strokeWidth: 2,
                           ),
                         )
-                      : Text(
-                          "SIMPAN PERUBAHAN",
+                      : const Text(
+                          "Simpan Perubahan",
                           style: TextStyle(
-                            color: context.c.onAccent,
                             fontWeight: FontWeight.w700,
                             fontSize: 16,
                           ),
@@ -282,43 +265,30 @@ class _EditProfilePageState extends State<EditProfilePage> {
       children: [
         Text(
           label,
-          style: TextStyle(fontWeight: FontWeight.bold, color: context.c.ink),
+          style: TextStyle(
+            fontSize: 13.5,
+            fontWeight: FontWeight.w700,
+            color: context.c.ink,
+          ),
         ),
         const SizedBox(height: 8),
-        Container(
-          decoration: BoxDecoration(
-            color: context.c.raised,
-            borderRadius: BorderRadius.circular(12),
+        TextField(
+          controller: controller,
+          readOnly: isReadOnly,
+          keyboardType: inputType,
+          style: TextStyle(
+            color: isReadOnly ? context.c.inkSoft : context.c.ink,
           ),
-          child: TextField(
-            controller: controller,
-            readOnly: isReadOnly,
-            keyboardType: inputType,
-            style: TextStyle(
-              color: isReadOnly ? context.c.inkSoft : context.c.ink,
+          decoration: InputDecoration(
+            prefixIcon: Icon(
+              icon,
+              color: isReadOnly ? context.c.inkSoft : context.c.accent,
             ),
-            decoration: InputDecoration(
-              prefixIcon: Icon(
-                icon,
-                color: isReadOnly ? context.c.inkSoft : context.c.accent,
-              ),
-              hintText: hint,
-              hintStyle: TextStyle(fontSize: 12, color: context.c.inkSoft),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none, // Hilangkan garis default
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: context.c.line),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: context.c.accent),
-              ),
-              filled: true,
-              fillColor: context.c.raised,
-            ),
+            hintText: hint,
+            hintStyle: TextStyle(fontSize: 12, color: context.c.inkSoft),
+            // Garis, sudut, dan isian dari tema; bidang baca-saja
+            // dibenamkan supaya terbaca tidak bisa diubah.
+            fillColor: isReadOnly ? context.c.sunken : null,
           ),
         ),
       ],

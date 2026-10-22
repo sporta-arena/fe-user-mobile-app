@@ -111,21 +111,13 @@ class _HasilFilterPageState extends State<HasilFilterPage> {
     final jumlah = _filter.jumlahAktif;
 
     return Scaffold(
-      backgroundColor: context.c.surface,
       appBar: AppBar(
-        backgroundColor: context.c.surface,
         elevation: 0,
-        iconTheme: IconThemeData(color: context.c.ink),
         title: Text(
           widget.judul ??
               (widget.kataKunci?.isNotEmpty == true
                   ? '"${widget.kataKunci}"'
                   : 'Cari Arena'),
-          style: TextStyle(
-            color: context.c.ink,
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-          ),
         ),
         actions: [
           Padding(
@@ -135,7 +127,7 @@ class _HasilFilterPageState extends State<HasilFilterPage> {
               children: [
                 IconButton(
                   onPressed: _bukaFilter,
-                  icon: Icon(Icons.tune_rounded, color: context.c.ink),
+                  icon: const Icon(Icons.tune_rounded),
                 ),
                 if (jumlah > 0)
                   Positioned(
@@ -146,14 +138,19 @@ class _HasilFilterPageState extends State<HasilFilterPage> {
                       width: 18,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color: context.c.accent,
+                        // Volt bertepi pekat, seperti lencana di kepala
+                        // pekat lainnya.
+                        color: SportagoColors.volt,
                         shape: BoxShape.circle,
-                        border: Border.all(color: context.c.surface, width: 2),
+                        border: Border.all(
+                          color: SportagoColors.pekat,
+                          width: 2,
+                        ),
                       ),
                       child: Text(
                         '$jumlah',
-                        style: TextStyle(
-                          color: context.c.onAccent,
+                        style: const TextStyle(
+                          color: SportagoColors.pekat,
                           fontSize: 10,
                           fontWeight: FontWeight.w800,
                         ),
@@ -260,7 +257,7 @@ class _HasilFilterPageState extends State<HasilFilterPage> {
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: context.c.raised,
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(color: context.c.line),
         ),
         child: Row(

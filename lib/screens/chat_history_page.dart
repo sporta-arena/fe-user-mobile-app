@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_tokens.dart';
+import '../widgets/sportago_ui.dart';
 import 'package:intl/intl.dart';
 import '../services/booking_service.dart';
 import '../services/auth_service.dart';
@@ -80,82 +81,40 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
     }
   }
 
+  // Bilah aplikasi ikut tema: hijau pekat dengan judul putih.
+  PreferredSizeWidget _bilah() => AppBar(
+    title: const Text("Riwayat Pesan"),
+    leading: IconButton(
+      icon: const Icon(Icons.arrow_back_ios_new_rounded),
+      onPressed: () => Navigator.pop(context),
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
     // Check if user is not logged in
     if (AuthService.token == null) {
       return Scaffold(
-        backgroundColor: context.c.surface,
-        appBar: AppBar(
-          systemOverlayStyle: gayaOverlay(context),
-          title: Text(
-            "Riwayat Pesan",
-            style: TextStyle(color: context.c.ink, fontWeight: FontWeight.bold),
-          ),
-          backgroundColor: context.c.surface,
-          elevation: 0,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back_ios, color: context.c.ink),
-            onPressed: () => Navigator.pop(context),
-          ),
-        ),
+        appBar: _bilah(),
         body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.login, size: 80, color: context.c.inkSoft),
-              const SizedBox(height: 16),
-              Text(
-                "Silakan login untuk melihat riwayat pesan",
-                style: TextStyle(color: context.c.inkSoft, fontSize: 16),
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const LoginPage()),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: context.c.accent,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 12,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                ),
-                child: Text(
-                  "Login",
-                  style: TextStyle(
-                    color: context.c.onAccent,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            ],
+          child: KeadaanKosong(
+            ikon: Icons.login_rounded,
+            judul: "Masuk dulu, ya",
+            pesan: "Silakan login untuk melihat riwayat pesan",
+            aksi: "Login",
+            onAksi: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const LoginPage()),
+              );
+            },
           ),
         ),
       );
     }
 
     return Scaffold(
-      backgroundColor: context.c.surface,
-      appBar: AppBar(
-        systemOverlayStyle: gayaOverlay(context),
-        title: Text(
-          "Riwayat Pesan",
-          style: TextStyle(color: context.c.ink, fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: context.c.surface,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: context.c.ink),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
+      appBar: _bilah(),
       body: SafeArea(
         // Bilah navigasi menumpuk di atas isi layar sejak
         // targetSdk 35. top:false karena AppBar sudah
@@ -165,66 +124,20 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
             ? Center(child: CircularProgressIndicator(color: context.c.accent))
             : _errorMessage != null
             ? Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.error_outline,
-                      size: 60,
-                      color: context.c.inkSoft,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      _errorMessage!,
-                      style: TextStyle(color: context.c.inkSoft),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: _loadBookingsWithChat,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: context.c.accent,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                      ),
-                      child: Text(
-                        'Coba Lagi',
-                        style: TextStyle(
-                          color: context.c.onAccent,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ],
+                child: KeadaanKosong(
+                  ikon: Icons.error_outline_rounded,
+                  judul: "Riwayat belum termuat",
+                  pesan: _errorMessage,
+                  aksi: 'Coba Lagi',
+                  onAksi: _loadBookingsWithChat,
                 ),
               )
             : _bookingsWithChat.isEmpty
-            ? Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.chat_bubble_outline,
-                      size: 80,
-                      color: context.c.inkSoft,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      "Belum ada riwayat pesan",
-                      style: TextStyle(
-                        color: context.c.inkSoft,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      "Riwayat chat akan muncul setelah\nbooking selesai",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: context.c.inkSoft, fontSize: 14),
-                    ),
-                  ],
+            ? const Center(
+                child: KeadaanKosong(
+                  ikon: Icons.chat_bubble_outline_rounded,
+                  judul: "Belum ada riwayat pesan",
+                  pesan: "Riwayat chat akan muncul setelah\nbooking selesai",
                 ),
               )
             : RefreshIndicator(
@@ -251,35 +164,30 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
     final bool isActive =
         booking.status == 'confirmed' || booking.status == 'checked_in';
 
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => ChatPage(booking: booking)),
-        );
-      },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Kartu(
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: context.c.raised,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: context.c.line),
-        ),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => ChatPage(booking: booking)),
+          );
+        },
         child: Row(
           children: [
-            // Venue Icon
+            // Venue Icon: pekat ber-ikon volt selagi chat masih terbuka.
             Container(
-              width: 56,
-              height: 56,
+              width: 52,
+              height: 52,
               decoration: BoxDecoration(
-                color: isActive ? context.c.accent : context.c.line,
-                borderRadius: BorderRadius.circular(14),
+                color: isActive ? SportagoColors.pekat : context.c.sunken,
+                borderRadius: BorderRadius.circular(16),
               ),
               child: Icon(
-                Icons.sports_soccer,
-                color: isActive ? context.c.onAccent : context.c.inkSoft,
-                size: 28,
+                Icons.sports_soccer_rounded,
+                color: isActive ? SportagoColors.volt : context.c.inkDim,
+                size: 26,
               ),
             ),
             const SizedBox(width: 14),
@@ -295,52 +203,19 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
                         child: Text(
                           booking.field?.venue?.name ?? "Venue",
                           style: TextStyle(
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w800,
                             fontSize: 15,
+                            letterSpacing: -0.2,
                             color: context.c.ink,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      if (isActive)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 3,
-                          ),
-                          decoration: BoxDecoration(
-                            color: context.c.okSoft,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Text(
-                            "Aktif",
-                            style: TextStyle(
-                              color: context.c.ok,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        )
-                      else
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 3,
-                          ),
-                          decoration: BoxDecoration(
-                            color: context.c.line,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Text(
-                            "Selesai",
-                            style: TextStyle(
-                              color: context.c.inkSoft,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
+                      const SizedBox(width: 8),
+                      isActive
+                          ? const ChipStatus("Aktif", nada: Nada.ok)
+                          : const ChipStatus("Selesai"),
                     ],
                   ),
                   const SizedBox(height: 4),
@@ -354,7 +229,7 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
                       Icon(
                         Icons.calendar_today_outlined,
                         size: 12,
-                        color: context.c.inkSoft,
+                        color: context.c.inkDim,
                       ),
                       const SizedBox(width: 4),
                       Text(
@@ -368,7 +243,7 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
                       Icon(
                         Icons.access_time_outlined,
                         size: 12,
-                        color: context.c.inkSoft,
+                        color: context.c.inkDim,
                       ),
                       const SizedBox(width: 4),
                       Text(
@@ -385,7 +260,7 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
             ),
 
             // Arrow
-            Icon(Icons.chevron_right, color: context.c.inkSoft),
+            Icon(Icons.chevron_right_rounded, color: context.c.inkSoft),
           ],
         ),
       ),

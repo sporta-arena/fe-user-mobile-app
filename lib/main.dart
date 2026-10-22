@@ -9,7 +9,7 @@ import 'services/versi_app.dart';
 import 'services/auth_service.dart';
 import 'services/favorite_service.dart';
 import 'theme/app_theme.dart';
-import 'theme/app_tokens.dart';
+import 'widgets/hero_backdrop.dart';
 import 'widgets/sportago_mark.dart';
 import 'theme/theme_controller.dart';
 import 'utils/tutup_papan_ketik.dart';
@@ -154,15 +154,36 @@ class _SplashScreenState extends State<SplashScreen> {
     // hitam dengan isian kuning, jadi isiannya lenyap ke latar dan yang
     // kebaca cuma garis hitamnya, logonya jadi nyaru.
     //
-    // Sekarang: lambang satu warna yang diwarnai ke aksen tema, plus
-    // wordmark sebagai teks. Kontrasnya benar di terang maupun gelap,
-    // dan warnanya sama persis dengan halaman masuk sesudahnya.
-    return Scaffold(
-      backgroundColor: context.c.surface,
-      body: Center(
-        child: SportagoWordmark(
-          markHeight: screenWidth * 0.16,
-          fontSize: screenWidth * 0.095,
+    // Sekarang: latar hijau pekat yang sama dengan onboarding, kepala
+    // layar Masuk, dan layar peluncur Android/iOS, jadi tidak ada kedip
+    // ganti warna dari ikon peluncur sampai layar pertama. Sama persis
+    // dengan splash aplikasi mitra.
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: Colors.transparent,
+        systemNavigationBarColor: HeroBackdrop.base,
+        systemNavigationBarIconBrightness: Brightness.light,
+      ),
+      child: Scaffold(
+        backgroundColor: HeroBackdrop.base,
+        body: HeroBackdrop(
+          glowAt: Alignment.center,
+          child: Center(
+            child: TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0, end: 1),
+              duration: const Duration(milliseconds: 700),
+              curve: Curves.easeOutCubic,
+              builder: (context, t, child) => Opacity(
+                opacity: t,
+                child: Transform.scale(scale: 0.92 + 0.08 * t, child: child),
+              ),
+              child: SportagoWordmark(
+                markHeight: screenWidth * 0.16,
+                fontSize: screenWidth * 0.095,
+                onMedia: true,
+              ),
+            ),
+          ),
         ),
       ),
     );

@@ -350,7 +350,9 @@ class _MapPageState extends State<MapPage> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
               decoration: BoxDecoration(
-                color: isSel ? context.c.ink : context.c.accent,
+                // Jarum pekat bertinta putih; yang dipilih berganti volt
+                // supaya menonjol di antara jarum lainnya.
+                color: isSel ? SportagoColors.volt : _latarAktif,
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(color: Colors.white, width: 1.5),
                 boxShadow: const [
@@ -365,7 +367,7 @@ class _MapPageState extends State<MapPage> {
                 teks,
                 maxLines: 1,
                 style: TextStyle(
-                  color: context.c.onAccent,
+                  color: isSel ? SportagoColors.pekat : _tintaAktif,
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
                 ),
@@ -376,13 +378,20 @@ class _MapPageState extends State<MapPage> {
             Container(
               width: 2,
               height: 7,
-              color: isSel ? context.c.ink : context.c.accent,
+              color: isSel ? SportagoColors.volt : _latarAktif,
             ),
           ],
         ),
       ),
     );
   }
+
+  /// Bidang aktif hijau pekat, sama dengan pil filter dan bottom-nav.
+  /// Di tema gelap pekat tenggelam ke peta yang dibalik, jadi memakai
+  /// aksen.
+  bool get _gelap => Theme.of(context).brightness == Brightness.dark;
+  Color get _latarAktif => _gelap ? context.c.accent : SportagoColors.pekat;
+  Color get _tintaAktif => _gelap ? context.c.onAccent : SportagoColors.pure;
 
   Widget _topBar() {
     return Positioned(
@@ -459,16 +468,14 @@ class _MapPageState extends State<MapPage> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               decoration: BoxDecoration(
-                color: aktif ? context.c.accent : context.c.raised,
+                color: aktif ? _latarAktif : context.c.raised,
                 borderRadius: BorderRadius.circular(999),
-                border: Border.all(
-                  color: aktif ? context.c.accent : context.c.line,
-                ),
+                border: Border.all(color: aktif ? _latarAktif : context.c.line),
               ),
               child: Text(
                 e.value,
                 style: TextStyle(
-                  color: aktif ? context.c.onAccent : context.c.ink,
+                  color: aktif ? _tintaAktif : context.c.ink,
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                 ),
@@ -496,7 +503,7 @@ class _MapPageState extends State<MapPage> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
             decoration: BoxDecoration(
-              color: context.c.accent,
+              color: _latarAktif,
               borderRadius: BorderRadius.circular(999),
               boxShadow: const [
                 BoxShadow(
@@ -512,13 +519,13 @@ class _MapPageState extends State<MapPage> {
                 Icon(
                   Icons.refresh_rounded,
                   size: 18,
-                  color: context.c.onAccent,
+                  color: _gelap ? context.c.onAccent : SportagoColors.volt,
                 ),
                 const SizedBox(width: 6),
                 Text(
                   'Cari di area ini',
                   style: TextStyle(
-                    color: context.c.onAccent,
+                    color: _tintaAktif,
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
                   ),
@@ -561,7 +568,7 @@ class _MapPageState extends State<MapPage> {
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: context.c.raised,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(20),
             border: Border.all(color: context.c.line),
             boxShadow: [
               BoxShadow(
