@@ -350,9 +350,10 @@ class _MapPageState extends State<MapPage> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
               decoration: BoxDecoration(
-                // Jarum pekat bertinta putih; yang dipilih berganti volt
-                // supaya menonjol di antara jarum lainnya.
-                color: isSel ? SportagoColors.volt : _latarAktif,
+                // Jarum hijau aksen; yang dipilih berganti warna kontras
+                // (gelap di tema terang) supaya menonjol di antara jarum
+                // lainnya.
+                color: isSel ? context.c.inverse : _latarAktif,
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(color: Colors.white, width: 1.5),
                 boxShadow: const [
@@ -367,7 +368,7 @@ class _MapPageState extends State<MapPage> {
                 teks,
                 maxLines: 1,
                 style: TextStyle(
-                  color: isSel ? SportagoColors.pekat : _tintaAktif,
+                  color: isSel ? context.c.onInverse : _tintaAktif,
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
                 ),
@@ -378,7 +379,7 @@ class _MapPageState extends State<MapPage> {
             Container(
               width: 2,
               height: 7,
-              color: isSel ? SportagoColors.volt : _latarAktif,
+              color: isSel ? context.c.inverse : _latarAktif,
             ),
           ],
         ),
@@ -386,12 +387,10 @@ class _MapPageState extends State<MapPage> {
     );
   }
 
-  /// Bidang aktif hijau pekat, sama dengan pil filter dan bottom-nav.
-  /// Di tema gelap pekat tenggelam ke peta yang dibalik, jadi memakai
-  /// aksen.
-  bool get _gelap => Theme.of(context).brightness == Brightness.dark;
-  Color get _latarAktif => _gelap ? context.c.accent : SportagoColors.pekat;
-  Color get _tintaAktif => _gelap ? context.c.onAccent : SportagoColors.pure;
+  /// Bidang aktif memakai aksen tema, sama dengan pil filter dan
+  /// bottom-nav: hijau lapangan di terang, volt di gelap.
+  Color get _latarAktif => context.c.accent;
+  Color get _tintaAktif => context.c.onAccent;
 
   Widget _topBar() {
     return Positioned(
@@ -516,11 +515,7 @@ class _MapPageState extends State<MapPage> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  Icons.refresh_rounded,
-                  size: 18,
-                  color: _gelap ? context.c.onAccent : SportagoColors.volt,
-                ),
+                Icon(Icons.refresh_rounded, size: 18, color: _tintaAktif),
                 const SizedBox(width: 6),
                 Text(
                   'Cari di area ini',

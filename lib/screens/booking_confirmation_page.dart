@@ -421,12 +421,12 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                   ),
                 ),
                 child: _memeriksaPromo
-                    ? const SizedBox(
+                    ? SizedBox(
                         height: 18,
                         width: 18,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: SportagoColors.pure,
+                          color: context.c.onAccent,
                         ),
                       )
                     : const Text(
@@ -780,13 +780,11 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // --- KARTU PEKAT: venue, tanggal, jam ---
+                        // --- KARTU PESANAN: venue, tanggal, jam ---
                         //
-                        // Sama seperti rincian booking di app mitra: hal
-                        // yang dipesan duduk di satu kartu pekat paling
-                        // atas, baru di bawahnya urusan bayar.
+                        // Hal yang dipesan duduk di satu kartu paling atas,
+                        // baru di bawahnya urusan bayar.
                         Kartu(
-                          warna: SportagoColors.pekat,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -821,11 +819,11 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                                             Expanded(
                                               child: Text(
                                                 widget.venueName,
-                                                style: const TextStyle(
+                                                style: TextStyle(
                                                   fontWeight: FontWeight.w800,
                                                   fontSize: 16.5,
                                                   letterSpacing: -0.3,
-                                                  color: SportagoColors.pure,
+                                                  color: context.c.ink,
                                                 ),
                                                 maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
@@ -838,8 +836,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                                           children: [
                                             Icon(
                                               Icons.location_on,
-                                              color: SportagoColors.pure
-                                                  .withValues(alpha: 0.65),
+                                              color: context.c.inkSoft,
                                               size: 14,
                                             ),
                                             const SizedBox(width: 4),
@@ -847,8 +844,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                                               child: Text(
                                                 widget.venueAddress,
                                                 style: TextStyle(
-                                                  color: SportagoColors.pure
-                                                      .withValues(alpha: 0.7),
+                                                  color: context.c.inkSoft,
                                                   fontSize: 12,
                                                 ),
                                                 maxLines: 1,
@@ -865,8 +861,8 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                                                 text: _formatCurrency(
                                                   widget.price,
                                                 ),
-                                                style: const TextStyle(
-                                                  color: SportagoColors.volt,
+                                                style: TextStyle(
+                                                  color: context.c.accent,
                                                   fontWeight: FontWeight.w800,
                                                   fontSize: 16,
                                                 ),
@@ -874,8 +870,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                                               TextSpan(
                                                 text: " /jam",
                                                 style: TextStyle(
-                                                  color: SportagoColors.pure
-                                                      .withValues(alpha: 0.65),
+                                                  color: context.c.inkSoft,
                                                   fontSize: 12,
                                                 ),
                                               ),
@@ -889,12 +884,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                               ),
 
                               const SizedBox(height: 16),
-                              Divider(
-                                height: 1,
-                                color: SportagoColors.pure.withValues(
-                                  alpha: 0.12,
-                                ),
-                              ),
+                              Divider(height: 1, color: context.c.line),
                               const SizedBox(height: 16),
 
                               // --- TANGGAL ---
@@ -903,25 +893,21 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                                   Icon(
                                     Icons.calendar_today_outlined,
                                     size: 16,
-                                    color: SportagoColors.pure.withValues(
-                                      alpha: 0.65,
-                                    ),
+                                    color: context.c.inkSoft,
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
                                     "Tanggal Booking",
                                     style: TextStyle(
                                       fontSize: 12.5,
-                                      color: SportagoColors.pure.withValues(
-                                        alpha: 0.7,
-                                      ),
+                                      color: context.c.inkSoft,
                                     ),
                                   ),
                                   const Spacer(),
                                   Text(
                                     widget.selectedDate,
-                                    style: const TextStyle(
-                                      color: SportagoColors.pure,
+                                    style: TextStyle(
+                                      color: context.c.ink,
                                       fontSize: 14,
                                       fontWeight: FontWeight.w700,
                                     ),
@@ -940,9 +926,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                                     "Jam Terpilih",
                                     style: TextStyle(
                                       fontSize: 12.5,
-                                      color: SportagoColors.pure.withValues(
-                                        alpha: 0.7,
-                                      ),
+                                      color: context.c.inkSoft,
                                     ),
                                   ),
                                   Container(
@@ -951,13 +935,13 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                                       vertical: 4,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: SportagoColors.volt,
+                                      color: context.c.accent,
                                       borderRadius: BorderRadius.circular(999),
                                     ),
                                     child: Text(
                                       "${_durationHours} jam",
-                                      style: const TextStyle(
-                                        color: SportagoColors.pekat,
+                                      style: TextStyle(
+                                        color: context.c.onAccent,
                                         fontSize: 12,
                                         fontWeight: FontWeight.w800,
                                       ),
@@ -976,7 +960,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                                       vertical: 8,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: SportagoColors.pekatNaik,
+                                      color: context.c.accentSoft,
                                       borderRadius: BorderRadius.circular(999),
                                     ),
                                     child: Text(
@@ -985,8 +969,8 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                                       // membuat booking. Yang digeser ke WIB
                                       // hanya labelnya.
                                       WaktuWib.tampil(slot),
-                                      style: const TextStyle(
-                                        color: SportagoColors.pure,
+                                      style: TextStyle(
+                                        color: context.c.accent,
                                         fontWeight: FontWeight.w700,
                                         fontSize: 14,
                                       ),
@@ -1398,7 +1382,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                   onPressed: (_isLoading || !_refundPolicyAccepted)
                       ? null
                       : _createBooking,
-                  // Warna dari tema: pekat di terang, aksen di gelap, dan
+                  // Warna dari tema (aksen hijau, volt di gelap), dan
                   // keadaan mati yang redup sudah diatur di sana.
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(
@@ -1407,11 +1391,11 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                     elevation: 0,
                   ),
                   child: _isLoading
-                      ? const SizedBox(
+                      ? SizedBox(
                           width: 24,
                           height: 24,
                           child: CircularProgressIndicator(
-                            color: SportagoColors.pure,
+                            color: context.c.onAccent,
                             strokeWidth: 2,
                           ),
                         )
@@ -2570,13 +2554,13 @@ class _BookingCreatedPageState extends State<BookingCreatedPage>
               Container(
                 width: 100,
                 height: 100,
-                decoration: const BoxDecoration(
-                  color: SportagoColors.pekat,
+                decoration: BoxDecoration(
+                  color: context.c.accent,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.check_rounded,
-                  color: SportagoColors.volt,
+                  color: context.c.onAccent,
                   size: 56,
                 ),
               ),
@@ -2807,12 +2791,11 @@ class _BookingCreatedPageState extends State<BookingCreatedPage>
   /// paling berharga. Sekarang tempat itu diisi yang benar-benar dicari
   /// pelanggan: statusnya, jumlah yang harus dibayar, dan sisa waktunya.
   Widget _kepalaStatus(BuildContext context, int total) {
-    // Kepalanya kartu pekat, jadi status memakai volt (lunas/menunggu)
-    // atau putih redup (habis), bukan hijau/oranye yang tenggelam di
-    // atas hijau pekat.
-    final Color warna = _isExpired
-        ? SportagoColors.pure.withValues(alpha: 0.75)
-        : SportagoColors.volt;
+    // Warna status dari token: hijau saat lunas, oranye saat menunggu,
+    // merah saat waktunya habis.
+    final Color warna = _isPaid
+        ? context.c.ok
+        : (_isExpired ? context.c.danger : context.c.warn);
     final String judul = _isPaid
         ? 'Pembayaran diterima'
         : (_isExpired ? 'Waktu pembayaran habis' : 'Menunggu pembayaran');
@@ -2821,7 +2804,6 @@ class _BookingCreatedPageState extends State<BookingCreatedPage>
         : (_isExpired ? Icons.cancel_rounded : Icons.schedule_rounded);
 
     return Kartu(
-      warna: SportagoColors.pekat,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -2850,16 +2832,16 @@ class _BookingCreatedPageState extends State<BookingCreatedPage>
                     vertical: 5,
                   ),
                   decoration: BoxDecoration(
-                    color: SportagoColors.volt,
+                    color: context.c.warnSoft,
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(
                     _countdown,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w800,
-                      fontFeatures: [FontFeature.tabularFigures()],
-                      color: SportagoColors.pekat,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                      color: context.c.warn,
                     ),
                   ),
                 ),
@@ -2868,12 +2850,12 @@ class _BookingCreatedPageState extends State<BookingCreatedPage>
           const SizedBox(height: 10),
           Text(
             _formatCurrencyInt(total),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 32,
               fontWeight: FontWeight.w800,
               letterSpacing: -0.8,
               height: 1.1,
-              color: SportagoColors.pure,
+              color: context.c.ink,
             ),
           ),
           const SizedBox(height: 6),
@@ -2883,10 +2865,7 @@ class _BookingCreatedPageState extends State<BookingCreatedPage>
                 : (_isExpired
                       ? 'Slotnya sudah dilepas. Silakan pesan ulang.'
                       : 'Transfer dengan nominal yang sama persis.'),
-            style: TextStyle(
-              fontSize: 13,
-              color: SportagoColors.pure.withValues(alpha: 0.7),
-            ),
+            style: TextStyle(fontSize: 13, color: context.c.inkSoft),
           ),
           if (_isCheckingStatus && !_isPaid) ...[
             const SizedBox(height: 10),
@@ -2897,16 +2876,13 @@ class _BookingCreatedPageState extends State<BookingCreatedPage>
                   height: 13,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    color: SportagoColors.volt,
+                    color: context.c.accent,
                   ),
                 ),
                 const SizedBox(width: 8),
                 Text(
                   'Mengecek status pembayaran...',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: SportagoColors.pure.withValues(alpha: 0.8),
-                  ),
+                  style: TextStyle(fontSize: 12, color: context.c.inkSoft),
                 ),
               ],
             ),
@@ -3639,11 +3615,10 @@ class _BookingCreatedPageState extends State<BookingCreatedPage>
     );
   }
 
-  bool get _gelap => Theme.of(context).brightness == Brightness.dark;
-
-  /// Warna tombol utama, sama dengan tema: pekat di terang, aksen di gelap.
-  Color get _bgUtama => _gelap ? context.c.accent : SportagoColors.pekat;
-  Color get _fgUtama => _gelap ? context.c.onAccent : SportagoColors.pure;
+  /// Warna tombol Cek Status Pembayaran: oranye peringatan, sama seperti
+  /// sebelum tampilannya dirombak.
+  Color get _bgUtama => context.c.warn;
+  Color get _fgUtama => SportagoColors.pure;
 
   Widget _buildPriceRow(String label, int amount) {
     return Row(

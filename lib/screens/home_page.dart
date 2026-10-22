@@ -88,9 +88,12 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // Ketiga tab berkepala hijau pekat, jadi ikon bilah status selalu
-    // terang. Bilah navigasi sistem menyatu dengan bottom-nav.
+    // Beranda berkepala foto yang diredupkan, jadi ikon bilah status
+    // terang. Pesanan dan Profil berkepala putih, jadi ikonnya ikut tema
+    // supaya jam dan baterai tidak hilang. Bilah navigasi sistem menyatu
+    // dengan bottom-nav.
     final gelap = Theme.of(context).brightness == Brightness.dark;
+    final ikonTerang = gelap || _selectedIndex == 0;
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
         systemNavigationBarColor: context.c.raised,
@@ -98,8 +101,10 @@ class _HomePageState extends State<HomePage> {
             ? Brightness.light
             : Brightness.dark,
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light,
-        statusBarBrightness: Brightness.dark,
+        statusBarIconBrightness: ikonTerang
+            ? Brightness.light
+            : Brightness.dark,
+        statusBarBrightness: ikonTerang ? Brightness.dark : Brightness.light,
       ),
       child: Scaffold(
         body: IndexedStack(index: _selectedIndex, children: _pages),
@@ -133,10 +138,8 @@ class _BottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Dulu: ikon dan label berganti hijau di bilah polos. Sekarang pil
-    // hijau pekat di belakang ikon aktif dengan ikon volt, bahasa yang
-    // sama dengan kepala halaman dan bottom-nav app mitra.
-    final gelap = Theme.of(context).brightness == Brightness.dark;
+    // Pil hijau muda di belakang ikon aktif, ikon dan label hijau
+    // lapangan. Di tema gelap aksennya otomatis volt.
     return DecoratedBox(
       decoration: BoxDecoration(
         color: context.c.raised,
@@ -169,15 +172,13 @@ class _BottomNav extends StatelessWidget {
                           height: 30,
                           decoration: BoxDecoration(
                             color: sel
-                                ? (gelap
-                                      ? context.c.accentSoft
-                                      : SportagoColors.pekat)
+                                ? context.c.accentSoft
                                 : Colors.transparent,
                             borderRadius: BorderRadius.circular(15),
                           ),
                           child: Icon(
                             sel ? active : inactive,
-                            color: sel ? SportagoColors.volt : context.c.inkDim,
+                            color: sel ? context.c.accent : context.c.inkDim,
                             size: 21,
                           ),
                         ),
@@ -189,7 +190,7 @@ class _BottomNav extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 11.5,
                             fontWeight: sel ? FontWeight.w800 : FontWeight.w500,
-                            color: sel ? context.c.ink : context.c.inkDim,
+                            color: sel ? context.c.accent : context.c.inkDim,
                           ),
                         ),
                       ],
@@ -633,7 +634,7 @@ class _DashboardContentState extends State<DashboardContent>
 
   @override
   Widget build(BuildContext context) {
-    // Tanpa SafeArea atas: kepala pekat menjangkau sampai ke balik bilah
+    // Tanpa SafeArea atas: kepala berfoto menjangkau sampai ke balik bilah
     // status dan memberi bantalannya sendiri.
     return MediaQuery.removePadding(
       context: context,
@@ -660,7 +661,7 @@ class _DashboardContentState extends State<DashboardContent>
                 // pemakai baru tetap melihat beranda yang ramping.
                 if (_belumBayar != null) _kartuBelumBayar(_belumBayar!),
 
-                // Kolom cari pindah ke dalam kepala pekat.
+                // Kolom cari pindah ke dalam kepala berfoto.
                 _categories(),
 
                 const SizedBox(height: 24),
@@ -734,8 +735,7 @@ class _DashboardContentState extends State<DashboardContent>
     return '$salam, ${nama.split(RegExp(r'\s+')).first}';
   }
 
-  /// Kepala pekat berfoto, sama keluarganya dengan pembuka dan Beranda
-  /// app mitra. Lokasi dan kolom cari ikut masuk ke dalamnya, jadi hal
+  /// Kepala berfoto, sama keluarganya dengan pembuka. Lokasi dan kolom cari ikut masuk ke dalamnya, jadi hal
   /// pertama yang terlihat adalah "di mana" dan "cari apa".
   Widget _header() {
     final media = context.c.onMedia;
@@ -750,6 +750,7 @@ class _DashboardContentState extends State<DashboardContent>
         TombolIkonKepala(
           ikon: Icons.map_outlined,
           tooltip: 'Peta',
+          diFoto: true,
           onTap: () => Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const MapPage()),
@@ -760,6 +761,7 @@ class _DashboardContentState extends State<DashboardContent>
           ikon: Icons.notifications_none_rounded,
           tooltip: 'Notifikasi',
           lencana: _notifBelumDibaca,
+          diFoto: true,
           onTap: () => Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const NotificationsPage()),
@@ -774,11 +776,7 @@ class _DashboardContentState extends State<DashboardContent>
             behavior: HitTestBehavior.opaque,
             child: Row(
               children: [
-                const Icon(
-                  Icons.location_on_rounded,
-                  color: SportagoColors.volt,
-                  size: 18,
-                ),
+                Icon(Icons.location_on_rounded, color: media.ink, size: 18),
                 const SizedBox(width: 6),
                 Flexible(
                   child: Text(
@@ -1148,8 +1146,9 @@ class _DashboardContentState extends State<DashboardContent>
       child: Container(
         width: 132,
         decoration: BoxDecoration(
-          color: SportagoColors.pekat,
+          color: context.c.accentSoft,
           borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: context.c.accentLine),
         ),
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -1159,20 +1158,20 @@ class _DashboardContentState extends State<DashboardContent>
             Container(
               height: 40,
               width: 40,
-              decoration: const BoxDecoration(
-                color: SportagoColors.pekatNaik,
+              decoration: BoxDecoration(
+                color: context.c.accent,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.percent_rounded,
-                color: SportagoColors.volt,
+                color: context.c.onAccent,
                 size: 22,
               ),
             ),
-            const Text(
+            Text(
               'Lihat Semua Promo',
               style: TextStyle(
-                color: SportagoColors.pure,
+                color: context.c.accent,
                 fontSize: 14,
                 fontWeight: FontWeight.w800,
                 height: 1.25,
@@ -1314,7 +1313,7 @@ class _DashboardContentState extends State<DashboardContent>
         height: 52,
         padding: const EdgeInsets.symmetric(horizontal: 18),
         decoration: BoxDecoration(
-          // Pil putih tanpa garis tepi di atas bidang pekat: kolom cari
+          // Pil putih tanpa garis tepi di atas kepala berfoto: kolom cari
           // yang dikelilingi garis terbaca seperti kotak isian yang
           // sedang menunggu diketik, padahal ini tombol ke layar cari.
           color: context.c.raised,
@@ -1739,7 +1738,6 @@ class _VenueCard extends StatelessWidget {
                     width: double.infinity,
                     child: FilledButton(
                       onPressed: () => _bukaJadwal(context),
-                      // Warna mengikuti tema: pekat di terang, hijau di gelap.
                       style: FilledButton.styleFrom(
                         minimumSize: const Size(0, 40),
                         padding: EdgeInsets.zero,

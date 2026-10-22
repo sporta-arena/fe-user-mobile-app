@@ -4,6 +4,7 @@ import '../services/favorite_service.dart';
 import '../theme/app_tokens.dart';
 import '../utils/tampilan_venue.dart';
 import '../widgets/sampul_venue.dart';
+import '../widgets/sportago_ui.dart';
 import 'venue_detail_page.dart';
 
 /// Daftar venue yang ditandai hati.
@@ -54,30 +55,12 @@ class _FavoriteVenuesPageState extends State<FavoriteVenuesPage> {
   }
 
   Widget _kosong(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 40),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.favorite_border, size: 56, color: context.c.inkSoft),
-            const SizedBox(height: 16),
-            Text(
-              'Belum ada venue favorit',
-              style: TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.w700,
-                color: context.c.ink,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              'Ketuk ikon hati di halaman venue untuk menyimpannya di sini.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: context.c.inkSoft, height: 1.4),
-            ),
-          ],
-        ),
+    return const Center(
+      child: KeadaanKosong(
+        ikon: Icons.favorite_border,
+        gambar: 'assets/images/ilustrasi/favorit-kosong.png',
+        judul: 'Belum ada venue favorit',
+        pesan: 'Ketuk ikon hati di halaman venue untuk menyimpannya di sini.',
       ),
     );
   }

@@ -10,6 +10,7 @@ import '../theme/app_tokens.dart';
 import '../utils/tampilan_venue.dart';
 import '../widgets/lembar_filter.dart';
 import '../widgets/sampul_venue.dart';
+import '../widgets/sportago_ui.dart';
 import 'venue_detail_page.dart';
 
 /// Hasil pencarian venue dengan penyaring.
@@ -138,19 +139,16 @@ class _HasilFilterPageState extends State<HasilFilterPage> {
                       width: 18,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        // Volt bertepi pekat, seperti lencana di kepala
-                        // pekat lainnya.
-                        color: SportagoColors.volt,
+                        // Aksen bertepi warna bilah, supaya lencana
+                        // terbaca lepas dari ikon di belakangnya.
+                        color: context.c.accent,
                         shape: BoxShape.circle,
-                        border: Border.all(
-                          color: SportagoColors.pekat,
-                          width: 2,
-                        ),
+                        border: Border.all(color: context.c.surface, width: 2),
                       ),
                       child: Text(
                         '$jumlah',
-                        style: const TextStyle(
-                          color: SportagoColors.pekat,
+                        style: TextStyle(
+                          color: context.c.onAccent,
                           fontSize: 10,
                           fontWeight: FontWeight.w800,
                         ),
@@ -184,52 +182,21 @@ class _HasilFilterPageState extends State<HasilFilterPage> {
 
   Widget _kosong() {
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.search_off_rounded, size: 44, color: context.c.inkDim),
-            const SizedBox(height: 14),
-            Text(
-              'Tidak ada arena yang cocok',
-              style: TextStyle(
-                color: context.c.ink,
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              _filter.kosong
-                  ? 'Belum ada arena di sini.'
-                  : 'Coba longgarkan salah satu filternya.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: context.c.inkSoft, fontSize: 13.5),
-            ),
-            if (!_filter.kosong) ...[
-              const SizedBox(height: 16),
-              OutlinedButton(
-                onPressed: () {
+      child: SingleChildScrollView(
+        child: KeadaanKosong(
+          ikon: Icons.search_off_rounded,
+          gambar: 'assets/images/ilustrasi/cari-kosong.png',
+          judul: 'Tidak ada arena yang cocok',
+          pesan: _filter.kosong
+              ? 'Belum ada arena di sini.'
+              : 'Coba longgarkan salah satu filternya.',
+          aksi: _filter.kosong ? null : 'Hapus semua filter',
+          onAksi: _filter.kosong
+              ? null
+              : () {
                   setState(() => _filter = const FilterVenue());
                   _muat();
                 },
-                style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: context.c.accent),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: Text(
-                  'Hapus semua filter',
-                  style: TextStyle(
-                    color: context.c.accent,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            ],
-          ],
         ),
       ),
     );

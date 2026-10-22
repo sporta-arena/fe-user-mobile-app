@@ -97,8 +97,8 @@ class _MyBookingPageState extends State<MyBookingPage>
     ('history', 'Riwayat'),
   ];
 
-  /// Dibuka dari notifikasi: bilah pekat bawaan tema membawa tombol
-  /// kembali, lalu kepala pekat menyambung tanpa sambungan warna.
+  /// Dibuka dari notifikasi: bilah putih bawaan tema membawa tombol
+  /// kembali, lalu kepala tab yang juga putih menyambung di bawahnya.
   PreferredSizeWidget? get _bilahKembali => widget.showBackButton
       ? AppBar(
           leading: IconButton(
@@ -128,6 +128,7 @@ class _MyBookingPageState extends State<MyBookingPage>
               child: Center(
                 child: KeadaanKosong(
                   ikon: Icons.login_rounded,
+                  gambar: 'assets/images/ilustrasi/belum-masuk.png',
                   judul: 'Silakan login untuk melihat pesanan',
                   aksi: 'Login',
                   onAksi: () {
@@ -195,6 +196,7 @@ class _MyBookingPageState extends State<MyBookingPage>
                 ? Center(
                     child: KeadaanKosong(
                       ikon: Icons.cloud_off_rounded,
+                      gambar: 'assets/images/ilustrasi/gagal-muat.png',
                       judul: 'Data booking belum bisa dimuat',
                       pesan: _errorMessage,
                       aksi: 'Coba Lagi',
@@ -249,6 +251,7 @@ class _MyBookingPageState extends State<MyBookingPage>
           SizedBox(height: 48),
           KeadaanKosong(
             ikon: Icons.assignment_outlined,
+            gambar: 'assets/images/ilustrasi/pesanan-kosong.png',
             judul: 'Belum ada booking di sini',
           ),
         ],
@@ -269,7 +272,7 @@ class _MyBookingPageState extends State<MyBookingPage>
   }
 }
 
-/// Pil penyaring di dalam kepala pekat, sama dengan tab Booking mitra.
+/// Pil penyaring di dalam kepala tab: aktif hijau lapangan, sisanya abu.
 class _PilFilter extends StatelessWidget {
   const _PilFilter({
     required this.label,
@@ -284,9 +287,7 @@ class _PilFilter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: aktif
-          ? SportagoColors.volt
-          : SportagoColors.pure.withValues(alpha: 0.08),
+      color: aktif ? context.c.accent : context.c.sunken,
       shape: const StadiumBorder(),
       child: InkWell(
         customBorder: const StadiumBorder(),
@@ -299,9 +300,7 @@ class _PilFilter extends StatelessWidget {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 13,
                 fontWeight: aktif ? FontWeight.w800 : FontWeight.w600,
-                color: aktif
-                    ? SportagoColors.pekat
-                    : SportagoColors.pure.withValues(alpha: 0.8),
+                color: aktif ? context.c.onAccent : context.c.inkSoft,
               ),
             ),
           ),
@@ -497,7 +496,7 @@ class BookingCard extends StatelessWidget {
     ).split(' - ');
 
     // Bayangan hitam tebal diganti garis tipis, dan ikon bola abu
-    // diganti ubin jam pekat seperti kartu booking di app mitra.
+    // diganti ubin jam hijau muda yang menonjolkan jam mulai.
     return Kartu(
       padding: const EdgeInsets.all(14),
       child: Column(
@@ -510,7 +509,7 @@ class BookingCard extends StatelessWidget {
                 width: 64,
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
-                  color: SportagoColors.pekat,
+                  color: context.c.accentSoft,
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Column(
@@ -520,7 +519,7 @@ class BookingCard extends StatelessWidget {
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 16,
                         fontWeight: FontWeight.w800,
-                        color: SportagoColors.pure,
+                        color: context.c.accent,
                       ),
                     ),
                     if (jam.length > 1)
@@ -529,7 +528,7 @@ class BookingCard extends StatelessWidget {
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 10.5,
                           fontWeight: FontWeight.w600,
-                          color: SportagoColors.volt,
+                          color: context.c.inkSoft,
                         ),
                       ),
                   ],
@@ -1037,7 +1036,7 @@ class _PaymentWaitingPageState extends State<PaymentWaitingPage> {
     // ditransfer sungguhan membuat uang pelanggan hilang.
     String? paymentCode = qrString ?? widget.booking.payment?.virtualAccountNo;
 
-    // Bilah aplikasi dari tema (pekat), hitung mundur jadi kartu pekat.
+    // Bilah aplikasi dari tema, hitung mundur jadi kartu kuning lembut.
     return Scaffold(
       backgroundColor: context.c.sunken,
       appBar: AppBar(title: const Text("Selesaikan Pembayaran")),
@@ -1070,7 +1069,7 @@ class _PaymentWaitingPageState extends State<PaymentWaitingPage> {
                       width: double.infinity,
                       padding: const EdgeInsets.all(18),
                       decoration: BoxDecoration(
-                        color: SportagoColors.pekat,
+                        color: context.c.warnSoft,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Row(
@@ -1078,12 +1077,12 @@ class _PaymentWaitingPageState extends State<PaymentWaitingPage> {
                           Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color: SportagoColors.pekatNaik,
+                              color: context.c.raised,
                               borderRadius: BorderRadius.circular(14),
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.timer_outlined,
-                              color: SportagoColors.volt,
+                              color: context.c.warn,
                               size: 24,
                             ),
                           ),
@@ -1096,20 +1095,20 @@ class _PaymentWaitingPageState extends State<PaymentWaitingPage> {
                                   "Selesaikan pembayaran dalam",
                                   style: TextStyle(
                                     fontSize: 12.5,
-                                    color: context.c.onMedia.inkSoft,
+                                    color: context.c.inkSoft,
                                   ),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
                                   widget.bookingData['countdown'] ?? "00:15:00",
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 26,
                                     fontWeight: FontWeight.w800,
                                     letterSpacing: -0.5,
-                                    fontFeatures: [
+                                    fontFeatures: const [
                                       FontFeature.tabularFigures(),
                                     ],
-                                    color: SportagoColors.pure,
+                                    color: context.c.warn,
                                   ),
                                 ),
                               ],

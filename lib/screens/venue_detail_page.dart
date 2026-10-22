@@ -433,7 +433,7 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
 
     return Scaffold(
       bottomNavigationBar: _buildBottomBar(),
-      // Bagian atas tidak diberi SafeArea: kepala foto pekat sendiri yang
+      // Bagian atas tidak diberi SafeArea: kepala foto sendiri yang
       // mengisi bawah bilah status, jadi tidak ada pita latar di atasnya.
       body: SafeArea(
         top: false,
@@ -514,12 +514,10 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
     );
   }
 
-  bool get _gelap => Theme.of(context).brightness == Brightness.dark;
-
-  /// Bidang pilihan aktif (lapangan, tanggal, jam): hijau pekat di
-  /// tema terang, aksen di tema gelap supaya tidak tenggelam.
-  Color get _pilihBg => _gelap ? context.c.accent : SportagoColors.pekat;
-  Color get _pilihFg => _gelap ? context.c.onAccent : SportagoColors.pure;
+  /// Bidang pilihan aktif (lapangan, tanggal, jam): aksen tema, hijau
+  /// lapangan di terang dan volt di gelap.
+  Color get _pilihBg => context.c.accent;
+  Color get _pilihFg => context.c.onAccent;
 
   /// Keterangan satu slide, aman kalau indeksnya sudah lewat batas
   /// (bisa terjadi sekejap saat galerinya berganti isi).
@@ -544,11 +542,12 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
       expandedHeight: 300.0,
       floating: false,
       pinned: true,
-      backgroundColor: SportagoColors.pekat,
+      backgroundColor: KepalaTab.redupFoto,
       foregroundColor: SportagoColors.pure,
       elevation: 0,
       leading: Center(
         child: TombolIkonKepala(
+          diFoto: true,
           ikon: Icons.arrow_back_ios_new_rounded,
           tooltip: 'Kembali',
           onTap: () => Navigator.pop(context),
@@ -556,6 +555,7 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
       ),
       actions: [
         TombolIkonKepala(
+          diFoto: true,
           ikon: _isFavorite
               ? Icons.favorite_rounded
               : Icons.favorite_border_rounded,
@@ -586,7 +586,7 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                 );
               },
             ),
-            // Gradasi pekat di atas dan bawah foto: tombol dan keterangan
+            // Gradasi gelap netral di atas dan bawah foto: tombol dan keterangan
             // tetap terbaca di foto seterang apa pun.
             IgnorePointer(
               child: DecoratedBox(
@@ -596,10 +596,10 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                     end: Alignment.bottomCenter,
                     stops: const [0, 0.3, 0.6, 1],
                     colors: [
-                      SportagoColors.pekat.withValues(alpha: 0.6),
-                      SportagoColors.pekat.withValues(alpha: 0),
-                      SportagoColors.pekat.withValues(alpha: 0),
-                      SportagoColors.pekat.withValues(alpha: 0.85),
+                      KepalaTab.redupFoto.withValues(alpha: 0.6),
+                      KepalaTab.redupFoto.withValues(alpha: 0),
+                      KepalaTab.redupFoto.withValues(alpha: 0),
+                      KepalaTab.redupFoto.withValues(alpha: 0.85),
                     ],
                   ),
                 ),
@@ -621,7 +621,7 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                     vertical: 5,
                   ),
                   decoration: BoxDecoration(
-                    color: SportagoColors.pekat.withValues(alpha: 0.75),
+                    color: KepalaTab.redupFoto.withValues(alpha: 0.75),
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(
@@ -650,7 +650,7 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                       margin: const EdgeInsets.symmetric(horizontal: 3),
                       decoration: BoxDecoration(
                         color: _currentImageIndex == index
-                            ? SportagoColors.volt
+                            ? SportagoColors.pure
                             : SportagoColors.pure.withValues(alpha: 0.5),
                         borderRadius: BorderRadius.circular(4),
                       ),
@@ -668,7 +668,7 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: SportagoColors.pekat.withValues(alpha: 0.75),
+                  color: KepalaTab.redupFoto.withValues(alpha: 0.75),
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
@@ -1036,7 +1036,7 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                               horizontal: 6,
                               vertical: 4,
                             ),
-                            color: SportagoColors.pekat.withValues(alpha: 0.7),
+                            color: KepalaTab.redupFoto.withValues(alpha: 0.7),
                             child: Text(
                               keterangan,
                               maxLines: 1,
@@ -1146,7 +1146,7 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                                   horizontal: 8,
                                   vertical: 5,
                                 ),
-                                color: SportagoColors.pekat.withValues(
+                                color: KepalaTab.redupFoto.withValues(
                                   alpha: 0.7,
                                 ),
                                 child: Text(
@@ -1272,7 +1272,7 @@ class _VenueDetailPageState extends State<VenueDetailPage> {
                       fontSize: 12.5,
                       fontWeight: FontWeight.w600,
                       color: isSelected
-                          ? (_gelap ? context.c.onAccent : SportagoColors.volt)
+                          ? context.c.onAccent.withValues(alpha: 0.85)
                           : context.c.inkSoft,
                     ),
                   ),

@@ -126,13 +126,13 @@ class _ETicketPageState extends State<ETicketPage> {
   Widget build(BuildContext context) {
     final c = context.c;
 
-    // Tiket duduk di atas bidang hijau pekat, sama dengan pembuka dan
-    // kepala halaman. Kotak QR selalu putih murni (juga di mode gelap)
-    // supaya pemindai di pintu venue tetap membacanya.
+    // Tiket putih bergaris duduk di atas latar abu muda, jadi kartunya
+    // yang paling menonjol. Kotak QR selalu putih murni (juga di mode
+    // gelap) supaya pemindai di pintu venue tetap membacanya.
     return Scaffold(
-      backgroundColor: SportagoColors.pekat,
+      backgroundColor: c.sunken,
       appBar: AppBar(
-        backgroundColor: SportagoColors.pekat,
+        backgroundColor: c.sunken,
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
@@ -174,6 +174,7 @@ class _ETicketPageState extends State<ETicketPage> {
                         decoration: BoxDecoration(
                           color: c.raised,
                           borderRadius: BorderRadius.circular(24),
+                          border: Border.all(color: c.line),
                         ),
                         child: Column(
                           children: [
@@ -251,15 +252,15 @@ class _ETicketPageState extends State<ETicketPage> {
                             ),
 
                             // Sobekan tiket: lekuk kiri-kanan berwarna latar
-                            // pekat, garis putus di tengah.
+                            // halaman, garis putus di tengah.
                             Row(
                               children: [
                                 Container(
                                   width: 14,
                                   height: 28,
-                                  decoration: const BoxDecoration(
-                                    color: SportagoColors.pekat,
-                                    borderRadius: BorderRadius.only(
+                                  decoration: BoxDecoration(
+                                    color: c.sunken,
+                                    borderRadius: const BorderRadius.only(
                                       topRight: Radius.circular(14),
                                       bottomRight: Radius.circular(14),
                                     ),
@@ -287,9 +288,9 @@ class _ETicketPageState extends State<ETicketPage> {
                                 Container(
                                   width: 14,
                                   height: 28,
-                                  decoration: const BoxDecoration(
-                                    color: SportagoColors.pekat,
-                                    borderRadius: BorderRadius.only(
+                                  decoration: BoxDecoration(
+                                    color: c.sunken,
+                                    borderRadius: const BorderRadius.only(
                                       topLeft: Radius.circular(14),
                                       bottomLeft: Radius.circular(14),
                                     ),
@@ -360,18 +361,12 @@ class _ETicketPageState extends State<ETicketPage> {
                             size: 18,
                           ),
                           label: const Text("Chat Venue"),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: SportagoColors.pure,
-                            side: BorderSide(
-                              color: SportagoColors.pure.withValues(alpha: 0.2),
-                            ),
-                          ),
                         ),
                       ),
                       const SizedBox(height: 12),
                     ],
 
-                    _catatanPekat(
+                    _catatan(
                       ikon: Icons.schedule_rounded,
                       judul: 'Harap datang 10 menit sebelum jadwal',
                     ),
@@ -387,7 +382,7 @@ class _ETicketPageState extends State<ETicketPage> {
                     // bisa berubah di belakang layar.
                     if (widget.booking.status == 'confirmed') ...[
                       const SizedBox(height: 10),
-                      _catatanPekat(
+                      _catatan(
                         ikon: Icons.receipt_long_outlined,
                         judul: 'Pembatalan',
                         pesan:
@@ -410,27 +405,23 @@ class _ETicketPageState extends State<ETicketPage> {
                   key: _tombolUnduhKey,
                   onPressed: _isDownloading ? null : _downloadTicket,
                   icon: _isDownloading
-                      ? const SizedBox(
+                      ? SizedBox(
                           width: 20,
                           height: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color: SportagoColors.pekat,
+                            color: c.onAccent,
                           ),
                         )
                       : const Icon(Icons.download_rounded),
                   label: Text(
                     _isDownloading ? "Menyimpan..." : "Download Ticket",
                   ),
-                  // Di atas bidang pekat tombol utama memakai volt, sama
-                  // dengan tombol di pembuka; tombol pekat akan tenggelam.
                   style: FilledButton.styleFrom(
-                    backgroundColor: SportagoColors.volt,
-                    foregroundColor: SportagoColors.pekat,
-                    disabledBackgroundColor: SportagoColors.volt.withValues(
-                      alpha: 0.7,
-                    ),
-                    disabledForegroundColor: SportagoColors.pekat,
+                    backgroundColor: c.accent,
+                    foregroundColor: c.onAccent,
+                    disabledBackgroundColor: c.accent.withValues(alpha: 0.7),
+                    disabledForegroundColor: c.onAccent,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
                 ),
@@ -442,24 +433,25 @@ class _ETicketPageState extends State<ETicketPage> {
     );
   }
 
-  /// Catatan kecil di atas bidang pekat, di bawah tiket.
-  Widget _catatanPekat({
+  /// Catatan kecil di bawah tiket.
+  Widget _catatan({
     required IconData ikon,
     required String judul,
     String? pesan,
   }) {
-    final media = context.c.onMedia;
+    final c = context.c;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: SportagoColors.pekatNaik,
+        color: c.raised,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: c.line),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(ikon, color: SportagoColors.volt, size: 20),
+          Icon(ikon, color: c.accent, size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -468,7 +460,7 @@ class _ETicketPageState extends State<ETicketPage> {
                 Text(
                   judul,
                   style: GoogleFonts.plusJakartaSans(
-                    color: media.ink,
+                    color: c.ink,
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                   ),
@@ -478,7 +470,7 @@ class _ETicketPageState extends State<ETicketPage> {
                   Text(
                     pesan,
                     style: GoogleFonts.plusJakartaSans(
-                      color: media.inkSoft,
+                      color: c.inkSoft,
                       fontSize: 12,
                       height: 1.4,
                     ),

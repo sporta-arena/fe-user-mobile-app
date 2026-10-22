@@ -81,7 +81,7 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
     }
   }
 
-  // Bilah aplikasi ikut tema: hijau pekat dengan judul putih.
+  // Bilah aplikasi ikut tema customer.
   PreferredSizeWidget _bilah() => AppBar(
     title: const Text("Riwayat Pesan"),
     leading: IconButton(
@@ -99,6 +99,7 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
         body: Center(
           child: KeadaanKosong(
             ikon: Icons.login_rounded,
+            gambar: 'assets/images/ilustrasi/belum-masuk.png',
             judul: "Masuk dulu, ya",
             pesan: "Silakan login untuk melihat riwayat pesan",
             aksi: "Login",
@@ -136,6 +137,7 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
             ? const Center(
                 child: KeadaanKosong(
                   ikon: Icons.chat_bubble_outline_rounded,
+                  gambar: 'assets/images/ilustrasi/chat-kosong.png',
                   judul: "Belum ada riwayat pesan",
                   pesan: "Riwayat chat akan muncul setelah\nbooking selesai",
                 ),
@@ -176,17 +178,17 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
         },
         child: Row(
           children: [
-            // Venue Icon: pekat ber-ikon volt selagi chat masih terbuka.
+            // Venue Icon: hijau lapangan selagi chat masih terbuka.
             Container(
               width: 52,
               height: 52,
               decoration: BoxDecoration(
-                color: isActive ? SportagoColors.pekat : context.c.sunken,
+                color: isActive ? context.c.accentSoft : context.c.sunken,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Icon(
                 Icons.sports_soccer_rounded,
-                color: isActive ? SportagoColors.volt : context.c.inkDim,
+                color: isActive ? context.c.accent : context.c.inkDim,
                 size: 26,
               ),
             ),

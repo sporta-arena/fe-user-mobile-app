@@ -77,7 +77,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Latar dan bilah aplikasi ikut tema: abu muda dengan bilah pekat.
+      // Latar dan bilah aplikasi ikut tema customer.
       appBar: AppBar(
         title: const Text("Edit Profil"),
         leading: IconButton(
@@ -105,9 +105,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       height: 120,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: SportagoColors.pekat,
+                        color: context.c.accentSoft,
                         border: Border.all(
-                          color: SportagoColors.volt,
+                          color: context.c.accentLine,
                           width: 3,
                         ),
                         image: AuthService.currentUser?.avatarUrl != null
@@ -120,10 +120,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
                             : null,
                       ),
                       child: AuthService.currentUser?.avatarUrl == null
-                          ? const Icon(
+                          ? Icon(
                               Icons.person_rounded,
                               size: 52,
-                              color: SportagoColors.volt,
+                              color: context.c.accent,
                             )
                           : null,
                     ),
@@ -144,16 +144,16 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         child: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: SportagoColors.volt,
+                            color: context.c.accent,
                             shape: BoxShape.circle,
                             border: Border.all(
                               color: context.c.sunken,
                               width: 3,
                             ),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.camera_alt_rounded,
-                            color: SportagoColors.pekat,
+                            color: context.c.onAccent,
                             size: 18,
                           ),
                         ),
@@ -225,13 +225,13 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 height: 56,
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : _saveProfile,
-                  // Warna dan bentuk dari tema: tombol utama pekat.
+                  // Warna dan bentuk dari tema: tombol utama hijau lapangan.
                   child: _isLoading
-                      ? const SizedBox(
+                      ? SizedBox(
                           height: 24,
                           width: 24,
                           child: CircularProgressIndicator(
-                            color: SportagoColors.pure,
+                            color: context.c.onAccent,
                             strokeWidth: 2,
                           ),
                         )

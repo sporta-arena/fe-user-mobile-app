@@ -9,7 +9,7 @@ import 'services/versi_app.dart';
 import 'services/auth_service.dart';
 import 'services/favorite_service.dart';
 import 'theme/app_theme.dart';
-import 'widgets/hero_backdrop.dart';
+import 'theme/app_tokens.dart';
 import 'widgets/sportago_mark.dart';
 import 'theme/theme_controller.dart';
 import 'utils/tutup_papan_ketik.dart';
@@ -154,20 +154,23 @@ class _SplashScreenState extends State<SplashScreen> {
     // hitam dengan isian kuning, jadi isiannya lenyap ke latar dan yang
     // kebaca cuma garis hitamnya, logonya jadi nyaru.
     //
-    // Sekarang: latar hijau pekat yang sama dengan onboarding, kepala
-    // layar Masuk, dan layar peluncur Android/iOS, jadi tidak ada kedip
-    // ganti warna dari ikon peluncur sampai layar pertama. Sama persis
-    // dengan splash aplikasi mitra.
+    // Sekarang: permukaan tema customer (putih, atau hitam di tema
+    // gelap), sama dengan layar peluncur Android/iOS, jadi tidak ada
+    // kedip ganti warna. Hijau pekat sengaja tidak dipakai: itu ciri
+    // aplikasi mitra.
+    final gelap = Theme.of(context).brightness == Brightness.dark;
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.light.copyWith(
-        statusBarColor: Colors.transparent,
-        systemNavigationBarColor: HeroBackdrop.base,
-        systemNavigationBarIconBrightness: Brightness.light,
-      ),
+      value: (gelap ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark)
+          .copyWith(
+            statusBarColor: Colors.transparent,
+            systemNavigationBarColor: context.c.surface,
+            systemNavigationBarIconBrightness: gelap
+                ? Brightness.light
+                : Brightness.dark,
+          ),
       child: Scaffold(
-        backgroundColor: HeroBackdrop.base,
-        body: HeroBackdrop(
-          glowAt: Alignment.center,
+        backgroundColor: context.c.surface,
+        body: SizedBox.expand(
           child: Center(
             child: TweenAnimationBuilder<double>(
               tween: Tween(begin: 0, end: 1),
@@ -180,7 +183,6 @@ class _SplashScreenState extends State<SplashScreen> {
               child: SportagoWordmark(
                 markHeight: screenWidth * 0.16,
                 fontSize: screenWidth * 0.095,
-                onMedia: true,
               ),
             ),
           ),

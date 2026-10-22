@@ -135,9 +135,9 @@ class _TransactionsPageState extends State<TransactionsPage>
 
   @override
   Widget build(BuildContext context) {
-    // Dulu AppBar putih dengan TabBar bergaris bawah, sementara Beranda
-    // dan app mitra sudah berkepala pekat. Sekarang kepalanya sama, dan
-    // tab pindah ke dalam kepala sebagai pil; geser kiri-kanan tetap jalan.
+    // Dulu AppBar putih dengan TabBar bergaris bawah. Sekarang kepalanya
+    // KepalaTab seperti tab lain, dan tab pindah ke dalam kepala sebagai
+    // pil; geser kiri-kanan tetap jalan.
     if (AuthService.token == null) {
       return Scaffold(
         backgroundColor: context.c.sunken,
@@ -151,6 +151,7 @@ class _TransactionsPageState extends State<TransactionsPage>
               child: Center(
                 child: KeadaanKosong(
                   ikon: Icons.login_rounded,
+                  gambar: 'assets/images/ilustrasi/belum-masuk.png',
                   judul: 'Masuk dulu untuk melihat pesanan',
                   aksi: 'Masuk',
                   onAksi: () {
@@ -230,6 +231,7 @@ class _TransactionsPageState extends State<TransactionsPage>
                 ? Center(
                     child: KeadaanKosong(
                       ikon: Icons.cloud_off_rounded,
+                      gambar: 'assets/images/ilustrasi/gagal-muat.png',
                       judul: 'Pesanan belum bisa dimuat',
                       pesan: _errorMessage,
                       aksi: 'Coba Lagi',
@@ -272,7 +274,12 @@ class _TransactionsPageState extends State<TransactionsPage>
         child: ListView(
           children: [
             const SizedBox(height: 48),
-            KeadaanKosong(ikon: ikon, judul: judul, pesan: pesan),
+            KeadaanKosong(
+              ikon: ikon,
+              gambar: 'assets/images/ilustrasi/pesanan-kosong.png',
+              judul: judul,
+              pesan: pesan,
+            ),
           ],
         ),
       );
@@ -295,7 +302,7 @@ class _TransactionsPageState extends State<TransactionsPage>
   }
 }
 
-/// Pil penyaring di dalam kepala pekat, sama dengan tab Booking mitra.
+/// Pil penyaring di dalam kepala tab: aktif hijau lapangan, sisanya abu.
 class _PilFilter extends StatelessWidget {
   const _PilFilter({
     required this.label,
@@ -310,9 +317,7 @@ class _PilFilter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: aktif
-          ? SportagoColors.volt
-          : SportagoColors.pure.withValues(alpha: 0.08),
+      color: aktif ? context.c.accent : context.c.sunken,
       shape: const StadiumBorder(),
       child: InkWell(
         customBorder: const StadiumBorder(),
@@ -325,9 +330,7 @@ class _PilFilter extends StatelessWidget {
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 13,
                 fontWeight: aktif ? FontWeight.w800 : FontWeight.w600,
-                color: aktif
-                    ? SportagoColors.pekat
-                    : SportagoColors.pure.withValues(alpha: 0.8),
+                color: aktif ? context.c.onAccent : context.c.inkSoft,
               ),
             ),
           ),
@@ -459,8 +462,8 @@ class _BookingCardState extends State<_BookingCard> {
     final venueAddress = booking.field?.venue?.address;
     final jam = booking.formattedTime.split(' - ');
 
-    // Jam mulai di kiri dalam ubin pekat, sama dengan kartu booking di
-    // app mitra: itu yang dicari pemain sebelum berangkat.
+    // Jam mulai di kiri dalam ubin hijau muda: itu yang dicari pemain
+    // sebelum berangkat.
     return Kartu(
       padding: const EdgeInsets.all(14),
       child: Column(
@@ -473,7 +476,7 @@ class _BookingCardState extends State<_BookingCard> {
                 width: 64,
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
-                  color: SportagoColors.pekat,
+                  color: context.c.accentSoft,
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Column(
@@ -483,7 +486,7 @@ class _BookingCardState extends State<_BookingCard> {
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 16,
                         fontWeight: FontWeight.w800,
-                        color: SportagoColors.pure,
+                        color: context.c.accent,
                       ),
                     ),
                     if (jam.length > 1)
@@ -492,7 +495,7 @@ class _BookingCardState extends State<_BookingCard> {
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 10.5,
                           fontWeight: FontWeight.w600,
-                          color: SportagoColors.volt,
+                          color: context.c.inkSoft,
                         ),
                       ),
                   ],
@@ -1571,8 +1574,8 @@ class _TransactionPaymentWaitingPageState
     // tidak terbayar.
     final String? nomorVa = widget.booking.payment?.virtualAccountNo;
 
-    // Bilah aplikasi dan warnanya dari tema (pekat), bukan ditimpa
-    // putih di sini; hitung mundur jadi kartu pekat di paling atas.
+    // Bilah aplikasi dan warnanya dari tema, bukan ditimpa di sini;
+    // hitung mundur jadi kartu kuning lembut di paling atas.
     return Scaffold(
       backgroundColor: context.c.sunken,
       appBar: AppBar(title: const Text("Selesaikan Pembayaran")),
@@ -1605,7 +1608,7 @@ class _TransactionPaymentWaitingPageState
                       width: double.infinity,
                       padding: const EdgeInsets.all(18),
                       decoration: BoxDecoration(
-                        color: SportagoColors.pekat,
+                        color: context.c.warnSoft,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Row(
@@ -1613,12 +1616,12 @@ class _TransactionPaymentWaitingPageState
                           Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color: SportagoColors.pekatNaik,
+                              color: context.c.raised,
                               borderRadius: BorderRadius.circular(14),
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.timer_outlined,
-                              color: SportagoColors.volt,
+                              color: context.c.warn,
                               size: 24,
                             ),
                           ),
@@ -1635,7 +1638,7 @@ class _TransactionPaymentWaitingPageState
                                             : 'Selesaikan pembayaran dalam'),
                                   style: TextStyle(
                                     fontSize: 12.5,
-                                    color: context.c.onMedia.inkSoft,
+                                    color: context.c.inkSoft,
                                   ),
                                 ),
                                 if (_sisaWaktu.isNotEmpty) ...[
@@ -1650,8 +1653,8 @@ class _TransactionPaymentWaitingPageState
                                         FontFeature.tabularFigures(),
                                       ],
                                       color: _sudahLewat
-                                          ? context.c.onMedia.inkSoft
-                                          : SportagoColors.pure,
+                                          ? context.c.inkDim
+                                          : context.c.warn,
                                     ),
                                   ),
                                 ],

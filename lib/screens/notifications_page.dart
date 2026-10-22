@@ -4,6 +4,7 @@ import '../models/notifikasi.dart';
 import '../models/tujuan_notifikasi.dart';
 import '../services/notifikasi_service.dart';
 import '../theme/app_tokens.dart';
+import '../widgets/sportago_ui.dart';
 import 'my_booking_page.dart';
 
 /// Daftar notifikasi dalam aplikasi.
@@ -124,11 +125,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
             child: Text(
               'Tandai Dibaca',
               style: TextStyle(
-                // Di atas bilah pekat: volt kalau bisa ditekan, putih
-                // redup kalau tidak ada yang perlu ditandai.
-                color: adaBelumDibaca
-                    ? SportagoColors.volt
-                    : context.c.onMedia.inkDim,
+                // Aksen kalau bisa ditekan, redup kalau tidak ada yang
+                // perlu ditandai.
+                color: adaBelumDibaca ? context.c.accent : context.c.inkDim,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -150,6 +149,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
     if (_gagalMuat) {
       return _keadaanKosong(
         ikon: Icons.cloud_off_rounded,
+        gambar: 'assets/images/ilustrasi/gagal-muat.png',
         judul: 'Gagal memuat notifikasi',
         isi: 'Periksa koneksi kamu, lalu tarik layar ini ke bawah.',
       );
@@ -157,6 +157,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
     if (_daftar.isEmpty) {
       return _keadaanKosong(
         ikon: Icons.notifications_none_rounded,
+        gambar: 'assets/images/ilustrasi/notifikasi-kosong.png',
         judul: 'Belum ada notifikasi',
         isi:
             'Kabar soal booking dan pesan dari pengelola lapangan muncul di sini.',
@@ -221,36 +222,19 @@ class _NotificationsPageState extends State<NotificationsPage> {
     );
   }
 
+  /// Tetap di dalam ListView supaya tarik-untuk-muat-ulang jalan juga
+  /// saat daftarnya kosong.
   Widget _keadaanKosong({
     required IconData ikon,
+    required String gambar,
     required String judul,
     required String isi,
   }) {
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
       children: [
-        const SizedBox(height: 120),
-        Icon(ikon, size: 64, color: context.c.inkDim),
-        const SizedBox(height: 20),
-        Center(
-          child: Text(
-            judul,
-            style: TextStyle(
-              color: context.c.ink,
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 48),
-          child: Text(
-            isi,
-            textAlign: TextAlign.center,
-            style: TextStyle(color: context.c.inkSoft, fontSize: 13),
-          ),
-        ),
+        const SizedBox(height: 64),
+        KeadaanKosong(ikon: ikon, gambar: gambar, judul: judul, pesan: isi),
       ],
     );
   }

@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../theme/app_tokens.dart';
-import 'hero_backdrop.dart';
+import 'sportago_ui.dart';
 import 'sportago_mark.dart';
 
 /// Kepala berfoto untuk layar Masuk dan Daftar.
 ///
 /// Fotonya dari keluarga yang sama dengan onboarding (dan dengan layar
 /// Masuk aplikasi mitra), jadi pindah dari slide terakhir ke form terasa
-/// satu alur. Bawahnya pekat supaya kartu form yang menumpang punya
-/// tepi yang jelas.
+/// satu alur. Bawahnya gelap netral supaya kartu form yang menumpang
+/// punya tepi yang jelas.
 class KepalaFotoAuth extends StatelessWidget {
   const KepalaFotoAuth({
     super.key,
@@ -42,7 +42,7 @@ class KepalaFotoAuth extends StatelessWidget {
           fit: StackFit.expand,
           children: [
             Image.asset(foto, fit: BoxFit.cover, excludeFromSemantics: true),
-            // Atas gelap untuk bilah status, bawah pekat untuk tulisan.
+            // Atas gelap untuk bilah status, bawah gelap netral untuk tulisan.
             DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -50,8 +50,8 @@ class KepalaFotoAuth extends StatelessWidget {
                   end: Alignment.bottomCenter,
                   colors: [
                     Colors.black.withValues(alpha: 0.5),
-                    HeroBackdrop.base.withValues(alpha: 0.15),
-                    HeroBackdrop.base.withValues(alpha: 0.9),
+                    KepalaTab.redupFoto.withValues(alpha: 0.15),
+                    KepalaTab.redupFoto.withValues(alpha: 0.9),
                   ],
                   stops: const [0.0, 0.45, 1.0],
                 ),
@@ -115,7 +115,7 @@ class KepalaFotoAuth extends StatelessWidget {
 
 /// Gaya bilah sistem untuk layar yang kepalanya foto gelap tapi badannya
 /// permukaan tema: ikon bilah status selalu terang, bilah navigasi ikut
-/// permukaan supaya warna pekat onboarding tidak terbawa ke bawah form.
+/// permukaan supaya gelap foto onboarding tidak terbawa ke bawah form.
 SystemUiOverlayStyle gayaOverlayKepalaFoto(BuildContext context) {
   final gelap = Theme.of(context).brightness == Brightness.dark;
   return SystemUiOverlayStyle(

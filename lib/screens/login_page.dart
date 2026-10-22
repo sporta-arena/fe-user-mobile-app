@@ -258,7 +258,7 @@ class _LoginPageState extends State<LoginPage> {
           ),
           const SizedBox(height: 12),
 
-          // Tombol Masuk: warna dari tema (pekat di terang, aksen di
+          // Tombol Masuk: warna dari tema (aksen hijau di terang, volt di
           // gelap), sama dengan tombol utama di seluruh aplikasi.
           SizedBox(
             height: 54,

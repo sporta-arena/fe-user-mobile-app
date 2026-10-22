@@ -196,7 +196,6 @@ class _LembarFilterState extends State<_LembarFilter> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () => Navigator.pop(context, _f),
-                  // Warna mengikuti tema: pekat di terang, hijau di gelap.
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size(0, 50),
                     shape: RoundedRectangleBorder(
@@ -216,11 +215,10 @@ class _LembarFilterState extends State<_LembarFilter> {
     );
   }
 
-  /// Pil terpilih hijau pekat, sama dengan pil filter app mitra. Di tema
-  /// gelap pekat tenggelam ke latar, jadi memakai aksen.
-  bool get _gelap => Theme.of(context).brightness == Brightness.dark;
-  Color get _latarAktif => _gelap ? context.c.accent : SportagoColors.pekat;
-  Color get _tintaAktif => _gelap ? context.c.onAccent : SportagoColors.pure;
+  /// Pil terpilih memakai aksen tema: hijau lapangan di terang, volt di
+  /// gelap.
+  Color get _latarAktif => context.c.accent;
+  Color get _tintaAktif => context.c.onAccent;
 
   Widget _judul(String teks) => Padding(
     padding: const EdgeInsets.only(bottom: 10),

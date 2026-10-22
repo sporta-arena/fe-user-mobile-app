@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_tokens.dart';
 import '../services/venue_service.dart';
 import '../models/venue.dart';
+import '../widgets/sportago_ui.dart';
 import 'venue_detail_page.dart';
 import '../utils/tampilan_venue.dart';
 
@@ -59,9 +60,10 @@ class _SearchPageState extends State<SearchPage> {
         ),
         title: Container(
           height: 40,
-          // Pil putih di atas bilah pekat, sama dengan kolom cari Beranda.
+          // Pil abu muda di bilah putih: kolom cari terbaca sebagai
+          // bidang isian tanpa perlu garis tepi.
           decoration: BoxDecoration(
-            color: context.c.raised,
+            color: context.c.sunken,
             borderRadius: BorderRadius.circular(999),
           ),
           child: TextField(
@@ -93,18 +95,14 @@ class _SearchPageState extends State<SearchPage> {
             ? Center(child: CircularProgressIndicator(color: context.c.accent))
             : _venues.isEmpty
             ? Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.search_off, size: 64, color: context.c.inkSoft),
-                    const SizedBox(height: 16),
-                    Text(
-                      _searchController.text.isEmpty
-                          ? "Ketik untuk mencari venue"
-                          : "Tidak ada venue ditemukan",
-                      style: TextStyle(color: context.c.inkSoft),
-                    ),
-                  ],
+                child: SingleChildScrollView(
+                  child: KeadaanKosong(
+                    ikon: Icons.search_off,
+                    gambar: 'assets/images/ilustrasi/cari-kosong.png',
+                    judul: _searchController.text.isEmpty
+                        ? "Ketik untuk mencari venue"
+                        : "Tidak ada venue ditemukan",
+                  ),
                 ),
               )
             : ListView.builder(

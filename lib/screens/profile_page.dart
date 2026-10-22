@@ -135,17 +135,19 @@ class _ProfilePageState extends State<ProfilePage> {
       backgroundColor: context.c.sunken,
       body: SafeArea(
         // Bilah navigasi menumpuk di atas isi layar sejak
-        // targetSdk 35. top:false karena kepala pekat sudah
+        // targetSdk 35. top:false karena kepala tab sudah
         // menyisihkan bagian atasnya sendiri.
         top: false,
         child: AnnotatedRegion<SystemUiOverlayStyle>(
-          // Kepala selalu hijau pekat, jadi ikon bilah status selalu
-          // terang, di tema mana pun.
-          value: const SystemUiOverlayStyle(
-            statusBarColor: Colors.transparent,
-            statusBarIconBrightness: Brightness.light,
-            statusBarBrightness: Brightness.dark,
-          ),
+          // Kepala putih di tema terang, gelap di tema gelap: ikon bilah
+          // status mengikuti tema supaya jam dan baterai tetap terbaca.
+          value: Theme.of(context).brightness == Brightness.dark
+              ? SystemUiOverlayStyle.light.copyWith(
+                  statusBarColor: Colors.transparent,
+                )
+              : SystemUiOverlayStyle.dark.copyWith(
+                  statusBarColor: Colors.transparent,
+                ),
           child: RefreshIndicator(
             onRefresh: _loadUserStats,
             color: context.c.accent,
@@ -189,9 +191,9 @@ class _ProfilePageState extends State<ProfilePage> {
     return bagian.first[0].toUpperCase();
   }
 
-  // Kepala hijau pekat: avatar inisial, nama, kontak, dan "Member sejak".
+  // Kepala tab: avatar inisial, nama, kontak, dan "Member sejak".
   Widget _buildProfileHeader() {
-    final media = context.c.onMedia;
+    final media = context.c;
     return KepalaTab(
       judul: "Profil",
       jarakBawah: 60,
@@ -206,15 +208,15 @@ class _ProfilePageState extends State<ProfilePage> {
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: SportagoColors.pekatNaik,
-                  border: Border.all(color: SportagoColors.volt, width: 2),
+                  color: media.accentSoft,
+                  border: Border.all(color: media.accentLine, width: 2),
                 ),
                 child: Text(
                   _inisial,
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.w800,
-                    color: SportagoColors.volt,
+                    color: media.accent,
                   ),
                 ),
               ),
@@ -268,7 +270,7 @@ class _ProfilePageState extends State<ProfilePage> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
-              color: SportagoColors.pekatNaik,
+              color: media.sunken,
               borderRadius: BorderRadius.circular(14),
             ),
             child: Row(
@@ -276,7 +278,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 Icon(
                   Icons.calendar_today_outlined,
                   size: 15,
-                  color: SportagoColors.volt,
+                  color: media.accent,
                 ),
                 const SizedBox(width: 8),
                 Text(
@@ -770,11 +772,11 @@ class _ProfilePageState extends State<ProfilePage> {
       // Tampilkan success message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Row(
+          content: Row(
             children: [
-              Icon(Icons.check_circle, color: SportagoColors.volt),
-              SizedBox(width: 12),
-              Text("Berhasil keluar dari akun"),
+              Icon(Icons.check_circle, color: context.c.onInverse),
+              const SizedBox(width: 12),
+              const Text("Berhasil keluar dari akun"),
             ],
           ),
           behavior: SnackBarBehavior.floating,

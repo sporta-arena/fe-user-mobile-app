@@ -310,15 +310,15 @@ class _ChatPageState extends State<ChatPage> {
           children: [
             CircleAvatar(
               radius: 40,
-              backgroundColor: SportagoColors.pekat,
+              backgroundColor: context.c.accentSoft,
               child: Text(
                 _partnerContact?.name.isNotEmpty == true
                     ? _partnerContact!.name[0].toUpperCase()
                     : 'P',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.w800,
-                  color: SportagoColors.volt,
+                  color: context.c.accent,
                 ),
               ),
             ),
@@ -379,9 +379,9 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Bilah aplikasi pekat dari tema, jadi teksnya memakai warna
-    // "di atas media", bukan tinta halaman.
-    final media = context.c.onMedia;
+    // Bilah aplikasi putih dari tema customer, jadi teksnya memakai
+    // tinta halaman biasa.
+    final media = context.c;
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -394,15 +394,15 @@ class _ChatPageState extends State<ChatPage> {
             children: [
               CircleAvatar(
                 radius: 18,
-                backgroundColor: SportagoColors.pekatNaik,
+                backgroundColor: media.accentSoft,
                 child: Text(
                   _partnerContact?.name.isNotEmpty == true
                       ? _partnerContact!.name[0].toUpperCase()
                       : 'P',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
-                    color: SportagoColors.volt,
+                    color: media.accent,
                   ),
                 ),
               ),
@@ -464,16 +464,16 @@ class _ChatPageState extends State<ChatPage> {
         child: Column(
           children: [
             // Booking info banner
-            // Pita kode booking menyambung dari bilah pekat di atasnya.
+            // Pita kode booking tepat di bawah bilah aplikasi.
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              color: SportagoColors.pekatNaik,
+              color: media.accentSoft,
               child: Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.confirmation_number_rounded,
                     size: 16,
-                    color: SportagoColors.volt,
+                    color: media.accent,
                   ),
                   const SizedBox(width: 8),
                   Text(
@@ -603,27 +603,27 @@ class _ChatPageState extends State<ChatPage> {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    // Tombol kirim pekat ber-ikon volt, seperti tombol
-                    // utama di halaman lain.
+                    // Tombol kirim hijau lapangan, seperti tombol utama
+                    // di halaman lain.
                     Container(
-                      decoration: const BoxDecoration(
-                        color: SportagoColors.pekat,
+                      decoration: BoxDecoration(
+                        color: context.c.accent,
                         shape: BoxShape.circle,
                       ),
                       child: IconButton(
                         onPressed: _isSending ? null : _sendMessage,
                         icon: _isSending
-                            ? const SizedBox(
+                            ? SizedBox(
                                 width: 20,
                                 height: 20,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  color: SportagoColors.volt,
+                                  color: context.c.onAccent,
                                 ),
                               )
-                            : const Icon(
+                            : Icon(
                                 Icons.send_rounded,
-                                color: SportagoColors.volt,
+                                color: context.c.onAccent,
                               ),
                       ),
                     ),
@@ -694,7 +694,7 @@ class _ChatPageState extends State<ChatPage> {
         ),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: isUser ? SportagoColors.pekat : context.c.raised,
+          color: isUser ? context.c.accent : context.c.raised,
           border: isUser ? null : Border.all(color: context.c.line),
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(18),
@@ -711,7 +711,7 @@ class _ChatPageState extends State<ChatPage> {
               style: TextStyle(
                 fontSize: 14,
                 height: 1.4,
-                color: isUser ? SportagoColors.pure : context.c.ink,
+                color: isUser ? context.c.onAccent : context.c.ink,
               ),
             ),
             const SizedBox(height: 4),
@@ -723,7 +723,7 @@ class _ChatPageState extends State<ChatPage> {
                   style: TextStyle(
                     fontSize: 11,
                     color: isUser
-                        ? context.c.onMedia.inkSoft
+                        ? context.c.onAccent.withValues(alpha: 0.7)
                         : context.c.inkDim,
                   ),
                 ),
@@ -735,11 +735,13 @@ class _ChatPageState extends State<ChatPage> {
                         : message.status == MessageStatus.delivered
                         ? Icons.done_all
                         : Icons.done,
-                    size: 14,
-                    // Sudah dibaca: volt, supaya beda dari terkirim.
+                    size: message.status == MessageStatus.read ? 16 : 14,
+                    // Sudah dibaca: penuh dan sedikit lebih besar; terkirim
+                    // pudar. Gelembungnya hijau di tema terang dan volt di
+                    // tema gelap, jadi warna isinya selalu onAccent.
                     color: message.status == MessageStatus.read
-                        ? SportagoColors.volt
-                        : context.c.onMedia.inkSoft,
+                        ? context.c.onAccent
+                        : context.c.onAccent.withValues(alpha: 0.5),
                   ),
                 ],
               ],

@@ -426,7 +426,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 ),
                               const SizedBox(height: 28),
 
-                              // Tombol Daftar: warna dari tema (pekat di terang, aksen
+                              // Tombol Daftar: warna dari tema (aksen hijau di terang, volt
                               // di gelap), sama dengan tombol utama di seluruh aplikasi.
                               SizedBox(
                                 width: double.infinity,

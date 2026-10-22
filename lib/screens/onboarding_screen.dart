@@ -1,7 +1,7 @@
 import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../widgets/hero_backdrop.dart';
+import '../widgets/sportago_ui.dart';
 import '../widgets/sportago_mark.dart';
 import '../theme/app_tokens.dart';
 import 'login_page.dart';
@@ -144,11 +144,11 @@ class _OnboardingPageState extends State<OnboardingPage>
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light.copyWith(
         statusBarColor: Colors.transparent,
-        systemNavigationBarColor: HeroBackdrop.base,
+        systemNavigationBarColor: KepalaTab.redupFoto,
         systemNavigationBarIconBrightness: Brightness.light,
       ),
       child: Scaffold(
-        backgroundColor: HeroBackdrop.base,
+        backgroundColor: KepalaTab.redupFoto,
         body: Stack(
           fit: StackFit.expand,
           children: [
@@ -213,8 +213,8 @@ class _OnboardingPageState extends State<OnboardingPage>
     );
   }
 
-  /// Gelap di atas untuk bilah status dan wordmark, pekat di bawah
-  /// untuk teks dan tombol. Ujung bawahnya sama persis dengan warna
+  /// Gelap di atas untuk bilah status dan wordmark, gelap netral di
+  /// bawah untuk teks dan tombol. Ujung bawahnya sama persis dengan warna
   /// bilah navigasi supaya tidak ada garis sambungan.
   Widget _buildScrim() {
     return DecoratedBox(
@@ -226,9 +226,9 @@ class _OnboardingPageState extends State<OnboardingPage>
           colors: [
             Colors.black.withValues(alpha: 0.55),
             Colors.black.withValues(alpha: 0.0),
-            HeroBackdrop.base.withValues(alpha: 0.05),
-            HeroBackdrop.base.withValues(alpha: 0.9),
-            HeroBackdrop.base,
+            KepalaTab.redupFoto.withValues(alpha: 0.05),
+            KepalaTab.redupFoto.withValues(alpha: 0.9),
+            KepalaTab.redupFoto,
           ],
         ),
       ),
@@ -245,11 +245,11 @@ class _OnboardingPageState extends State<OnboardingPage>
         children: [
           Text(
             '0${index + 1} / 0${_slides.length}',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w700,
               letterSpacing: 1.6,
-              color: SportagoColors.volt,
+              color: media.inkSoft,
             ),
           ),
           const SizedBox(height: 10),
@@ -296,7 +296,7 @@ class _OnboardingPageState extends State<OnboardingPage>
                 height: 6,
                 decoration: BoxDecoration(
                   color: _currentPage == i
-                      ? SportagoColors.volt
+                      ? media.ink
                       : media.ink.withValues(alpha: 0.28),
                   borderRadius: BorderRadius.circular(3),
                 ),
@@ -318,7 +318,7 @@ class _OnboardingPageState extends State<OnboardingPage>
                   ? 'Menghubungkan…'
                   : 'Lanjut dengan Google',
               background: SportagoColors.pure,
-              foreground: HeroBackdrop.base,
+              foreground: KepalaTab.redupFoto,
               height: pendek ? 52 : 56,
               leading: _isGoogleLoading
                   ? const SizedBox(
@@ -326,7 +326,7 @@ class _OnboardingPageState extends State<OnboardingPage>
                       width: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: HeroBackdrop.base,
+                        color: KepalaTab.redupFoto,
                       ),
                     )
                   : Image.asset('assets/google_logo.png', height: 20),
@@ -335,12 +335,12 @@ class _OnboardingPageState extends State<OnboardingPage>
             const SizedBox(height: 10),
           ],
 
-          // Masuk pakai email: tombol volt yang sama dengan tombol
-          // utama onboarding aplikasi mitra.
+          // Masuk pakai email: tombol utama aksen tema customer
+          // (hijau lapangan, volt di tema gelap).
           _AuthButton(
             label: 'Lanjut pakai email',
-            background: SportagoColors.volt,
-            foreground: HeroBackdrop.base,
+            background: context.c.accent,
+            foreground: context.c.onAccent,
             height: pendek ? 52 : 56,
             trailing: const Icon(Icons.arrow_forward_rounded, size: 20),
             onPressed: _continueWithEmail,
