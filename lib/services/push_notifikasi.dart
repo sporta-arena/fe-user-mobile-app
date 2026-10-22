@@ -90,7 +90,7 @@ class PesanPush {
 /// karena dua jalur penampil yang berbeda, dan nilainya harus sama:
 /// kalau berbeda, notifikasi berubah warna tergantung aplikasinya
 /// sedang terbuka atau tidak.
-const Color _warnaMerek = Color(0xFF00693C);
+const Color _warnaMerek = Color(0xFF111111);
 
 const String _kunciTokenTerdaftar = 'fcm_token_terdaftar';
 

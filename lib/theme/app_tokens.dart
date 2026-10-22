@@ -91,7 +91,13 @@ class SportagoColors extends ThemeExtension<SportagoColors> {
   /// Benar-benar putih, untuk teks/ikon di atas foto.
   static const Color pure = Color(0xFFFFFFFF);
 
-  /// Volt asli. Dipakai HANYA di tempat yang memang selalu gelap
+  /// Kuning merek customer, diambil dari logo dan ikon aplikasi
+  /// (#F5E51C di atas hitam). Mitra memakai volt di atas hijau pekat;
+  /// customer kuning di atas hitam, supaya kedua aplikasi langsung
+  /// terbedakan dari warnanya.
+  static const Color kuning = Color(0xFFF5E51C);
+
+  /// Volt asli (warna app mitra). Dipakai HANYA di tempat yang memang selalu gelap
   /// (splash, konten di atas foto), bukan sebagai warna aksi umum.
   static const Color volt = Color(0xFFC5F400);
 
@@ -141,22 +147,22 @@ class SportagoColors extends ThemeExtension<SportagoColors> {
 
   // ── Tema terang ──────────────────────────────────────────────────
   static const SportagoColors light = SportagoColors(
-    surface: Color(0xFFFBFCFB),
+    surface: Color(0xFFFFFFFF),
     raised: Color(0xFFFFFFFF),
-    sunken: Color(0xFFF2F5F3),
-    hoverSurface: Color(0xFFEDF1EE),
-    inverse: Color(0xFF101E17),
-    onInverse: Color(0xFFF4F7F5),
-    ink: Color(0xFF101E17),
-    inkSoft: Color(0xFF4A5C52),
-    inkDim: Color(0xFF7B8A82),
-    onAccent: Color(0xFFFFFFFF),
-    line: Color(0xFFDEE7E1),
-    lineStrong: Color(0xFFC3D2C9),
-    accent: Color(0xFF00733F),
-    accentHover: Color(0xFF005730),
-    accentSoft: Color(0xFFEAF4EE),
-    accentLine: Color(0xFFA9CDB8),
+    sunken: Color(0xFFF5F5F2),
+    hoverSurface: Color(0xFFECECE8),
+    inverse: Color(0xFF111111),
+    onInverse: Color(0xFFFFFFFF),
+    ink: Color(0xFF111111),
+    inkSoft: Color(0xFF4D4D4A),
+    inkDim: Color(0xFF7D7D78),
+    onAccent: kuning,
+    line: Color(0xFFE5E5E0),
+    lineStrong: Color(0xFFCFCFC8),
+    accent: Color(0xFF111111),
+    accentHover: Color(0xFF000000),
+    accentSoft: Color(0xFFFFF7C2),
+    accentLine: Color(0xFFE9D93A),
     ok: Color(0xFF12703F),
     okSoft: Color(0xFFE6F4EC),
     warn: Color(0xFF9A5B08),
@@ -169,22 +175,22 @@ class SportagoColors extends ThemeExtension<SportagoColors> {
 
   // ── Tema gelap ───────────────────────────────────────────────────
   static const SportagoColors dark = SportagoColors(
-    surface: Color(0xFF0A0B0E),
-    raised: Color(0xFF131519),
-    sunken: Color(0xFF08090B),
-    hoverSurface: Color(0xFF1B1E24),
-    inverse: Color(0xFFF4F7F5),
-    onInverse: Color(0xFF101E17),
-    ink: Color(0xFFE9ECEF),
-    inkSoft: Color(0xFF98A1AB),
-    inkDim: Color(0xFF69727C),
-    onAccent: Color(0xFF0A0B0E),
-    line: Color(0xFF262A31),
-    lineStrong: Color(0xFF363B44),
-    accent: volt,
-    accentHover: Color(0xFFD7FF3D),
-    accentSoft: Color(0xFF1A1F08),
-    accentLine: Color(0xFF3F4D0A),
+    surface: Color(0xFF0A0A0A),
+    raised: Color(0xFF151515),
+    sunken: Color(0xFF050505),
+    hoverSurface: Color(0xFF1F1F1F),
+    inverse: Color(0xFFF5F5F2),
+    onInverse: Color(0xFF111111),
+    ink: Color(0xFFF2F2EF),
+    inkSoft: Color(0xFFA5A5A0),
+    inkDim: Color(0xFF70706B),
+    onAccent: Color(0xFF111111),
+    line: Color(0xFF262626),
+    lineStrong: Color(0xFF383836),
+    accent: kuning,
+    accentHover: Color(0xFFFFF04D),
+    accentSoft: Color(0xFF26230A),
+    accentLine: Color(0xFF5C5412),
     ok: Color(0xFF48D18A),
     okSoft: Color(0xFF10251A),
     warn: Color(0xFFE0A312),
@@ -205,17 +211,16 @@ class SportagoColors extends ThemeExtension<SportagoColors> {
         hoverSurface: dark.hoverSurface,
         inverse: dark.inverse,
         onInverse: dark.onInverse,
-        ink: const Color(0xFFF2F5F3),
-        inkSoft: const Color(0xFFC8D0CB),
-        inkDim: const Color(0xFF9AA5A0),
+        ink: const Color(0xFFF7F7F4),
+        inkSoft: const Color(0xFFD0D0CB),
+        inkDim: const Color(0xFFA0A09A),
         onAccent: dark.onAccent,
         line: dark.line,
         lineStrong: dark.lineStrong,
         // Terang cukup untuk terbaca di atas foto, tapi tetap sekeluarga
         // dengan aksen halaman.
-        accent: accent == light.accent ? const Color(0xFF3ECF7E) : volt,
-        accentHover:
-            accent == light.accent ? const Color(0xFF5BDD94) : dark.accentHover,
+        accent: kuning,
+        accentHover: dark.accentHover,
         accentSoft: dark.accentSoft,
         accentLine: dark.accentLine,
         ok: dark.ok,

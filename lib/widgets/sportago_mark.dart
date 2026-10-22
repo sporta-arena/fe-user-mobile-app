@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_tokens.dart';
 
-/// Lambang Sportago yang ikut warna aksen tema.
+/// Lambang Sportago customer: kuning-hitam seperti logo dan ikon app.
 ///
-/// Asetnya (`assets/sportago_mark.png`) adalah topeng satu warna di atas
-/// transparan, jadi bisa diwarnai ulang saat render, tidak perlu aset
-/// terpisah per tema. Berkasnya sama persis dengan yang dipakai aplikasi
-/// mitra, supaya kedua aplikasi benar-benar satu merek.
+/// Di tema terang dipakai lambang berwarna penuh
+/// (`assets/sportago_lambang.png`, dipotong dari logo). Di tema gelap
+/// dan di atas foto, garis hitamnya tenggelam, jadi dipakai topeng satu
+/// warna (`assets/sportago_mark.png`) yang diwarnai kuning merek. App
+/// mitra memakai topeng yang sama tapi diwarnai volt/hijau pekat.
 class SportagoMark extends StatelessWidget {
   const SportagoMark({super.key, this.height = 40, this.onMedia = false});
 
@@ -20,11 +21,19 @@ class SportagoMark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final warna = onMedia ? context.c.onMedia.accent : context.c.accent;
+    final gelap = Theme.of(context).brightness == Brightness.dark;
+    if (!onMedia && !gelap) {
+      return Image.asset(
+        'assets/sportago_lambang.png',
+        height: height,
+        filterQuality: FilterQuality.medium,
+        excludeFromSemantics: true,
+      );
+    }
     return Image.asset(
       'assets/sportago_mark.png',
       height: height,
-      color: warna,
+      color: SportagoColors.kuning,
       colorBlendMode: BlendMode.srcIn,
       // Asetnya ~341 px sementara di layar dipakai 28-96 px logis; tanpa
       // mipmap, penyusutan sebesar itu berkerut.
