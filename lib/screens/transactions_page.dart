@@ -653,27 +653,33 @@ class _BookingCardState extends State<_BookingCard> {
   Widget _buildActionButton(BuildContext context) {
     switch (booking.status) {
       case 'pending':
+        // "Batalkan" selebar teksnya sendiri, sisanya untuk tombol bayar.
+        // Dulu dibagi 1:2, dan di HP 360dp jatah sepertiganya lebih
+        // sempit dari teks + padding bawaan, jadi "n"-nya turun ke baris
+        // kedua.
         return Row(
           children: [
-            Expanded(
-              child: OutlinedButton(
-                onPressed: () => _cancelBooking(context),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: context.c.danger,
-                  side: BorderSide(
-                    color: context.c.danger.withValues(alpha: 0.5),
-                  ),
+            OutlinedButton(
+              onPressed: () => _cancelBooking(context),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: context.c.danger,
+                side: BorderSide(
+                  color: context.c.danger.withValues(alpha: 0.5),
                 ),
-                child: const Text("Batalkan"),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
               ),
+              child: const Text("Batalkan", maxLines: 1, softWrap: false),
             ),
             const SizedBox(width: 10),
             Expanded(
-              flex: 2,
               child: FilledButton.icon(
                 onPressed: () => _goToPayment(context),
                 icon: const Icon(Icons.payment_rounded, size: 18),
-                label: const Text("Bayar Sekarang"),
+                label: const Text(
+                  "Bayar Sekarang",
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ),
           ],
