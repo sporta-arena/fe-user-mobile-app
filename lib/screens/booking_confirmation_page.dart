@@ -2359,7 +2359,7 @@ class BookingCreatedPage extends StatefulWidget {
 }
 
 class _BookingCreatedPageState extends State<BookingCreatedPage>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   // Timers
   Timer? _countdownTimer;
   Timer? _pollingTimer;
@@ -2396,10 +2396,24 @@ class _BookingCreatedPageState extends State<BookingCreatedPage>
 
     // Start polling payment status every 5 seconds
     _startPolling();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  // Pelanggan biasanya keluar ke m-banking atau browser untuk membayar.
+  // Selama di latar belakang iOS membekukan timer polling, dan permintaan
+  // yang sedang jalan bisa menggantung sampai timeout 20 detik, jadi saat
+  // kembali halaman ini tampak diam sampai "Cek Status" ditekan. Begitu
+  // app aktif lagi, langsung cek tanpa menunggu tik berikutnya.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed || _isPaid || _isExpired) return;
+    _isCheckingStatus = false;
+    _checkPaymentStatus();
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _countdownTimer?.cancel();
     _pollingTimer?.cancel();
     _animationController.dispose();
