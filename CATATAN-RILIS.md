@@ -1,5 +1,26 @@
 # Catatan Rilis — Sportago (App Pemesan)
 
+## 1.2.3 (versionCode 6)
+
+Naik dari 1.2.2 (versionCode 5).
+
+### Untuk Play Console (bahasa Indonesia, ≤500 karakter)
+
+```
+Biaya platform lebih ringan:
+• Biaya platform turun dari 8% jadi 5%, paling sedikit Rp2.000 dan paling
+  banyak Rp10.000 per pemesanan.
+• Rincian biaya di layar konfirmasi kini sama persis dengan yang ditagih.
+• Pusat Bantuan sekarang bisa dihubungi lewat WhatsApp.
+```
+
+### Rinciannya
+
+Server sudah menagih 5% (min Rp2.000, maks Rp10.000) sejak 10 Nov 2026.
+Versi sebelumnya masih menghitung perkiraan 8% maks Rp20.000 di layar
+konfirmasi, jadi pemesan melihat total lebih mahal daripada yang ditagih.
+WhatsApp resmi 0817-7091-4140 ditambahkan di Pusat Bantuan.
+
 ## 1.1.1 (versionCode 3)
 
 Naik dari 1.1.0 (versionCode 2).
