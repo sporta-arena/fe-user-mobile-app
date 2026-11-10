@@ -79,14 +79,15 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
   String? _promoGalat;
   bool _memeriksaPromo = false;
 
-  // Tarif biaya: HARUS sama dengan backend (BookingService::PLATFORM_FEE_RATE
-  // dan PLATFORM_FEE_CAP di be-main). Sebelumnya di sini 5% tanpa batas,
+  // Tarif biaya: HARUS sama dengan backend (BookingService::hitungBiayaPlatform
+  // di be-main): 5%, min Rp 2.000, maks Rp 10.000 sejak 10 Nov 2026. Sebelumnya di sini 5% tanpa batas,
   // sementara server memakai 8% dengan batas Rp 20.000: layar ini
   // menampilkan total yang berbeda dari yang benar-benar ditagihkan,
   // kurang Rp 3.056 pada booking Rp 100.000, dan lebih Rp 17.360 pada
   // booking Rp 750.000.
-  static const double _platformFeePercent = 0.08;
-  static const int _platformFeeCap = 20000;
+  static const double _platformFeePercent = 0.05;
+  static const int _platformFeeMin = 2000;
+  static const int _platformFeeCap = 10000;
 
   // Payment method data with fees
   /// Metode pembayaran, diisi dari server saat layar dibuka.
@@ -255,6 +256,9 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
     if (penuh > _platformFeeCap) {
       return 'Biaya Platform (maks ${_formatCurrency(_platformFeeCap)})';
     }
+    if (_fieldPrice > 0 && penuh < _platformFeeMin) {
+      return 'Biaya Platform (min ${_formatCurrency(_platformFeeMin)})';
+    }
     final persen = (_platformFeePercent * 100).toStringAsFixed(0);
     return 'Biaya Platform ($persen%)';
   }
@@ -264,13 +268,17 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
   // `_hargaLapangan` harga kotor; `_fieldPrice` subtotal SESUDAH
   // potongan promo. Semua turunannya — biaya platform, biaya gateway,
   // total — membaca `_fieldPrice`, jadi urutan hitungnya sama persis
-  // dengan server: potongan dulu, baru 8% dari sisanya. Kalau app
+  // dengan server: potongan dulu, baru 5% dari sisanya. Kalau app
   // menghitung dari harga kotor, angka di layar berbeda dari yang
   // ditagih dan pemesan melihat totalnya berubah sendiri setelah bayar.
   int get _hargaLapangan => widget.price * _durationHours;
   int get _fieldPrice => math.max(0, _hargaLapangan - _potongan);
-  int get _platformFee =>
-      math.min((_fieldPrice * _platformFeePercent).round(), _platformFeeCap);
+  int get _platformFee => _fieldPrice <= 0
+      ? 0
+      : math.min(
+          math.max((_fieldPrice * _platformFeePercent).round(), _platformFeeMin),
+          _platformFeeCap,
+        );
   int get _totalPrice => _fieldPrice + _platformFee + _paymentGatewayFee;
 
   Future<void> _terapkanPromo() async {
@@ -1902,6 +1910,18 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
                           // Tentang, dan disalin ke papan klip seperti di
                           // sana, bukan membuka mailto: yang gagal diam-diam
                           // kalau perangkatnya tidak punya aplikasi surel.
+                          // WhatsApp resmi Sportago (10 Nov 2026), nomor
+                          // yang sama dengan tombol ubah skema biaya mitra.
+                          _buildContactItem(
+                            Icons.chat_rounded,
+                            'WhatsApp',
+                            '0817-7091-4140',
+                            context.c.ok,
+                            () => launchUrl(
+                              Uri.parse('https://wa.me/6281770914140'),
+                              mode: LaunchMode.externalApplication,
+                            ),
+                          ),
                           _buildContactItem(
                             Icons.email_rounded,
                             'Email',
@@ -2242,7 +2262,7 @@ class _BookingConfirmationPageState extends State<BookingConfirmationPage> {
               ),
               _buildTermItem(
                 '5',
-                'Harga lapangan, biaya platform (8%, maksimal Rp 20.000), dan biaya pembayaran sama-sama tidak dikembalikan.',
+                'Harga lapangan, biaya platform (5%, minimal Rp 2.000, maksimal Rp 10.000), dan biaya pembayaran sama-sama tidak dikembalikan.',
               ),
               _buildTermItem(
                 '6',
