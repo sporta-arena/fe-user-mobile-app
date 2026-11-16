@@ -1437,7 +1437,6 @@ class _DashboardContentState extends State<DashboardContent>
           _kategoriBulat(
             ikon: Icons.grid_view_rounded,
             label: 'Semua',
-            warna: context.c.accent,
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const AllCategoriesPage()),
@@ -1452,7 +1451,6 @@ class _DashboardContentState extends State<DashboardContent>
   Widget _kategoriBulat({
     required IconData ikon,
     required String label,
-    required Color warna,
     required VoidCallback onTap,
   }) {
     return Padding(
@@ -1466,34 +1464,16 @@ class _DashboardContentState extends State<DashboardContent>
             children: [
               // Ubin kuning pucat bergaris kuning dengan ikon hitam:
               // seragam untuk semua kategori, supaya deretan ini terbaca
-              // sebagai bagian merek, bukan pelangi. [warna] tinggal
-              // sebagai titik kecil penanda kategori.
-              Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Container(
-                    height: 56,
-                    width: 56,
-                    decoration: BoxDecoration(
-                      color: context.c.accentSoft,
-                      border: Border.all(color: context.c.accentLine),
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                    child: Icon(ikon, color: context.c.ink, size: 26),
-                  ),
-                  Positioned(
-                    right: 6,
-                    top: 6,
-                    child: Container(
-                      width: 7,
-                      height: 7,
-                      decoration: BoxDecoration(
-                        color: warna,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ),
-                ],
+              // sebagai bagian merek, bukan pelangi.
+              Container(
+                height: 56,
+                width: 56,
+                decoration: BoxDecoration(
+                  color: context.c.accentSoft,
+                  border: Border.all(color: context.c.accentLine),
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: Icon(ikon, color: context.c.ink, size: 26),
               ),
               const SizedBox(height: 8),
               Text(
@@ -1519,7 +1499,6 @@ class _DashboardContentState extends State<DashboardContent>
     return _kategoriBulat(
       ikon: type.icon,
       label: type.label,
-      warna: warna,
       onTap: () => Navigator.push(
         context,
         MaterialPageRoute(

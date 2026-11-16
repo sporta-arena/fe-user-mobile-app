@@ -166,35 +166,16 @@ class _AllCategoriesPageState extends State<AllCategoriesPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // Ubin kuning pucat bergaris kuning dengan ikon hitam, sama
-            // dengan baris kategori di beranda. Warna per cabang tinggal
-            // titik kecil di pojok: cukup untuk membedakan dua puluh
-            // empat cabang tanpa membuat halamannya jadi pelangi.
-            Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Container(
-                  width: 62,
-                  height: 62,
-                  decoration: BoxDecoration(
-                    color: context.c.accentSoft,
-                    border: Border.all(color: context.c.accentLine),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Icon(category.icon, size: 30, color: context.c.ink),
-                ),
-                Positioned(
-                  right: 7,
-                  top: 7,
-                  child: Container(
-                    width: 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: context.c.kategori(category.indeksWarna),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ),
-              ],
+            // dengan baris kategori di beranda.
+            Container(
+              width: 62,
+              height: 62,
+              decoration: BoxDecoration(
+                color: context.c.accentSoft,
+                border: Border.all(color: context.c.accentLine),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Icon(category.icon, size: 30, color: context.c.ink),
             ),
 
             const SizedBox(height: 12),
